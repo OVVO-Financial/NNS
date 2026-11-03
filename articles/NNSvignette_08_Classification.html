@@ -77,9 +77,10 @@ applications per the use of an ensemble method of classification in
 <strong><code>NNS.boost</code></strong>. In short,
 <strong><code>NNS.reg</code></strong> is the base learner instead of
 trees.</p>
-<p><strong><em>One major advantage <code>NNS.boost</code> has over tree
-based methods is the ability to seamlessly extrapolate beyond the
-current range of observations.</em></strong></p>
+<p>For numeric regression, extrapolation follows the fitted NNS
+construction and needs boundary validation. Nominal classification
+predicts among the observed classes; numeric class codes do not define
+an extrapolation scale.</p>
 <div class="section level3">
 <h3 id="splits-vs--partitions">Splits vs. Partitions<a class="anchor" aria-label="anchor" href="#splits-vs--partitions"></a>
 </h3>
@@ -102,21 +103,21 @@ allow for a larger number of partitions. This is determined internally
 with the <strong><code>NNS.dep</code></strong> measure.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/NNS.reg.html">NNS.reg</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, <span class="va">iris</span><span class="op">[</span>,<span class="fl">5</span><span class="op">]</span>, residual.plot <span class="op">=</span> <span class="cn">FALSE</span>, ncores <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">$</span><span class="va">rhs.partitions</span></span></code></pre></div>
-<pre><code><span><span class="co">##   Sepal.Length Sepal.Width Petal.Length Petal.Width</span></span>
-<span><span class="co">## 1     4.300000    2.000000         1.00         0.1</span></span>
-<span><span class="co">## 2     4.498056    2.829734         1.05         0.2</span></span>
-<span><span class="co">## 3     4.774255    3.358016         1.20         0.3</span></span>
-<span><span class="co">## 4     4.900000    4.400000         1.30         0.4</span></span>
-<span><span class="co">## 5     5.024342          NA         1.40         0.5</span></span>
-<span><span class="co">## 6     5.337272          NA         1.50         0.6</span></span>
-<span><span class="co">## ---</span></span>
-<span><span class="co">## 21           NA          NA     5.337500         2.5</span></span>
-<span><span class="co">## 22           NA          NA     5.500000          NA</span></span>
-<span><span class="co">## 23           NA          NA     5.617708          NA</span></span>
-<span><span class="co">## 24           NA          NA     5.849554          NA</span></span>
-<span><span class="co">## 25           NA          NA     6.336875          NA</span></span>
-<span><span class="co">## 26           NA          NA     6.900000          NA</span></span>
-<span><span class="co">## --- [ 26 rows x 4 cols ]; showing first and last 6. Use as.data.frame(x) for all. ---</span></span></code></pre>
+<pre><code><span><span class="co">## [[1]]</span></span>
+<span><span class="co">##  [1] 4.300000 4.612500 5.012000 5.388889 5.704762 6.057895 6.380952 6.766667</span></span>
+<span><span class="co">##  [9] 7.475000 7.900000</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## [[2]]</span></span>
+<span><span class="co">## [1] 2.000000 2.493939 2.924000 3.245238 3.752000 4.400000</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## [[3]]</span></span>
+<span><span class="co">##  [1] 1.000000 1.236364 1.400000 1.500000 1.636364 1.900000 3.000000 3.300000</span></span>
+<span><span class="co">##  [9] 3.575000 3.983333 4.300000 4.581250 4.900000 5.150000 5.536364 5.892308</span></span>
+<span><span class="co">## [17] 6.600000 6.900000</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## [[4]]</span></span>
+<span><span class="co">##  [1] 0.10 0.20 0.30 0.40 0.50 0.60 1.00 1.10 1.20 1.30 1.40 1.50 1.60 1.70 1.80</span></span>
+<span><span class="co">## [16] 1.90 2.00 2.10 2.20 2.30 2.45 2.50</span></span></code></pre>
 </div>
 </div>
 </div>
@@ -124,11 +125,15 @@ with the <strong><code>NNS.dep</code></strong> measure.</p>
 <h2 id="nns-boost">
 <code>NNS.boost()</code><a class="anchor" aria-label="anchor" href="#nns-boost"></a>
 </h2>
-<p>Through resampling of the training set and letting each iterated set
-of data speak for themselves (while paying extra attention to the
-residuals throughout), we can test various regressor combinations in
-these dynamic decision trees…only keeping those combinations that add
-predictive value. From there we simply aggregate the predictions.</p>
+<p><strong><code>NNS.boost</code></strong> screens feature subsets. Each
+learner trial fits <strong><code>NNS.reg</code></strong> on a random
+subset of the regressors and scores it on a held-out split. Subsets that
+clear a learned objective threshold are re-tested on new holdouts in the
+epoch stage, and each feature is counted every time a subset containing
+it passes again. The features are then replicated in proportion to those
+counts and a single <strong><code>NNS.stack</code></strong> (method 1)
+is fitted on that design. It is not an ensemble of voting or averaged
+learners, and it does not reweight residuals.</p>
 <p><strong><code>NNS.boost</code></strong> will automatically search for
 an accuracy <code>threshold</code> from the training set, reporting
 iterations remaining and level obtained in the console. A plot of the
@@ -138,60 +143,52 @@ provided.</p>
 <strong><code>NNS.boost</code></strong> will test various feature
 combinations against different splits of the training set and report
 back the frequency of each regressor used in the final estimate.</p>
-<p>Let’s have a look and see how it works. We use 140 random
-<code>iris</code> observations as our training set with the 10 holdout
-observations as our test set. For brevity, we set
+<p>Let’s have a look and see how it works. We hold out four observations
+from each iris species, using 138 observations for training and 12 for
+testing. The split is stratified and reproducible; the last ten rows
+alone would contain only virginica. For brevity, we set
 <code>epochs = 10, learner.trials = 10, folds = 1</code>.</p>
-<p><strong>NOTE: Base category of response variable should be 1, not 0
-for classification problems when using
-<code>NNS.boost(..., type = "CLASS")</code></strong>.</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>test.set <span class="ot">=</span> <span class="dv">141</span><span class="sc">:</span><span class="dv">150</span></span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a> </span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>a <span class="ot">=</span> <span class="fu">NNS.boost</span>(<span class="at">IVs.train =</span> iris[<span class="sc">-</span>test.set, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], </span>
-<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>              <span class="at">DV.train =</span> iris[<span class="sc">-</span>test.set, <span class="dv">5</span>],</span>
-<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>              <span class="at">IVs.test =</span> iris[test.set, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>],</span>
-<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>              <span class="at">epochs =</span> <span class="dv">10</span>, <span class="at">learner.trials =</span> <span class="dv">10</span>, </span>
-<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>              <span class="at">status =</span> <span class="cn">FALSE</span>, <span class="at">balance =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>              <span class="at">type =</span> <span class="st">"CLASS"</span>)</span>
-<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a></span>
-<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>a</span>
-<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="sc">$</span>results</span>
-<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a> [<span class="dv">1</span>] <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span></span>
-<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a></span>
-<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="sc">$</span>pred.int</span>
-<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="cn">NULL</span></span>
-<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a></span>
-<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a><span class="sc">$</span>feature.weights</span>
-<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a>Petal.Length  Petal.Width Sepal.Length  Sepal.Width </span>
-<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a>   <span class="fl">0.2777778</span>    <span class="fl">0.2777778</span>    <span class="fl">0.2222222</span>    <span class="fl">0.2222222</span> </span>
-<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a></span>
-<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a><span class="sc">$</span>feature.frequency</span>
-<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a>Petal.Length  Petal.Width Sepal.Length  Sepal.Width </span>
-<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a>           <span class="dv">5</span>            <span class="dv">5</span>            <span class="dv">4</span>            <span class="dv">4</span> </span>
-<span id="cb4-24"><a href="#cb4-24" tabindex="-1"></a></span>
-<span id="cb4-25"><a href="#cb4-25" tabindex="-1"></a><span class="sc">$</span>class.levels</span>
-<span id="cb4-26"><a href="#cb4-26" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">"setosa"</span>     <span class="st">"versicolor"</span> <span class="st">"virginica"</span> </span>
-<span id="cb4-27"><a href="#cb4-27" tabindex="-1"></a>   </span>
-<span id="cb4-28"><a href="#cb4-28" tabindex="-1"></a><span class="fu">mean</span>( a<span class="sc">$</span>results <span class="sc">==</span> <span class="fu">as.numeric</span>(iris[test.set, <span class="dv">5</span>]) )</span>
-<span id="cb4-29"><a href="#cb4-29" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">1</span></span></code></pre></div>
-<p>A perfect classification, using the features weighted per the output
-above.</p>
+<p><strong>NOTE:</strong> class labels can be factor levels or any
+distinct numbers. Numeric and logical responses are returned on their
+own values; factor and character responses are returned as codes, which
+<code>class.levels</code> maps back to the labels.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">20261103</span><span class="op">)</span></span>
+<span><span class="va">test.set</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/split.html" class="external-link">split</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">iris</span><span class="op">)</span><span class="op">)</span>, <span class="va">iris</span><span class="op">$</span><span class="va">Species</span><span class="op">)</span>,</span>
+<span>                               <span class="kw">function</span><span class="op">(</span><span class="va">rows</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="va">rows</span>, <span class="fl">4</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span> </span>
+<span><span class="va">a</span> <span class="op">=</span> <span class="fu"><a href="../reference/NNS.boost.html">NNS.boost</a></span><span class="op">(</span>IVs.train <span class="op">=</span> <span class="va">iris</span><span class="op">[</span><span class="op">-</span><span class="va">test.set</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, </span>
+<span>              DV.train <span class="op">=</span> <span class="va">iris</span><span class="op">[</span><span class="op">-</span><span class="va">test.set</span>, <span class="fl">5</span><span class="op">]</span>,</span>
+<span>              IVs.test <span class="op">=</span> <span class="va">iris</span><span class="op">[</span><span class="va">test.set</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>,</span>
+<span>              epochs <span class="op">=</span> <span class="fl">10</span>, learner.trials <span class="op">=</span> <span class="fl">10</span>, </span>
+<span>              status <span class="op">=</span> <span class="cn">FALSE</span>, balance <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>              type <span class="op">=</span> <span class="st">"CLASS"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">a</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">a</span><span class="op">$</span><span class="va">results</span> <span class="op">==</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span><span class="va">test.set</span>, <span class="fl">5</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>The reported accuracy is for this held-out split. Repeated stratified
+splits are needed to assess variability; a small demonstration does not
+establish general superiority or robustness to increasing dimension.</p>
 </div>
 <div class="section level2">
 <h2 id="cross-validation-classification-using-nns-stack">Cross-Validation Classification Using <code>NNS.stack()</code><a class="anchor" aria-label="anchor" href="#cross-validation-classification-using-nns-stack"></a>
 </h2>
-<p>The <strong><code><a href="../reference/NNS.stack.html">NNS.stack()</a></code></strong> routine cross-validates
-for a given objective function the <code>n.best</code> parameter in the
-multivariate <strong><code>NNS.reg</code></strong> function as well as
-the <code>threshold</code> parameter in the dimension reduction
-<strong><code>NNS.reg</code></strong> version.
-<strong><code>NNS.stack</code></strong> can be used for classification
-via
-<strong><code>NNS.stack(..., type = "CLASS", ...)</code></strong>.</p>
+<p>The <strong><code><a href="../reference/NNS.stack.html">NNS.stack()</a></code></strong> routine
+cross-validates, for a given objective function, the neighbour count
+<code>n.best</code> of the multivariate
+<strong><code>NNS.reg</code></strong> fit and the number of predictors
+in the dimension reduction <strong><code>NNS.reg</code></strong>
+version, then blends the two. For classification
+(<strong><code>NNS.stack(..., type = "CLASS", ...)</code></strong>) it
+tunes and blends class-probability vectors. The <code>OBJfn</code>
+values it returns are the best scores of that search on the out-of-fold
+predictions, so they overstate held-out performance; the held-out test
+set below is the assessment.</p>
 <p>For brevity, we set <code>folds = 1</code>.</p>
-<p><strong>NOTE: Base category of response variable should be 1, not 0
-for classification problems when using
-<code>NNS.stack(..., type = "CLASS")</code></strong>.</p>
+<p><strong>NOTE:</strong> class labels can be factor levels or any
+distinct numbers. Numeric and logical responses are returned on their
+own values; factor and character responses are returned as codes, which
+<code>class.levels</code> maps back to the labels.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">b</span> <span class="op">=</span> <span class="fu"><a href="../reference/NNS.stack.html">NNS.stack</a></span><span class="op">(</span>IVs.train <span class="op">=</span> <span class="va">iris</span><span class="op">[</span><span class="op">-</span><span class="va">test.set</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, </span>
 <span>              DV.train <span class="op">=</span> <span class="va">iris</span><span class="op">[</span><span class="op">-</span><span class="va">test.set</span>, <span class="fl">5</span><span class="op">]</span>,</span>
@@ -200,48 +197,11 @@ for classification problems when using
 <span>              ncores <span class="op">=</span> <span class="fl">1</span>, folds <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">b</span></span></code></pre></div>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="sc">$</span>OBJfn.reg</span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.9714286</span></span>
-<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a></span>
-<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="sc">$</span>NNS.reg.n.best</span>
-<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">1</span></span>
-<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a></span>
-<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="sc">$</span>probability.threshold</span>
-<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.13</span></span>
-<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a></span>
-<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="sc">$</span>OBJfn.dim.red</span>
-<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.9642857</span></span>
-<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a></span>
-<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a><span class="sc">$</span>NNS.dim.red.threshold</span>
-<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.9335162</span></span>
-<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a></span>
-<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a><span class="sc">$</span>reg</span>
-<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a> [<span class="dv">1</span>] <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span></span>
-<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a></span>
-<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a><span class="sc">$</span>reg.pred.int</span>
-<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a><span class="cn">NULL</span></span>
-<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a></span>
-<span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a><span class="sc">$</span>dim.red</span>
-<span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a> [<span class="dv">1</span>] <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span></span>
-<span id="cb6-24"><a href="#cb6-24" tabindex="-1"></a></span>
-<span id="cb6-25"><a href="#cb6-25" tabindex="-1"></a><span class="sc">$</span>dim.red.pred.int</span>
-<span id="cb6-26"><a href="#cb6-26" tabindex="-1"></a><span class="cn">NULL</span></span>
-<span id="cb6-27"><a href="#cb6-27" tabindex="-1"></a></span>
-<span id="cb6-28"><a href="#cb6-28" tabindex="-1"></a><span class="sc">$</span>stack</span>
-<span id="cb6-29"><a href="#cb6-29" tabindex="-1"></a> [<span class="dv">1</span>] <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span></span>
-<span id="cb6-30"><a href="#cb6-30" tabindex="-1"></a></span>
-<span id="cb6-31"><a href="#cb6-31" tabindex="-1"></a><span class="sc">$</span>pred.int</span>
-<span id="cb6-32"><a href="#cb6-32" tabindex="-1"></a><span class="cn">NULL</span></span>
-<span id="cb6-33"><a href="#cb6-33" tabindex="-1"></a></span>
-<span id="cb6-34"><a href="#cb6-34" tabindex="-1"></a><span class="sc">$</span>weights</span>
-<span id="cb6-35"><a href="#cb6-35" tabindex="-1"></a>    reg dim.red </span>
-<span id="cb6-36"><a href="#cb6-36" tabindex="-1"></a>   <span class="fl">0.85</span>    <span class="fl">0.15</span> </span>
-<span id="cb6-37"><a href="#cb6-37" tabindex="-1"></a></span>
-<span id="cb6-38"><a href="#cb6-38" tabindex="-1"></a><span class="sc">$</span>class.levels</span>
-<span id="cb6-39"><a href="#cb6-39" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">"setosa"</span>     <span class="st">"versicolor"</span> <span class="st">"virginica"</span> </span></code></pre></div>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span> <span class="va">b</span><span class="op">$</span><span class="va">stack</span> <span class="op">==</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span><span class="va">test.set</span>, <span class="fl">5</span><span class="op">]</span><span class="op">)</span> <span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">1</span></span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">b</span><span class="op">$</span><span class="va">stack</span> <span class="op">==</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span><span class="va">test.set</span>, <span class="fl">5</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>The returned <code>class.levels</code> gives the label mapping for
+encoded class results. Compare original labels after decoding when a
+classifier’s API returns labels.</p>
 <div class="section level3">
 <h3 id="brief-notes-on-other-parameters">Brief Notes on Other Parameters<a class="anchor" aria-label="anchor" href="#brief-notes-on-other-parameters"></a>
 </h3>
@@ -252,9 +212,11 @@ regression. In essence, this is the basis for a <code>kNN</code> nearest
 neighbor type of classification.</p></li>
 <li><p><code>n.best = 1</code> will use the single nearest neighbor.
 When coupled with <code>depth = "max"</code>, <code>NNS</code> will
-emulate a <code>kNN = 1</code> but as the dimensions increase the
-results diverge demonstrating <code>NNS</code> is less sensitive to the
-curse of dimensionality than <code>kNN</code>.</p></li>
+emulate a <code>kNN = 1</code> for the chosen partition and distance
+configuration. Performance as dimension increases requires a matched
+comparison of sample size, features, tuning, distance metric, and
+held-out loss; this example does not establish a general dimensionality
+advantage.</p></li>
 <li><p><code>extreme</code> will use the maximum or minimum
 <code>threshold</code> obtained, and may result in errors if that
 threshold cannot be eclipsed by subsequent iterations.</p></li>

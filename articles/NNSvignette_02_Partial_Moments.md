@@ -136,7 +136,7 @@ recognizing multiple modes.
 NNS.mode(x)
 ```
 
-    ## [1] -0.4132834
+    ## [1] -0.3545662
 
 ``` r
 
@@ -274,7 +274,7 @@ u_y = LPM.ratio(0, y, y)
 # Value of copula at c(.5, .5)
 Co.LPM(0, u_x, u_y, .5, .5)
 
-# Continuous CDF:
+# Area-weighted CDF (degree 1): the share of deviation area below each point, not P(X <= t)
 NNS.CDF(x, 1)
 
 # CDF with target:

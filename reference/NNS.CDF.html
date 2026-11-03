@@ -53,7 +53,7 @@
 
 
 <dt id="arg-degree">degree<a class="anchor" aria-label="anchor" href="#arg-degree"></a></dt>
-<dd><p>numeric; <code>(degree = 0)</code> (default) is frequency, <code>(degree = 1)</code> is area.</p></dd>
+<dd><p>numeric; <code>(degree = 0)</code> (default) is frequency, the empirical distribution of <code>variable</code>; <code>(degree = 1)</code> is area, the share of deviation area below each point, which is not \(P(X \le t)\).</p></dd>
 
 
 <dt id="arg-target">target<a class="anchor" aria-label="anchor" href="#arg-target"></a></dt>
@@ -61,7 +61,7 @@
 
 
 <dt id="arg-type">type<a class="anchor" aria-label="anchor" href="#arg-type"></a></dt>
-<dd><p>options("CDF", "survival", "hazard", "cumulative hazard"); <code>"CDF"</code> (default) Selects type of function to return.  For multivariate <code>variable</code> the joint survival is \(P(X_1 &gt; t_1, \ldots, X_d &gt; t_d)\) at <code>degree = 0</code>, by inclusion-exclusion over the column subsets for \(d \le 3\) and as the share of observations above \(t\) in every column for larger \(d\), and the joint upper partial moment <a href="Co.UPM_nD.html">Co.UPM_nD</a> at <code>degree &gt; 0</code>, normalised like the CDF.  The hazard and cumulative hazard are built from it, and need <code>degree = 0</code> for multivariate <code>variable</code>.  At <code>degree &gt; 0</code> with two or more columns, each target's co-partial moment is normalised by its own total, so the "CDF" and "survival" values are generalised co-partial-moment ratios, not a joint distribution function: they can assign a negative probability to a rectangle.  At <code>degree = 0</code>, and in one dimension at any degree, they are proper distribution functions.</p></dd>
+<dd><p>options("CDF", "survival", "hazard", "cumulative hazard"); <code>"CDF"</code> (default) Selects type of function to return.  For multivariate <code>variable</code> the joint survival is \(P(X_1 &gt; t_1, \ldots, X_d &gt; t_d)\) at <code>degree = 0</code>, by inclusion-exclusion over the column subsets for \(d \le 3\) and as the share of observations above \(t\) in every column for larger \(d\), and the joint upper partial moment <a href="Co.UPM_nD.html">Co.UPM_nD</a> at <code>degree &gt; 0</code>, normalised like the CDF.  The multivariate cumulative hazard is the transform \(-\log S(t)\) and requires <code>degree = 0</code>; it is not automatically an integral of a scalar multivariate hazard. Multivariate <code>type = "hazard"</code> is unsupported and raises an error: a joint density-over-survival or a coordinate-hazard definition requires a separate estimator, and dividing the joint CDF by survival does not estimate either.  At <code>degree &gt; 0</code> with two or more columns, each target's co-partial moment is normalised by its own total, so the "CDF" and "survival" values are generalised co-partial-moment ratios, not a joint distribution function: they can assign a negative probability to a rectangle.  At <code>degree = 0</code>, and in one dimension at any degree, they are proper distribution functions; at positive degree the univariate induced law describes deviation-area balance rather than the frequency law of the original variable.</p></dd>
 
 
 <dt id="arg-plot">plot<a class="anchor" aria-label="anchor" href="#arg-plot"></a></dt>
@@ -93,7 +93,7 @@
 <span class="r-in"><span><span class="co">## Empirical CDF (degree = 0)</span></span></span>
 <span class="r-in"><span><span class="fu">NNS.CDF</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co">## Continuous CDF (degree = 1)</span></span></span>
+<span class="r-in"><span><span class="co">## Area-weighted CDF (degree = 1): the share of deviation area below each point</span></span></span>
 <span class="r-in"><span><span class="fu">NNS.CDF</span><span class="op">(</span><span class="va">x</span>, <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Joint CDF</span></span></span>

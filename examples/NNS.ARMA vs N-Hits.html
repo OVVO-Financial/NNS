@@ -23,7 +23,6 @@
       margin: 0 0.8em 0.2em -1.6em;
       vertical-align: middle;
     }
-    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
     /* CSS for syntax highlighting */
     html { -webkit-text-size-adjust: 100%; }
     pre > code.sourceCode { white-space: pre; position: relative; }
@@ -99,9 +98,8 @@
   <a href="https://ovvo-financial.github.io/NNS/book/">Book</a>
   <a href="https://github.com/OVVO-Financial/NNS">GitHub</a>
 </nav>
-<h1
-id="rocket-nnsarmaoptim-vs-n-hits-a-surprising-forecasting-result">🚀
-NNS.ARMA.optim vs. n-HiTS: A Surprising Forecasting Result</h1>
+<h1 id="nnsarmaoptim-traffic-forecasting-example">NNS.ARMA.optim traffic
+forecasting example</h1>
 <p>When it comes to time-series forecasting, deep learning models like
 <strong>N-BEATS</strong> and <strong>n-HiTS</strong> often dominate the
 conversation. But what happens when we put them head-to-head against a
@@ -140,11 +138,12 @@ href="https://www.datasciencewithmarco.com/blog/all-about-n-hits-the-latest-brea
 </tr>
 </tbody>
 </table>
-<p><strong>Yes — the nonlinear nonparametric
-<code>NNS.ARMA.optim()</code> outperformed all of them</strong>,
-including the deep learning-based n-HiTS.</p>
-<h2 id="white_check_mark-exact-reproducible-r-code">✅ Exact
-Reproducible R Code</h2>
+<p>These are historical reported scores from separate sources. The NNS
+code below reserves a test suffix, but this page does not establish that
+the external neural-model scores use the same data version, origin,
+horizon, preprocessing, or tuning budget. Treat the table as a
+motivation for a matched reproduction, not a validated ranking.</p>
+<h2 id="r-demonstration">R demonstration</h2>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(NNS)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Read Data</span></span>
@@ -182,11 +181,11 @@ Reproducible R Code</h2>
 <pre><code>Console output from the run (exact values from the screenshot):
 textMetrics::mae(nns_estimates$results, test_set)
 [1] 236.17</code></pre>
-<p>✅ Takeaway Sometimes simplicity + interpretability beats complexity.
-Before jumping into the latest neural architecture, it’s worth asking:
-Can a nonparametric approach solve the problem faster, with fewer
-resources, and better performance?</p>
-<p>NNS on CRAN: <a href="https://cran.r-project.org/package=NNS">Install
-the latest version</a></p>
+<h2 id="interpretation">Interpretation</h2>
+<p>Run the script with recorded package versions and preserve the input
+data snapshot. A comparative claim requires reproducing every model on
+the same forecast origins and held-out outcomes. The historical NNS MAE
+is not a fixed result for current versions; recompute it after the
+gravity, shrinkage, and bias corrections.</p>
 </body>
 </html>

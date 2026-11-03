@@ -75,7 +75,8 @@ A list containing \`order\`, \`dt\`, and \`regression.points\`.
 
 For a numeric `order`, each cell is split at a centre per coordinate,
 set by `noise.reduction`: `"mean"` and `"median"` use the mean and
-median, `"mode"` uses `NNS.mode(discrete = TRUE)`, `"mode_class"` uses
+median, `"mode"` uses the continuous `NNS.mode(multi = FALSE)`,
+`"mode_class"` uses
 [NNS.gravity](https://OVVO-Financial.github.io/NNS/reference/NNS.gravity.md)
 for x and `NNS.mode(discrete = TRUE)` for y, and `"off"` uses
 [NNS.gravity](https://OVVO-Financial.github.io/NNS/reference/NNS.gravity.md).

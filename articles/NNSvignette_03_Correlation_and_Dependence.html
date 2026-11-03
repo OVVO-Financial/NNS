@@ -111,10 +111,10 @@ quadrants.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/NNS.dep.html">NNS.dep</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## $Correlation</span></span>
-<span><span class="co">## [1] 0.8971295</span></span>
+<span><span class="co">## [1] 0.9169329</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $Dependence</span></span>
-<span><span class="co">## [1] 0.8971295</span></span></code></pre>
+<span><span class="co">## [1] 0.9169329</span></span></code></pre>
 </div>
 <div class="section level3">
 <h3 id="cyclic-relationship">Cyclic Relationship<a class="anchor" aria-label="anchor" href="#cyclic-relationship"></a>
@@ -131,10 +131,10 @@ divergent partial moment quadrants, are properly compensated for in
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/NNS.dep.html">NNS.dep</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## $Correlation</span></span>
-<span><span class="co">## [1] -0.0009596625</span></span>
+<span><span class="co">## [1] 0.09141861</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $Dependence</span></span>
-<span><span class="co">## [1] 0.7906345</span></span></code></pre>
+<span><span class="co">## [1] 0.8050198</span></span></code></pre>
 </div>
 <div class="section level3">
 <h3 id="asymmetrical-analysis">Asymmetrical Analysis<a class="anchor" aria-label="anchor" href="#asymmetrical-analysis"></a>
@@ -151,10 +151,10 @@ dependence between the variables, which can be confirmed using
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/NNS.dep.html">NNS.dep</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, asym <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## $Correlation</span></span>
-<span><span class="co">## [1] -0.0009596625</span></span>
+<span><span class="co">## [1] 0.09141861</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $Dependence</span></span>
-<span><span class="co">## [1] 0.7906345</span></span></code></pre>
+<span><span class="co">## [1] 0.8050198</span></span></code></pre>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">cor</a></span><span class="op">(</span><span class="va">y</span>, <span class="va">x</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] -0.1297766</span></span></code></pre>
@@ -179,21 +179,24 @@ partial moment quadrants for a given subquadrant.</p>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/NNS.dep.html">NNS.dep</a></span><span class="op">(</span><span class="va">df</span><span class="op">$</span><span class="va">x</span>, <span class="va">df</span><span class="op">$</span><span class="va">y</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## $Correlation</span></span>
-<span><span class="co">## [1] -0.06545778</span></span>
+<span><span class="co">## [1] -0.05131028</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $Dependence</span></span>
-<span><span class="co">## [1] 0.8541136</span></span></code></pre>
+<span><span class="co">## [1] 0.8634874</span></span></code></pre>
 </div>
 </div>
 <div class="section level2">
 <h2 id="p-values-for-nns-dep">p-values for <code>NNS.dep()</code><a class="anchor" aria-label="anchor" href="#p-values-for-nns-dep"></a>
 </h2>
-<p>p-values and confidence intervals can be obtained from sampling
-random permutations of
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>y</mi><mo>→</mo><msub><mi>y</mi><mi>p</mi></msub></mrow><annotation encoding="application/x-tex">y \rightarrow y_p</annotation></semantics></math>
-and running <strong><code>NNS.dep(x,$y_p$)</code></strong> to compare
-against a null hypothesis of 0 correlation, or independence between
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo>,</mo><mi>y</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(x, y)</annotation></semantics></math>.</p>
+<p>Permutation p-values and null reference intervals can be obtained by
+permuting
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>y</mi><annotation encoding="application/x-tex">y</annotation></semantics></math>
+and recomputing <code>NNS.dep(x, y_perm)</code>. Quantiles of those
+shuffled statistics describe the null distribution; they are not
+confidence intervals for the original population dependence. The
+permutation interpretation requires exchangeability under the null, so
+unrestricted shuffling is not automatically appropriate for serial,
+clustered, or other dependent observations.</p>
 <p>Simply set
 <strong><code>NNS.dep(..., p.value = TRUE, print.map = TRUE)</code></strong>
 to run 100 permutations and plot the results.</p>
@@ -206,24 +209,24 @@ to run 100 permutations and plot the results.</p>
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/NNS.dep.html">NNS.dep</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, p.value <span class="op">=</span> <span class="cn">TRUE</span>, print.map <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="NNSvignette_03_Correlation_and_Dependence_files/figure-html/permutattions_res-1.png" class="r-plt" alt="" width="480" style="display: block; margin: auto;"></p>
 <pre><code><span><span class="co">## $Correlation</span></span>
-<span><span class="co">## [1] 0.1897929</span></span>
+<span><span class="co">## [1] 0.002403968</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $`Correlation p.value`</span></span>
-<span><span class="co">## [1] 0.0990099</span></span>
+<span><span class="co">## [1] 0.8712871</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $`Correlation 95% CIs`</span></span>
 <span><span class="co">##       2.5%      97.5% </span></span>
-<span><span class="co">## -0.1761214  0.1930509 </span></span>
+<span><span class="co">## -0.1996010  0.1585008 </span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $Dependence</span></span>
-<span><span class="co">## [1] 0.8954724</span></span>
+<span><span class="co">## [1] 0.935499</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $`Dependence p.value`</span></span>
 <span><span class="co">## [1] 0.00990099</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $`Dependence 95% CIs`</span></span>
 <span><span class="co">##       2.5%      97.5% </span></span>
-<span><span class="co">## 0.04397262 0.26266120</span></span></code></pre>
+<span><span class="co">## 0.03359598 0.26350373</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="multivariate-dependence-nns-copula">Multivariate Dependence <code>NNS.copula()</code><a class="anchor" aria-label="anchor" href="#multivariate-dependence-nns-copula"></a>

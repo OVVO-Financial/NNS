@@ -25,7 +25,8 @@ mean((predicted - actual)^2)/.denom
   objective = "min",
   status = TRUE,
   ncores = NULL,
-  nowcast = FALSE
+  nowcast = FALSE,
+  validation = c("pipeline", "observed")
 )
 ```
 
@@ -55,18 +56,17 @@ mean((predicted - actual)^2)/.denom
 
 - dim.red.method:
 
-  options: ("cor", "NNS.dep", "NNS.caus", "all") method for reducing
-  regressors via
-  [NNS.stack](https://OVVO-Financial.github.io/NNS/reference/NNS.stack.md).
-  `(dim.red.method = "cor")` (default) uses standard linear correlation
-  for dimension reduction in the lagged variable matrix.
-  `(dim.red.method = "NNS.dep")` uses
-  [NNS.dep](https://OVVO-Financial.github.io/NNS/reference/NNS.dep.md)
-  for nonlinear dependence weights, while
-  `(dim.red.method = "NNS.caus")` uses
-  [NNS.caus](https://OVVO-Financial.github.io/NNS/reference/NNS.caus.md)
-  for causal weights. `(dim.red.method = "all")` averages all methods
-  for further feature engineering.
+  options: ("cor", "NNS.dep", "NNS.caus", "all") method for screening
+  lagged regressors with
+  [NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md)
+  before the multivariate
+  [NNS.stack](https://OVVO-Financial.github.io/NNS/reference/NNS.stack.md)
+  fit. `dim.red.method = "cor"` (default) uses signed Spearman
+  rank-correlation coefficients, screened by magnitude. `"NNS.dep"` uses
+  nonlinear dependence weights, and `"NNS.caus"` uses directional
+  association weights. `"all"` averages the Spearman, dependence,
+  directional-association, and unit-weight coefficients. The coefficient
+  cutoff is selected by scoring `NNS.reg` validation forecasts.
 
 - naive.weights:
 
@@ -107,6 +107,15 @@ mean((predicted - actual)^2)/.denom
   the input frequency, with the forecast rows labelled by the following
   `h` months.
 
+- validation:
+
+  `"pipeline"` (default) rebuilds interpolation, univariate forecasts
+  and lagged predictors using only the prefix before the chronological
+  holdout. Same-period and later-horizon covariates are forecast, and
+  only observed holdout targets are scored. `"observed"` retains
+  conditional-regression tuning on realized holdout covariates; that
+  score does not evaluate deployment forecasts.
+
 ## Value
 
 Returns the following matrices of forecasted variables:
@@ -120,10 +129,10 @@ Returns the following matrices of forecasted variables:
   intra-quarterly data when indexed with monthly periods.
 
 - `"relevant_variables"` Returns, for each variable, the lagged
-  regressors selected by the
-  [NNS.stack](https://OVVO-Financial.github.io/NNS/reference/NNS.stack.md)
-  dimension reduction, ranked by absolute coefficient. These are exactly
-  the regressors the `"multivariate"` estimate is built from.
+  regressors retained after the
+  [NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md)
+  coefficient-cutoff validation search. These are the only regressors
+  used in the `"multivariate"` estimate.
 
 - `"univariate"` Returns the univariate
   [NNS.ARMA](https://OVVO-Financial.github.io/NNS/reference/NNS.ARMA.md)
@@ -135,6 +144,9 @@ Returns the following matrices of forecasted variables:
   the lag-matrix rows of the forecast period (built from the univariate
   forecasts).
 
+- `"validation"` Returns the validation mode, origin, horizon and number
+  of observed holdout targets for each series.
+
 - `"ensemble"` Returns the ensemble of both `"univariate"` and
   `"multivariate"` forecasts.
 
@@ -143,6 +155,13 @@ with its time index and the forecast rows with the following `h`
 periods.
 
 ## Note
+
+Pipeline validation uses one chronological tuning origin. Missing prefix
+values are completed without later observations. Relevance coefficients
+are fitted on that prefix, the selected variables are retained for
+tuning, and the final forecast is refitted on all available
+observations. Assess the complete model at additional rolling origins
+for a performance estimate.
 
 - `"Error in { : task xx failed -}"` should be re-run with
   `NNS.VAR(..., ncores = 1)`.

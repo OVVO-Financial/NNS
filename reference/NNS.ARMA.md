@@ -140,9 +140,7 @@ NNS.ARMA(
   gives intervals from validation errors. The band therefore describes
   the dispersion of the forecast path, not the uncertainty of the
   outcome at each horizon: it does not widen with the horizon, and it is
-  not calibrated to contain future values with probability `pred.int`
-  (rolling-origin coverage at `pred.int = 0.95` has ranged from about
-  0.35 on white noise to 0.97 on `AirPassengers`).
+  not calibrated to contain future values with probability `pred.int`.
   [NNS.ARMA.optim](https://OVVO-Financial.github.io/NNS/reference/NNS.ARMA.optim.md)
   derives its interval from validation errors instead.
 

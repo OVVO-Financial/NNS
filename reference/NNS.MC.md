@@ -54,9 +54,9 @@ NNS.MC(
 
 - exp:
 
-  numeric; `1` default will exponentially weight maximum rho value if
-  `exp > 1`. Shrinks values towards `upper_rho`, keeping them within
-  `[lower_rho, upper_rho]`.
+  positive finite numeric; `1` default will exponentially weight maximum
+  rho value if `exp > 1`. Shrinks values towards `upper_rho`, keeping
+  them within `[lower_rho, upper_rho]`.
 
 - type:
 

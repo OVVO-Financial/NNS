@@ -18,8 +18,9 @@ NNS.CDF(variable, degree = 0, target = NULL, type = "CDF", plot = TRUE)
 
 - degree:
 
-  numeric; `(degree = 0)` (default) is frequency, `(degree = 1)` is
-  area.
+  numeric; `(degree = 0)` (default) is frequency, the empirical
+  distribution of `variable`; `(degree = 1)` is area, the share of
+  deviation area below each point, which is not \\P(X \le t)\\.
 
 - target:
 
@@ -35,14 +36,20 @@ NNS.CDF(variable, degree = 0, target = NULL, type = "CDF", plot = TRUE)
   \\d \le 3\\ and as the share of observations above \\t\\ in every
   column for larger \\d\\, and the joint upper partial moment
   [Co.UPM_nD](https://OVVO-Financial.github.io/NNS/reference/Co.UPM_nD.md)
-  at `degree > 0`, normalised like the CDF. The hazard and cumulative
-  hazard are built from it, and need `degree = 0` for multivariate
-  `variable`. At `degree > 0` with two or more columns, each target's
-  co-partial moment is normalised by its own total, so the "CDF" and
-  "survival" values are generalised co-partial-moment ratios, not a
-  joint distribution function: they can assign a negative probability to
-  a rectangle. At `degree = 0`, and in one dimension at any degree, they
-  are proper distribution functions.
+  at `degree > 0`, normalised like the CDF. The multivariate cumulative
+  hazard is the transform \\-\log S(t)\\ and requires `degree = 0`; it
+  is not automatically an integral of a scalar multivariate hazard.
+  Multivariate `type = "hazard"` is unsupported and raises an error: a
+  joint density-over-survival or a coordinate-hazard definition requires
+  a separate estimator, and dividing the joint CDF by survival does not
+  estimate either. At `degree > 0` with two or more columns, each
+  target's co-partial moment is normalised by its own total, so the
+  "CDF" and "survival" values are generalised co-partial-moment ratios,
+  not a joint distribution function: they can assign a negative
+  probability to a rectangle. At `degree = 0`, and in one dimension at
+  any degree, they are proper distribution functions; at positive degree
+  the univariate induced law describes deviation-area balance rather
+  than the frequency law of the original variable.
 
 - plot:
 
@@ -81,7 +88,7 @@ NNS.CDF(x)
 ## Empirical CDF (degree = 0)
 NNS.CDF(x)
 
-## Continuous CDF (degree = 1)
+## Area-weighted CDF (degree = 1): the share of deviation area below each point
 NNS.CDF(x, 1)
 
 ## Joint CDF

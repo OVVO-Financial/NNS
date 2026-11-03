@@ -72,10 +72,10 @@ NNS.dep(x, y)
 ```
 
     ## $Correlation
-    ## [1] 0.8971295
+    ## [1] 0.9169329
     ## 
     ## $Dependence
-    ## [1] 0.8971295
+    ## [1] 0.9169329
 
 ### Cyclic Relationship
 
@@ -103,10 +103,10 @@ NNS.dep(x, y)
 ```
 
     ## $Correlation
-    ## [1] -0.0009596625
+    ## [1] 0.09141861
     ## 
     ## $Dependence
-    ## [1] 0.7906345
+    ## [1] 0.8050198
 
 ### Asymmetrical Analysis
 
@@ -131,10 +131,10 @@ NNS.dep(x, y, asym = TRUE)
 ```
 
     ## $Correlation
-    ## [1] -0.0009596625
+    ## [1] 0.09141861
     ## 
     ## $Dependence
-    ## [1] 0.7906345
+    ## [1] 0.8050198
 
 ``` r
 
@@ -174,17 +174,20 @@ NNS.dep(df$x, df$y)
 ```
 
     ## $Correlation
-    ## [1] -0.06545778
+    ## [1] -0.05131028
     ## 
     ## $Dependence
-    ## [1] 0.8541136
+    ## [1] 0.8634874
 
 ## p-values for `NNS.dep()`
 
-p-values and confidence intervals can be obtained from sampling random
-permutations of $`y \rightarrow y_p`$ and running **`NNS.dep(x,$y_p$)`**
-to compare against a null hypothesis of 0 correlation, or independence
-between $`(x, y)`$.
+Permutation p-values and null reference intervals can be obtained by
+permuting $`y`$ and recomputing `NNS.dep(x, y_perm)`. Quantiles of those
+shuffled statistics describe the null distribution; they are not
+confidence intervals for the original population dependence. The
+permutation interpretation requires exchangeability under the null, so
+unrestricted shuffling is not automatically appropriate for serial,
+clustered, or other dependent observations.
 
 Simply set **`NNS.dep(..., p.value = TRUE, print.map = TRUE)`** to run
 100 permutations and plot the results.
@@ -206,24 +209,24 @@ NNS.dep(x, y, p.value = TRUE, print.map = TRUE)
 ![](NNSvignette_03_Correlation_and_Dependence_files/figure-html/permutattions_res-1.png)
 
     ## $Correlation
-    ## [1] 0.1897929
+    ## [1] 0.002403968
     ## 
     ## $`Correlation p.value`
-    ## [1] 0.0990099
+    ## [1] 0.8712871
     ## 
     ## $`Correlation 95% CIs`
     ##       2.5%      97.5% 
-    ## -0.1761214  0.1930509 
+    ## -0.1996010  0.1585008 
     ## 
     ## $Dependence
-    ## [1] 0.8954724
+    ## [1] 0.935499
     ## 
     ## $`Dependence p.value`
     ## [1] 0.00990099
     ## 
     ## $`Dependence 95% CIs`
     ##       2.5%      97.5% 
-    ## 0.04397262 0.26266120
+    ## 0.03359598 0.26350373
 
 ## Multivariate Dependence `NNS.copula()`
 

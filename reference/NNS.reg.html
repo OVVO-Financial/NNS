@@ -84,19 +84,19 @@
 
 
 <dt id="arg-order">order<a class="anchor" aria-label="anchor" href="#arg-order"></a></dt>
-<dd><p>integer; Controls the number of partial moment quadrant means.  Users are encouraged to try different <code>(order = ...)</code> integer settings with <code>(noise.reduction = "off")</code>.  <code>(order = "max")</code> will force a limit condition perfect fit.</p></dd>
+<dd><p>integer; Controls the number of partial moment quadrant means.  Users are encouraged to try different <code>(order = ...)</code> integer settings with <code>(noise.reduction = "off")</code>.  <code>(order = "max")</code> retains distinct predictor locations. A perfect training fit requires compatible responses at tied locations and interpolation at those locations; duplicate predictors with different responses cannot all be interpolated.</p></dd>
 
 
 <dt id="arg-dim-red-method">dim.red.method<a class="anchor" aria-label="anchor" href="#arg-dim-red-method"></a></dt>
-<dd><p>options: ("cor", "NNS.dep", "NNS.caus", "all", "equal", <code>numeric vector</code>, NULL) method for determining synthetic X* coefficients (per Dana and Dawes (2004)).  Selection of a method automatically engages the dimension reduction regression.  The default is <code>NULL</code> for full multivariate regression.  <code>(dim.red.method = "NNS.dep")</code> uses <a href="NNS.dep.html">NNS.dep</a> for nonlinear dependence weights, while <code>(dim.red.method = "NNS.caus")</code> uses <a href="NNS.caus.html">NNS.caus</a> for causal weights.  <code>(dim.red.method = "cor")</code> uses Spearman rank correlation for weights.  <code>(dim.red.method = "all")</code> averages all methods for further feature engineering.  <code>(dim.red.method = "equal")</code> uses unit weights.  Alternatively, user can specify a numeric vector of coefficients.</p></dd>
+<dd><p>options: ("cor", "NNS.dep", "NNS.caus", "all", "equal", <code>numeric vector</code>, NULL) method for determining synthetic X* coefficients (per Dana and Dawes (2004)).  Selection of a method automatically engages the dimension reduction regression.  The default is <code>NULL</code> for full multivariate regression.  <code>(dim.red.method = "NNS.dep")</code> uses <a href="NNS.dep.html">NNS.dep</a> for nonlinear dependence weights, while <code>(dim.red.method = "NNS.caus")</code> uses <a href="NNS.caus.html">NNS.caus</a> for directional association weights.  <code>(dim.red.method = "cor")</code> uses Spearman rank correlation for weights.  <code>(dim.red.method = "all")</code> averages all methods for further feature engineering.  <code>(dim.red.method = "equal")</code> uses unit weights.  Alternatively, user can specify a numeric vector of coefficients. Named vectors must exactly match the encoded predictor columns and are matched by name; unnamed vectors follow encoded column order.</p></dd>
 
 
 <dt id="arg-tau">tau<a class="anchor" aria-label="anchor" href="#arg-tau"></a></dt>
-<dd><p>options("ts", NULL); <code>NULL</code>(default) To be used in conjunction with <code>(dim.red.method = "NNS.caus")</code> or <code>(dim.red.method = "all")</code>.  If the regression is using time-series data, set <code>(tau = "ts")</code> for more accurate causal analysis.</p></dd>
+<dd><p>options("ts", NULL); <code>NULL</code>(default) To be used in conjunction with <code>(dim.red.method = "NNS.caus")</code> or <code>(dim.red.method = "all")</code>.  If the regression is using time-series data, set <code>(tau = "ts")</code> to use the time-series lag convention.</p></dd>
 
 
 <dt id="arg-type">type<a class="anchor" aria-label="anchor" href="#arg-type"></a></dt>
-<dd><p><code>NULL</code> (default).  To perform a classification, set to <code>(type = "CLASS")</code>.  Like a logistic regression, it is not necessary for target variable of two classes e.g. [0, 1]: a numeric response with exactly the values 0 and 1, or a factor, character or logical response, is classified automatically.  <code>(type = "XONLY")</code> is valid only for a single predictor: it keeps the default x-only partition but turns off the automatic classification.</p></dd>
+<dd><p><code>NULL</code> (default).  To perform a classification, set to <code>(type = "CLASS")</code>.  Like a logistic regression, it is not necessary for target variable of two classes e.g. [0, 1]: a numeric response with exactly the values 0 and 1, or a factor, character or logical response, is classified automatically.  Use <code>type = "REG"</code> to fit a numeric response as regression, including a two-valued response, with one or more predictors. <code>(type = "XONLY")</code> is the single-predictor regression alias and keeps the default x-only partition.</p></dd>
 
 
 <dt id="arg-point-est">point.est<a class="anchor" aria-label="anchor" href="#arg-point-est"></a></dt>
@@ -132,7 +132,7 @@
 
 
 <dt id="arg-n-best">n.best<a class="anchor" aria-label="anchor" href="#arg-n-best"></a></dt>
-<dd><p>integer; <code>NULL</code> (default) Sets the number of nearest regression points to use in weighting for multivariate regression at <code>floor((1 - NNS.copula(cbind(x, y))) * sqrt(nrow(x)))</code> (at least 1, at most the number of regression points).  <code>(n.best = "all")</code> will select and weight all generated regression points.  Analogous to <code>k</code> in a
+<dd><p>integer; <code>NULL</code> (default) Sets the number of nearest regression points to use in weighting for multivariate regression at <code>floor((1 - D) * sqrt(nrow(x)))</code> (at least 1, at most the number of regression points), where D averages the copula summaries with response y and -y so the smoothing choice is unchanged by response reflection.  <code>(n.best = "all")</code> will select and weight all generated regression points.  Analogous to <code>k</code> in a
 <code>k Nearest Neighbors</code> algorithm.  Different values of <code>n.best</code> are tested using cross-validation in <a href="NNS.stack.html">NNS.stack</a>.</p></dd>
 
 
@@ -162,15 +162,15 @@
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>UNIVARIATE REGRESSION RETURNS THE FOLLOWING VALUES:</p><ul><li><p><code>"R2"</code> provides the goodness of fit;</p></li>
+    <p>UNIVARIATE REGRESSION RETURNS THE FOLLOWING VALUES:</p><ul><li><p><code>"R2"</code> is squared Pearson correlation between fitted and observed responses (Racine–Hastie goodness of fit), or fitted classification accuracy;</p></li>
 <li><p><code>"SE"</code> returns the overall standard error of the estimate between <code>y</code> and <code>y.hat</code>;</p></li>
-<li><p><code>"Prediction.Accuracy"</code> returns the correct rounded <code>"Point.est"</code> used in classifications versus the categorical <code>y</code>;</p></li>
+<li><p><code>"Prediction.Accuracy"</code> returns the proportion of fitted class decisions equal to the observed class;</p></li>
 <li><p><code>"derivative"</code> for the coefficient of the <code>x</code> and its applicable range;</p></li>
 <li><p><code>"Point.est"</code> for the predicted value generated;</p></li>
 <li><p><code>"pred.int"</code> lower and upper prediction intervals for the <code>"Point.est"</code> returned using the <code>"confidence.interval"</code> provided;</p></li>
 <li><p><code>"regression.points"</code> provides the points used in the regression equation for the given order of partitions;</p></li>
 <li><p><code>"Fitted.xy"</code> returns a <code>data.frame</code> of <code>x</code>, <code>y</code>, <code>y.hat</code>, <code>resid</code>, <code>NNS.ID</code>, <code>gradient</code>;</p></li>
-</ul><p>MULTIVARIATE REGRESSION RETURNS THE FOLLOWING VALUES:</p><ul><li><p><code>"R2"</code> provides the goodness of fit;</p></li>
+</ul><p>MULTIVARIATE REGRESSION RETURNS THE FOLLOWING VALUES:</p><ul><li><p><code>"R2"</code> is squared Pearson correlation between fitted and observed responses (Racine–Hastie goodness of fit), or fitted classification accuracy;</p></li>
 <li><p><code>"equation"</code> returns the numerator of the synthetic X* dimension reduction equation as a <code>data.frame</code> consisting of regressor and its coefficient.  Denominator is the number of non-zero coefficients (<code>abs(coefficient) &gt; 0</code>), returned in last row of <code>equation</code> <code>data.frame</code>.</p></li>
 <li><p><code>"x.star"</code> returns the synthetic X* as a vector;</p></li>
 <li><p><code>"rhs.partitions"</code> returns the partition points for each regressor <code>x</code>;</p></li>
@@ -180,10 +180,17 @@
 <li><p><code>"Fitted.xy"</code> returns a <code>data.frame</code> of the regressors, <code>y</code>, <code>y.hat</code>, <code>NNS.ID</code> and <code>residuals</code> for full multivariate regression, or of the synthetic <code>x</code>, <code>y</code>, <code>y.hat</code>, <code>NNS.ID</code>, <code>gradient</code> and <code>residuals</code> for dimension reduction regression.  <code>confidence.interval</code> adds <code>conf.int.neg</code> and <code>conf.int.pos</code>.</p></li>
 </ul></div>
     <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>For regression, <code>R2</code> measures association between fitted and observed responses: it is \(cor(y, \hat y)^2\), with the package's finite constant-vector convention. It is not \(1-SSE/SST\); a biased or incorrectly scaled prediction can have <code>R2 = 1</code>. Evaluate held-out prediction errors for predictive accuracy.</p>
+<p>The default partition order combines a finite-partition dependence score with the average of the duplicated-predictor copula score under both response orientations. This complexity heuristic is invariant to reflecting the response; the underlying directional dependence and copula definitions are unchanged. A supplied order bypasses this heuristic.</p>
+<p>Univariate regression linearly interpolates the selected regression points and extends the first or last segment beyond their range (unless a smoothing spline is requested). Endpoint slopes can be unstable with sparse or noisy boundary points. Multivariate distance weighting is a weighted average of regression-point responses, so it does not automatically continue a trend outside the training support. Neither construction supplies a general extrapolation guarantee. With the default <code>n.best = NULL</code>, purely categorical predictors use exact observed joint cells, and an unobserved joint combination uses its nearest cells. An explicit <code>n.best</code> weights that many nearest cells, as for numeric predictors. A declared factor level with no training rows is accepted in <code>point.est</code> and is placed by the same distance rule. A coordinate with exactly two observed values retains both terminal cells, including a dummy column in a mixed design. Other finite-order numeric coordinates retain interval cells; <code>order = "max"</code> uses exact joint support.</p>
+<p>Classification forms an indicator for each observed class, retains the empirical class frequencies in each predictor cell, and interpolates or distance-weights those probability vectors. Class labels never enter numeric interpolation. <code>Point.probabilities</code>, <code>Fitted.probabilities</code>, and <code>RPM.probabilities</code> expose the corresponding vectors. Tied class decisions follow first appearance in the training response. Factor and character responses retain numeric output codes with <code>class.levels</code>; numeric responses retain their supplied values. For dimension reduction, one signed NNS index is fitted per class indicator, and the resulting probabilities are normalized across classes; <code>equation</code> is then a list indexed by class. <code>confidence.interval</code> returns <code>Prediction.set</code>, the smallest leading set of classes attaining the requested estimated probability mass. These are descriptive probability sets, not calibrated coverage guarantees; nominal classes have no numeric prediction interval.</p>
+    </div>
+    <div class="section level2">
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
 
 <ul><li><p>Please ensure <code>point.est</code> is of compatible dimensions to <code>x</code>, error message will ensue if not compatible.</p></li>
-<li><p>Like a logistic regression, the <code>(type = "CLASS")</code> setting is not necessary for target variable of two classes e.g. [0, 1].  For other numeric responses set <code>type = "CLASS"</code>; the response variable base category should be 1 for multi-class problems.</p></li>
+<li><p>Like a logistic regression, the <code>(type = "CLASS")</code> setting is not necessary for target variable of two classes e.g. [0, 1].  For other numeric responses set <code>type = "CLASS"</code>; class values can be any distinct numbers.</p></li>
 <li><p>For low signal:noise instances, increasing the dimension may yield better results using <code>NNS.stack(cbind(x,x), y, method = 1, ...)</code>.</p></li>
 </ul></div>
     <div class="section level2">

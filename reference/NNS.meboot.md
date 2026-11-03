@@ -27,7 +27,8 @@ NNS.meboot(
   colsubj,
   coldata,
   coltimes,
-  ...
+  ...,
+  expand.residual.sd = TRUE
 )
 ```
 
@@ -103,15 +104,15 @@ NNS.meboot(
 
 - force.clt:
 
-  logical; If `TRUE` the ensemble is forced to satisfy the central limit
-  theorem: the replicate means are spread as a normal sample centred on
-  `mean(x)` with standard deviation `sd(x) / sqrt(n)`, the standard
-  error of the mean of the `n` observations, whatever the number of
-  `reps`. See `force.clt` in `meboot::meboot`, whose code divides by the
-  number of replicates instead (its comment says `n`). When
-  `drift = FALSE`, `target_drift` or `target_drift_scale` replaces the
-  original drift, the replicate means are centred and spread using the
-  new baseline plus the original residuals instead of `x`.
+  logical; If `TRUE` the replicate means are assigned an iid
+  normal-reference scale: the replicate means are spread as a normal
+  sample centred on `mean(x)` with standard deviation `sd(x) / sqrt(n)`,
+  the standard error of the mean of the `n` observations, whatever the
+  number of `reps`. See `force.clt` in `meboot::meboot`, whose code
+  divides by the number of replicates instead (its comment says `n`).
+  When `drift = FALSE`, `target_drift` or `target_drift_scale` replaces
+  the original drift, the replicate means are centred and spread using
+  the new baseline plus the original residuals instead of `x`.
 
 - scl.adjustment:
 
@@ -148,6 +149,12 @@ NNS.meboot(
   numeric; an optional argument indicating the column that contains the
   times at which the observations for each individual are observed. It
   is ignored if the input data `x` is not a `pdata.frame` object.
+
+- expand.residual.sd:
+
+  Logical; TRUE retains residual-space SD expansion before trend
+  reconstruction. FALSE leaves the generated residual scales unexpanded,
+  separately from the later level-space expand.sd switch.
 
 - ...:
 
@@ -188,6 +195,12 @@ Returns the following row names in a matrix:
 - elaps elapsed time.
 
 ## Note
+
+These are dependence-targeted synthetic scenarios. Zero rank or linear
+correlation does not imply independence, and interior-rho mixing can
+alter marginal distributions. The force.clt scale sd(x)/sqrt(n) is an
+iid finite-variance reference, not a serial-dependence long-run standard
+error or a calibration for arbitrary statistics.
 
 Vectorized `rho` and `drift` parameters will not vectorize both
 simultaneously. Also, do not specify `target_drift = NULL`.
@@ -236,11 +249,14 @@ on the `replicates`, in the metric implied by `type`, rather than on the
 
 ``` r
 if (FALSE) { # \dontrun{
-# To generate an orthogonal rank correlated time-series to AirPassengers
-boots <- NNS.meboot(AirPassengers, reps = 100, rho = 0, xmin = 0)
+# Target zero Spearman correlation of individual detrended residuals
+boots <- NNS.meboot(AirPassengers, reps = 100, rho = 0, drift = FALSE,
+  expand.sd = FALSE, force.clt = FALSE)
 
-# Verify correlation of replicates ensemble to original
-cor(boots["ensemble",]$ensemble, AirPassengers, method = "spearman")
+# Inspect residual correlations on individual replicates
+detrend <- function(z) residuals(lm(as.numeric(z) ~ seq_along(z)))
+apply(boots["replicates",]$replicates, 2, function(z)
+  cor(z, detrend(AirPassengers), method = "spearman"))
 
 # Plot all replicates
 matplot(boots["replicates",]$replicates , type = 'l')

@@ -16,11 +16,14 @@ underlying function for these tests is
 
 The output from
 **[`NNS.ANOVA()`](https://OVVO-Financial.github.io/NNS/reference/NNS.ANOVA.md)**
-is a `Certainty` statistic, which compares CDFs of distributions from
-several shared quantiles and normalizes the similarity of these points
-to be within the interval $`[0,1]`$, with 1 representing identical
-distributions. For a complete analysis of `Certainty` to common p-values
-and the role of power, please see the [References](#References).
+includes a descriptive `Certainty` statistic. `means.only = TRUE`
+compares group means through their directional area balance,
+`means.only = FALSE` compares profiles over shared quantiles, and
+`medians = TRUE` compares median targets. Agreement in one mode does not
+establish equality for the other targets. The finite-sample adjustment
+can make the maximum less than one. Certainty is not a calibrated
+p-value or power; inferential calibration must match the target and
+sampling design.
 
 ### Test if Same Population
 
@@ -28,11 +31,13 @@ Below we run the analysis to whether automatic transmissions and manual
 transmissions have significantly different `mpg` distributions per the
 `mtcars` dataset.
 
-The plot on the left shows the robust `Certainty` estimate, reflecting
-the distribution of `Certainty` estimates over 100 random permutations
-of both variables. The plot on the right illustrates the control and
-treatment variables, along with the grand mean among variables, and the
-confidence interval associated with the control mean.
+The plot on the left shows the resampling distribution of `Certainty`.
+Its inferential interpretation requires the resampling scheme to match
+the target; pooled permutation calibrates equal distributions under
+exchangeability, not every equal-means null with unequal variances. The
+plot on the right illustrates the control and treatment variables, along
+with the grand mean among variables, and the confidence interval
+associated with the control mean.
 
 ``` r
 
@@ -72,7 +77,7 @@ NNS.ANOVA(control = mpg_man_trans, treatment = mpg_auto_trans, robust = TRUE)
     ## [1] 0.95
     ## 
     ## $`Robust Certainty Estimate`
-    ## [1] 0.01447008
+    ## [1] 0.01485973
     ## 
     ## $`Lower 95% CI`
     ## [1] 0.000272993
@@ -80,10 +85,10 @@ NNS.ANOVA(control = mpg_man_trans, treatment = mpg_auto_trans, robust = TRUE)
     ## $`Upper 95% CI`
     ## [1] 0.06890714
 
-The `Certainty` shows that these two distributions clearly do not come
-from the same population. This is verified with the
-Mann-Whitney-Wilcoxon test, which also does not assume a normality to
-the underlying data as a nonparametric test of identical distributions.
+The `Certainty` describes disagreement for the selected target. The
+Mann-Whitney-Wilcoxon result below addresses a rank-based hypothesis
+under its own assumptions; it is not a universal test of all
+distributional differences or a calibration of NNS certainty.
 
 ``` r
 
@@ -145,7 +150,7 @@ NNS.ANOVA(control = x, treatment = y,
     ## [1] 0.95
     ## 
     ## $`Robust Certainty Estimate`
-    ## [1] 0.9046778
+    ## [1] 0.9001731
     ## 
     ## $`Lower 95% CI`
     ## [1] 0.7729845
@@ -216,7 +221,7 @@ NNS.ANOVA(control = x, treatment = y,
     ## [1] 0.95
     ## 
     ## $`Robust Certainty Estimate`
-    ## [1] 0.1811777
+    ## [1] 0.1818801
     ## 
     ## $`Lower 95% CI`
     ## [1] 0.1463972
@@ -289,10 +294,10 @@ NNS.ANOVA(control = x, treatment = y,
     ## [1] 0.95
     ## 
     ## $`Robust Certainty Estimate`
-    ## [1] 0.3595841
+    ## [1] 0.3605887
     ## 
     ## $`Lower 95% CI`
-    ## [1] 0.3151044
+    ## [1] 0.3161758
     ## 
     ## $`Upper 95% CI`
     ## [1] 0.4024833

@@ -57,7 +57,8 @@
 <span>  objective <span class="op">=</span> <span class="st">"min"</span>,</span>
 <span>  status <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  ncores <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  nowcast <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  nowcast <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  validation <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"pipeline"</span>, <span class="st">"observed"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -78,7 +79,7 @@
 
 
 <dt id="arg-dim-red-method">dim.red.method<a class="anchor" aria-label="anchor" href="#arg-dim-red-method"></a></dt>
-<dd><p>options: ("cor", "NNS.dep", "NNS.caus", "all") method for reducing regressors via <a href="NNS.stack.html">NNS.stack</a>.  <code>(dim.red.method = "cor")</code> (default) uses standard linear correlation for dimension reduction in the lagged variable matrix.  <code>(dim.red.method = "NNS.dep")</code> uses <a href="NNS.dep.html">NNS.dep</a> for nonlinear dependence weights, while <code>(dim.red.method = "NNS.caus")</code> uses <a href="NNS.caus.html">NNS.caus</a> for causal weights.  <code>(dim.red.method = "all")</code> averages all methods for further feature engineering.</p></dd>
+<dd><p>options: ("cor", "NNS.dep", "NNS.caus", "all") method for screening lagged regressors with <a href="NNS.reg.html">NNS.reg</a> before the multivariate <a href="NNS.stack.html">NNS.stack</a> fit. <code>dim.red.method = "cor"</code> (default) uses signed Spearman rank-correlation coefficients, screened by magnitude. <code>"NNS.dep"</code> uses nonlinear dependence weights, and <code>"NNS.caus"</code> uses directional association weights. <code>"all"</code> averages the Spearman, dependence, directional-association, and unit-weight coefficients. The coefficient cutoff is selected by scoring <code>NNS.reg</code> validation forecasts.</p></dd>
 
 
 <dt id="arg-naive-weights">naive.weights<a class="anchor" aria-label="anchor" href="#arg-naive-weights"></a></dt>
@@ -105,18 +106,24 @@
 <dt id="arg-nowcast">nowcast<a class="anchor" aria-label="anchor" href="#arg-nowcast"></a></dt>
 <dd><p>logical; <code>FALSE</code> (default) internal call for frequency alignment in downstream nowcasting applications.  When <code>TRUE</code>, rows of a time-indexed <code>variables</code> are labelled by month (<code>"Mon YYYY"</code>) whatever the input frequency, with the forecast rows labelled by the following <code>h</code> months.</p></dd>
 
+
+<dt id="arg-validation">validation<a class="anchor" aria-label="anchor" href="#arg-validation"></a></dt>
+<dd><p><code>"pipeline"</code> (default) rebuilds interpolation, univariate forecasts and lagged predictors using only the prefix before the chronological holdout. Same-period and later-horizon covariates are forecast, and only observed holdout targets are scored. <code>"observed"</code> retains conditional-regression tuning on realized holdout covariates; that score does not evaluate deployment forecasts.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>Returns the following matrices of forecasted variables:</p><ul><li><p><code>"interpolated_and_extrapolated"</code> Returns a <code>data.frame</code> of the linear interpolated and <a href="NNS.ARMA.html">NNS.ARMA</a> extrapolated values to replace <code>NA</code> values in the original <code>variables</code> argument.  This is required for working with variables containing different frequencies, e.g. where <code>NA</code> would be reported for intra-quarterly data when indexed with monthly periods.</p></li>
-<li><p><code>"relevant_variables"</code> Returns, for each variable, the lagged regressors selected by the <a href="NNS.stack.html">NNS.stack</a> dimension reduction, ranked by absolute coefficient.  These are exactly the regressors the <code>"multivariate"</code> estimate is built from.</p></li>
+<li><p><code>"relevant_variables"</code> Returns, for each variable, the lagged regressors retained after the <a href="NNS.reg.html">NNS.reg</a> coefficient-cutoff validation search. These are the only regressors used in the <code>"multivariate"</code> estimate.</p></li>
 <li><p><code>"univariate"</code> Returns the univariate <a href="NNS.ARMA.html">NNS.ARMA</a> forecasts.</p></li>
 <li><p><code>"multivariate"</code> Returns the multi-variate forecasts: <a href="NNS.stack.html">NNS.stack</a> <code>(method = 1, stack = FALSE)</code> on the relevant variables, evaluated on the lag-matrix rows of the forecast period (built from the univariate forecasts).</p></li>
+<li><p><code>"validation"</code> Returns the validation mode, origin, horizon and number of observed holdout targets for each series.</p></li>
 <li><p><code>"ensemble"</code> Returns the ensemble of both <code>"univariate"</code> and <code>"multivariate"</code> forecasts.</p></li>
 </ul><p>When <code>variables</code> is a <code>ts</code>, <code>xts</code> or <code>zoo</code> object, rows are labelled with its time index and the forecast rows with the following <code>h</code> periods.</p>
     </div>
     <div class="section level2">
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
+    <p>Pipeline validation uses one chronological tuning origin. Missing prefix values are completed without later observations. Relevance coefficients are fitted on that prefix, the selected variables are retained for tuning, and the final forecast is refitted on all available observations. Assess the complete model at additional rolling origins for a performance estimate.</p>
 
 <ul><li><p><code>"Error in { : task xx failed -}"</code> should be re-run with <code>NNS.VAR(..., ncores = 1)</code>.</p></li>
 <li><p>Not recommended for factor variables, even after transformed to numeric.  <a href="NNS.reg.html">NNS.reg</a> is better suited for factor or binary regressor extrapolation.</p></li>

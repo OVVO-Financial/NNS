@@ -31,7 +31,8 @@ mean((predicted - actual)^2)/.denom
   ncores = NULL,
   pred.int = 0.95,
   print.trace = TRUE,
-  plot = FALSE
+  plot = FALSE,
+  bias.correction = c("none", "split")
 )
 ```
 
@@ -117,6 +118,21 @@ mean((predicted - actual)^2)/.denom
 
   logical; `FALSE` (default)
 
+- bias.correction:
+
+  `"none"` (default) returns the selected model's forecasts without an
+  additive shift. `"split"` estimates a gravity bias from the first half
+  of the validation errors and accepts it only if the objective improves
+  on the later half; at least four validation observations are required.
+  On rolling-origin forecasts of nine series (AirPassengers, UKgas,
+  LakeHuron, a random walk, sunspot.month, nottem, USAccDeaths, co2 and
+  Nile; six expanding origins, h = 12), the uncorrected forecasts had
+  the lower mean MASE on eight of the nine series, both against
+  `"split"` and against estimating and accepting the shift on the same
+  window, a rule that is no longer offered. Model selection still uses
+  the validation window, so these diagnostics are not independent
+  out-of-sample performance estimates.
+
 ## Value
 
 Returns a list containing:
@@ -126,7 +142,8 @@ Returns a list containing:
 - `$weights` the optimal weights of each seasonal period between an
   equal weight or NULL weighting
 
-- `$obj.fn` the objective function value
+- `$obj.fn` the `obj.fn` value of the returned model's internal
+  validation forecasts, after `$bias.shift`.
 
 - `$method` the method identifying which
   [NNS.ARMA](https://OVVO-Financial.github.io/NNS/reference/NNS.ARMA.md)
@@ -139,12 +156,20 @@ Returns a list containing:
   [NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md)
   before forecasting.
 
-- `$bias.shift` a numerical result of the overall bias of the returned
-  model on the internal validation window, 0 when correcting it does not
-  improve the objective function. To be added to the final result when
-  using the
+- `$bias.shift` the accepted additive correction (0 when rejected or
+  disabled). Add it to the forecast from
   [NNS.ARMA](https://OVVO-Financial.github.io/NNS/reference/NNS.ARMA.md)
-  with the derived parameters.
+  with the returned model parameters, then apply the nonnegative support
+  clamp if required.
+
+- `$bias.validation` correction policy, estimated/applied shifts,
+  chronological estimate and acceptance rows, and raw/adjusted
+  acceptance scores.
+
+- `$raw.results` forecasts before the additive bias correction.
+
+- `$validation.forecast` the final internal validation forecasts,
+  including correction and support clamp.
 
 - `$errors` a vector of the returned model's internal validation errors
   (forecast - actual), before `$bias.shift`.
@@ -158,6 +183,13 @@ Returns a list containing:
   point.
 
 ## Note
+
+By default no bias shift is added. With `bias.correction = "split"` the
+shift is estimated on the first half of the validation window and
+accepted on the second. Base model selection still uses the internal
+validation window, so these tuning scores are not an independent
+evaluation of the whole forecasting procedure. Evaluate the complete
+procedure at fresh chronological origins.
 
 - Typically, `(training.set = 0.8 * length(variable))` is used for
   optimization. Smaller samples could use

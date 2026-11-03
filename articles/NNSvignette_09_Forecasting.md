@@ -1,12 +1,5 @@
 # Getting Started with NNS: Forecasting
 
-``` r
-
-library(NNS)
-require(knitr)
-require(rgl)
-```
-
 ## Forecasting
 
 The underlying assumptions of traditional autoregressive models are well
@@ -19,8 +12,10 @@ can choose the correct model and parameters efficiently given this array
 of choices.’’*
 
 `NNS` simplifies the forecasting process. Below are some examples
-demonstrating **`NNS.ARMA`** and its **assumption free, minimal
-parameter** forecasting method.
+demonstrating **`NNS.ARMA`** and its partial-moment component
+forecasting method. It does not require a parametric distribution
+family; predictive assessment still requires a suitable temporal
+validation design.
 
 ### Linear Regression
 
@@ -40,12 +35,12 @@ using `method = "lin"`.
 
 ``` r
 
-nns_lin = NNS.ARMA(AirPassengers, 
-               h = 44, 
-               training.set = 100, 
-               method = "lin", 
-               plot = TRUE, 
-               seasonal.factor = 12, 
+nns_lin = NNS.ARMA(AirPassengers,
+               h = 44,
+               training.set = 100,
+               method = "lin",
+               plot = TRUE,
+               seasonal.factor = 12,
                seasonal.plot = FALSE)
 ```
 
@@ -65,95 +60,93 @@ series using `method = "nonlin"`.
 
 ``` r
 
-nns_nonlin = NNS.ARMA(AirPassengers, 
-               h = 44, 
-               training.set = 100, 
-               method = "nonlin", 
-               plot = FALSE, 
-               seasonal.factor = 12, 
+nns_nonlin = NNS.ARMA(AirPassengers,
+               h = 44,
+               training.set = 100,
+               method = "nonlin",
+               plot = TRUE,
+               seasonal.factor = 12,
                seasonal.plot = FALSE)
+```
+
+![](NNSvignette_09_Forecasting_files/figure-html/nonlinear-1.png)
+
+``` r
 
 sqrt(mean((nns_nonlin - tail(AirPassengers, 44)) ^ 2))
 ```
 
-``` r
-[1] 18.1809
-```
+    ## [1] 17.90252
+
+The plot and RMSE are computed when this vignette is built, using the
+installed NNS version. They describe this fixed training/test split;
+historical values are not a performance guarantee.
 
 ### Cross-Validation
 
-We can test a series of `seasonal.factors` and select the best one to
-fit. The largest period to consider would be `0.5 * length(variable)`,
-since we need more than 2 points for a regression! Remember, we are
-testing the first 100 observations of `AirPassengers`, not the full 144
-observations.
+We select the period using only the first 100 observations. Within that
+training prefix, the first 80 observations fit candidate models and
+observations 81–100 select the period. The final 44 observations remain
+untouched until the selected model is evaluated. Known monthly frequency
+is also a legitimate pre-specified choice; selecting a period on those
+final 44 outcomes would make their error a tuning score rather than a
+test score.
 
 ``` r
 
-seas = t(sapply(1 : 25, function(i) c(i, sqrt( mean( (NNS.ARMA(AirPassengers, h = 44, training.set = 100, method = "lin", seasonal.factor = i, plot=FALSE) - tail(AirPassengers, 44)) ^ 2) ) ) ) )
-
-colnames(seas) = c("Period", "RMSE")
+training <- head(AirPassengers, 100)
+inner_n <- 80L
+candidates <- 1:16
+seas <- data.frame(
+  Period = candidates,
+  validation_RMSE = vapply(candidates, function(period) {
+    predicted <- NNS.ARMA(head(training, inner_n), h = length(training) - inner_n,
+                          method = "lin", seasonal.factor = period,
+                          plot = FALSE, seasonal.plot = FALSE)
+    sqrt(mean((predicted - tail(training, length(training) - inner_n))^2))
+  }, numeric(1))
+)
+a <- seas$Period[which.min(seas$validation_RMSE)]
 seas
 ```
 
-    ##       Period      RMSE
-    ##  [1,]      1  75.67783
-    ##  [2,]      2  75.71250
-    ##  [3,]      3  75.87604
-    ##  [4,]      4  75.16563
-    ##  [5,]      5  76.07418
-    ##  [6,]      6  70.43185
-    ##  [7,]      7  77.98493
-    ##  [8,]      8  75.48997
-    ##  [9,]      9  79.16378
-    ## [10,]     10  81.47260
-    ## [11,]     11 106.56886
-    ## [12,]     12  35.39965
-    ## [13,]     13  90.98265
-    ## [14,]     14  95.64979
-    ## [15,]     15  82.05345
-    ## [16,]     16  74.63052
-    ## [17,]     17  87.54036
-    ## [18,]     18  74.90881
-    ## [19,]     19  96.96011
-    ## [20,]     20  88.75015
-    ## [21,]     21 100.21346
-    ## [22,]     22 108.68674
-    ## [23,]     23  85.06430
-    ## [24,]     24  35.49018
-    ## [25,]     25  75.16192
-
-Now we know `seasonal.factor = 12` is our best fit, we can see if
-there’s any benefit from using a nonlinear regression. Alternatively, we
-can define our best fit as the corresponding `seas$Period` entry of the
-minimum value in our `seas$RMSE` column.
+    ##    Period validation_RMSE
+    ## 1       1        43.78888
+    ## 2       2        43.80467
+    ## 3       3        43.10466
+    ## 4       4        44.27946
+    ## 5       5        46.43585
+    ## 6       6        41.88094
+    ## 7       7        46.64724
+    ## 8       8        46.23633
+    ## 9       9        51.19663
+    ## 10     10        54.06680
+    ## 11     11        56.15792
+    ## 12     12        31.63458
+    ## 13     13        55.53088
+    ## 14     14        67.55522
+    ## 15     15        60.16975
+    ## 16     16        58.26864
 
 ``` r
 
-a = seas[which.min(seas[ , 2]), 1]
+selected <- NNS.ARMA(training, h = 44, method = "lin", seasonal.factor = a,
+                     plot = TRUE, seasonal.plot = FALSE)
 ```
 
-Below you will notice the use of `seasonal.factor = a` generates the
-same output.
+![](NNSvignette_09_Forecasting_files/figure-html/selected-period-test-1.png)
 
 ``` r
 
-nns = NNS.ARMA(AirPassengers, 
-               h = 44, 
-               training.set = 100, 
-               method = "nonlin", 
-               seasonal.factor = a, 
-               plot = TRUE, seasonal.plot = FALSE)
+sqrt(mean((selected - tail(AirPassengers, 44))^2))
 ```
 
-![](NNSvignette_09_Forecasting_files/figure-html/best%20nonlinear-1.png)
+    ## [1] 35.39965
 
-``` r
-
-sqrt(mean((nns - tail(AirPassengers, 44)) ^ 2))
-```
-
-    ## [1] 17.32624
+This outer test score evaluates one selected procedure. The earlier
+linear and nonlinear illustrations are separate pre-specified
+comparisons; choosing among them after seeing their test errors would
+require a new test period.
 
 **Note:** You may experience instances with monthly data that report
 `seasonal.factor` close to multiples of 3, 4, 6 or 12. For instance, if
@@ -166,136 +159,219 @@ in the expanded output.
 
 ``` r
 
-NNS.seas(AirPassengers, modulo = 12, plot = FALSE)
+NNS.seas(training, modulo = 12, plot = FALSE)
 ```
 
     ## $all.periods
     ##   Period Coefficient.of.Variation Variable.Coefficient.of.Variation
-    ## 1     12               0.09860445                         0.1776757
-    ## 2     24               0.10336370                         0.1776757
-    ## 3     36               0.10754609                         0.1776757
+    ## 1     12               0.08014336                         0.1532545
+    ## 2     24               0.08386687                         0.1532545
     ## 
     ## $best.period
     ## [1] 12
     ## 
     ## $periods
-    ## [1] 12 24 36
+    ## [1] 12 24
 
-### Cross-Validating All Combinations of `seasonal.factor`
+### Selecting Seasonal Factors with `NNS.ARMA.optim`
 
 NNS also offers a wrapper function
 **[`NNS.ARMA.optim()`](https://OVVO-Financial.github.io/NNS/reference/NNS.ARMA.optim.md)**
-to test a given vector of `seasonal.factor` and returns the optimized
-objective function (in this case RMSE written as
+that searches combinations from a supplied vector of `seasonal.factor`
+and returns the selected objective value (in this case RMSE written as
 `obj.fn = expression( sqrt(mean((predicted - actual)^2)) )`) and the
 corresponding periods, as well as the **`NNS.ARMA`** regression method
 used. Alternatively, using external package objective functions work as
 well such as `obj.fn = expression(Metrics::rmse(actual, predicted))`.
 
 **[`NNS.ARMA.optim()`](https://OVVO-Financial.github.io/NNS/reference/NNS.ARMA.optim.md)**
-will also test whether to regress the underlying data first, `shrink`
-the estimates to their subset mean values, include a `bias.shift` based
-on its internal validation errors, and compare different `weights` of
-both linear and nonlinear estimates.
+also compares smoothing the training series, shrinking component
+forecasts toward their means, and weighting seasonal estimates. The
+default linear approximation uses the linear search to select seasonal
+candidates before comparing nonlinear and mixed forecasts. By default it
+adds no bias shift (`bias.correction = "none"`); `"split"` estimates a
+gravity shift from the first half of the internal validation errors and
+accepts it on the later half, and `bias.validation` reports that
+decision. These are tuning steps within the first 100 observations.
 
-Given our monthly dataset, we will try multiple years by setting
-`seasonal.factor = seq(12, 60, 6)` every 6 months based on our
-**NNS.seas()** insights above.
+For this monthly series, we specify periods of 12, 18 and 24 months
+before inspecting the reserved test outcomes. Each leaves at least three
+observations per phase in the 80-observation inner training window.
+Longer candidates up to 60 would be removed by the optimizer’s
+sample-support rule for this window, so the code lists the supported
+candidates explicitly.
 
 ``` r
 
-nns.optimal = NNS.ARMA.optim(AirPassengers,
-                             training.set = 100, 
-                             seasonal.factor = seq(12, 60, 6),
-                             obj.fn = expression( sqrt(mean((predicted - actual)^2)) ),
-                             objective = "min",
-                             pred.int = .95, plot = TRUE)
+optimizer_periods <- c(12L, 18L, 24L)
+nns.optimal <- NNS.ARMA.optim(training,
+                              training.set = inner_n, h = 44,
+                              seasonal.factor = optimizer_periods,
+                              obj.fn = expression(sqrt(mean((predicted - actual)^2))),
+                              objective = "min",
+                              ncores = 1, print.trace = FALSE,
+                              pred.int = .95, plot = TRUE)
+```
+
+![](NNSvignette_09_Forecasting_files/figure-html/optimizer-1.png)
+
+``` r
 
 nns.optimal
 ```
 
+    ## $periods
+    ## [1] 12
+    ## 
+    ## $weights
+    ## NULL
+    ## 
+    ## $obj.fn
+    ## [1] 26.17135
+    ## 
+    ## $method
+    ## [1] "nonlin"
+    ## 
+    ## $shrink
+    ## [1] FALSE
+    ## 
+    ## $nns.regress
+    ## [1] FALSE
+    ## 
+    ## $bias.shift
+    ## [1] 0
+    ## 
+    ## $bias.validation
+    ## $bias.validation$policy
+    ## [1] "none"
+    ## 
+    ## $bias.validation$estimated.shift
+    ## [1] 0
+    ## 
+    ## $bias.validation$applied.shift
+    ## [1] 0
+    ## 
+    ## $bias.validation$estimate.rows
+    ## integer(0)
+    ## 
+    ## $bias.validation$acceptance.rows
+    ## integer(0)
+    ## 
+    ## $bias.validation$raw.score
+    ## [1] NA
+    ## 
+    ## $bias.validation$adjusted.score
+    ## [1] NA
+    ## 
+    ## $bias.validation$accepted
+    ## [1] FALSE
+    ## 
+    ## $bias.validation$status
+    ## [1] "disabled"
+    ## 
+    ## 
+    ## $raw.results
+    ##  [1] 351.5357 416.9881 458.7143 449.3373 392.5159 336.5437 298.9365 336.4444
+    ##  [9] 346.3643 329.2791 391.0775 381.8643 386.0959 460.4725 504.8682 494.0918
+    ## [17] 430.5114 367.5057 327.2567 367.1606 377.4073 357.0265 425.9934 415.2036
+    ## [25] 420.6647 503.5999 550.2190 538.3911 467.7517 397.7587 355.3077 396.9306
+    ## [33] 407.5023 383.8903 459.2223 447.3086 453.5746 545.6254 595.4617 581.6900
+    ## [41] 504.6181 428.0697 383.3069 427.4418
+    ## 
+    ## $validation.forecast
+    ##  [1] 283.1667 250.8667 225.0667 252.9667 267.4438 255.6970 290.5894 295.0285
+    ##  [9] 297.5839 349.4541 406.5728 383.8038 307.7166 273.1074 247.6094 276.5102
+    ## [17] 292.4705 277.8527 313.5819 321.0222
+    ## 
+    ## $errors
+    ##  [1] -28.833333 -23.133333 -11.933333 -25.033333 -16.556171 -21.303006
+    ##  [7] -26.410601 -17.971519 -20.416139 -24.545886  -6.427215 -21.196203
+    ## [13] -47.283360 -32.892616 -23.390559 -29.489847 -22.529482 -23.147274
+    ## [19] -42.418145 -26.977785
+    ## 
+    ## $results
+    ##  [1] 351.5357 416.9881 458.7143 449.3373 392.5159 336.5437 298.9365 336.4444
+    ##  [9] 346.3643 329.2791 391.0775 381.8643 386.0959 460.4725 504.8682 494.0918
+    ## [17] 430.5114 367.5057 327.2567 367.1606 377.4073 357.0265 425.9934 415.2036
+    ## [25] 420.6647 503.5999 550.2190 538.3911 467.7517 397.7587 355.3077 396.9306
+    ## [33] 407.5023 383.8903 459.2223 447.3086 453.5746 545.6254 595.4617 581.6900
+    ## [41] 504.6181 428.0697 383.3069 427.4418
+    ## 
+    ## $lower.pred.int
+    ##  [1] 360.5783 426.0307 467.7569 458.3799 401.5585 345.5863 307.9791 345.4871
+    ##  [9] 355.4070 338.3217 400.1201 390.9070 395.1386 469.5152 513.9108 503.1345
+    ## [17] 439.5540 376.5483 336.2993 376.2033 386.4499 366.0691 435.0360 424.2463
+    ## [25] 429.7073 512.6425 559.2616 547.4337 476.7943 406.8013 364.3503 405.9733
+    ## [33] 416.5450 392.9329 468.2650 456.3513 462.6173 554.6680 604.5044 590.7326
+    ## [41] 513.6607 437.1123 392.3495 436.4844
+    ## 
+    ## $upper.pred.int
+    ##  [1] 396.5081 461.9605 503.6867 494.3097 437.4883 381.5160 343.9089 381.4168
+    ##  [9] 391.3367 374.2515 436.0499 426.8367 431.0683 505.4449 549.8406 539.0642
+    ## [17] 475.4838 412.4781 372.2291 412.1330 422.3797 401.9989 470.9658 460.1760
+    ## [25] 465.6371 548.5723 595.1914 583.3635 512.7241 442.7310 400.2801 441.9030
+    ## [33] 452.4747 428.8627 504.1947 492.2810 498.5470 590.5978 640.4341 626.6624
+    ## [41] 549.5905 473.0421 428.2792 472.4142
+
 ``` r
-[1] "CURRNET METHOD: lin"
-[1] "COPY LATEST PARAMETERS DIRECTLY FOR NNS.ARMA() IF ERROR:"
-[1] "NNS.ARMA(... method =  'lin' , seasonal.factor =  c( 12 ) ...)"
-[1] "CURRENT lin OBJECTIVE FUNCTION = 35.3996540135277"
-[1] "BEST method = 'lin', seasonal.factor = c( 12 )"
-[1] "BEST lin OBJECTIVE FUNCTION = 35.3996540135277"
-[1] "CURRNET METHOD: nonlin"
-[1] "COPY LATEST PARAMETERS DIRECTLY FOR NNS.ARMA() IF ERROR:"
-[1] "NNS.ARMA(... method =  'nonlin' , seasonal.factor =  c( 12 ) ...)"
-[1] "CURRENT nonlin OBJECTIVE FUNCTION = 18.1809033101955"
-[1] "BEST method = 'nonlin' PATH MEMBER = c( 12 )"
-[1] "BEST nonlin OBJECTIVE FUNCTION = 18.1809033101955"
-[1] "CURRNET METHOD: both"
-[1] "COPY LATEST PARAMETERS DIRECTLY FOR NNS.ARMA() IF ERROR:"
-[1] "NNS.ARMA(... method =  'both' , seasonal.factor =  c( 12 ) ...)"
-[1] "CURRENT both OBJECTIVE FUNCTION = 22.7363330823967"
-[1] "BEST method = 'both' PATH MEMBER = c( 12 )"
-[1] "BEST both OBJECTIVE FUNCTION = 22.7363330823967"
-> 
-> nns.optimal
-$periods
-[1] 12
 
-$weights
-NULL
-
-$obj.fn
-[1] 18.1809
-
-$method
-[1] "nonlin"
-
-$shrink
-[1] FALSE
-
-$nns.regress
-[1] FALSE
-
-$bias.shift
-[1] 0
-
-$errors
- [1]  -6.0626221 -10.8434613 -10.7646998 -22.7134790 -15.3519569 -12.9673866  -9.1626428   3.9393939   7.4882812  12.3750000  29.1132812  34.3281250  19.7002739
-[14]  20.0656989  11.8833952 -15.1389735  24.1108241   7.4289721  15.2385271  38.3826941  19.2903993  17.4644272  19.3331767  19.8155057  -4.0856291  26.3260739
-[27]   2.6153110 -24.3491085   3.9057436  -8.8271346  -7.9236143   5.9867956  -3.9068174  -0.7986170  42.1995863 -10.1324609 -20.0852820   8.6573328 -21.3067790
-[40] -24.3403514  -0.6332912 -29.8418247  -5.8572216  14.8998761
-
-$results
- [1] 348.9374 411.1565 454.2353 444.2865 388.6480 334.0326 295.8374 339.9394 347.4883 330.3750 391.1133 382.3281 382.7003 455.0657 502.8834 489.8610 428.1108
-[18] 366.4290 325.2385 375.3827 379.2904 359.4644 425.3332 415.8155 415.9144 498.3261 550.6153 534.6509 466.9057 398.1729 354.0764 410.9868 413.0932 390.2014
-[35] 461.1996 450.8675 451.9147 543.6573 600.6932 581.6596 507.3667 431.1582 384.1428 446.8999
-
-$lower.pred.int
- [1] 310.8588 373.0779 416.1567 406.2079 350.5694 295.9540 257.7588 301.8608 309.4097 292.2964 353.0347 344.2495 344.6217 416.9871 464.8048 451.7824 390.0322
-[18] 328.3504 287.1599 337.3041 341.2118 321.3858 387.2546 377.7369 377.8358 460.2475 512.5367 496.5723 428.8271 360.0943 315.9978 372.9082 375.0146 352.1228
-[35] 423.1210 412.7889 413.8361 505.5787 562.6146 543.5810 469.2881 393.0796 346.0642 408.8213
-
-$upper.pred.int
- [1] 387.0160 449.2351 492.3139 482.3651 426.7266 372.1112 333.9160 378.0180 385.5669 368.4536 429.1919 420.4067 420.7789 493.1443 540.9620 527.9396 466.1894
-[18] 404.5076 363.3171 413.4613 417.3690 397.5430 463.4118 453.8941 453.9930 536.4047 588.6939 572.7295 504.9843 436.2515 392.1550 449.0654 451.1718 428.2800
-[35] 499.2782 488.9461 489.9933 581.7359 638.7718 619.7382 545.4453 469.2368 422.2214 484.9785
+c(internal_validation_RMSE = nns.optimal$obj.fn,
+  raw_reserved_test_RMSE = sqrt(mean((nns.optimal$raw.results - tail(AirPassengers, 44))^2)),
+  corrected_reserved_test_RMSE = sqrt(mean((nns.optimal$results - tail(AirPassengers, 44))^2)))
 ```
 
-![](images/ARMA_optim.png)
+    ##     internal_validation_RMSE       raw_reserved_test_RMSE 
+    ##                     26.17135                     17.90252 
+    ## corrected_reserved_test_RMSE 
+    ##                     17.90252
+
+The optimizer’s `obj.fn` describes its final **internal validation**
+forecast. The other two scores evaluate the raw forecast and the
+returned, corrected forecast against the reserved final 44 observations.
+They are diagnostics; the example does not use them to choose a bias
+policy. Selecting a policy from these comparisons would require a new
+chronological test window. All values and the returned forecasts are
+regenerated at each build. A fitted bias shift is a model parameter, not
+proof of persistent future bias.
 
 ### Extension of Estimates
 
-We can forecast another 50 periods out-of-sample (`h = 50`), by dropping
-the `training.set` parameter while generating the 95% prediction
-intervals.
+We can forecast another 50 periods out-of-sample (`h = 50`), using all
+observations now available as training history. The requested interval
+level names the residual-quantile construction; future coverage must be
+assessed separately.
+
+The longer history supports candidate periods through 36 months under
+the optimizer’s default 80% internal training split. This deployment
+example has no observed future outcomes to score.
 
 ``` r
 
-NNS.ARMA.optim(AirPassengers, 
-                seasonal.factor = seq(12, 60, 6),
-                obj.fn = expression( sqrt(mean((predicted - actual)^2)) ),
-                objective = "min",
-                pred.int = .95, h = 50, plot = TRUE)
+extended <- NNS.ARMA.optim(AirPassengers,
+                            seasonal.factor = seq(12, 36, 6),
+                            obj.fn = expression(sqrt(mean((predicted - actual)^2))),
+                            objective = "min",
+                            ncores = 1, print.trace = FALSE,
+                            pred.int = .95, h = 50, plot = TRUE)
 ```
 
-![](images/ARMA_optim_h_50.png)
+![](NNSvignette_09_Forecasting_files/figure-html/extension-1.png)
+
+``` r
+
+head(data.frame(horizon = seq_along(extended$results),
+                forecast = extended$results,
+                lower = extended$lower.pred.int,
+                upper = extended$upper.pred.int))
+```
+
+    ##   horizon forecast    lower    upper
+    ## 1       1 414.3000 389.7333 455.3167
+    ## 2       2 382.7071 358.1405 423.7238
+    ## 3       3 437.3357 412.7690 478.3524
+    ## 4       4 421.4714 396.9048 462.4881
+    ## 5       5 443.2357 418.6690 484.2524
+    ## 6       6 533.5429 508.9762 574.5595
 
 ### Brief Notes on Other Parameters
 

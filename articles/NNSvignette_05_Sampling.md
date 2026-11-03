@@ -81,16 +81,20 @@ in black and **`LPM.ratio`** in red.
 
 #### **`LPM.ratio`** degree \> 0
 
-By simply increasing the `degree` parameter to any positive real number,
-we can generate different CDFs of our initial distribution $`x`$.
+Increasing `degree` changes the target from event frequency to a
+directional severity share. In the univariate case with the required
+finite moment and nondegeneracy, this defines an induced CDF whose law
+generally differs from the original empirical law. It is not a smoothing
+operation that automatically preserves original probabilities.
 
 ![](images/CDFs_1.png)
 
 #### Generating PDFs with (**`LPM.VaR`**)
 
-We can now generate distributions using the same insights and `degree`
-manipulation in the corresponding **`LPM.VaR`** function, a la
-value-at-risk, providing inverse CDF estimates.
+The corresponding **`LPM.VaR`** inverts the selected directional curve.
+Degree zero uses R type-7 empirical quantiles; degree one gives
+expectiles. Drawing uniforms and applying a positive-degree inverse
+samples the induced law, not the original marginal law.
 
 The general form in the following plots is:
 
@@ -146,12 +150,17 @@ head(data.frame(check.names = FALSE, cbind("original x" = sort(x), degree.0.samp
 ### Bootstrapping (**`NNS.meboot`**)
 
 **`NNS.meboot`** is based on the maximum entropy bootstrap, available in
-the R-package `meboot`. This procedure is specifically designed for
-time-series and avoids the IID assumption in traditional methods.
+the R-package `meboot`. Its rank-based scenario construction is useful
+for time-series exploration. The default `force.clt` constrains
+replicate means using an iid standard-error scale, so preserving rank
+structure does not by itself provide calibrated sampling uncertainty for
+serial dependence.
 
-The ability to sample from specified correlations ensures the full
-spectrum of future paths is sampled from. Typical Monte Carlo samples
-are restricted to \[-0.3, 0.3\] correlations to the original data.
+Specified rank-correlation targets explore a chosen range of scenario
+shapes. They do not enumerate every possible future path. A zero
+rank-correlation target does not imply independence, and achieved
+marginal distributions and moments must be checked for the chosen
+settings.
 
 We will generate 1 replicate of $`X`$ for each value of a sequence of
 $`\rho`$ values (the $`ensemble`$), and then plot the results compared
@@ -227,78 +236,43 @@ documentation.
 
 ### Simulating a Multivariate Dependence Structure
 
-Analogous to an empirical copula transformation, we can generate
-`new data` from the dependence structure of our `original data` via the
-following steps:
+A marginal rank transformation can transfer the empirical rank
+arrangement of continuous observations to chosen new marginal
+distributions. It does not identify a unique copula when marginals have
+atoms, and a positive-degree partial-moment transform generally changes
+the original marginal probability law.
 
-- **Determine the dependence structure:**
-
-This is accomplished using **`LPM.ratio(1, x, x)`** for continuous
-variables, and **`LPM.ratio(0, x, x)`** for discrete variables, which
-are the empirical CDFs of the marginal variables.
-
-- **Generate or supply `new data`:**
-
-`new data` does not have to be of the same distribution or dimension as
-the `original data`, nor does each dimension of `new data` have to share
-a distribution type.
-
-- **Apply dependence structure to `new data`:**
-
-We then utilize **`LPM.VaR`** to ascertain `new data` values
-corresponding to `original data` position mappings, and return a matrix
-of these transformed values with the same dimensions as `new.data`.
+Use degree-zero probabilities for this frequency construction. For these
+continuous samples, subtracting half an observation from the empirical
+CDF ranks keeps probability levels away from zero and one. Inverting
+with degree-zero `LPM.VaR` applies the target empirical quantile
+function (type7 interpolation).
 
 ``` r
 
 set.seed(123)
-x = rnorm(1000); y = rnorm(1000); z = rnorm(1000)
+x <- rnorm(1000); y <- rnorm(1000); z <- rnorm(1000)
+original.data <- cbind(x, y, z, x_copy = x)
+n <- nrow(original.data)
+dep.structure <- apply(original.data, 2, function(v) {
+  LPM.ratio(degree = 0, target = v, variable = v) - .5 / n
+})
+new.data <- replicate(ncol(original.data), rnorm(2000, mean = 10, sd = 20))
+new.dep.data <- vapply(seq_len(ncol(original.data)), function(j) {
+  LPM.VaR(percentile = dep.structure[, j], degree = 0, x = new.data[, j])
+}, numeric(n))
 
-# Add variable x to original data to avoid total independence (example only)
-original.data = cbind(x, y, z, x)
-
-# Determine dependence structure
-dep.structure = apply(original.data, 2, function(x) LPM.ratio(degree = 1, target = x, variable = x))
-  
-# Generate new data with different mean, sd and length (or distribution type)
-new.data = sapply(1:ncol(original.data), function(x) rnorm(nrow(original.data)*2, mean = 10, sd = 20))
-
-# Apply dependence structure to new data
-new.dep.data = sapply(1:ncol(original.data), function(x) LPM.VaR(percentile = dep.structure[,x], degree = 1, x = new.data[,x]))
+cor(original.data, method = "spearman")
+cor(new.dep.data, method = "spearman")
 ```
 
-#### Compare Multivariate Dependence Structures
-
-Similar dependence with radically different values, since we used
-$`N(10, 20)`$ in place of our original $`N(0,1)`$ observations.
-
-``` r
-NNS.copula(original.data)
-NNS.copula(new.dep.data)
-
-[1] 0.4743531
-[1] 0.4753264
-```
-
-``` r
-head(original.data)
-head(new.dep.data)
-
-               x           y          z           x
-[1,] -0.56047565 -0.99579872 -0.5116037 -0.56047565
-[2,] -0.23017749 -1.03995504  0.2369379 -0.23017749
-[3,]  1.55870831 -0.01798024 -0.5415892  1.55870831
-[4,]  0.07050839 -0.13217513  1.2192276  0.07050839
-[5,]  0.12928774 -2.54934277  0.1741359  0.12928774
-[6,]  1.71506499  1.04057346 -0.6152683  1.71506499
-          [,1]       [,2]       [,3]      [,4]
-[1,] -2.028109 -10.498044 -0.2090467 -1.682949
-[2,]  4.608303 -11.390485 15.6213689  4.852534
-[3,] 39.478741   8.836581 -0.8508203 40.585505
-[4,] 10.683731   6.609255 36.0328589 10.877677
-[5,] 11.866922 -47.955235 14.3111350 12.064633
-[6,] 42.665726  29.639640 -2.4141874 43.797025
-```
+The output has one row per original rank tuple, here 1000, even though
+the new marginal reference samples have 2000 rows. It approximates those
+reference marginals at the supplied ranks. For tied marginals, specify a
+tie policy or randomized probability transform within each CDF jump;
+ordinary inclusive CDF values are not uniform at atoms. Positive-degree
+transformations remain useful for directional severity modelling, with
+their changed target stated explicitly.
 
 ### Alternative Using **`NNS.meboot`**
 
@@ -334,19 +308,18 @@ for(i in 1:4) print(cor(new.boot.dep.matrix[,i], original.data[,i], method = "sp
 ```
 
 > **Reading these numbers.** Here `ensemble` is the per-observation mean
-> of `reps = 100` replicates — a central summary, not a single path
-> carrying the exact target dependence — so a rank/linear correlation
-> taken directly on it tends to read **higher** than the per-replicate
-> $`\rho`$ (averaging amplifies the shared order). With $`\rho = 0.95`$
-> the gap is small because the target is already near the ceiling; at
-> moderate $`\rho`$ it is larger (e.g. a per-replicate Spearman
-> $`\rho = 0.75`$ typically reads ~0.9 once averaged into the
-> `ensemble`). The $`\rho`$ alignment is calibrated on the individual
-> `replicates`; treat the `ensemble` as a representative central path.
+> of the replicates, a central summary. Its correlation with the input
+> is not the requested per-replicate target. Alignment is applied to
+> individual residual paths; averaging and trend reconstruction can
+> change the measured correlation. Treat the ensemble as a
+> representative path and inspect achieved correlations for the
+> requested output.
 
 #### Compare Multivariate Dependence Structures
 
-Similar dependence with similar values.
+Column-wise scenario generation does not guarantee preservation of the
+full joint law or every multivariate dependence statistic. Compare the
+achieved structure explicitly.
 
 ``` r
 NNS.copula(original.data)

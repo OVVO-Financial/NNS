@@ -23,7 +23,6 @@
       margin: 0 0.8em 0.2em -1.6em;
       vertical-align: middle;
     }
-    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
     /* CSS for syntax highlighting */
     html { -webkit-text-size-adjust: 100%; }
     pre > code.sourceCode { white-space: pre; position: relative; }
@@ -91,6 +90,9 @@
     code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
   </style>
   <link rel="stylesheet" href="pages.css" />
+  <script defer=""
+  src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"
+  type="text/javascript"></script>
 </head>
 <body>
 <nav class="nns-site-nav">
@@ -121,21 +123,21 @@ eigenvectors.</p>
 conditional covariance. These observable pieces reconstruct the
 covariance matrix exactly.</p>
 <p>The static covariance decomposition is:</p>
-<p><span class="math display">$$\Sigma
+<p><span class="math display">\[\Sigma
 =
 \underbrace{\sum_q p_q u_q u_q^\top}_{\Sigma^B}
 +
-\underbrace{\sum_q p_q \Sigma^{(q)}}_{\Sigma^W}.$$</span></p>
+\underbrace{\sum_q p_q \Sigma^{(q)}}_{\Sigma^W}.\]</span></p>
 <p>The dynamic transition-path decomposition is:</p>
-<p><span class="math display">$$\Sigma_{\mathrm{lead}}
+<p><span class="math display">\[\Sigma_{\mathrm{lead}}
 =
 \underbrace{
-\sum_{q,q'} p_{qq'} u_{q\to q'}u_{q\to q'}^\top
+\sum_{q,q&#39;} p_{qq&#39;} u_{q\to q&#39;}u_{q\to q&#39;}^\top
 }_{\Sigma^B_{\mathrm{dyn}}}
 +
 \underbrace{
-\sum_{q,q'} p_{qq'} \Sigma^{(q\to q')}
-}_{\Sigma^W_{\mathrm{dyn}}}.$$</span></p>
+\sum_{q,q&#39;} p_{qq&#39;} \Sigma^{(q\to q&#39;)}
+}_{\Sigma^W_{\mathrm{dyn}}}.\]</span></p>
 <p>The main result is:</p>
 <blockquote>
 <p>PCA identifies the dominant axis. NNS identifies the regimes and
@@ -152,8 +154,15 @@ NNS package workflow. With:</p>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">norm       =</span> <span class="cn">FALSE</span></span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
 <p>the returned matrices satisfy:</p>
-<p><span
-class="math display"><em>Σ</em> = clpm + cupm − dlpm − dupm.</span></p>
+<p><span class="math display">\[\Sigma
+=
+\mathrm{clpm}
++
+\mathrm{cupm}
+-
+\mathrm{dlpm}
+-
+\mathrm{dupm}.\]</span></p>
 <p>Thus the same covariance and PCA recovery can be verified directly
 through the package API. The setting <code>norm = FALSE</code> is
 required for covariance and PCA recovery; <code>norm = TRUE</code>
@@ -174,7 +183,7 @@ procedures.</p>
 <p>In the NNS directional framework, the state is not latent. It is
 directly defined by directional geometry.</p>
 <p>Let:</p>
-<p><span class="math display">$$Z_t =
+<p><span class="math display">\[Z_t =
 \begin{pmatrix}
 X_t\\
 Y_t
@@ -184,28 +193,27 @@ Y_t
 \begin{pmatrix}
 \bar X\\
 \bar Y
-\end{pmatrix}.$$</span></p>
+\end{pmatrix}.\]</span></p>
 <p>Define the observable quadrant state:</p>
-<p><span
-class="math display"><em>Q</em><sub><em>t</em></sub> ∈ {CUPM, CLPM, DLPM, DUPM}.</span></p>
+<p><span class="math display">\[Q_t \in \{\mathrm{CUPM}, \mathrm{CLPM},
+\mathrm{DLPM}, \mathrm{DUPM}\}.\]</span></p>
 <p>Using a mean split:</p>
-<p><span
-class="math display">CUPM : <em>X</em><sub><em>t</em></sub> &gt; <em>X̄</em>, <em>Y</em><sub><em>t</em></sub> &gt; <em>Ȳ</em>,</span></p>
-<p><span
-class="math display">CLPM : <em>X</em><sub><em>t</em></sub> ≤ <em>X̄</em>, <em>Y</em><sub><em>t</em></sub> ≤ <em>Ȳ</em>,</span></p>
-<p><span
-class="math display">DLPM : <em>X</em><sub><em>t</em></sub> &gt; <em>X̄</em>, <em>Y</em><sub><em>t</em></sub> ≤ <em>Ȳ</em>,</span></p>
-<p><span
-class="math display">DUPM : <em>X</em><sub><em>t</em></sub> ≤ <em>X̄</em>, <em>Y</em><sub><em>t</em></sub> &gt; <em>Ȳ</em>.</span></p>
+<p><span class="math display">\[\mathrm{CUPM}: X_t &gt; \bar X,\; Y_t
+&gt; \bar Y,\]</span></p>
+<p><span class="math display">\[\mathrm{CLPM}: X_t \leq \bar X,\; Y_t
+\leq \bar Y,\]</span></p>
+<p><span class="math display">\[\mathrm{DLPM}: X_t &gt; \bar X,\; Y_t
+\leq \bar Y,\]</span></p>
+<p><span class="math display">\[\mathrm{DUPM}: X_t \leq \bar X,\; Y_t
+&gt; \bar Y.\]</span></p>
 <p>The state probabilities are empirical frequencies:</p>
-<p><span
-class="math display"><em>p</em><sub><em>q</em></sub> = <em>P</em>(<em>Q</em><sub><em>t</em></sub> = <em>q</em>).</span></p>
+<p><span class="math display">\[p_q = P(Q_t=q).\]</span></p>
 <p>The state-conditional means are:</p>
-<p><span
-class="math display"><em>m</em><sub><em>q</em></sub> = <em>E</em>[<em>Z</em><sub><em>t</em></sub> ∣ <em>Q</em><sub><em>t</em></sub> = <em>q</em>].</span></p>
+<p><span class="math display">\[m_q = E[Z_t \mid Q_t=q].\]</span></p>
 <p>The state-conditional covariances are:</p>
-<p><span
-class="math display"><em>Σ</em><sup>(<em>q</em>)</sup> = Cov(<em>Z</em><sub><em>t</em></sub> ∣ <em>Q</em><sub><em>t</em></sub> = <em>q</em>).</span></p>
+<p><span class="math display">\[\Sigma^{(q)}
+=
+\mathrm{Cov}(Z_t \mid Q_t=q).\]</span></p>
 <p>The key difference from an HMM is that <code>Q_t</code> is observed
 once the benchmark is specified. No latent-state inference is
 required.</p>
@@ -213,48 +221,57 @@ required.</p>
 <h2 id="2-static-directional-spectral-decomposition">2. Static
 Directional Spectral Decomposition</h2>
 <p>The covariance matrix decomposes as:</p>
-<p><span
-class="math display"><em>Σ</em> = <em>Σ</em><sup><em>B</em></sup> + <em>Σ</em><sup><em>W</em></sup>,</span></p>
+<p><span class="math display">\[\Sigma
+=
+\Sigma^B+\Sigma^W,\]</span></p>
 <p>where:</p>
-<p><span
-class="math display"><em>Σ</em><sup><em>B</em></sup> = ∑<sub><em>q</em></sub><em>p</em><sub><em>q</em></sub><em>u</em><sub><em>q</em></sub><em>u</em><sub><em>q</em></sub><sup>⊤</sup>,</span></p>
+<p><span class="math display">\[\Sigma^B
+=
+\sum_q p_q u_q u_q^\top,\]</span></p>
 <p>and:</p>
-<p><span
-class="math display"><em>Σ</em><sup><em>W</em></sup> = ∑<sub><em>q</em></sub><em>p</em><sub><em>q</em></sub><em>Σ</em><sup>(<em>q</em>)</sup>.</span></p>
+<p><span class="math display">\[\Sigma^W
+=
+\sum_q p_q\Sigma^{(q)}.\]</span></p>
 <p>Here:</p>
-<p><span
-class="math display"><em>u</em><sub><em>q</em></sub> = <em>m</em><sub><em>q</em></sub> − <em>μ</em>.</span></p>
+<p><span class="math display">\[u_q=m_q-\mu.\]</span></p>
 <p>The between-quadrant component <code>Sigma^B</code> is built from
 rank-one spectral primitives:</p>
-<p><span
-class="math display"><em>B</em><sub><em>q</em></sub> = <em>p</em><sub><em>q</em></sub><em>u</em><sub><em>q</em></sub><em>u</em><sub><em>q</em></sub><sup>⊤</sup>.</span></p>
+<p><span class="math display">\[B_q=p_q u_q u_q^\top.\]</span></p>
 <p>If <code>u_q</code> is nonzero, then:</p>
-<p><span
-class="math display"><em>B</em><sub><em>q</em></sub><em>u</em><sub><em>q</em></sub> = <em>p</em><sub><em>q</em></sub><em>u</em><sub><em>q</em></sub><em>u</em><sub><em>q</em></sub><sup>⊤</sup><em>u</em><sub><em>q</em></sub> = <em>p</em><sub><em>q</em></sub>∥<em>u</em><sub><em>q</em></sub>∥<sup>2</sup><em>u</em><sub><em>q</em></sub>.</span></p>
+<p><span class="math display">\[B_q u_q
+=
+p_q u_q u_q^\top u_q
+=
+p_q\|u_q\|^2u_q.\]</span></p>
 <p>Therefore <code>u_q</code> is the nonzero eigenvector of its own
 quadrant contribution <code>B_q</code>, with eigenvalue:</p>
-<p><span
-class="math display"><em>ℓ</em><sub><em>q</em></sub> = <em>p</em><sub><em>q</em></sub>∥<em>u</em><sub><em>q</em></sub>∥<sup>2</sup>.</span></p>
+<p><span class="math display">\[\ell_q=p_q\|u_q\|^2.\]</span></p>
 <p>After normalization,</p>
-<p><span class="math display">$$v_q=\frac{u_q}{\|u_q\|}$$</span></p>
+<p><span class="math display">\[v_q=\frac{u_q}{\|u_q\|}\]</span></p>
 <p>is the corresponding unit eigenvector.</p>
 <p>Thus, centered quadrant conditional means are rank-one spectral
 primitives.</p>
 <p>The full between-quadrant covariance is:</p>
-<p><span
-class="math display"><em>Σ</em><sup><em>B</em></sup> = <em>B</em><sub>CUPM</sub> + <em>B</em><sub>CLPM</sub> + <em>B</em><sub>DLPM</sub> + <em>B</em><sub>DUPM</sub>.</span></p>
+<p><span class="math display">\[\Sigma^B
+=
+B_{\mathrm{CUPM}}
++
+B_{\mathrm{CLPM}}
++
+B_{\mathrm{DLPM}}
++
+B_{\mathrm{DUPM}}.\]</span></p>
 <p>Equivalently, define:</p>
-<p><span class="math display">$$C
+<p><span class="math display">\[C
 =
 \left(
 \sqrt{p_{\mathrm{CUPM}}}u_{\mathrm{CUPM}}\;
 \sqrt{p_{\mathrm{CLPM}}}u_{\mathrm{CLPM}}\;
 \sqrt{p_{\mathrm{DLPM}}}u_{\mathrm{DLPM}}\;
 \sqrt{p_{\mathrm{DUPM}}}u_{\mathrm{DUPM}}
-\right).$$</span></p>
+\right).\]</span></p>
 <p>Then:</p>
-<p><span
-class="math display"><em>Σ</em><sup><em>B</em></sup> = <em>C</em><em>C</em><sup>⊤</sup>.</span></p>
+<p><span class="math display">\[\Sigma^B=CC^\top.\]</span></p>
 <p>The eigenvectors of <code>Sigma^B</code> are the left singular
 vectors of <code>C</code>, built entirely from weighted quadrant
 conditional mean displacements.</p>
@@ -262,28 +279,38 @@ conditional mean displacements.</p>
 <h2 id="3-pca-recovery-directly-from-quadrant-conditional-means">3. PCA
 Recovery Directly from Quadrant Conditional Means</h2>
 <p>This is the central static recovery chain:</p>
-<p><span
-class="math display">{<em>p</em><sub><em>q</em></sub>, <em>m</em><sub><em>q</em></sub>, <em>Σ</em><sup>(<em>q</em>)</sup>}<sub><em>q</em></sub> → <em>Σ</em><sup><em>B</em></sup> + <em>Σ</em><sup><em>W</em></sup> → <em>Σ</em> → (<em>λ</em><sub><em>i</em></sub>, <em>v</em><sub><em>i</em></sub>).</span></p>
+<p><span class="math display">\[\{p_q,m_q,\Sigma^{(q)}\}_q
+\longrightarrow
+\Sigma^B+\Sigma^W
+\longrightarrow
+\Sigma
+\longrightarrow
+(\lambda_i,v_i).\]</span></p>
 <p>The quadrant conditional means enter through:</p>
-<p><span
-class="math display"><em>u</em><sub><em>q</em></sub> = <em>m</em><sub><em>q</em></sub> − <em>μ</em>.</span></p>
+<p><span class="math display">\[u_q=m_q-\mu.\]</span></p>
 <p>From those displacements, construct the rank-one matrices:</p>
-<p><span
-class="math display"><em>B</em><sub><em>q</em></sub> = <em>p</em><sub><em>q</em></sub><em>u</em><sub><em>q</em></sub><em>u</em><sub><em>q</em></sub><sup>⊤</sup>.</span></p>
+<p><span class="math display">\[B_q=p_q u_q u_q^\top.\]</span></p>
 <p>Then:</p>
-<p><span
-class="math display"><em>Σ</em><sup><em>B</em></sup> = ∑<sub><em>q</em></sub><em>B</em><sub><em>q</em></sub> = ∑<sub><em>q</em></sub><em>p</em><sub><em>q</em></sub><em>u</em><sub><em>q</em></sub><em>u</em><sub><em>q</em></sub><sup>⊤</sup>.</span></p>
+<p><span class="math display">\[\Sigma^B
+=
+\sum_q B_q
+=
+\sum_q p_q u_q u_q^\top.\]</span></p>
 <p>If only the quadrant conditional means and probabilities are used,
 the recovered eigensystem is the eigensystem of the between-quadrant
 covariance <code>Sigma^B</code>.</p>
 <p>To recover the full classical PCA eigensystem of the original
 covariance matrix, add the within-quadrant residual covariance
 terms:</p>
-<p><span
-class="math display"><em>Σ</em> = <em>Σ</em><sup><em>B</em></sup> + <em>Σ</em><sup><em>W</em></sup> = ∑<sub><em>q</em></sub><em>p</em><sub><em>q</em></sub><em>u</em><sub><em>q</em></sub><em>u</em><sub><em>q</em></sub><sup>⊤</sup> + ∑<sub><em>q</em></sub><em>p</em><sub><em>q</em></sub><em>Σ</em><sup>(<em>q</em>)</sup>.</span></p>
+<p><span class="math display">\[\Sigma
+=
+\Sigma^B+\Sigma^W
+=
+\sum_q p_q u_q u_q^\top
++
+\sum_q p_q\Sigma^{(q)}.\]</span></p>
 <p>Then diagonalize the recovered covariance matrix:</p>
-<p><span
-class="math display"><em>Σ</em><em>v</em><sub><em>i</em></sub> = <em>λ</em><sub><em>i</em></sub><em>v</em><sub><em>i</em></sub>.</span></p>
+<p><span class="math display">\[\Sigma v_i=\lambda_i v_i.\]</span></p>
 <p>This is not an approximation in the sample calculation. It is an
 exact covariance decomposition up to numerical machine precision.</p>
 <p>The R example below verifies this directly by computing:</p>
@@ -298,13 +325,13 @@ exact covariance decomposition up to numerical machine precision.</p>
 </ol>
 <p>In the reported run, the max absolute recovery error was
 approximately:</p>
-<p><span class="math display">1.08 × 10<sup>−19</sup>,</span></p>
+<p><span class="math display">\[1.08\times 10^{-19},\]</span></p>
 <p>and the original and recovered leading eigenvectors had
 alignment:</p>
-<p><span class="math display">1.</span></p>
+<p><span class="math display">\[1.\]</span></p>
 <p>The between-quadrant covariance alone had leading eigenvector
 alignment:</p>
-<p><span class="math display">0.9999992</span></p>
+<p><span class="math display">\[0.9999992\]</span></p>
 <p>with the full PCA leading eigenvector.</p>
 <p>So the result is stronger than merely saying that PCA is related to
 quadrant means:</p>
@@ -317,17 +344,24 @@ eigensystem.</p>
 <h2 id="4-pca-eigenvalue-attribution">4. PCA Eigenvalue Attribution</h2>
 <p>Let <code>(lambda_i, v_i)</code> be a unit eigenpair of the full
 covariance matrix <code>Sigma</code>:</p>
-<p><span
-class="math display"><em>Σ</em><em>v</em><sub><em>i</em></sub> = <em>λ</em><sub><em>i</em></sub><em>v</em><sub><em>i</em></sub>,   ∥<em>v</em><sub><em>i</em></sub>∥ = 1.</span></p>
+<p><span class="math display">\[\Sigma v_i=\lambda_i v_i,
+\qquad
+\|v_i\|=1.\]</span></p>
 <p>Since:</p>
-<p><span
-class="math display"><em>λ</em><sub><em>i</em></sub> = <em>v</em><sub><em>i</em></sub><sup>⊤</sup><em>Σ</em><em>v</em><sub><em>i</em></sub>,</span></p>
+<p><span class="math display">\[\lambda_i = v_i^\top\Sigma
+v_i,\]</span></p>
 <p>and:</p>
-<p><span
-class="math display"><em>Σ</em> = ∑<sub><em>q</em></sub><em>p</em><sub><em>q</em></sub><em>u</em><sub><em>q</em></sub><em>u</em><sub><em>q</em></sub><sup>⊤</sup> + ∑<sub><em>q</em></sub><em>p</em><sub><em>q</em></sub><em>Σ</em><sup>(<em>q</em>)</sup>,</span></p>
+<p><span class="math display">\[\Sigma
+=
+\sum_q p_q u_q u_q^\top
++
+\sum_q p_q\Sigma^{(q)},\]</span></p>
 <p>we get the exact attribution identity:</p>
-<p><span
-class="math display"><em>λ</em><sub><em>i</em></sub> = ∑<sub><em>q</em></sub><em>p</em><sub><em>q</em></sub>(<em>v</em><sub><em>i</em></sub><sup>⊤</sup><em>u</em><sub><em>q</em></sub>)<sup>2</sup> + ∑<sub><em>q</em></sub><em>p</em><sub><em>q</em></sub><em>v</em><sub><em>i</em></sub><sup>⊤</sup><em>Σ</em><sup>(<em>q</em>)</sup><em>v</em><sub><em>i</em></sub>.</span></p>
+<p><span class="math display">\[\lambda_i
+=
+\sum_q p_q(v_i^\top u_q)^2
++
+\sum_q p_q v_i^\top\Sigma^{(q)}v_i.\]</span></p>
 <p>This decomposes each classical PCA eigenvalue into:</p>
 <ol type="1">
 <li>between-quadrant conditional-mean displacement;</li>
@@ -342,26 +376,27 @@ that covariance came from.</p>
 Directional Markov Transitions</h2>
 <p>Because <code>Q_t</code> is observed, transition probabilities can be
 estimated directly:</p>
-<p><span class="math display">$$\widehat P_{qq'}
+<p><span class="math display">\[\widehat P_{qq&#39;}
 =
-P(Q_{t+1}=q'\mid Q_t=q)
+P(Q_{t+1}=q&#39;\mid Q_t=q)
 =
 \frac{
-\#\{t:Q_t=q,\;Q_{t+1}=q'\}
+\#\{t:Q_t=q,\;Q_{t+1}=q&#39;\}
 }{
 \#\{t:Q_t=q\}
-}.$$</span></p>
+}.\]</span></p>
 <p>This gives a four-state observable Markov chain over:</p>
-<p><span class="math display">{CUPM, CLPM, DLPM, DUPM}.</span></p>
+<p><span
+class="math display">\[\{\mathrm{CUPM},\mathrm{CLPM},\mathrm{DLPM},\mathrm{DUPM}\}.\]</span></p>
 <p>Examples:</p>
-<p><span
-class="math display"><em>P</em>(CLPM<sub><em>t</em> + 1</sub> ∣ CLPM<sub><em>t</em></sub>)</span></p>
+<p><span class="math display">\[P(\mathrm{CLPM}_{t+1}\mid
+\mathrm{CLPM}_t)\]</span></p>
 <p>is crash persistence.</p>
-<p><span
-class="math display"><em>P</em>(CUPM<sub><em>t</em> + 1</sub> ∣ CLPM<sub><em>t</em></sub>)</span></p>
+<p><span class="math display">\[P(\mathrm{CUPM}_{t+1}\mid
+\mathrm{CLPM}_t)\]</span></p>
 <p>is crash-to-rally reversal.</p>
-<p><span
-class="math display"><em>P</em>(CLPM<sub><em>t</em> + 1</sub> ∣ CUPM<sub><em>t</em></sub>)</span></p>
+<p><span class="math display">\[P(\mathrm{CLPM}_{t+1}\mid
+\mathrm{CUPM}_t)\]</span></p>
 <p>is rally-to-crash reversal.</p>
 <p>This is not a latent Markov model. It is an observable directional
 Markov regime model.</p>
@@ -370,14 +405,22 @@ Markov regime model.</p>
 Mixture</h2>
 <p>Given current quadrant <code>Q_t=q</code>, the one-step predictive
 mean is:</p>
-<p><span
-class="math display"><em>E</em>[<em>Z</em><sub><em>t</em> + 1</sub> ∣ <em>Q</em><sub><em>t</em></sub> = <em>q</em>] = ∑<sub><em>q</em><sup>′</sup></sub><em>P</em><sub><em>q</em><em>q</em><sup>′</sup></sub><em>m</em><sub><em>q</em><sup>′</sup></sub>.</span></p>
+<p><span class="math display">\[E[Z_{t+1}\mid Q_t=q]
+=
+\sum_{q&#39;}P_{qq&#39;}m_{q&#39;}.\]</span></p>
 <p>The corresponding predictive covariance is:</p>
-<p><span
-class="math display">Cov(<em>Z</em><sub><em>t</em> + 1</sub> ∣ <em>Q</em><sub><em>t</em></sub> = <em>q</em>) = ∑<sub><em>q</em><sup>′</sup></sub><em>P</em><sub><em>q</em><em>q</em><sup>′</sup></sub>[<em>Σ</em><sup>(<em>q</em><sup>′</sup>)</sup> + (<em>m</em><sub><em>q</em><sup>′</sup></sub> − <em>μ</em><sub><em>q</em> → ⋅</sub>)(<em>m</em><sub><em>q</em><sup>′</sup></sub> − <em>μ</em><sub><em>q</em> → ⋅</sub>)<sup>⊤</sup>],</span></p>
+<p><span class="math display">\[\mathrm{Cov}(Z_{t+1}\mid Q_t=q)
+=
+\sum_{q&#39;}P_{qq&#39;}
+\left[
+\Sigma^{(q&#39;)}
++
+(m_{q&#39;}-\mu_{q\to\cdot})(m_{q&#39;}-\mu_{q\to\cdot})^\top
+\right],\]</span></p>
 <p>where:</p>
-<p><span
-class="math display"><em>μ</em><sub><em>q</em> → ⋅</sub> = ∑<sub><em>q</em><sup>′</sup></sub><em>P</em><sub><em>q</em><em>q</em><sup>′</sup></sub><em>m</em><sub><em>q</em><sup>′</sup></sub>.</span></p>
+<p><span class="math display">\[\mu_{q\to\cdot}
+=
+\sum_{q&#39;}P_{qq&#39;}m_{q&#39;}.\]</span></p>
 <p>This is the same mixture logic used by HMMs, but with observed
 directional states instead of inferred hidden states.</p>
 <hr />
@@ -387,72 +430,96 @@ Transition-Path Spectral Decomposition</h2>
 paths.</p>
 <p>Define:</p>
 <p><span
-class="math display"><em>p</em><sub><em>q</em><em>q</em><sup>′</sup></sub> = <em>P</em>(<em>Q</em><sub><em>t</em></sub> = <em>q</em>, <em>Q</em><sub><em>t</em> + 1</sub> = <em>q</em><sup>′</sup>).</span></p>
+class="math display">\[p_{qq&#39;}=P(Q_t=q,Q_{t+1}=q&#39;).\]</span></p>
+<p>Let:</p>
+<p><span class="math display">\[m_{q\to q&#39;}
+=
+E[Z_{t+1}\mid Q_t=q,Q_{t+1}=q&#39;].\]</span></p>
 <p>Let:</p>
 <p><span
-class="math display"><em>m</em><sub><em>q</em> → <em>q</em><sup>′</sup></sub> = <em>E</em>[<em>Z</em><sub><em>t</em> + 1</sub> ∣ <em>Q</em><sub><em>t</em></sub> = <em>q</em>, <em>Q</em><sub><em>t</em> + 1</sub> = <em>q</em><sup>′</sup>].</span></p>
-<p>Let:</p>
-<p><span
-class="math display"><em>μ</em><sub>lead</sub> = <em>E</em>[<em>Z</em><sub><em>t</em> + 1</sub>].</span></p>
+class="math display">\[\mu_{\mathrm{lead}}=E[Z_{t+1}].\]</span></p>
 <p>Define the transition-path displacement:</p>
-<p><span
-class="math display"><em>u</em><sub><em>q</em> → <em>q</em><sup>′</sup></sub> = <em>m</em><sub><em>q</em> → <em>q</em><sup>′</sup></sub> − <em>μ</em><sub>lead</sub>.</span></p>
+<p><span class="math display">\[u_{q\to q&#39;}
+=
+m_{q\to q&#39;}-\mu_{\mathrm{lead}}.\]</span></p>
 <p>Define the within-transition covariance:</p>
-<p><span
-class="math display"><em>Σ</em><sup>(<em>q</em> → <em>q</em><sup>′</sup>)</sup> = Cov(<em>Z</em><sub><em>t</em> + 1</sub> ∣ <em>Q</em><sub><em>t</em></sub> = <em>q</em>, <em>Q</em><sub><em>t</em> + 1</sub> = <em>q</em><sup>′</sup>).</span></p>
+<p><span class="math display">\[\Sigma^{(q\to q&#39;)}
+=
+\mathrm{Cov}(Z_{t+1}\mid Q_t=q,Q_{t+1}=q&#39;).\]</span></p>
 <p>Then the lead covariance decomposes as:</p>
-<p><span
-class="math display"><em>Σ</em><sub>lead</sub> = <em>Σ</em><sub>dyn</sub><sup><em>B</em></sup> + <em>Σ</em><sub>dyn</sub><sup><em>W</em></sup>,</span></p>
+<p><span class="math display">\[\Sigma_{\mathrm{lead}}
+=
+\Sigma^B_{\mathrm{dyn}}
++
+\Sigma^W_{\mathrm{dyn}},\]</span></p>
 <p>where:</p>
-<p><span
-class="math display"><em>Σ</em><sub>dyn</sub><sup><em>B</em></sup> = ∑<sub><em>q</em>, <em>q</em><sup>′</sup></sub><em>p</em><sub><em>q</em><em>q</em><sup>′</sup></sub><em>u</em><sub><em>q</em> → <em>q</em><sup>′</sup></sub><em>u</em><sub><em>q</em> → <em>q</em><sup>′</sup></sub><sup>⊤</sup>,</span></p>
+<p><span class="math display">\[\Sigma^B_{\mathrm{dyn}}
+=
+\sum_{q,q&#39;}p_{qq&#39;}u_{q\to q&#39;}u_{q\to
+q&#39;}^\top,\]</span></p>
 <p>and:</p>
-<p><span
-class="math display"><em>Σ</em><sub>dyn</sub><sup><em>W</em></sup> = ∑<sub><em>q</em>, <em>q</em><sup>′</sup></sub><em>p</em><sub><em>q</em><em>q</em><sup>′</sup></sub><em>Σ</em><sup>(<em>q</em> → <em>q</em><sup>′</sup>)</sup>.</span></p>
+<p><span class="math display">\[\Sigma^W_{\mathrm{dyn}}
+=
+\sum_{q,q&#39;}p_{qq&#39;}\Sigma^{(q\to q&#39;)}.\]</span></p>
 <p>Each transition path contributes a rank-one dynamic spectral
 primitive:</p>
-<p><span
-class="math display"><em>B</em><sub><em>q</em> → <em>q</em><sup>′</sup></sub> = <em>p</em><sub><em>q</em><em>q</em><sup>′</sup></sub><em>u</em><sub><em>q</em> → <em>q</em><sup>′</sup></sub><em>u</em><sub><em>q</em> → <em>q</em><sup>′</sup></sub><sup>⊤</sup>.</span></p>
+<p><span class="math display">\[B_{q\to q&#39;}
+=
+p_{qq&#39;}u_{q\to q&#39;}u_{q\to q&#39;}^\top.\]</span></p>
 <p>If <code>u_{q-&gt;q'}</code> is nonzero, then:</p>
-<p><span
-class="math display"><em>B</em><sub><em>q</em> → <em>q</em><sup>′</sup></sub><em>u</em><sub><em>q</em> → <em>q</em><sup>′</sup></sub> = <em>p</em><sub><em>q</em><em>q</em><sup>′</sup></sub>∥<em>u</em><sub><em>q</em> → <em>q</em><sup>′</sup></sub>∥<sup>2</sup><em>u</em><sub><em>q</em> → <em>q</em><sup>′</sup></sub>.</span></p>
+<p><span class="math display">\[B_{q\to q&#39;}u_{q\to q&#39;}
+=
+p_{qq&#39;}\|u_{q\to q&#39;}\|^2u_{q\to q&#39;}.\]</span></p>
 <p>Thus transition paths are dynamic rank-one spectral primitives.</p>
 <hr />
 <h2
 id="8-dynamic-pca-recovery-from-transition-path-conditional-means">8.
 Dynamic PCA Recovery from Transition-Path Conditional Means</h2>
 <p>The dynamic recovery chain is:</p>
-<p><span
-class="math display">{<em>p</em><sub><em>q</em><em>q</em><sup>′</sup></sub>, <em>m</em><sub><em>q</em> → <em>q</em><sup>′</sup></sub>, <em>Σ</em><sup>(<em>q</em> → <em>q</em><sup>′</sup>)</sup>}<sub><em>q</em>, <em>q</em><sup>′</sup></sub> → <em>Σ</em><sub>dyn</sub><sup><em>B</em></sup> + <em>Σ</em><sub>dyn</sub><sup><em>W</em></sup> → <em>Σ</em><sub>lead</sub> → (<em>λ</em><sub><em>i</em></sub><sup>lead</sup>, <em>v</em><sub><em>i</em></sub><sup>lead</sup>).</span></p>
+<p><span class="math display">\[\{p_{qq&#39;},m_{q\to
+q&#39;},\Sigma^{(q\to q&#39;)}\}_{q,q&#39;}
+\longrightarrow
+\Sigma^B_{\mathrm{dyn}}+\Sigma^W_{\mathrm{dyn}}
+\longrightarrow
+\Sigma_{\mathrm{lead}}
+\longrightarrow
+(\lambda_i^{\mathrm{lead}},v_i^{\mathrm{lead}}).\]</span></p>
 <p>Transition-path conditional means enter through:</p>
-<p><span
-class="math display"><em>u</em><sub><em>q</em> → <em>q</em><sup>′</sup></sub> = <em>m</em><sub><em>q</em> → <em>q</em><sup>′</sup></sub> − <em>μ</em><sub>lead</sub>.</span></p>
+<p><span class="math display">\[u_{q\to q&#39;}=m_{q\to
+q&#39;}-\mu_{\mathrm{lead}}.\]</span></p>
 <p>The dynamic between-transition covariance is:</p>
-<p><span
-class="math display"><em>Σ</em><sub>dyn</sub><sup><em>B</em></sup> = ∑<sub><em>q</em>, <em>q</em><sup>′</sup></sub><em>p</em><sub><em>q</em><em>q</em><sup>′</sup></sub><em>u</em><sub><em>q</em> → <em>q</em><sup>′</sup></sub><em>u</em><sub><em>q</em> → <em>q</em><sup>′</sup></sub><sup>⊤</sup>.</span></p>
+<p><span class="math display">\[\Sigma^B_{\mathrm{dyn}}
+=
+\sum_{q,q&#39;}p_{qq&#39;}u_{q\to q&#39;}u_{q\to
+q&#39;}^\top.\]</span></p>
 <p>Adding the within-transition residual covariance gives the full lead
 covariance:</p>
-<p><span
-class="math display"><em>Σ</em><sub>lead</sub> = <em>Σ</em><sub>dyn</sub><sup><em>B</em></sup> + <em>Σ</em><sub>dyn</sub><sup><em>W</em></sup>.</span></p>
+<p><span class="math display">\[\Sigma_{\mathrm{lead}}
+=
+\Sigma^B_{\mathrm{dyn}}+\Sigma^W_{\mathrm{dyn}}.\]</span></p>
 <p>Then diagonalizing <code>Sigma_lead</code> recovers the dynamic PCA
 eigensystem.</p>
 <p>In the reported run, the dynamic recovery error was
 approximately:</p>
-<p><span class="math display">1.08 × 10<sup>−19</sup>,</span></p>
+<p><span class="math display">\[1.08\times 10^{-19},\]</span></p>
 <p>and the dynamic recovered leading eigenvector had alignment:</p>
-<p><span class="math display">1</span></p>
+<p><span class="math display">\[1\]</span></p>
 <p>with the original lead covariance leading eigenvector.</p>
 <p>The dynamic between-transition covariance alone had leading
 eigenvector alignment:</p>
-<p><span class="math display">0.9999993</span></p>
+<p><span class="math display">\[0.9999993\]</span></p>
 <p>with the full lead PC1.</p>
 <h2 id="10-dynamic-eigenvalue-attribution">10. Dynamic Eigenvalue
 Attribution</h2>
 <p>Let <code>(lambda_i_lead, v_i_lead)</code> be an eigenpair of
 <code>Sigma_lead</code>.</p>
 <p>Then:</p>
-<p><span
-class="math display"><em>λ</em><sub><em>i</em></sub><sup>lead</sup> = ∑<sub><em>q</em>, <em>q</em><sup>′</sup></sub><em>p</em><sub><em>q</em><em>q</em><sup>′</sup></sub>(<em>v</em><sub><em>i</em></sub><sup>lead⊤</sup><em>u</em><sub><em>q</em> → <em>q</em><sup>′</sup></sub>)<sup>2</sup> + ∑<sub><em>q</em>, <em>q</em><sup>′</sup></sub><em>p</em><sub><em>q</em><em>q</em><sup>′</sup></sub><em>v</em><sub><em>i</em></sub><sup>lead⊤</sup><em>Σ</em><sup>(<em>q</em> → <em>q</em><sup>′</sup>)</sup><em>v</em><sub><em>i</em></sub><sup>lead</sup>.</span></p>
+<p><span class="math display">\[\lambda_i^{\mathrm{lead}}
+=
+\sum_{q,q&#39;}p_{qq&#39;}(v_i^{\mathrm{lead}\top}u_{q\to q&#39;})^2
++
+\sum_{q,q&#39;}p_{qq&#39;}v_i^{\mathrm{lead}\top}\Sigma^{(q\to
+q&#39;)}v_i^{\mathrm{lead}}.\]</span></p>
 <p>This gives dynamic spectral attribution by transition path.</p>
 <p>Instead of saying:</p>
 <blockquote>
@@ -475,8 +542,7 @@ from two hidden volatility regimes:</p>
 </ul>
 <p>The true hidden states followed a persistent two-state Markov process
 with:</p>
-<p><span
-class="math display"><em>p</em><sub>stay</sub> = 0.96.</span></p>
+<p><span class="math display">\[p_{\mathrm{stay}}=0.96.\]</span></p>
 <p>The observed NNS states were then defined by quadrant membership
 relative to the mean of <code>X</code> and <code>Y</code>.</p>
 <h3 id="hidden-state-frequencies">Hidden State Frequencies</h3>
@@ -527,11 +593,13 @@ Frequencies</h3>
 </tbody>
 </table>
 <p>The concordant quadrants dominate:</p>
-<p><span
-class="math display"><em>p</em><sub>CUPM</sub> + <em>p</em><sub>CLPM</sub> = 0.6792.</span></p>
+<p><span class="math display">\[p_{\mathrm{CUPM}}+p_{\mathrm{CLPM}}
+=
+0.6792.\]</span></p>
 <p>The divergent quadrants account for:</p>
-<p><span
-class="math display"><em>p</em><sub>DLPM</sub> + <em>p</em><sub>DUPM</sub> = 0.3208.</span></p>
+<p><span class="math display">\[p_{\mathrm{DLPM}}+p_{\mathrm{DUPM}}
+=
+0.3208.\]</span></p>
 <h3 id="hidden-state-composition-by-observable-quadrant">Hidden-State
 Composition by Observable Quadrant</h3>
 <table>
@@ -562,70 +630,71 @@ Composition by Observable Quadrant</h3>
 </tbody>
 </table>
 <p>The concordant quadrants are mostly turbulent:</p>
-<p><span
-class="math display"><em>P</em>(turbulent ∣ CUPM) = 0.6612,</span></p>
-<p><span
-class="math display"><em>P</em>(turbulent ∣ CLPM) = 0.6828.</span></p>
+<p><span class="math display">\[P(\mathrm{turbulent}\mid
+\mathrm{CUPM})=0.6612,\]</span></p>
+<p><span class="math display">\[P(\mathrm{turbulent}\mid
+\mathrm{CLPM})=0.6828.\]</span></p>
 <p>The divergent quadrants are more often calm:</p>
-<p><span
-class="math display"><em>P</em>(calm ∣ DLPM) = 0.5921,</span></p>
-<p><span
-class="math display"><em>P</em>(calm ∣ DUPM) = 0.5645.</span></p>
+<p><span class="math display">\[P(\mathrm{calm}\mid
+\mathrm{DLPM})=0.5921,\]</span></p>
+<p><span class="math display">\[P(\mathrm{calm}\mid
+\mathrm{DUPM})=0.5645.\]</span></p>
 <p>Thus the observable quadrant states recover meaningful information
 about the latent volatility regime without fitting an HMM.</p>
 <hr />
 <h2 id="11-static-results">11. Static Results</h2>
 <h3 id="covariance-recovery">Covariance Recovery</h3>
 <p>The original covariance matrix was:</p>
-<p><span class="math display">$$\Sigma
+<p><span class="math display">\[\Sigma
 =
 \begin{pmatrix}
 0.00078857 &amp; 0.00055621\\
 0.00055621 &amp; 0.00079558
-\end{pmatrix}.$$</span></p>
+\end{pmatrix}.\]</span></p>
 <p>The recovered covariance matrix was:</p>
-<p><span class="math display">$$\Sigma^B+\Sigma^W
+<p><span class="math display">\[\Sigma^B+\Sigma^W
 =
 \begin{pmatrix}
 0.00078857 &amp; 0.00055621\\
 0.00055621 &amp; 0.00079558
-\end{pmatrix}.$$</span></p>
+\end{pmatrix}.\]</span></p>
 <p>The max absolute recovery error was:</p>
-<p><span class="math display">1.084202 × 10<sup>−19</sup>.</span></p>
+<p><span class="math display">\[1.084202\times 10^{-19}.\]</span></p>
 <p>This is numerical zero.</p>
 <h3 id="static-eigenvalue-recovery">Static Eigenvalue Recovery</h3>
 <p>The eigenvalues of the original covariance matrix were:</p>
-<p><span
-class="math display"><em>λ</em><sub>1</sub> = 0.0013482978,   <em>λ</em><sub>2</sub> = 0.0002358557.</span></p>
+<p><span class="math display">\[\lambda_1=0.0013482978,
+\qquad
+\lambda_2=0.0002358557.\]</span></p>
 <p>The eigenvalues of the recovered matrix were identical.</p>
 <p>The leading eigenvector of the original covariance matrix was:</p>
 <p><span
-class="math display"><em>v</em><sub>1</sub> = (0.7048772, 0.7093294).</span></p>
+class="math display">\[v_1=(0.7048772,\;0.7093294).\]</span></p>
 <p>The leading eigenvector of the recovered matrix was:</p>
 <p><span
-class="math display"><em>v</em><sub>1</sub> = (0.7048772, 0.7093294).</span></p>
+class="math display">\[v_1=(0.7048772,\;0.7093294).\]</span></p>
 <p>The alignment was:</p>
-<p><span class="math display">1.</span></p>
+<p><span class="math display">\[1.\]</span></p>
 <p>The leading eigenvector of the between-quadrant covariance
 <code>Sigma^B</code> alone was:</p>
 <p><span
-class="math display"><em>v</em><sub>1</sub><sup><em>B</em></sup> = (0.7039744, 0.7102253).</span></p>
+class="math display">\[v^B_1=(0.7039744,\;0.7102253).\]</span></p>
 <p>Its alignment with the full PC1 was:</p>
-<p><span class="math display">0.9999992.</span></p>
+<p><span class="math display">\[0.9999992.\]</span></p>
 <p>Thus, in this simulation, the quadrant conditional-mean geometry
 essentially determines PC1.</p>
 <h3 id="static-eigenvalue-attribution">Static Eigenvalue
 Attribution</h3>
 <p>For the first eigenvalue:</p>
-<p><span
-class="math display"><em>λ</em><sub>1</sub> = 0.0013482978.</span></p>
+<p><span class="math display">\[\lambda_1=0.0013482978.\]</span></p>
 <p>The decomposition was:</p>
 <p><span
-class="math display">between-quadrant = 0.0008537907,</span></p>
-<p><span class="math display">within-quadrant = 0.0004945070.</span></p>
+class="math display">\[\text{between-quadrant}=0.0008537907,\]</span></p>
+<p><span
+class="math display">\[\text{within-quadrant}=0.0004945070.\]</span></p>
 <p>Therefore:</p>
-<p><span class="math display">$$\frac{0.0008537907}{0.0013482978}
-\approx 63.3\%.$$</span></p>
+<p><span class="math display">\[\frac{0.0008537907}{0.0013482978}
+\approx 63.3\%.\]</span></p>
 <p>About 63.3 percent of the leading PCA eigenvalue came from
 between-quadrant conditional-mean displacement.</p>
 <p>About 36.7 percent came from within-quadrant residual covariance.</p>
@@ -663,7 +732,7 @@ Contributions to <code>lambda_1</code></h3>
 </tbody>
 </table>
 <p>The concordant quadrants contributed approximately:</p>
-<p><span class="math display">49.6% + 47.8% = 97.4%</span></p>
+<p><span class="math display">\[49.6\%+47.8\%=97.4\%\]</span></p>
 <p>of the leading eigenvalue.</p>
 <p>Therefore:</p>
 <blockquote>
@@ -689,28 +758,45 @@ exported NNS function:</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(pm)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co"># &quot;cupm&quot; &quot;dupm&quot; &quot;dlpm&quot; &quot;clpm&quot; &quot;cov.matrix&quot;</span></span></code></pre></div>
 <p>Using the returned directional matrices:</p>
-<p><span
-class="math display"><em>Σ</em><sub>NNS</sub> = clpm + cupm − dlpm − dupm.</span></p>
+<p><span class="math display">\[\Sigma_{\mathrm{NNS}}
+=
+\mathrm{clpm}
++
+\mathrm{cupm}
+-
+\mathrm{dlpm}
+-
+\mathrm{dupm}.\]</span></p>
 <p>In the reported run:</p>
 <p><span
-class="math display">max |cov(<em>Z</em>) − PM.matrix(<em>Z</em>)$<em>c</em><em>o</em><em>v</em>.<em>m</em><em>a</em><em>t</em><em>r</em><em>i</em><em>x</em>| = 4.336809 × 10<sup>−19</sup>.</span></p>
+class="math display">\[\max\left|\mathrm{cov}(Z)-\mathrm{PM.matrix}(Z)\$cov.matrix\right|
+=
+4.336809\times 10^{-19}.\]</span></p>
 <p>Also:</p>
 <p><span
-class="math display">max |cov(<em>Z</em>) − <em>Σ</em><sub>NNS</sub>| = 4.336809 × 10<sup>−19</sup>.</span></p>
+class="math display">\[\max\left|\mathrm{cov}(Z)-\Sigma_{\mathrm{NNS}}\right|
+=
+4.336809\times 10^{-19}.\]</span></p>
 <p>and:</p>
 <p><span
-class="math display">max |PM.matrix(<em>Z</em>)$<em>c</em><em>o</em><em>v</em>.<em>m</em><em>a</em><em>t</em><em>r</em><em>i</em><em>x</em> − <em>Σ</em><sub>NNS</sub>| = 0.</span></p>
+class="math display">\[\max\left|\mathrm{PM.matrix}(Z)\$cov.matrix-\Sigma_{\mathrm{NNS}}\right|
+=
+0.\]</span></p>
 <p>So the direct package implementation recovers the covariance matrix
 to numerical precision.</p>
 <h3 id="static-pca-recovery-from-pmmatrix">Static PCA Recovery from
 <code>PM.matrix</code></h3>
 <p>The classical PCA eigenvalues of <code>cov(Z)</code> were:</p>
-<p><span class="math display">0.0013485675,   0.0002359029.</span></p>
+<p><span class="math display">\[0.0013485675,
+\qquad
+0.0002359029.\]</span></p>
 <p>The eigenvalues recovered from the <code>PM.matrix</code> directional
 reconstruction were identical:</p>
-<p><span class="math display">0.0013485675,   0.0002359029.</span></p>
+<p><span class="math display">\[0.0013485675,
+\qquad
+0.0002359029.\]</span></p>
 <p>The eigenvector alignments were:</p>
-<p><span class="math display">1,   1.</span></p>
+<p><span class="math display">\[1,\qquad 1.\]</span></p>
 <p>Thus <code>PM.matrix</code> directly recovers the same static PCA
 eigensystem.</p>
 <h3 id="static-eigenvalue-attribution-from-pmmatrix">Static Eigenvalue
@@ -791,27 +877,34 @@ larger relative divergent contribution.</p>
 Applying the same package workflow to <code>Z_lead = Z[-1, ]</code>
 gives:</p>
 <p><span
-class="math display">max |cov(<em>Z</em><sub>lead</sub>) − PM.matrix(<em>Z</em><sub>lead</sub>)$<em>c</em><em>o</em><em>v</em>.<em>m</em><em>a</em><em>t</em><em>r</em><em>i</em><em>x</em>| = 5.421011 × 10<sup>−19</sup>.</span></p>
+class="math display">\[\max\left|\mathrm{cov}(Z_{\mathrm{lead}})-\mathrm{PM.matrix}(Z_{\mathrm{lead}})\$cov.matrix\right|
+=
+5.421011\times 10^{-19}.\]</span></p>
 <p>The lead-sample PCA eigenvalues were:</p>
-<p><span class="math display">0.0013488347,   0.0002355702.</span></p>
+<p><span class="math display">\[0.0013488347,
+\qquad
+0.0002355702.\]</span></p>
 <p>The <code>PM.matrix</code> recovered eigenvalues were identical, and
 the eigenvector alignments were again:</p>
-<p><span class="math display">1,   1.</span></p>
+<p><span class="math display">\[1,\qquad 1.\]</span></p>
 <p>Thus the unconditional lead covariance used in the dynamic section is
 also directly recoverable through <code>PM.matrix</code>.</p>
 <h3 id="transition-path-covariance-validation">Transition-Path
 Covariance Validation</h3>
 <p>The transition-path decomposition remains a manual observable-regime
 decomposition because it groups observations by paths such as:</p>
-<p><span
-class="math display">CLPM → CUPM,   CUPM → CLPM,   CLPM → CLPM.</span></p>
+<p><span class="math display">\[\mathrm{CLPM}\to\mathrm{CUPM},
+\qquad
+\mathrm{CUPM}\to\mathrm{CLPM},
+\qquad
+\mathrm{CLPM}\to\mathrm{CLPM}.\]</span></p>
 <p>However, the covariance inside each transition path can be checked
 directly with <code>PM.matrix</code>.</p>
 <p>Across all 16 transition paths, the maximum path-level covariance
 error was:</p>
-<p><span class="math display">3.794708 × 10<sup>−19</sup>.</span></p>
+<p><span class="math display">\[3.794708\times 10^{-19}.\]</span></p>
 <p>The maximum path-level directional reassembly error was also:</p>
-<p><span class="math display">3.794708 × 10<sup>−19</sup>.</span></p>
+<p><span class="math display">\[3.794708\times 10^{-19}.\]</span></p>
 <p>So <code>PM.matrix</code> validates the within-path covariance
 objects used inside the dynamic transition-path decomposition.</p>
 <h3 id="norm--true-caveat"><code>norm = TRUE</code> Caveat</h3>
@@ -820,14 +913,14 @@ objects used inside the dynamic transition-path decomposition.</p>
 <p>With <code>norm = TRUE</code>, the returned <code>cov.matrix</code>
 is a normalized signed dependence matrix. In this run:</p>
 <p><span
-class="math display">$$\mathrm{PM.matrix}(Z,\mathrm{norm}=TRUE)\$cov.matrix
+class="math display">\[\mathrm{PM.matrix}(Z,\mathrm{norm}=TRUE)\$cov.matrix
 =
 \begin{pmatrix}
 1 &amp; 0.8650148\\
 0.8650148 &amp; 1
-\end{pmatrix}.$$</span></p>
+\end{pmatrix}.\]</span></p>
 <p>This differs from <code>cov(Z)</code> by:</p>
-<p><span class="math display">0.9992113.</span></p>
+<p><span class="math display">\[0.9992113.\]</span></p>
 <p>Therefore:</p>
 <blockquote>
 <p><code>norm = FALSE</code> preserves covariance magnitude and recovers
@@ -881,12 +974,12 @@ Matrix</h2>
 </tbody>
 </table>
 <p>Key transition probabilities:</p>
-<p><span
-class="math display"><em>P</em>(CLPM<sub><em>t</em> + 1</sub> ∣ CLPM<sub><em>t</em></sub>) = 0.3485.</span></p>
-<p><span
-class="math display"><em>P</em>(CUPM<sub><em>t</em> + 1</sub> ∣ CLPM<sub><em>t</em></sub>) = 0.3503.</span></p>
-<p><span
-class="math display"><em>P</em>(CLPM<sub><em>t</em> + 1</sub> ∣ CUPM<sub><em>t</em></sub>) = 0.3470.</span></p>
+<p><span class="math display">\[P(\mathrm{CLPM}_{t+1}\mid
+\mathrm{CLPM}_t)=0.3485.\]</span></p>
+<p><span class="math display">\[P(\mathrm{CUPM}_{t+1}\mid
+\mathrm{CLPM}_t)=0.3503.\]</span></p>
+<p><span class="math display">\[P(\mathrm{CLPM}_{t+1}\mid
+\mathrm{CUPM}_t)=0.3470.\]</span></p>
 <p>In this simulation, crash persistence is not dominant. CLPM is about
 equally likely to persist or flip to CUPM.</p>
 <p>This reveals an important distinction:</p>
@@ -902,19 +995,19 @@ not persistence in latent volatility.</p>
 <h2 id="13-one-step-forecast-from-clpm">13. One-Step Forecast from
 CLPM</h2>
 <p>For current state:</p>
-<p><span
-class="math display"><em>Q</em><sub><em>t</em></sub> = CLPM,</span></p>
+<p><span class="math display">\[Q_t=\mathrm{CLPM},\]</span></p>
 <p>the one-step predictive mean was:</p>
-<p><span
-class="math display"><em>E</em>[<em>Z</em><sub><em>t</em> + 1</sub> ∣ <em>Q</em><sub><em>t</em></sub> = CLPM] = (−0.0003297,  − 0.0006816).</span></p>
+<p><span class="math display">\[E[Z_{t+1}\mid Q_t=\mathrm{CLPM}]
+=
+(-0.0003297,\;-0.0006816).\]</span></p>
 <p>The one-step predictive covariance was:</p>
-<p><span class="math display">$$\mathrm{Cov}(Z_{t+1}\mid
+<p><span class="math display">\[\mathrm{Cov}(Z_{t+1}\mid
 Q_t=\mathrm{CLPM})
 =
 \begin{pmatrix}
 0.0008044702 &amp; 0.0005762073\\
 0.0005762073 &amp; 0.0008115607
-\end{pmatrix}.$$</span></p>
+\end{pmatrix}.\]</span></p>
 <p>This is an HMM-style predictive mixture, but no hidden-state
 filtering was used.</p>
 <hr />
@@ -922,54 +1015,55 @@ filtering was used.</p>
 Results</h2>
 <h3 id="dynamic-covariance-recovery">Dynamic Covariance Recovery</h3>
 <p>The original lead covariance matrix was:</p>
-<p><span class="math display">$$\Sigma_{\mathrm{lead}}
+<p><span class="math display">\[\Sigma_{\mathrm{lead}}
 =
 \begin{pmatrix}
 0.00078851 &amp; 0.00055651\\
 0.00055651 &amp; 0.00079558
-\end{pmatrix}.$$</span></p>
+\end{pmatrix}.\]</span></p>
 <p>The recovered dynamic covariance matrix was identical:</p>
 <p><span
-class="math display">$$\Sigma^B_{\mathrm{dyn}}+\Sigma^W_{\mathrm{dyn}}
+class="math display">\[\Sigma^B_{\mathrm{dyn}}+\Sigma^W_{\mathrm{dyn}}
 =
 \begin{pmatrix}
 0.00078851 &amp; 0.00055651\\
 0.00055651 &amp; 0.00079558
-\end{pmatrix}.$$</span></p>
+\end{pmatrix}.\]</span></p>
 <p>The max absolute dynamic recovery error was:</p>
-<p><span class="math display">1.084202 × 10<sup>−19</sup>.</span></p>
+<p><span class="math display">\[1.084202\times 10^{-19}.\]</span></p>
 <p>Again, this is numerical zero.</p>
 <h3 id="dynamic-eigensystem-recovery">Dynamic Eigensystem Recovery</h3>
 <p>The eigenvalues of <code>Sigma_lead</code> were:</p>
-<p><span
-class="math display"><em>λ</em><sub>1</sub><sup>lead</sup> = 0.0013485649,   <em>λ</em><sub>2</sub><sup>lead</sup> = 0.0002355231.</span></p>
+<p><span class="math display">\[\lambda_1^{\mathrm{lead}}=0.0013485649,
+\qquad
+\lambda_2^{\mathrm{lead}}=0.0002355231.\]</span></p>
 <p>The recovered dynamic covariance matrix had the same eigenvalues.</p>
 <p>The leading eigenvector of <code>Sigma_lead</code> was:</p>
 <p><span
-class="math display"><em>v</em><sub>1</sub><sup>lead</sup> = (0.7048570, 0.7093494).</span></p>
+class="math display">\[v_1^{\mathrm{lead}}=(0.7048570,\;0.7093494).\]</span></p>
 <p>The leading eigenvector of the recovered dynamic covariance was
 identical.</p>
 <p>The dynamic between-transition covariance <code>Sigma^B_dyn</code>
 alone had leading eigenvector:</p>
 <p><span
-class="math display"><em>v</em><sub>1</sub><sup><em>B</em>, <em>d</em><em>y</em><em>n</em></sup> = (0.7040324, 0.7101679).</span></p>
+class="math display">\[v^{B,dyn}_1=(0.7040324,\;0.7101679).\]</span></p>
 <p>Its alignment with the full lead PC1 was:</p>
-<p><span class="math display">0.9999993.</span></p>
+<p><span class="math display">\[0.9999993.\]</span></p>
 <p>Thus the transition-path conditional-mean geometry essentially
 determines the dynamic leading eigenvector.</p>
 <h3 id="dynamic-eigenvalue-attribution">Dynamic Eigenvalue
 Attribution</h3>
 <p>For the leading dynamic eigenvalue:</p>
 <p><span
-class="math display"><em>λ</em><sub>1</sub><sup>lead</sup> = 0.001348564855.</span></p>
+class="math display">\[\lambda_1^{\mathrm{lead}}=0.001348564855.\]</span></p>
 <p>The decomposition was:</p>
 <p><span
-class="math display">between-transition = 0.0008586159410,</span></p>
+class="math display">\[\text{between-transition}=0.0008586159410,\]</span></p>
 <p><span
-class="math display">within-transition = 0.0004899489139.</span></p>
+class="math display">\[\text{within-transition}=0.0004899489139.\]</span></p>
 <p>Therefore:</p>
-<p><span class="math display">$$\frac{0.0008586159410}{0.001348564855}
-\approx 63.7\%.$$</span></p>
+<p><span class="math display">\[\frac{0.0008586159410}{0.001348564855}
+\approx 63.7\%.\]</span></p>
 <p>About 63.7 percent of the dynamic leading eigenvalue came from
 transition-path conditional-mean displacement.</p>
 <p>About 36.3 percent came from within-transition residual
@@ -1031,10 +1125,13 @@ eigenvalue were:</p>
 </tbody>
 </table>
 <p>The top four paths are all concordant-to-concordant paths:</p>
-<p><span class="math display">{CLPM, CUPM} → {CLPM, CUPM}.</span></p>
+<p><span class="math display">\[\{\mathrm{CLPM},\mathrm{CUPM}\}
+\to
+\{\mathrm{CLPM},\mathrm{CUPM}\}.\]</span></p>
 <p>Together they contributed approximately:</p>
-<p><span
-class="math display">18.85% + 18.46% + 18.18% + 17.24% = 72.73%</span></p>
+<p><span class="math display">\[18.85\%+18.46\%+18.18\%+17.24\%
+=
+72.73\%\]</span></p>
 <p>of the leading dynamic eigenvalue.</p>
 <p>Therefore:</p>
 <blockquote>
@@ -1062,8 +1159,7 @@ precision and produced eigenvector alignments of <code>1, 1</code>.</p>
 id="claim-2-centered-quadrant-means-are-rank-one-eigenvector-primitives">Claim
 2: Centered quadrant means are rank-one eigenvector primitives.</h3>
 <p>For every quadrant:</p>
-<p><span
-class="math display"><em>B</em><sub><em>q</em></sub><em>u</em><sub><em>q</em></sub> = <em>ℓ</em><sub><em>q</em></sub><em>u</em><sub><em>q</em></sub>.</span></p>
+<p><span class="math display">\[B_q u_q=\ell_q u_q.\]</span></p>
 <p>The numerical errors were zero to machine precision, and the
 alignment with each rank-one eigenvector was <code>1</code>.</p>
 <h3
@@ -1071,8 +1167,9 @@ id="claim-3-time-indexed-quadrant-transitions-produce-observable-markov-regimes-
 3: Time-indexed quadrant transitions produce observable Markov regimes
 with exact spectral attribution.</h3>
 <p>For every transition path:</p>
-<p><span
-class="math display"><em>B</em><sub><em>q</em> → <em>q</em><sup>′</sup></sub><em>u</em><sub><em>q</em> → <em>q</em><sup>′</sup></sub> = <em>ℓ</em><sub><em>q</em> → <em>q</em><sup>′</sup></sub><em>u</em><sub><em>q</em> → <em>q</em><sup>′</sup></sub>.</span></p>
+<p><span class="math display">\[B_{q\to q&#39;}u_{q\to q&#39;}
+=
+\ell_{q\to q&#39;}u_{q\to q&#39;}.\]</span></p>
 <p>The dynamic covariance decomposition recovered
 <code>Sigma_lead</code> exactly, and dynamic eigenvalue attribution
 decomposed the leading eigenvalue into interpretable transition-path
@@ -1089,21 +1186,19 @@ concordant co-movement object.</p>
 <p>The directional decomposition changes the interpretation of
 hedging.</p>
 <p>Classical PCA suggests hedging against PC1 exposure:</p>
-<p><span
-class="math display"><em>w</em><sup>⊤</sup><em>v</em><sub>1</sub> = 0.</span></p>
+<p><span class="math display">\[w^\top v_1=0.\]</span></p>
 <p>Directional NNS allows regime-targeted hedging. For example,
 lower-tail co-movement exposure can be neutralized by:</p>
-<p><span
-class="math display"><em>w</em><sup>⊤</sup><em>u</em><sub>CLPM</sub> = 0.</span></p>
+<p><span class="math display">\[w^\top u_{\mathrm{CLPM}}=0.\]</span></p>
 <p>This condition means the portfolio is locally neutral to the CLPM
 conditional-mean displacement, not merely to an abstract
 variance-maximizing axis.</p>
 <p>Dynamic regime hedging can target transition paths:</p>
-<p><span
-class="math display"><em>w</em><sup>⊤</sup><em>u</em><sub>CLPM → CLPM</sub> = 0,</span></p>
+<p><span class="math display">\[w^\top
+u_{\mathrm{CLPM}\to\mathrm{CLPM}}=0,\]</span></p>
 <p>or:</p>
-<p><span
-class="math display"><em>w</em><sup>⊤</sup><em>u</em><sub>CLPM → CUPM</sub> = 0.</span></p>
+<p><span class="math display">\[w^\top
+u_{\mathrm{CLPM}\to\mathrm{CUPM}}=0.\]</span></p>
 <p>These are economically interpretable exposures:</p>
 <ul>
 <li>CLPM to CLPM: crash persistence;</li>
@@ -1116,24 +1211,30 @@ attribution, but also targeted risk control.</p>
 <hr />
 <h2 id="18-theoretical-significance">18. Theoretical Significance</h2>
 <p>Classical PCA begins with the covariance matrix:</p>
-<p><span class="math display"><em>Σ</em>,</span></p>
+<p><span class="math display">\[\Sigma,\]</span></p>
 <p>and extracts orthogonal eigenvectors:</p>
-<p><span
-class="math display"><em>v</em><sub><em>i</em></sub>.</span></p>
+<p><span class="math display">\[v_i.\]</span></p>
 <p>The directional framework begins with interpretable regime
 primitives:</p>
-<p><span
-class="math display"><em>p</em><sub><em>q</em></sub>,  <em>m</em><sub><em>q</em></sub>,  <em>u</em><sub><em>q</em></sub>,  <em>Σ</em><sup>(<em>q</em>)</sup>.</span></p>
+<p><span class="math display">\[p_q,\quad m_q,\quad u_q,\quad
+\Sigma^{(q)}.\]</span></p>
 <p>Then it reconstructs:</p>
-<p><span
-class="math display"><em>Σ</em> = ∑<sub><em>q</em></sub><em>p</em><sub><em>q</em></sub><em>u</em><sub><em>q</em></sub><em>u</em><sub><em>q</em></sub><sup>⊤</sup> + ∑<sub><em>q</em></sub><em>p</em><sub><em>q</em></sub><em>Σ</em><sup>(<em>q</em>)</sup>.</span></p>
+<p><span class="math display">\[\Sigma
+=
+\sum_q p_q u_q u_q^\top
++
+\sum_q p_q\Sigma^{(q)}.\]</span></p>
 <p>Therefore the PCA eigensystem is downstream of directional
 structure:</p>
-<p><span
-class="math display">{<em>p</em><sub><em>q</em></sub>, <em>u</em><sub><em>q</em></sub>, <em>Σ</em><sup>(<em>q</em>)</sup>}<sub><em>q</em></sub> → <em>Σ</em> → (<em>λ</em><sub><em>i</em></sub>, <em>v</em><sub><em>i</em></sub>).</span></p>
+<p><span class="math display">\[\{p_q,u_q,\Sigma^{(q)}\}_q
+\longrightarrow
+\Sigma
+\longrightarrow
+(\lambda_i,v_i).\]</span></p>
 <p>The map does not generally reverse:</p>
-<p><span
-class="math display">(<em>λ</em><sub><em>i</em></sub>, <em>v</em><sub><em>i</em></sub>) ↛ {<em>p</em><sub><em>q</em></sub>, <em>u</em><sub><em>q</em></sub>, <em>Σ</em><sup>(<em>q</em>)</sup>}<sub><em>q</em></sub>.</span></p>
+<p><span class="math display">\[(\lambda_i,v_i)
+\not\longrightarrow
+\{p_q,u_q,\Sigma^{(q)}\}_q.\]</span></p>
 <p>PCA discards the regime-indexed origin of covariance.</p>
 <p>NNS preserves it.</p>
 <hr />

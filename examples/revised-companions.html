@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>NNS examples: revised-companions</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="pages.css" />
+  <script defer=""
+  src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"
+  type="text/javascript"></script>
+</head>
+<body>
+<nav class="nns-site-nav">
+  <a href="https://ovvo-financial.github.io/NNS/">NNS home</a>
+  <a href="https://ovvo-financial.github.io/NNS/examples/">Examples</a>
+  <a href="https://ovvo-financial.github.io/NNS/book/">Book</a>
+  <a href="https://github.com/OVVO-Financial/NNS">GitHub</a>
+</nav>
+<header id="title-block-header">
+<h1 class="title">NNS applied examples: revised executable
+companions</h1>
+</header>
+<p>This is revised material accompanying twelve historical PDFs, not
+their original editable source. See <a
+href="example-corrections.html">example corrections</a> for the source
+inventory and withdrawn claims. Each section states its statistical
+target; illustrative outputs are recomputed from the installed NNS
+version.</p>
+<h1 id="conditional-event-probabilities">Conditional event
+probabilities</h1>
+<p>Companion to <em>Bayes' Theorem From Partial Moments</em>.
+Degree-zero co-partial moments count quadrant events. Positive-degree
+moments describe directional magnitude.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="sc">-</span><span class="dv">1</span>, <span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="sc">-</span>x</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>target <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>p_y_above_given_x_below <span class="ot">&lt;-</span> <span class="fu">D.UPM</span>(<span class="dv">0</span>, <span class="dv">0</span>, x, y, target, target) <span class="sc">/</span> <span class="fu">LPM</span>(<span class="dv">0</span>, target, x)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">partial_moment =</span> p_y_above_given_x_below,</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">direct_count =</span> <span class="fu">mean</span>(y[x <span class="sc">&lt;=</span> target] <span class="sc">&gt;</span> target))</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="do">## partial_moment   direct_count </span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="do">##              1              1</span></span></code></pre></div>
+<p>The conditioning event must have positive mass. A ratio of degree-one
+joint and marginal areas is a different directional quantity, not this
+event probability.</p>
+<h1 id="frequency-severity-and-comparison-targets">Frequency, severity,
+and comparison targets</h1>
+<p>Companion to <em>Continuous CDFs and ANOVA with NNS</em>. The
+normalized degree-one curve has its exact mean anchor and defines an
+induced univariate law; it is not the original frequency CDF. Neither
+interval width nor frequency coverage has a universal ordering across
+these targets.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="sc">-</span><span class="dv">100</span>, <span class="dv">10</span>), <span class="fu">rep</span>(<span class="dv">0</span>, <span class="dv">980</span>), <span class="fu">rep</span>(<span class="dv">100</span>, <span class="dv">10</span>))</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>bands <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">frequency_type7 =</span> <span class="fu">c</span>(<span class="fu">LPM.VaR</span>(.<span class="dv">025</span>, <span class="dv">0</span>, x), <span class="fu">UPM.VaR</span>(.<span class="dv">025</span>, <span class="dv">0</span>, x)),</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">directional_area =</span> <span class="fu">c</span>(<span class="fu">LPM.VaR</span>(.<span class="dv">025</span>, <span class="dv">1</span>, x), <span class="fu">UPM.VaR</span>(.<span class="dv">025</span>, <span class="dv">1</span>, x))</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="fu">data.frame</span>(bands, <span class="at">sample_fraction =</span> <span class="fu">apply</span>(bands, <span class="dv">1</span>,</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">function</span>(b) <span class="fu">mean</span>(x <span class="sc">&gt;=</span> b[<span class="dv">1</span>] <span class="sc">&amp;</span> x <span class="sc">&lt;=</span> b[<span class="dv">2</span>])))</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="do">##                      X2.5.   X97.5. sample_fraction</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="do">## frequency_type7    0.00000  0.00000            0.98</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="do">## directional_area -27.53623 27.53623            0.98</span></span></code></pre></div>
+<p>ANOVA mean, median, and distribution-profile modes retain distinct
+targets. Certainty summarizes agreement for the selected target;
+inferential calibration is a separate question.</p>
+<h1 id="directional-dependence-and-null-calibration">Directional
+dependence and null calibration</h1>
+<p>Companion to <em>Nonlinear Correlation and Dependence Using NNS</em>.
+Nonlinear dependence can be strong while linear correlation is zero.
+Finite partition resolution affects the NNS statistic and does not prove
+causal identification.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">2</span>, <span class="dv">2</span>, <span class="at">length.out =</span> <span class="dv">201</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> x<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">Pearson =</span> <span class="fu">cor</span>(x, y), <span class="at">NNS_dependence =</span> <span class="fu">NNS.dep</span>(x, y)<span class="sc">$</span>Dependence)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="do">##        Pearson NNS_dependence </span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="do">##   6.832295e-17   9.649646e-01</span></span></code></pre></div>
+<p>Permutation quantiles are null reference intervals under
+exchangeability, not population-dependence confidence intervals. Serial
+and clustered sampling need an appropriate null and resampling
+design.</p>
+<h2 id="historical-independent-three-variable-example">Historical
+independent three-variable example</h2>
+<p>Page 9 of <em>Nonlinear Correlation and Dependence Using NNS</em>
+prints <code>0.09571785</code> for the following seeded example. That
+historical value is stale; the current implementation returns
+approximately <code>0.19784524</code>. The executable chunk below
+recomputes the result from the installed version rather than carrying
+the PDF's output forward.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">1000</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">1000</span>)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>z <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">1000</span>)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="fu">NNS.copula</span>(<span class="fu">cbind</span>(x, y, z), <span class="at">plot =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 0.1978452</span></span></code></pre></div>
+<p>The three simulated variables are independent by construction. A
+nonzero finite-sample score does not contradict that construction, and
+it is not a p-value. The PDF's population reference of <span
+class="math inline">\(2(1/2)^3=1/4\)</span> concerns the combined
+all-below and all-above <strong>event mass</strong> for independent
+continuous variables at their marginal medians. It is not the expected
+degree-one copula score or a universal independence threshold. Mean
+benchmarks have this median property for the symmetric normal
+populations here, not for every distribution.</p>
+<h1 id="positive-scaling-and-association">Positive scaling and
+association</h1>
+<p>Companion to <em>Normalization</em>. Multiplication by positive
+constants preserves Pearson correlation. Negative factors reverse the
+sign. A change of portfolio weights is a separate operation from
+rescaling data columns.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> x <span class="sc">+</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="sc">-</span><span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="sc">-</span><span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">original =</span> <span class="fu">cor</span>(x, y), <span class="at">positive_scaling =</span> <span class="fu">cor</span>(<span class="dv">3</span><span class="sc">*</span>x, <span class="dv">7</span><span class="sc">*</span>y),</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">one_negative_factor =</span> <span class="fu">cor</span>(<span class="dv">3</span><span class="sc">*</span>x, <span class="sc">-</span><span class="dv">7</span><span class="sc">*</span>y))</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="do">##            original    positive_scaling one_negative_factor </span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="do">##           0.9719076           0.9719076          -0.9719076</span></span></code></pre></div>
+<p>Check NNS normalization factors and their intended target before
+interpreting transformed relationships; positivity of all sample means
+is not automatic.</p>
+<h1 id="severity-shares-and-winner-frequencies">Severity shares and
+winner frequencies</h1>
+<p>Companion to <em>5 way rank probabilities using R</em>. The two
+summaries below answer different questions about the same five-column
+panel.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">17</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>performance <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(<span class="dv">1000</span>), <span class="at">ncol =</span> <span class="dv">5</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>performance[, <span class="dv">5</span>] <span class="ot">&lt;-</span> <span class="dv">3</span> <span class="sc">*</span> performance[, <span class="dv">5</span>]</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>severity <span class="ot">&lt;-</span> <span class="fu">apply</span>(performance, <span class="dv">2</span>, <span class="cf">function</span>(z) <span class="fu">UPM</span>(<span class="dv">1</span>, <span class="dv">0</span>, z))</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>severity_share <span class="ot">&lt;-</span> severity <span class="sc">/</span> <span class="fu">sum</span>(severity)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>winner <span class="ot">&lt;-</span> <span class="fu">max.col</span>(performance, <span class="at">ties.method =</span> <span class="st">&quot;first&quot;</span>)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>win_frequency <span class="ot">&lt;-</span> <span class="fu">tabulate</span>(winner, <span class="at">nbins =</span> <span class="dv">5</span>) <span class="sc">/</span> <span class="fu">nrow</span>(performance)</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="fu">data.frame</span>(severity_share, win_frequency)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="do">##   severity_share win_frequency</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="do">## 1      0.1429036         0.130</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="do">## 2      0.1421865         0.170</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="do">## 3      0.1472827         0.140</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="do">## 4      0.1419384         0.155</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="do">## 5      0.4256888         0.405</span></span></code></pre></div>
+<p>Winner frequencies require jointly observed or jointly generated
+races and an explicit tie policy. Sampling class labels with
+<code>prob = severity_share</code> confirms only that sampler's input
+weights.</p>
+<h1 id="a-correctly-centered-regression-target">A correctly centered
+regression target</h1>
+<p>Companion to <em>Partitional Estimation Using Partial Moments</em>. A
+mean-zero noise term makes the known nonlinear function the conditional
+mean. All comparisons use the same held-out rows and loss.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">18</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">240</span>, <span class="sc">-</span><span class="dv">2</span>, <span class="dv">2</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> <span class="cf">function</span>(z) <span class="fu">sin</span>(pi<span class="sc">*</span>z)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">f</span>(x) <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">240</span>, <span class="at">sd =</span> .<span class="dv">1</span>) <span class="sc">+</span> .<span class="dv">2</span> <span class="sc">*</span> (<span class="fu">runif</span>(<span class="dv">240</span>) <span class="sc">-</span> .<span class="dv">5</span>)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>train <span class="ot">&lt;-</span> <span class="fu">seq_len</span>(<span class="dv">180</span>)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">NNS.reg</span>(x[train], y[train], <span class="at">point.est =</span> x[<span class="sc">-</span>train], <span class="at">ncores =</span> <span class="dv">1</span>)</span></code></pre></div>
+<p><img
+src="revised-companions_files/figure-html/regression-target-1.png"
+alt="plot of chunk regression-target" /></p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">test_RMSE =</span> <span class="fu">sqrt</span>(<span class="fu">mean</span>((fit<span class="sc">$</span>Point.est<span class="sc">-</span>y[<span class="sc">-</span>train])<span class="sc">^</span><span class="dv">2</span>)),</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">conditional_mean_RMSE =</span> <span class="fu">sqrt</span>(<span class="fu">mean</span>((fit<span class="sc">$</span>Point.est<span class="sc">-</span><span class="fu">f</span>(x[<span class="sc">-</span>train]))<span class="sc">^</span><span class="dv">2</span>)))</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="do">##             test_RMSE conditional_mean_RMSE </span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="do">##            0.14615104            0.07580776</span></span></code></pre></div>
+<p>Using uncentered <code>rnorm(n) + runif(n)</code> changes the
+conditional mean to <code>f(x)+0.5</code>. Out-of-bag error, training
+error, and test error should be labelled separately.</p>
+<h1 id="held-out-classification">Held-out classification</h1>
+<p>Companion to <em>Machine Learning</em>. The split includes every iris
+class. Class codes have no numeric distance or order; decode them using
+the returned class mapping.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">19</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>test <span class="ot">&lt;-</span> <span class="fu">sort</span>(<span class="fu">unlist</span>(<span class="fu">lapply</span>(<span class="fu">split</span>(<span class="fu">seq_len</span>(<span class="fu">nrow</span>(iris)), iris<span class="sc">$</span>Species),</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>                          <span class="cf">function</span>(rows) <span class="fu">sample</span>(rows, <span class="dv">5</span>))))</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">NNS.reg</span>(iris[<span class="sc">-</span>test, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], iris[<span class="sc">-</span>test, <span class="dv">5</span>],</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>               <span class="at">point.est =</span> iris[test, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>], <span class="at">ncores =</span> <span class="dv">1</span>)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(<span class="fu">as.numeric</span>(fit<span class="sc">$</span>Point.est) <span class="sc">==</span> <span class="fu">as.numeric</span>(iris[test, <span class="dv">5</span>]))</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 0.9333333</span></span></code></pre></div>
+<p>This is one demonstration, not evidence for a general error reduction
+or an escape from sample-size requirements in high dimensions.</p>
+<h1 id="a-reproducible-mnist-comparison-contract">A reproducible MNIST
+comparison contract</h1>
+<p>Companion to <em>NNS vs KNN MNIST dataset</em>. A publishable
+comparison must retain the exact data version and training/test split,
+shared image preprocessing, tuning folds chosen only within training,
+kNN distance and k choices, NNS options, seeds, fitted predictions,
+elapsed time, and error denominators. Report both methods' code and
+repeated-run uncertainty. The historical single NNS accuracy and
+unsupported 75% comparison are not repeated here as validated
+results.</p>
+<p>MNIST data and a complete matched kNN run are not bundled in this
+companion; this section provides the required reproducibility contract,
+not fabricated replacement accuracy numbers.</p>
+<h1 id="geometric-matching">Geometric matching</h1>
+<p>Companion to <em>Spiral Matching Example</em>. The same curve can
+have a many-to-one projection on either coordinate. Plotting the
+geometry helps explain why linear correlation alone does not describe
+the relationship.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>t <span class="ot">&lt;-</span> <span class="fu">seq</span>(.<span class="dv">2</span>, <span class="dv">4</span><span class="sc">*</span>pi, <span class="at">length.out =</span> <span class="dv">300</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> t<span class="sc">*</span><span class="fu">cos</span>(t)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> t<span class="sc">*</span><span class="fu">sin</span>(t)</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(x, y, <span class="at">type =</span> <span class="st">&quot;l&quot;</span>, <span class="at">asp =</span> <span class="dv">1</span>, <span class="at">xlab =</span> <span class="st">&quot;x&quot;</span>, <span class="at">ylab =</span> <span class="st">&quot;y&quot;</span>)</span></code></pre></div>
+<p><img src="revised-companions_files/figure-html/spiral-1.png"
+alt="plot of chunk spiral" /></p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">Pearson =</span> <span class="fu">cor</span>(x, y), <span class="at">NNS_dependence =</span> <span class="fu">NNS.dep</span>(x, y)<span class="sc">$</span>Dependence)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="do">##        Pearson NNS_dependence </span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="do">##     -0.1203425      0.6801170</span></span></code></pre></div>
+<p>Matching, association, and forecasting are separate tasks. Any
+claimed matching accuracy requires an explicit labelled correspondence
+and held-out evaluation.</p>
+<h1 id="residualization-and-conditional-targets">Residualization and
+conditional targets</h1>
+<p>Companion to <em>Nonlinear FWL</em>. The ordinary Frisch-Waugh-Lovell
+identity is an exact linear projection identity. General nonlinear
+residualization need not recover the same multivariate target without
+additional structure or orthogonal-score conditions. Retain the NNS
+conditional surface and state which contrast is being estimated instead
+of claiming an unrestricted nonlinear identity.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>z <span class="ot">&lt;-</span> mtcars[<span class="fu">c</span>(<span class="st">&quot;wt&quot;</span>, <span class="st">&quot;hp&quot;</span>, <span class="st">&quot;disp&quot;</span>)]</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> mtcars<span class="sc">$</span>mpg</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> mtcars<span class="sc">$</span>am</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>ry <span class="ot">&lt;-</span> <span class="fu">resid</span>(<span class="fu">lm</span>(y <span class="sc">~</span> ., <span class="at">data =</span> z))</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>rx <span class="ot">&lt;-</span> <span class="fu">resid</span>(<span class="fu">lm</span>(x <span class="sc">~</span> ., <span class="at">data =</span> z))</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">full_linear_coefficient =</span> <span class="fu">unname</span>(<span class="fu">coef</span>(<span class="fu">lm</span>(mpg <span class="sc">~</span> am <span class="sc">+</span> wt <span class="sc">+</span> hp <span class="sc">+</span> disp,</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>                                          <span class="at">data =</span> mtcars))[<span class="st">&quot;am&quot;</span>]),</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">residual_projection =</span> <span class="fu">sum</span>(rx<span class="sc">*</span>ry)<span class="sc">/</span><span class="fu">sum</span>(rx<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="do">## full_linear_coefficient     residual_projection </span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a><span class="do">##                2.159271                2.159271</span></span></code></pre></div>
+<h1 id="predictive-contrasts-and-identification">Predictive contrasts
+and identification</h1>
+<p>Companion to <em>Causal Inference with NNS stack</em>. NNS can
+estimate nonlinear conditional associations and heterogeneous fitted
+contrasts. A causal effect additionally requires an identification
+design, adequate overlap, and relevant confounding assumptions. Fitting
+both treatment settings does not establish those assumptions. See the <a
+href="Multivariate%20NNS%20Inference.html">multivariate workflow</a> for
+pairs resampling that refits the model rather than resampling fixed
+effects.</p>
+<h1 id="training-validation-and-test-chronology">Training, validation,
+and test chronology</h1>
+<p>Companion to <em>NNS ARMA</em>. All tuning must precede the final
+test outcomes.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>training <span class="ot">&lt;-</span> <span class="fu">head</span>(AirPassengers, <span class="dv">100</span>)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>predicted <span class="ot">&lt;-</span> <span class="fu">NNS.ARMA</span>(training, <span class="at">h =</span> <span class="dv">44</span>, <span class="at">seasonal.factor =</span> <span class="dv">12</span>,</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>                      <span class="at">method =</span> <span class="st">&quot;lin&quot;</span>, <span class="at">plot =</span> <span class="cn">FALSE</span>, <span class="at">seasonal.plot =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="fu">sqrt</span>(<span class="fu">mean</span>((predicted <span class="sc">-</span> <span class="fu">tail</span>(AirPassengers, <span class="dv">44</span>))<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 35.39965</span></span></code></pre></div>
+<p>Monthly frequency is specified here in advance. Vignette09
+demonstrates an internal validation split for choosing periods. The
+optimizer's internal validation score and a later held-out forecast
+score must be labelled separately. Forecast-path dispersion or
+residual-quantile bands need their own coverage assessment; a requested
+nominal level alone is not a future guarantee.</p>
+<h1 id="build-provenance">Build provenance</h1>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">packageVersion</span>(<span class="st">&quot;NNS&quot;</span>)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] &#39;13.3&#39;</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="do">## R version 4.6.2 (2026-10-29)</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="do">## Platform: x86_64-pc-linux-gnu</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="do">## Running under: Ubuntu 24.04.5 LTS</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="do">## Matrix products: default</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="do">## BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3 </span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="do">## LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.26.so;  LAPACK version 3.12.0</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="do">## locale:</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="do">##  [1] LC_CTYPE=C.UTF-8       LC_NUMERIC=C           LC_TIME=C.UTF-8       </span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a><span class="do">##  [4] LC_COLLATE=C.UTF-8     LC_MONETARY=C.UTF-8    LC_MESSAGES=C.UTF-8   </span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a><span class="do">##  [7] LC_PAPER=C.UTF-8       LC_NAME=C              LC_ADDRESS=C          </span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a><span class="do">## [10] LC_TELEPHONE=C         LC_MEASUREMENT=C.UTF-8 LC_IDENTIFICATION=C   </span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a><span class="do">## time zone: UTC</span></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a><span class="do">## tzcode source: system (glibc)</span></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a><span class="do">## attached base packages:</span></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] stats     graphics  grDevices utils     datasets  methods   base     </span></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a><span class="do">## other attached packages:</span></span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] NNS_13.3</span></span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a><span class="do">## loaded via a namespace (and not attached):</span></span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a><span class="do">##  [1] compiler_4.6.2     fastmap_1.2.0      cli_3.6.6          tools_4.6.2       </span></span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a><span class="do">##  [5] htmltools_0.5.9    otel_0.2.0         Rcpp_1.1.2         rmarkdown_2.32    </span></span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a><span class="do">##  [9] knitr_1.52         xfun_0.62          digest_0.6.39      RcppParallel_6.2.1</span></span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a><span class="do">## [13] rlang_1.3.0        evaluate_1.0.5</span></span></code></pre></div>
+</body>
+</html>

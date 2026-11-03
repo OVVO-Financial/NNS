@@ -27,8 +27,10 @@ NNS.SD.cluster(
 
 - type:
 
-  Character, either `"discrete"` (default) or `"continuous"`; specifies
-  the type of CDF.
+  At degree 1, `"discrete"` (default) uses empirical FSD and
+  `"continuous"` uses the degree-one area-ratio (Omega/expectile)
+  ordering. The latter does not imply ordinary FSD. SSD and TSD are
+  unaffected by `type`.
 
 - min_cluster:
 

@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>NNS examples: example-corrections</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="pages.css" />
+</head>
+<body>
+<nav class="nns-site-nav">
+  <a href="https://ovvo-financial.github.io/NNS/">NNS home</a>
+  <a href="https://ovvo-financial.github.io/NNS/examples/">Examples</a>
+  <a href="https://ovvo-financial.github.io/NNS/book/">Book</a>
+  <a href="https://github.com/OVVO-Financial/NNS">GitHub</a>
+</nav>
+<h1 id="example-corrections-and-reproducibility">Example corrections and
+reproducibility</h1>
+<p>These corrections accompany the November 2026 implementation and book
+review. The numbered R vignettes remain the canonical curriculum.
+Positive-degree partial moments retain their directional severity
+meaning; event probabilities, uncertainty, and predictive performance
+require their corresponding definitions and evidence.</p>
+<h2 id="corrections-to-applied-examples">Corrections to applied
+examples</h2>
+<table>
+<thead>
+<tr>
+<th>Topic</th>
+<th>Correct interpretation or revised procedure</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Multivariate fitted contrasts</td>
+<td>Describe conditional associations and heterogeneity. Resample
+sampling units and refit the model to include fitting uncertainty; do
+not compare a fixed-fit contrast bootstrap to an OLS coefficient
+interval as if they had the same target. The editable <a
+href="Multivariate%20NNS%20Inference.html">workflow</a> now refits.</td>
+</tr>
+<tr>
+<td>Time-series interval comparison</td>
+<td>Tune on past data and score an explicit future horizon. Match
+forecast origins and available lags. The invalid historical ranking is
+withdrawn; the <a
+href="nns_arma_conformal_benchmark_report.html">corrected report</a>
+links executable source. Three interval summary points do not identify a
+native predictive density.</td>
+</tr>
+<tr>
+<td>MNIST and machine-learning claims</td>
+<td>The supplied PDF's NNS score is one reported run; it does not
+include a matched kNN fit establishing a 75% error reduction. Those
+comparative and general dimensionality claims are withdrawn pending
+common splits, preprocessing, tuning, metrics, and repeated runs.</td>
+</tr>
+<tr>
+<td>Five-way ranking</td>
+<td>Normalized degree-one UPMs are shares of above-target deviation
+severity. They are not probabilities of winning a race. Sampling winners
+using those same shares merely reproduces the supplied weights; it does
+not validate their event-frequency interpretation.</td>
+</tr>
+<tr>
+<td>Partitional estimation</td>
+<td>For <code>rnorm(n) + runif(n)</code>, mean noise is 0.5. The
+conditional mean is <code>f(x) + 0.5</code>, or use
+<code>runif(n) - 0.5</code> to target <code>f(x)</code>. Compare all
+fitted methods on a common held-out set; random-forest OOB error and NNS
+training error are different assessments.</td>
+</tr>
+<tr>
+<td>Dependence permutation output</td>
+<td>Shuffled-statistic quantiles are a null reference distribution under
+exchangeability, not a confidence interval for population dependence.
+Specify dependence-preserving resampling for serial or clustered
+data.</td>
+</tr>
+<tr>
+<td>Independent 3-D copula output</td>
+<td>Page 9 of
+<code>Nonlinear_Correlation_and_Dependence_Using_NNS.pdf</code> prints
+<code>0.09571785</code> for
+<code>set.seed(123); x &lt;- rnorm(1000); y &lt;- rnorm(1000); z &lt;- rnorm(1000); NNS.copula(cbind(x,y,z))</code>.
+The reviewed implementation returns <code>0.197845241162</code>; the
+revised companion recomputes it. This descriptive finite-sample score is
+not a p-value or an independence threshold. The population event mass
+<code>2 * (1/2)^3</code> at independent marginal medians is a different
+quantity.</td>
+</tr>
+<tr>
+<td>Copula sampling</td>
+<td>Degree-zero marginal transforms or an explicitly randomized
+probability transform at atoms target frequency. Positive-degree
+inverses change the marginal law; their directional geometry does not
+imply preservation of the original marginal distribution.</td>
+</tr>
+<tr>
+<td>Iris classification</td>
+<td>Rows 141:150 are all virginica. Vignette08 now uses a seeded
+stratified split, removes historical perfect-accuracy output, and makes
+class decoding explicit.</td>
+</tr>
+<tr>
+<td>Derivative summaries</td>
+<td>Quantiles across fitted derivatives describe heterogeneity over
+evaluation locations. Sampling uncertainty requires resampling and
+refitting with a design appropriate to the observations. Smoothness and
+admissible local steps still matter.</td>
+</tr>
+<tr>
+<td>Normalization</td>
+<td>Positive constant multiplication of columns preserves Pearson
+correlation; a negative multiplier reverses its sign. Changing portfolio
+weights is a separate operation. Check scaling-factor signs before
+interpreting transformed associations.</td>
+</tr>
+<tr>
+<td>Forecast period selection</td>
+<td>Periods selected using a test window make that window validation.
+Vignette09 now selects periods within the training prefix, reserves the
+final observations for testing, and computes current outputs rather than
+printing stale values.</td>
+</tr>
+<tr>
+<td>Noisy differentiation</td>
+<td>Adding frozen real noise to a complex-valued evaluation leaves the
+imaginary part unchanged. Tiny complex-step error in that construction
+is not evidence of generic noise robustness. A reproducible noise
+generator, complex-input contract, and repeated evaluation protocol are
+required.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="historical-html-output-regeneration">Historical HTML output
+regeneration</h2>
+<p>Issue #72 remains open for the six archived HTML pages below. The
+documentation workflow copies their existing content and adds a visible
+historical-output notice to the <strong>staged copies</strong>; it does
+not rerun their analyses. The original HTML files remain unchanged.
+Neither a successful site build nor the revised PDF companions should be
+read as regeneration of these outputs.</p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><a
+href="Causal_Inference_Amongst_Macroeconomic_Variables_Using_NNS.html">Macroeconomic
+causal analysis</a>: regenerate the <code>NNS.VAR</code> output with the
+current validation policy and state the directional-association
+target.</label></li>
+<li><label><input type="checkbox" /><a
+href="NNSvignette_Overview.html">Archived overview</a>: replace affected
+<code>NNS.VAR</code>, <code>NNS.ARMA</code>, <code>NNS.CDF</code>,
+derivative, seasonality, and copula output with current executable
+examples, or retire the duplicates in favor of the canonical numbered
+vignettes.</label></li>
+<li><label><input type="checkbox" /><a
+href="Sunspots_example.html">Sunspots</a>: regenerate seasonal selection
+and forecasting output with periods chosen before the evaluation
+horizon.</label></li>
+<li><label><input type="checkbox" /><a href="VAR_example.html">VAR
+example</a>: regenerate the full multivariate forecast pipeline and
+label internal-validation versus later-test scores.</label></li>
+<li><label><input type="checkbox" /><a
+href="prophet_NNS_comparison.html">Prophet comparison</a>: rerun both
+methods with the same data, forecast origins, horizon, and tuning budget
+before reporting comparative scores.</label></li>
+<li><label><input type="checkbox" /><a href="tides.html">Tides</a>:
+regenerate seasonality and forecasting output with its data version and
+temporal validation split recorded.</label></li>
+</ul>
+<p>For each page, add editable source, data provenance, package
+versions, and a repeatable build command. Retain only the current
+results or explicitly withdraw unsupported historical comparisons. The
+exact book text corrections, the independent three-variable copula
+erratum, and current executable vignette sources are addressed
+separately; they do not close this remaining checklist.</p>
+<h2 id="published-pdf-source-status">Published PDF source status</h2>
+<p>The twelve published PDFs are retained as historical documents.
+Matching original editable sources were not present in the audited
+repository. The new <a
+href="revised-companions.Rmd">revised-companions.Rmd</a> is an
+explicitly revised, executable companion, <strong>not a reconstruction
+of the original authors' source</strong>. It provides corrected
+demonstrations and clear limits for each PDF below.</p>
+<table>
+<thead>
+<tr>
+<th>Historical PDF</th>
+<th>Revised companion section</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Bayes' Theorem From Partial Moments.pdf</code></td>
+<td>Conditional event probabilities</td>
+</tr>
+<tr>
+<td><code>Continuous_CDFs_and_ANOVA_with_NNS.pdf</code></td>
+<td>Frequency, severity, and comparison targets</td>
+</tr>
+<tr>
+<td><code>Nonlinear_Correlation_and_Dependence_Using_NNS.pdf</code></td>
+<td>Directional dependence and null calibration</td>
+</tr>
+<tr>
+<td><code>Normalization.pdf</code></td>
+<td>Positive scaling and association</td>
+</tr>
+<tr>
+<td><code>5_way_rank_probabilities_using_R.pdf</code></td>
+<td>Severity shares and winner frequencies</td>
+</tr>
+<tr>
+<td><code>Partitional_Estimation_Using_Partial_Moments.pdf</code></td>
+<td>A correctly centered regression target</td>
+</tr>
+<tr>
+<td><code>Machine_Learning.pdf</code></td>
+<td>Held-out classification</td>
+</tr>
+<tr>
+<td><code>NNS vs KNN MNIST dataset.pdf</code></td>
+<td>A reproducible MNIST comparison contract</td>
+</tr>
+<tr>
+<td><code>Spiral Matching Example.pdf</code></td>
+<td>Geometric matching</td>
+</tr>
+<tr>
+<td><code>Nonlinear_FWL.pdf</code></td>
+<td>Residualization and conditional targets</td>
+</tr>
+<tr>
+<td><code>Causal_Inference_with_NNS_stack.pdf</code></td>
+<td>Predictive contrasts and identification</td>
+</tr>
+<tr>
+<td><code>NNS ARMA.pdf</code></td>
+<td>Training, validation, and test chronology</td>
+</tr>
+</tbody>
+</table>
+<p>The <a
+href="https://ovvo-financial.github.io/NNS/examples/revised-companions.html">rendered
+companion</a> is rebuilt by the documentation workflow. Build it locally
+with:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">Rscript</span> examples/build-revised-companions.R</span></code></pre></div>
+<p>The build records <code>sessionInfo()</code> and the NNS version.
+Original source recovery remains a provenance task: when those sources
+are available, add them with their assets and build instructions rather
+than representing revised material as an exact source restoration.
+Historical numerical tables are not carried forward as current
+validation results.</p>
+</body>
+</html>

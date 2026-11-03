@@ -23,7 +23,6 @@
       margin: 0 0.8em 0.2em -1.6em;
       vertical-align: middle;
     }
-    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
     /* CSS for syntax highlighting */
     html { -webkit-text-size-adjust: 100%; }
     pre > code.sourceCode { white-space: pre; position: relative; }
@@ -91,6 +90,9 @@
     code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
   </style>
   <link rel="stylesheet" href="pages.css" />
+  <script defer=""
+  src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"
+  type="text/javascript"></script>
 </head>
 <body>
 <nav class="nns-site-nav">
@@ -203,11 +205,11 @@ distributions as well as recognizing multiple modes.</p>
 <span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] -0.04372107</span></span></code></pre></div>
 <h3 id="covariance-elements-and-covariance-matrix">Covariance Elements
 and Covariance Matrix</h3>
-<p>The covariance matrix <span class="math inline">(<em>Σ</em>)</span>
+<p>The covariance matrix <span class="math inline">\((\Sigma)\)</span>
 is equal to the sum of the co-partial moments matrices less the
 divergent partial moments matrices.</p>
-<p><span
-class="math display"><em>Σ</em> = <em>C</em><em>L</em><em>P</em><em>M</em> + <em>C</em><em>U</em><em>P</em><em>M</em> − <em>D</em><em>L</em><em>P</em><em>M</em> − <em>D</em><em>U</em><em>P</em><em>M</em></span></p>
+<p><span class="math display">\[\Sigma = CLPM + CUPM - DLPM -
+DUPM\]</span></p>
 <div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>cov.mtx <span class="ot">&lt;-</span> <span class="fu">PM.matrix</span>(</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">LPM_degree =</span> <span class="dv">1</span>,</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">UPM_degree =</span> <span class="dv">1</span>,</span>
@@ -332,32 +334,33 @@ Continuous)</h3>
 <p>Partial moments are asymptotic area approximations of
 <code>f(x)</code> akin to the familiar Trapezoidal and Simpson's rules.
 More observations, more accuracy.</p>
-<p><span class="math display">$$[UPM(1,0,f(x)) - LPM(1,0,f(x))] \asymp
-\frac{F(b)-F(a)}{b-a}$$</span> <span
-class="math display">[<em>U</em><em>P</em><em>M</em>(1, 0, <em>f</em>(<em>x</em>)) − <em>L</em><em>P</em><em>M</em>(1, 0, <em>f</em>(<em>x</em>))] ⋅ (<em>b</em> − <em>a</em>) ≍ <em>F</em>(<em>b</em>) − <em>F</em>(<em>a</em>)</span></p>
+<p><span class="math display">\[[UPM(1,0,f(x)) - LPM(1,0,f(x))] \asymp
+\frac{F(b)-F(a)}{b-a}\]</span> <span
+class="math display">\[[UPM(1,0,f(x)) - LPM(1,0,f(x))] \cdot (b-a)
+\asymp F(b)-F(a)\]</span></p>
 <div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, .<span class="dv">001</span>)</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> x <span class="sc">^</span> <span class="dv">2</span></span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>(<span class="fu">UPM</span>(<span class="dv">1</span>, <span class="dv">0</span>, y) <span class="sc">-</span> <span class="fu">LPM</span>(<span class="dv">1</span>, <span class="dv">0</span>, y)) <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="dv">0</span>)</span>
 <span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] 0.3335</span></span></code></pre></div>
-<p><span
-class="math display">0.3333 ⋅ [1 − 0] = ∫<sub>0</sub><sup>1</sup><em>x</em><sup>2</sup> <em>d</em><em>x</em></span></p>
+<p><span class="math display">\[0.3333 \cdot [1-0] = \int_{0}^{1} x^2 \,
+dx\]</span></p>
 <p>For the total area, not just the definite integral, sum the partial
-moments and multiply by <span
-class="math inline">(<em>b</em> − <em>a</em>)</span>:</p>
-<p><span
-class="math display">[<em>U</em><em>P</em><em>M</em>(1, 0, <em>f</em>(<em>x</em>)) + <em>L</em><em>P</em><em>M</em>(1, 0, <em>f</em>(<em>x</em>))] ⋅ (<em>b</em> − <em>a</em>) ≍ |∫<sub><em>a</em></sub><sup><em>b</em></sup><em>f</em>(<em>x</em>)<em>d</em><em>x</em>|</span></p>
+moments and multiply by <span class="math inline">\((b -
+a)\)</span>:</p>
+<p><span class="math display">\[[UPM(1,0,f(x)) + LPM(1,0,f(x))] \cdot
+(b-a) \asymp \left|\int_a^b f(x)dx\right|\]</span></p>
 <h3 id="bayes-theorem">Bayes' Theorem</h3>
 <p>For example, when ascertaining the probability of an increase in
-<span class="math inline"><em>A</em></span> given an increase in <span
-class="math inline"><em>B</em></span>, the
+<span class="math inline">\(A\)</span> given an increase in <span
+class="math inline">\(B\)</span>, the
 <code>Co.UPM(degree_upm, x, y, target_x, target_y)</code> target
 parameters are set to <code>target_x = 0</code> and
 <code>target_y = 0</code> and the
 <code>UPM(degree, target, variable)</code> target parameter is also set
 to <code>target = 0</code>.</p>
 <p><span
-class="math display">$$P(A|B)=\frac{Co.UPM(0,A,B,0,0)}{UPM(0,0,B)}$$</span></p>
+class="math display">\[P(A|B)=\frac{Co.UPM(0,A,B,0,0)}{UPM(0,0,B)}\]</span></p>
 <h3 id="references">References</h3>
 <ul>
 <li><a href="https://doi.org/10.2139/ssrn.6249658">Partial Moments as a

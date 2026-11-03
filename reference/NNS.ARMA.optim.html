@@ -60,7 +60,8 @@
 <span>  ncores <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  pred.int <span class="op">=</span> <span class="fl">0.95</span>,</span>
 <span>  print.trace <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  plot <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  plot <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  bias.correction <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"none"</span>, <span class="st">"split"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -121,16 +122,23 @@ The default is the mean squared error divided by the degree-1 co-movement of <co
 <dt id="arg-plot">plot<a class="anchor" aria-label="anchor" href="#arg-plot"></a></dt>
 <dd><p>logical; <code>FALSE</code> (default)</p></dd>
 
+
+<dt id="arg-bias-correction">bias.correction<a class="anchor" aria-label="anchor" href="#arg-bias-correction"></a></dt>
+<dd><p><code>"none"</code> (default) returns the selected model's forecasts without an additive shift. <code>"split"</code> estimates a gravity bias from the first half of the validation errors and accepts it only if the objective improves on the later half; at least four validation observations are required. On rolling-origin forecasts of nine series (AirPassengers, UKgas, LakeHuron, a random walk, sunspot.month, nottem, USAccDeaths, co2 and Nile; six expanding origins, h = 12), the uncorrected forecasts had the lower mean MASE on eight of the nine series, both against <code>"split"</code> and against estimating and accepting the shift on the same window, a rule that is no longer offered. Model selection still uses the validation window, so these diagnostics are not independent out-of-sample performance estimates.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>Returns a list containing:</p><ul><li><p><code>$period</code> a vector of optimal seasonal periods</p></li>
 <li><p><code>$weights</code> the optimal weights of each seasonal period between an equal weight or NULL weighting</p></li>
-<li><p><code>$obj.fn</code> the objective function value</p></li>
+<li><p><code>$obj.fn</code> the <code>obj.fn</code> value of the returned model's internal validation forecasts, after <code>$bias.shift</code>.</p></li>
 <li><p><code>$method</code> the method identifying which <a href="NNS.ARMA.html">NNS.ARMA</a> method was used.</p></li>
 <li><p><code>$shrink</code> whether to use the <code>shrink</code> parameter in <a href="NNS.ARMA.html">NNS.ARMA</a>.</p></li>
 <li><p><code>$nns.regress</code> whether to smooth the variable via <a href="NNS.reg.html">NNS.reg</a> before forecasting.</p></li>
-<li><p><code>$bias.shift</code> a numerical result of the overall bias of the returned model on the internal validation window, 0 when correcting it does not improve the objective function.  To be added to the final result when using the <a href="NNS.ARMA.html">NNS.ARMA</a> with the derived parameters.</p></li>
+<li><p><code>$bias.shift</code> the accepted additive correction (0 when rejected or disabled). Add it to the forecast from <a href="NNS.ARMA.html">NNS.ARMA</a> with the returned model parameters, then apply the nonnegative support clamp if required.</p></li>
+<li><p><code>$bias.validation</code> correction policy, estimated/applied shifts, chronological estimate and acceptance rows, and raw/adjusted acceptance scores.</p></li>
+<li><p><code>$raw.results</code> forecasts before the additive bias correction.</p></li>
+<li><p><code>$validation.forecast</code> the final internal validation forecasts, including correction and support clamp.</p></li>
 <li><p><code>$errors</code> a vector of the returned model's internal validation errors (forecast - actual), before <code>$bias.shift</code>.</p></li>
 <li><p><code>$results</code> a vector of length <code>h</code>.</p></li>
 <li><p><code>$lower.pred.int</code> a vector of lower prediction intervals per forecast point.</p></li>
@@ -138,7 +146,7 @@ The default is the mean squared error divided by the degree-1 co-movement of <co
 </ul></div>
     <div class="section level2">
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
-
+    <p>By default no bias shift is added. With <code>bias.correction = "split"</code> the shift is estimated on the first half of the validation window and accepted on the second. Base model selection still uses the internal validation window, so these tuning scores are not an independent evaluation of the whole forecasting procedure. Evaluate the complete procedure at fresh chronological origins.</p>
 <ul><li><p>Typically, <code>(training.set = 0.8 * length(variable))</code> is used for optimization.  Smaller samples could use <code>(training.set = 0.9 * length(variable))</code> (or larger) in order to preserve information.</p></li>
 <li><p>The number of combinations will grow prohibitively large, they should be kept as small as possible.  <code>seasonal.factor</code> containing an element too large will result in an error.  Please reduce the maximum <code>seasonal.factor</code>.</p></li>
 <li><p>Set <code>(ncores = 1)</code> if routine is used within a parallel architecture.</p></li>

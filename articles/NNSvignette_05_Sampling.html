@@ -132,19 +132,22 @@ we can plot both methods visualizing their identical results.
 <h4 id="lpm-ratio-degree-0">
 <strong><code>LPM.ratio</code></strong> degree &gt; 0<a class="anchor" aria-label="anchor" href="#lpm-ratio-degree-0"></a>
 </h4>
-<p>By simply increasing the <code>degree</code> parameter to any
-positive real number, we can generate different CDFs of our initial
-distribution
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math>.</p>
+<p>Increasing <code>degree</code> changes the target from event
+frequency to a directional severity share. In the univariate case with
+the required finite moment and nondegeneracy, this defines an induced
+CDF whose law generally differs from the original empirical law. It is
+not a smoothing operation that automatically preserves original
+probabilities.</p>
 <p><img src="images/CDFs_1.png"></p>
 </div>
 <div class="section level4">
 <h4 id="generating-pdfs-with-lpm-var">Generating PDFs with (<strong><code>LPM.VaR</code></strong>)<a class="anchor" aria-label="anchor" href="#generating-pdfs-with-lpm-var"></a>
 </h4>
-<p>We can now generate distributions using the same insights and
-<code>degree</code> manipulation in the corresponding
-<strong><code>LPM.VaR</code></strong> function, a la value-at-risk,
-providing inverse CDF estimates.</p>
+<p>The corresponding <strong><code>LPM.VaR</code></strong> inverts the
+selected directional curve. Degree zero uses R type-7 empirical
+quantiles; degree one gives expectiles. Drawing uniforms and applying a
+positive-degree inverse samples the induced law, not the original
+marginal law.</p>
 <p>The general form in the following plots is:</p>
 <p><strong><code>LPM.VaR(percentile = seq(0, 1, length.out = 100), degree = 0, x = x)</code></strong></p>
 <p>Any length <code>percentile</code> can be used to sample from the
@@ -198,12 +201,17 @@ compared to our original
 <h3 id="bootstrapping-nns-meboot">Bootstrapping (<strong><code>NNS.meboot</code></strong>)<a class="anchor" aria-label="anchor" href="#bootstrapping-nns-meboot"></a>
 </h3>
 <p><strong><code>NNS.meboot</code></strong> is based on the maximum
-entropy bootstrap, available in the R-package <code>meboot</code>. This
-procedure is specifically designed for time-series and avoids the IID
-assumption in traditional methods.</p>
-<p>The ability to sample from specified correlations ensures the full
-spectrum of future paths is sampled from. Typical Monte Carlo samples
-are restricted to [-0.3, 0.3] correlations to the original data.</p>
+entropy bootstrap, available in the R-package <code>meboot</code>. Its
+rank-based scenario construction is useful for time-series exploration.
+The default <code>force.clt</code> constrains replicate means using an
+iid standard-error scale, so preserving rank structure does not by
+itself provide calibrated sampling uncertainty for serial
+dependence.</p>
+<p>Specified rank-correlation targets explore a chosen range of scenario
+shapes. They do not enumerate every possible future path. A zero
+rank-correlation target does not imply independence, and achieved
+marginal distributions and moments must be checked for the chosen
+settings.</p>
 <p>We will generate 1 replicate of
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>X</mi><annotation encoding="application/x-tex">X</annotation></semantics></math>
 for each value of a sequence of
@@ -288,77 +296,38 @@ on the <code>replicates</code>, not the <code>ensemble</code>.</p>
 <div class="section level3">
 <h3 id="simulating-a-multivariate-dependence-structure">Simulating a Multivariate Dependence Structure<a class="anchor" aria-label="anchor" href="#simulating-a-multivariate-dependence-structure"></a>
 </h3>
-<p>Analogous to an empirical copula transformation, we can generate
-<code>new data</code> from the dependence structure of our
-<code>original data</code> via the following steps:</p>
-<ul>
-<li><strong>Determine the dependence structure:</strong></li>
-</ul>
-<p>This is accomplished using
-<strong><code>LPM.ratio(1, x, x)</code></strong> for continuous
-variables, and <strong><code>LPM.ratio(0, x, x)</code></strong> for
-discrete variables, which are the empirical CDFs of the marginal
-variables.</p>
-<ul>
-<li><strong>Generate or supply <code>new data</code>:</strong></li>
-</ul>
-<p><code>new data</code> does not have to be of the same distribution or
-dimension as the <code>original data</code>, nor does each dimension of
-<code>new data</code> have to share a distribution type.</p>
-<ul>
-<li><strong>Apply dependence structure to
-<code>new data</code>:</strong></li>
-</ul>
-<p>We then utilize <strong><code>LPM.VaR</code></strong> to ascertain
-<code>new data</code> values corresponding to <code>original data</code>
-position mappings, and return a matrix of these transformed values with
-the same dimensions as <code>new.data</code>.</p>
+<p>A marginal rank transformation can transfer the empirical rank
+arrangement of continuous observations to chosen new marginal
+distributions. It does not identify a unique copula when marginals have
+atoms, and a positive-degree partial-moment transform generally changes
+the original marginal probability law.</p>
+<p>Use degree-zero probabilities for this frequency construction. For
+these continuous samples, subtracting half an observation from the
+empirical CDF ranks keeps probability levels away from zero and one.
+Inverting with degree-zero <code>LPM.VaR</code> applies the target
+empirical quantile function (type7 interpolation).</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
-<span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">1000</span><span class="op">)</span>; <span class="va">y</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">1000</span><span class="op">)</span>; <span class="va">z</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">1000</span><span class="op">)</span></span>
+<span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">1000</span><span class="op">)</span>; <span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">1000</span><span class="op">)</span>; <span class="va">z</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">1000</span><span class="op">)</span></span>
+<span><span class="va">original.data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">z</span>, x_copy <span class="op">=</span> <span class="va">x</span><span class="op">)</span></span>
+<span><span class="va">n</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">original.data</span><span class="op">)</span></span>
+<span><span class="va">dep.structure</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">original.data</span>, <span class="fl">2</span>, <span class="kw">function</span><span class="op">(</span><span class="va">v</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="../reference/LPM.ratio.html">LPM.ratio</a></span><span class="op">(</span>degree <span class="op">=</span> <span class="fl">0</span>, target <span class="op">=</span> <span class="va">v</span>, variable <span class="op">=</span> <span class="va">v</span><span class="op">)</span> <span class="op">-</span> <span class="fl">.5</span> <span class="op">/</span> <span class="va">n</span></span>
+<span><span class="op">}</span><span class="op">)</span></span>
+<span><span class="va">new.data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">replicate</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">original.data</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">2000</span>, mean <span class="op">=</span> <span class="fl">10</span>, sd <span class="op">=</span> <span class="fl">20</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">new.dep.data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">original.data</span><span class="op">)</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">j</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="../reference/LPM.VaR.html">LPM.VaR</a></span><span class="op">(</span>percentile <span class="op">=</span> <span class="va">dep.structure</span><span class="op">[</span>, <span class="va">j</span><span class="op">]</span>, degree <span class="op">=</span> <span class="fl">0</span>, x <span class="op">=</span> <span class="va">new.data</span><span class="op">[</span>, <span class="va">j</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="op">}</span>, <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Add variable x to original data to avoid total independence (example only)</span></span>
-<span><span class="va">original.data</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">z</span>, <span class="va">x</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Determine dependence structure</span></span>
-<span><span class="va">dep.structure</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">original.data</span>, <span class="fl">2</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="../reference/LPM.ratio.html">LPM.ratio</a></span><span class="op">(</span>degree <span class="op">=</span> <span class="fl">1</span>, target <span class="op">=</span> <span class="va">x</span>, variable <span class="op">=</span> <span class="va">x</span><span class="op">)</span><span class="op">)</span></span>
-<span>  </span>
-<span><span class="co"># Generate new data with different mean, sd and length (or distribution type)</span></span>
-<span><span class="va">new.data</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">original.data</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">original.data</span><span class="op">)</span><span class="op">*</span><span class="fl">2</span>, mean <span class="op">=</span> <span class="fl">10</span>, sd <span class="op">=</span> <span class="fl">20</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Apply dependence structure to new data</span></span>
-<span><span class="va">new.dep.data</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">original.data</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="../reference/LPM.VaR.html">LPM.VaR</a></span><span class="op">(</span>percentile <span class="op">=</span> <span class="va">dep.structure</span><span class="op">[</span>,<span class="va">x</span><span class="op">]</span>, degree <span class="op">=</span> <span class="fl">1</span>, x <span class="op">=</span> <span class="va">new.data</span><span class="op">[</span>,<span class="va">x</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<div class="section level4">
-<h4 id="compare-multivariate-dependence-structures">Compare Multivariate Dependence Structures<a class="anchor" aria-label="anchor" href="#compare-multivariate-dependence-structures"></a>
-</h4>
-<p>Similar dependence with radically different values, since we used
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mo stretchy="false" form="prefix">(</mo><mn>10</mn><mo>,</mo><mn>20</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">N(10, 20)</annotation></semantics></math>
-in place of our original
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">N(0,1)</annotation></semantics></math>
-observations.</p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="fu">NNS.copula</span>(original.data)</span>
-<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a><span class="fu">NNS.copula</span>(new.dep.data)</span>
-<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a></span>
-<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.4743531</span></span>
-<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.4753264</span></span></code></pre></div>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="fu">head</span>(original.data)</span>
-<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a><span class="fu">head</span>(new.dep.data)</span>
-<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a></span>
-<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a>               x           y          z           x</span>
-<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a>[<span class="dv">1</span>,] <span class="sc">-</span><span class="fl">0.56047565</span> <span class="sc">-</span><span class="fl">0.99579872</span> <span class="sc">-</span><span class="fl">0.5116037</span> <span class="sc">-</span><span class="fl">0.56047565</span></span>
-<span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a>[<span class="dv">2</span>,] <span class="sc">-</span><span class="fl">0.23017749</span> <span class="sc">-</span><span class="fl">1.03995504</span>  <span class="fl">0.2369379</span> <span class="sc">-</span><span class="fl">0.23017749</span></span>
-<span id="cb16-7"><a href="#cb16-7" tabindex="-1"></a>[<span class="dv">3</span>,]  <span class="fl">1.55870831</span> <span class="sc">-</span><span class="fl">0.01798024</span> <span class="sc">-</span><span class="fl">0.5415892</span>  <span class="fl">1.55870831</span></span>
-<span id="cb16-8"><a href="#cb16-8" tabindex="-1"></a>[<span class="dv">4</span>,]  <span class="fl">0.07050839</span> <span class="sc">-</span><span class="fl">0.13217513</span>  <span class="fl">1.2192276</span>  <span class="fl">0.07050839</span></span>
-<span id="cb16-9"><a href="#cb16-9" tabindex="-1"></a>[<span class="dv">5</span>,]  <span class="fl">0.12928774</span> <span class="sc">-</span><span class="fl">2.54934277</span>  <span class="fl">0.1741359</span>  <span class="fl">0.12928774</span></span>
-<span id="cb16-10"><a href="#cb16-10" tabindex="-1"></a>[<span class="dv">6</span>,]  <span class="fl">1.71506499</span>  <span class="fl">1.04057346</span> <span class="sc">-</span><span class="fl">0.6152683</span>  <span class="fl">1.71506499</span></span>
-<span id="cb16-11"><a href="#cb16-11" tabindex="-1"></a>          [,<span class="dv">1</span>]       [,<span class="dv">2</span>]       [,<span class="dv">3</span>]      [,<span class="dv">4</span>]</span>
-<span id="cb16-12"><a href="#cb16-12" tabindex="-1"></a>[<span class="dv">1</span>,] <span class="sc">-</span><span class="fl">2.028109</span> <span class="sc">-</span><span class="fl">10.498044</span> <span class="sc">-</span><span class="fl">0.2090467</span> <span class="sc">-</span><span class="fl">1.682949</span></span>
-<span id="cb16-13"><a href="#cb16-13" tabindex="-1"></a>[<span class="dv">2</span>,]  <span class="fl">4.608303</span> <span class="sc">-</span><span class="fl">11.390485</span> <span class="fl">15.6213689</span>  <span class="fl">4.852534</span></span>
-<span id="cb16-14"><a href="#cb16-14" tabindex="-1"></a>[<span class="dv">3</span>,] <span class="fl">39.478741</span>   <span class="fl">8.836581</span> <span class="sc">-</span><span class="fl">0.8508203</span> <span class="fl">40.585505</span></span>
-<span id="cb16-15"><a href="#cb16-15" tabindex="-1"></a>[<span class="dv">4</span>,] <span class="fl">10.683731</span>   <span class="fl">6.609255</span> <span class="fl">36.0328589</span> <span class="fl">10.877677</span></span>
-<span id="cb16-16"><a href="#cb16-16" tabindex="-1"></a>[<span class="dv">5</span>,] <span class="fl">11.866922</span> <span class="sc">-</span><span class="fl">47.955235</span> <span class="fl">14.3111350</span> <span class="fl">12.064633</span></span>
-<span id="cb16-17"><a href="#cb16-17" tabindex="-1"></a>[<span class="dv">6</span>,] <span class="fl">42.665726</span>  <span class="fl">29.639640</span> <span class="sc">-</span><span class="fl">2.4141874</span> <span class="fl">43.797025</span></span></code></pre></div>
-</div>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">cor</a></span><span class="op">(</span><span class="va">original.data</span>, method <span class="op">=</span> <span class="st">"spearman"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">cor</a></span><span class="op">(</span><span class="va">new.dep.data</span>, method <span class="op">=</span> <span class="st">"spearman"</span><span class="op">)</span></span></code></pre></div>
+<p>The output has one row per original rank tuple, here 1000, even
+though the new marginal reference samples have 2000 rows. It
+approximates those reference marginals at the supplied ranks. For tied
+marginals, specify a tie policy or randomized probability transform
+within each CDF jump; ordinary inclusive CDF values are not uniform at
+atoms. Positive-degree transformations remain useful for directional
+severity modelling, with their changed target stated explicitly.</p>
 </div>
 <div class="section level3">
 <h3 id="alternative-using-nns-meboot">Alternative Using <strong><code>NNS.meboot</code></strong><a class="anchor" aria-label="anchor" href="#alternative-using-nns-meboot"></a>
@@ -371,7 +340,7 @@ procedure to each of the variables.</p>
 to our <code>original.data</code>, use their <code>ensemble</code> and
 note the multivariate dependence among our
 <code>new.boot.dep.data</code>.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Apply bootstrap to each variable</span></span>
 <span><span class="va">new.boot.dep.data</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">original.data</span>, <span class="fl">2</span>, <span class="kw">function</span><span class="op">(</span><span class="va">r</span><span class="op">)</span> <span class="fu"><a href="../reference/NNS.meboot.html">NNS.meboot</a></span><span class="op">(</span><span class="va">r</span>, reps <span class="op">=</span> <span class="fl">100</span>, rho <span class="op">=</span> <span class="fl">.95</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
@@ -382,57 +351,49 @@ note the multivariate dependence among our
 <span><span class="va">new.boot.dep.matrix</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">cbind</span>, <span class="va">boot.ensemble.vectors</span><span class="op">)</span></span></code></pre></div>
 <p>Checking <code>ensemble</code> correlations with
 <code>original.data</code>:</p>
-<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>) <span class="fu">print</span>(<span class="fu">cor</span>(new.boot.dep.matrix[,i], original.data[,i], <span class="at">method =</span> <span class="st">"spearman"</span>))</span>
-<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a></span>
-<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.9885851</span></span>
-<span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.9965075</span></span>
-<span id="cb18-5"><a href="#cb18-5" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.9906302</span></span>
-<span id="cb18-6"><a href="#cb18-6" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.9901535</span></span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>) <span class="fu">print</span>(<span class="fu">cor</span>(new.boot.dep.matrix[,i], original.data[,i], <span class="at">method =</span> <span class="st">"spearman"</span>))</span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a></span>
+<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.9885851</span></span>
+<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.9965075</span></span>
+<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.9906302</span></span>
+<span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.9901535</span></span></code></pre></div>
 <blockquote>
 <p><strong>Reading these numbers.</strong> Here <code>ensemble</code> is
-the per-observation mean of <code>reps = 100</code> replicates — a
-central summary, not a single path carrying the exact target dependence
-— so a rank/linear correlation taken directly on it tends to read
-<strong>higher</strong> than the per-replicate
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ρ</mi><annotation encoding="application/x-tex">\rho</annotation></semantics></math>
-(averaging amplifies the shared order). With
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ρ</mi><mo>=</mo><mn>0.95</mn></mrow><annotation encoding="application/x-tex">\rho = 0.95</annotation></semantics></math>
-the gap is small because the target is already near the ceiling; at
-moderate
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ρ</mi><annotation encoding="application/x-tex">\rho</annotation></semantics></math>
-it is larger (e.g. a per-replicate Spearman
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ρ</mi><mo>=</mo><mn>0.75</mn></mrow><annotation encoding="application/x-tex">\rho = 0.75</annotation></semantics></math>
-typically reads ~0.9 once averaged into the <code>ensemble</code>). The
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ρ</mi><annotation encoding="application/x-tex">\rho</annotation></semantics></math>
-alignment is calibrated on the individual <code>replicates</code>; treat
-the <code>ensemble</code> as a representative central path.</p>
+the per-observation mean of the replicates, a central summary. Its
+correlation with the input is not the requested per-replicate target.
+Alignment is applied to individual residual paths; averaging and trend
+reconstruction can change the measured correlation. Treat the ensemble
+as a representative path and inspect achieved correlations for the
+requested output.</p>
 </blockquote>
 <div class="section level4">
-<h4 id="compare-multivariate-dependence-structures-1">Compare Multivariate Dependence Structures<a class="anchor" aria-label="anchor" href="#compare-multivariate-dependence-structures-1"></a>
+<h4 id="compare-multivariate-dependence-structures">Compare Multivariate Dependence Structures<a class="anchor" aria-label="anchor" href="#compare-multivariate-dependence-structures"></a>
 </h4>
-<p>Similar dependence with similar values.</p>
-<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a><span class="fu">NNS.copula</span>(original.data)</span>
-<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a><span class="fu">NNS.copula</span>(new.boot.dep.matrix)</span>
-<span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a></span>
-<span id="cb19-4"><a href="#cb19-4" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.4743531</span></span>
-<span id="cb19-5"><a href="#cb19-5" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.4704039</span></span></code></pre></div>
-<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a><span class="fu">head</span>(original.data)</span>
-<span id="cb20-2"><a href="#cb20-2" tabindex="-1"></a><span class="fu">head</span>(new.boot.dep.matrix)</span>
-<span id="cb20-3"><a href="#cb20-3" tabindex="-1"></a></span>
-<span id="cb20-4"><a href="#cb20-4" tabindex="-1"></a>               x           y          z           x</span>
-<span id="cb20-5"><a href="#cb20-5" tabindex="-1"></a>[<span class="dv">1</span>,] <span class="sc">-</span><span class="fl">0.56047565</span> <span class="sc">-</span><span class="fl">0.99579872</span> <span class="sc">-</span><span class="fl">0.5116037</span> <span class="sc">-</span><span class="fl">0.56047565</span></span>
-<span id="cb20-6"><a href="#cb20-6" tabindex="-1"></a>[<span class="dv">2</span>,] <span class="sc">-</span><span class="fl">0.23017749</span> <span class="sc">-</span><span class="fl">1.03995504</span>  <span class="fl">0.2369379</span> <span class="sc">-</span><span class="fl">0.23017749</span></span>
-<span id="cb20-7"><a href="#cb20-7" tabindex="-1"></a>[<span class="dv">3</span>,]  <span class="fl">1.55870831</span> <span class="sc">-</span><span class="fl">0.01798024</span> <span class="sc">-</span><span class="fl">0.5415892</span>  <span class="fl">1.55870831</span></span>
-<span id="cb20-8"><a href="#cb20-8" tabindex="-1"></a>[<span class="dv">4</span>,]  <span class="fl">0.07050839</span> <span class="sc">-</span><span class="fl">0.13217513</span>  <span class="fl">1.2192276</span>  <span class="fl">0.07050839</span></span>
-<span id="cb20-9"><a href="#cb20-9" tabindex="-1"></a>[<span class="dv">5</span>,]  <span class="fl">0.12928774</span> <span class="sc">-</span><span class="fl">2.54934277</span>  <span class="fl">0.1741359</span>  <span class="fl">0.12928774</span></span>
-<span id="cb20-10"><a href="#cb20-10" tabindex="-1"></a>[<span class="dv">6</span>,]  <span class="fl">1.71506499</span>  <span class="fl">1.04057346</span> <span class="sc">-</span><span class="fl">0.6152683</span>  <span class="fl">1.71506499</span></span>
-<span id="cb20-11"><a href="#cb20-11" tabindex="-1"></a>                   x          y          z          x</span>
-<span id="cb20-12"><a href="#cb20-12" tabindex="-1"></a>ensemble1 <span class="sc">-</span><span class="fl">0.4268047</span> <span class="sc">-</span><span class="fl">0.7794553</span> <span class="sc">-</span><span class="fl">0.6364458</span> <span class="sc">-</span><span class="fl">0.4642642</span></span>
-<span id="cb20-13"><a href="#cb20-13" tabindex="-1"></a>ensemble2 <span class="sc">-</span><span class="fl">0.2965744</span> <span class="sc">-</span><span class="fl">1.0682197</span>  <span class="fl">0.3297265</span> <span class="sc">-</span><span class="fl">0.2531178</span></span>
-<span id="cb20-14"><a href="#cb20-14" tabindex="-1"></a>ensemble3  <span class="fl">1.3302149</span>  <span class="fl">0.3054734</span> <span class="sc">-</span><span class="fl">0.4014515</span>  <span class="fl">1.4914884</span></span>
-<span id="cb20-15"><a href="#cb20-15" tabindex="-1"></a>ensemble4  <span class="fl">0.2257378</span>  <span class="fl">0.3108846</span>  <span class="fl">1.0603892</span>  <span class="fl">0.1728540</span></span>
-<span id="cb20-16"><a href="#cb20-16" tabindex="-1"></a>ensemble5  <span class="fl">0.4716743</span> <span class="sc">-</span><span class="fl">3.3344967</span> <span class="sc">-</span><span class="fl">0.1917697</span>  <span class="fl">0.4309379</span></span>
-<span id="cb20-17"><a href="#cb20-17" tabindex="-1"></a>ensemble6  <span class="fl">1.3984978</span>  <span class="fl">1.1881374</span> <span class="sc">-</span><span class="fl">0.5295386</span>  <span class="fl">1.5326055</span></span></code></pre></div>
+<p>Column-wise scenario generation does not guarantee preservation of
+the full joint law or every multivariate dependence statistic. Compare
+the achieved structure explicitly.</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a><span class="fu">NNS.copula</span>(original.data)</span>
+<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a><span class="fu">NNS.copula</span>(new.boot.dep.matrix)</span>
+<span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a></span>
+<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.4743531</span></span>
+<span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.4704039</span></span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="fu">head</span>(original.data)</span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a><span class="fu">head</span>(new.boot.dep.matrix)</span>
+<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a></span>
+<span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a>               x           y          z           x</span>
+<span id="cb18-5"><a href="#cb18-5" tabindex="-1"></a>[<span class="dv">1</span>,] <span class="sc">-</span><span class="fl">0.56047565</span> <span class="sc">-</span><span class="fl">0.99579872</span> <span class="sc">-</span><span class="fl">0.5116037</span> <span class="sc">-</span><span class="fl">0.56047565</span></span>
+<span id="cb18-6"><a href="#cb18-6" tabindex="-1"></a>[<span class="dv">2</span>,] <span class="sc">-</span><span class="fl">0.23017749</span> <span class="sc">-</span><span class="fl">1.03995504</span>  <span class="fl">0.2369379</span> <span class="sc">-</span><span class="fl">0.23017749</span></span>
+<span id="cb18-7"><a href="#cb18-7" tabindex="-1"></a>[<span class="dv">3</span>,]  <span class="fl">1.55870831</span> <span class="sc">-</span><span class="fl">0.01798024</span> <span class="sc">-</span><span class="fl">0.5415892</span>  <span class="fl">1.55870831</span></span>
+<span id="cb18-8"><a href="#cb18-8" tabindex="-1"></a>[<span class="dv">4</span>,]  <span class="fl">0.07050839</span> <span class="sc">-</span><span class="fl">0.13217513</span>  <span class="fl">1.2192276</span>  <span class="fl">0.07050839</span></span>
+<span id="cb18-9"><a href="#cb18-9" tabindex="-1"></a>[<span class="dv">5</span>,]  <span class="fl">0.12928774</span> <span class="sc">-</span><span class="fl">2.54934277</span>  <span class="fl">0.1741359</span>  <span class="fl">0.12928774</span></span>
+<span id="cb18-10"><a href="#cb18-10" tabindex="-1"></a>[<span class="dv">6</span>,]  <span class="fl">1.71506499</span>  <span class="fl">1.04057346</span> <span class="sc">-</span><span class="fl">0.6152683</span>  <span class="fl">1.71506499</span></span>
+<span id="cb18-11"><a href="#cb18-11" tabindex="-1"></a>                   x          y          z          x</span>
+<span id="cb18-12"><a href="#cb18-12" tabindex="-1"></a>ensemble1 <span class="sc">-</span><span class="fl">0.4268047</span> <span class="sc">-</span><span class="fl">0.7794553</span> <span class="sc">-</span><span class="fl">0.6364458</span> <span class="sc">-</span><span class="fl">0.4642642</span></span>
+<span id="cb18-13"><a href="#cb18-13" tabindex="-1"></a>ensemble2 <span class="sc">-</span><span class="fl">0.2965744</span> <span class="sc">-</span><span class="fl">1.0682197</span>  <span class="fl">0.3297265</span> <span class="sc">-</span><span class="fl">0.2531178</span></span>
+<span id="cb18-14"><a href="#cb18-14" tabindex="-1"></a>ensemble3  <span class="fl">1.3302149</span>  <span class="fl">0.3054734</span> <span class="sc">-</span><span class="fl">0.4014515</span>  <span class="fl">1.4914884</span></span>
+<span id="cb18-15"><a href="#cb18-15" tabindex="-1"></a>ensemble4  <span class="fl">0.2257378</span>  <span class="fl">0.3108846</span>  <span class="fl">1.0603892</span>  <span class="fl">0.1728540</span></span>
+<span id="cb18-16"><a href="#cb18-16" tabindex="-1"></a>ensemble5  <span class="fl">0.4716743</span> <span class="sc">-</span><span class="fl">3.3344967</span> <span class="sc">-</span><span class="fl">0.1917697</span>  <span class="fl">0.4309379</span></span>
+<span id="cb18-17"><a href="#cb18-17" tabindex="-1"></a>ensemble6  <span class="fl">1.3984978</span>  <span class="fl">1.1881374</span> <span class="sc">-</span><span class="fl">0.5295386</span>  <span class="fl">1.5326055</span></span></code></pre></div>
 </div>
 </div>
 </div>

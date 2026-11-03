@@ -73,26 +73,28 @@
 if distributions came from the same population, or if they share the
 same mean or median. The underlying function for these tests is
 <strong><code><a href="../reference/NNS.ANOVA.html">NNS.ANOVA()</a></code></strong>.</p>
-<p>The output from <strong><code><a href="../reference/NNS.ANOVA.html">NNS.ANOVA()</a></code></strong> is a
-<code>Certainty</code> statistic, which compares CDFs of distributions
-from several shared quantiles and normalizes the similarity of these
-points to be within the interval
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">[</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">[0,1]</annotation></semantics></math>,
-with 1 representing identical distributions. For a complete analysis of
-<code>Certainty</code> to common p-values and the role of power, please
-see the <a href="#References">References</a>.</p>
+<p>The output from <strong><code><a href="../reference/NNS.ANOVA.html">NNS.ANOVA()</a></code></strong> includes a
+descriptive <code>Certainty</code> statistic.
+<code>means.only = TRUE</code> compares group means through their
+directional area balance, <code>means.only = FALSE</code> compares
+profiles over shared quantiles, and <code>medians = TRUE</code> compares
+median targets. Agreement in one mode does not establish equality for
+the other targets. The finite-sample adjustment can make the maximum
+less than one. Certainty is not a calibrated p-value or power;
+inferential calibration must match the target and sampling design.</p>
 <div class="section level3">
 <h3 id="test-if-same-population">Test if Same Population<a class="anchor" aria-label="anchor" href="#test-if-same-population"></a>
 </h3>
 <p>Below we run the analysis to whether automatic transmissions and
 manual transmissions have significantly different <code>mpg</code>
 distributions per the <code>mtcars</code> dataset.</p>
-<p>The plot on the left shows the robust <code>Certainty</code>
-estimate, reflecting the distribution of <code>Certainty</code>
-estimates over 100 random permutations of both variables. The plot on
-the right illustrates the control and treatment variables, along with
-the grand mean among variables, and the confidence interval associated
-with the control mean.</p>
+<p>The plot on the left shows the resampling distribution of
+<code>Certainty</code>. Its inferential interpretation requires the
+resampling scheme to match the target; pooled permutation calibrates
+equal distributions under exchangeability, not every equal-means null
+with unequal variances. The plot on the right illustrates the control
+and treatment variables, along with the grand mean among variables, and
+the confidence interval associated with the control mean.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mpg_auto_trans</span> <span class="op">=</span> <span class="va">mtcars</span><span class="op">[</span><span class="va">mtcars</span><span class="op">$</span><span class="va">am</span><span class="op">==</span><span class="fl">1</span>, <span class="st">"mpg"</span><span class="op">]</span></span>
 <span><span class="va">mpg_man_trans</span> <span class="op">=</span> <span class="va">mtcars</span><span class="op">[</span><span class="va">mtcars</span><span class="op">$</span><span class="va">am</span><span class="op">==</span><span class="fl">0</span>, <span class="st">"mpg"</span><span class="op">]</span></span>
@@ -127,18 +129,17 @@ with the control mean.</p>
 <span><span class="co">## [1] 0.95</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $`Robust Certainty Estimate`</span></span>
-<span><span class="co">## [1] 0.01447008</span></span>
+<span><span class="co">## [1] 0.01485973</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $`Lower 95% CI`</span></span>
 <span><span class="co">## [1] 0.000272993</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $`Upper 95% CI`</span></span>
 <span><span class="co">## [1] 0.06890714</span></span></code></pre>
-<p>The <code>Certainty</code> shows that these two distributions clearly
-do not come from the same population. This is verified with the
-Mann-Whitney-Wilcoxon test, which also does not assume a normality to
-the underlying data as a nonparametric test of identical
-distributions.</p>
+<p>The <code>Certainty</code> describes disagreement for the selected
+target. The Mann-Whitney-Wilcoxon result below addresses a rank-based
+hypothesis under its own assumptions; it is not a universal test of all
+distributional differences or a calibration of NNS certainty.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/wilcox.test.html" class="external-link">wilcox.test</a></span><span class="op">(</span><span class="va">mpg</span> <span class="op">~</span> <span class="va">am</span>, data<span class="op">=</span><span class="va">mtcars</span><span class="op">)</span> </span></code></pre></div>
 <pre><code><span><span class="co">## </span></span>
@@ -191,7 +192,7 @@ certain these two means are equal.</p>
 <span><span class="co">## [1] 0.95</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $`Robust Certainty Estimate`</span></span>
-<span><span class="co">## [1] 0.9046778</span></span>
+<span><span class="co">## [1] 0.9001731</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $`Lower 95% CI`</span></span>
 <span><span class="co">## [1] 0.7729845</span></span>
@@ -254,7 +255,7 @@ firmly reject the null hypothesis of identical means.</p>
 <span><span class="co">## [1] 0.95</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $`Robust Certainty Estimate`</span></span>
-<span><span class="co">## [1] 0.1811777</span></span>
+<span><span class="co">## [1] 0.1818801</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $`Lower 95% CI`</span></span>
 <span><span class="co">## [1] 0.1463972</span></span>
@@ -317,10 +318,10 @@ upper effect boundaries.</p>
 <span><span class="co">## [1] 0.95</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $`Robust Certainty Estimate`</span></span>
-<span><span class="co">## [1] 0.3595841</span></span>
+<span><span class="co">## [1] 0.3605887</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $`Lower 95% CI`</span></span>
-<span><span class="co">## [1] 0.3151044</span></span>
+<span><span class="co">## [1] 0.3161758</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $`Upper 95% CI`</span></span>
 <span><span class="co">## [1] 0.4024833</span></span></code></pre>

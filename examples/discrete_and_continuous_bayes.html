@@ -23,7 +23,6 @@
       margin: 0 0.8em 0.2em -1.6em;
       vertical-align: middle;
     }
-    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
     /* CSS for syntax highlighting */
     html { -webkit-text-size-adjust: 100%; }
     pre > code.sourceCode { white-space: pre; position: relative; }
@@ -91,6 +90,9 @@
     code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
   </style>
   <link rel="stylesheet" href="pages.css" />
+  <script defer=""
+  src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"
+  type="text/javascript"></script>
 </head>
 <body>
 <nav class="nns-site-nav">
@@ -126,27 +128,24 @@ law can be recovered.</p>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>t_y <span class="ot">&lt;-</span> <span class="dv">0</span></span></code></pre></div>
 <p>Empirical sample quantities:</p>
 <ul>
-<li><span
-class="math inline"><em>P</em>(<em>X</em> &gt; 0) = 0.508</span></li>
-<li><span
-class="math inline"><em>P</em>(<em>Y</em> &gt; 0) = 0.500</span></li>
-<li><span
-class="math inline"><em>P</em>(<em>X</em> &gt; 0, <em>Y</em> &gt; 0) = 0.362</span></li>
-<li><span
-class="math inline"><em>P</em>(<em>Y</em> &gt; 0 ∣ <em>X</em> &gt; 0) = 0.7125984</span></li>
+<li><span class="math inline">\(P(X&gt;0) = 0.508\)</span></li>
+<li><span class="math inline">\(P(Y&gt;0) = 0.500\)</span></li>
+<li><span class="math inline">\(P(X&gt;0, Y&gt;0) = 0.362\)</span></li>
+<li><span class="math inline">\(P(Y&gt;0 \mid X&gt;0) =
+0.7125984\)</span></li>
 </ul>
 <hr />
 <h2 id="1-degree-0-bayes">1. Degree-0 Bayes</h2>
 <p>At degree 0, the NNS operators coincide with quadrant
 probabilities:</p>
-<p><span
-class="math display">Co.UPM(0, <em>x</em>, <em>y</em>; <em>t</em><sub><em>x</em></sub>, <em>t</em><sub><em>y</em></sub>) = <em>P</em>(<em>X</em> &gt; <em>t</em><sub><em>x</em></sub>, <em>Y</em> &gt; <em>t</em><sub><em>y</em></sub>),   UPM(0, <em>t</em><sub><em>x</em></sub>, <em>x</em>) = <em>P</em>(<em>X</em> &gt; <em>t</em><sub><em>x</em></sub>).</span></p>
+<p><span class="math display">\[
+\mathrm{Co.UPM}(0,x,y;t_x,t_y)=P(X&gt;t_x,\;Y&gt;t_y), \qquad
+\mathrm{UPM}(0,t_x,x)=P(X&gt;t_x). \]</span></p>
 <p>So the conditional event probability is obtained exactly as</p>
-<p><span class="math display">$$ P(Y&gt;t_y \mid X&gt;t_x) =
+<p><span class="math display">\[ P(Y&gt;t_y \mid X&gt;t_x) =
 \frac{\mathrm{Co.UPM}(0,x,y;t_x,t_y)}{\mathrm{UPM}(0,t_x,x)}.
-$$</span></p>
-<p>Using <span
-class="math inline"><em>t</em><sub><em>x</em></sub> = <em>t</em><sub><em>y</em></sub> = 0</span>:</p>
+\]</span></p>
+<p>Using <span class="math inline">\(t_x=t_y=0\)</span>:</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>joint_prob_deg0 <span class="ot">&lt;-</span> <span class="fu">Co.UPM</span>(<span class="dv">0</span>, x, y, <span class="at">target_x =</span> t_x, <span class="at">target_y =</span> t_y)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>marg_prob_x_deg0 <span class="ot">&lt;-</span> <span class="fu">UPM</span>(<span class="dv">0</span>, t_x, x)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -160,15 +159,16 @@ in-sample.</p>
 <h2 id="2-degree-1-hinge-surface-recovery">2. Degree-1 hinge-surface
 recovery</h2>
 <p>Define the raw lower hinge surface</p>
-<p><span
-class="math display"><em>H</em>(<em>t</em><sub><em>x</em></sub>, <em>t</em><sub><em>y</em></sub>) = <em>E</em>[(<em>t</em><sub><em>x</em></sub> − <em>X</em>)<sub>+</sub>(<em>t</em><sub><em>y</em></sub> − <em>Y</em>)<sub>+</sub>].</span></p>
+<p><span class="math display">\[
+H(t_x,t_y)=E[(t_x-X)_+(t_y-Y)_+].
+\]</span></p>
 <p>The degree-1 recovery theorem states that</p>
-<p><span class="math display">$$
+<p><span class="math display">\[
 \frac{\partial^2 H}{\partial t_x \partial
 t_y}(t_x,t_y)=F_{X,Y}(t_x,t_y).
-$$</span></p>
+\]</span></p>
 <p>So we can recover the joint CDF at <span
-class="math inline">(0, 0)</span> numerically by mixed finite
+class="math inline">\((0,0)\)</span> numerically by mixed finite
 differences.</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>targets <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">3</span>, <span class="dv">3</span>, <span class="at">length.out =</span> <span class="dv">61</span>)</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>h <span class="ot">&lt;-</span> <span class="fu">diff</span>(targets)[<span class="dv">1</span>]</span>
@@ -196,18 +196,18 @@ differences.</p>
 <span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>) <span class="sc">/</span> h<span class="sc">^</span><span class="dv">2</span></span></code></pre></div>
 <p>Recovered and empirical lower-left quadrant probabilities:</p>
 <ul>
-<li>Recovered <span class="math inline"><em>F</em>(0, 0)</span> from
-hinge surface: <code>0.372003</code></li>
-<li>Empirical <span
-class="math inline"><em>P</em>(<em>X</em> ≤ 0, <em>Y</em> ≤ 0)</span>:
+<li>Recovered <span class="math inline">\(F(0,0)\)</span> from hinge
+surface: <code>0.372003</code></li>
+<li>Empirical <span class="math inline">\(P(X \le 0, Y \le 0)\)</span>:
 <code>0.354000</code></li>
 </ul>
 <hr />
 <h2 id="3-reconstructing-the-same-upper-right-event-probability">3.
 Reconstructing the same upper-right event probability</h2>
 <p>From the recovered joint CDF,</p>
-<p><span
-class="math display"><em>P</em>(<em>X</em> &gt; 0, <em>Y</em> &gt; 0) = 1 − <em>F</em><sub><em>X</em></sub>(0) − <em>F</em><sub><em>Y</em></sub>(0) + <em>F</em><sub><em>X</em>, <em>Y</em></sub>(0, 0).</span></p>
+<p><span class="math display">\[
+P(X&gt;0,Y&gt;0)=1-F_X(0)-F_Y(0)+F_{X,Y}(0,0).
+\]</span></p>
 <p>Using degree-0 marginal CDF values at zero:</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>FX0 <span class="ot">&lt;-</span> <span class="fu">LPM.ratio</span>(<span class="dv">0</span>, t_x, x)</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>FY0 <span class="ot">&lt;-</span> <span class="fu">LPM.ratio</span>(<span class="dv">0</span>, t_y, y)</span>
@@ -221,24 +221,19 @@ class="math display"><em>P</em>(<em>X</em> &gt; 0, <em>Y</em> &gt; 0)�
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.7480377</span></span></code></pre></div>
 <p>Comparison:</p>
 <ul>
-<li>Recovered <span
-class="math inline"><em>P</em>(<em>X</em> &gt; 0, <em>Y</em> &gt; 0)</span>:
+<li>Recovered <span class="math inline">\(P(X&gt;0, Y&gt;0)\)</span>:
 <code>0.380003</code></li>
-<li>Empirical <span
-class="math inline"><em>P</em>(<em>X</em> &gt; 0, <em>Y</em> &gt; 0)</span>:
+<li>Empirical <span class="math inline">\(P(X&gt;0, Y&gt;0)\)</span>:
 <code>0.362000</code></li>
-<li>Recovered <span
-class="math inline"><em>P</em>(<em>Y</em> &gt; 0 ∣ <em>X</em> &gt; 0)</span>:
-<code>0.7480377</code></li>
-<li>Empirical <span
-class="math inline"><em>P</em>(<em>Y</em> &gt; 0 ∣ <em>X</em> &gt; 0)</span>:
-<code>0.7125984</code></li>
+<li>Recovered <span class="math inline">\(P(Y&gt;0 \mid
+X&gt;0)\)</span>: <code>0.7480377</code></li>
+<li>Empirical <span class="math inline">\(P(Y&gt;0 \mid
+X&gt;0)\)</span>: <code>0.7125984</code></li>
 </ul>
 <hr />
 <h2 id="4-interpretation">4. Interpretation</h2>
 <p>This example shows two different routes to the same event-level
-quantity <span
-class="math inline"><em>P</em>(<em>Y</em> &gt; 0 ∣ <em>X</em> &gt; 0)</span>:</p>
+quantity <span class="math inline">\(P(Y&gt;0 \mid X&gt;0)\)</span>:</p>
 <ul>
 <li><strong>Degree 0</strong> gives it directly and exactly through
 quadrant probabilities.</li>

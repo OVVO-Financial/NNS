@@ -51,8 +51,11 @@ NNS.reg(
 
   integer; Controls the number of partial moment quadrant means. Users
   are encouraged to try different `(order = ...)` integer settings with
-  `(noise.reduction = "off")`. `(order = "max")` will force a limit
-  condition perfect fit.
+  `(noise.reduction = "off")`. `(order = "max")` retains distinct
+  predictor locations. A perfect training fit requires compatible
+  responses at tied locations and interpolation at those locations;
+  duplicate predictors with different responses cannot all be
+  interpolated.
 
 - dim.red.method:
 
@@ -66,18 +69,20 @@ NNS.reg(
   for nonlinear dependence weights, while
   `(dim.red.method = "NNS.caus")` uses
   [NNS.caus](https://OVVO-Financial.github.io/NNS/reference/NNS.caus.md)
-  for causal weights. `(dim.red.method = "cor")` uses Spearman rank
-  correlation for weights. `(dim.red.method = "all")` averages all
-  methods for further feature engineering. `(dim.red.method = "equal")`
-  uses unit weights. Alternatively, user can specify a numeric vector of
-  coefficients.
+  for directional association weights. `(dim.red.method = "cor")` uses
+  Spearman rank correlation for weights. `(dim.red.method = "all")`
+  averages all methods for further feature engineering.
+  `(dim.red.method = "equal")` uses unit weights. Alternatively, user
+  can specify a numeric vector of coefficients. Named vectors must
+  exactly match the encoded predictor columns and are matched by name;
+  unnamed vectors follow encoded column order.
 
 - tau:
 
   options("ts", NULL); `NULL`(default) To be used in conjunction with
   `(dim.red.method = "NNS.caus")` or `(dim.red.method = "all")`. If the
-  regression is using time-series data, set `(tau = "ts")` for more
-  accurate causal analysis.
+  regression is using time-series data, set `(tau = "ts")` to use the
+  time-series lag convention.
 
 - type:
 
@@ -85,9 +90,10 @@ NNS.reg(
   `(type = "CLASS")`. Like a logistic regression, it is not necessary
   for target variable of two classes e.g. \[0, 1\]: a numeric response
   with exactly the values 0 and 1, or a factor, character or logical
-  response, is classified automatically. `(type = "XONLY")` is valid
-  only for a single predictor: it keeps the default x-only partition but
-  turns off the automatic classification.
+  response, is classified automatically. Use `type = "REG"` to fit a
+  numeric response as regression, including a two-valued response, with
+  one or more predictors. `(type = "XONLY")` is the single-predictor
+  regression alias and keeps the default x-only partition.
 
 - point.est:
 
@@ -143,11 +149,13 @@ NNS.reg(
 
   integer; `NULL` (default) Sets the number of nearest regression points
   to use in weighting for multivariate regression at
-  `floor((1 - NNS.copula(cbind(x, y))) * sqrt(nrow(x)))` (at least 1, at
-  most the number of regression points). `(n.best = "all")` will select
-  and weight all generated regression points. Analogous to `k` in a
-  `k Nearest Neighbors` algorithm. Different values of `n.best` are
-  tested using cross-validation in
+  `floor((1 - D) * sqrt(nrow(x)))` (at least 1, at most the number of
+  regression points), where D averages the copula summaries with
+  response y and -y so the smoothing choice is unchanged by response
+  reflection. `(n.best = "all")` will select and weight all generated
+  regression points. Analogous to `k` in a `k Nearest Neighbors`
+  algorithm. Different values of `n.best` are tested using
+  cross-validation in
   [NNS.stack](https://OVVO-Financial.github.io/NNS/reference/NNS.stack.md).
 
 - smooth:
@@ -197,13 +205,15 @@ NNS.reg(
 
 UNIVARIATE REGRESSION RETURNS THE FOLLOWING VALUES:
 
-- `"R2"` provides the goodness of fit;
+- `"R2"` is squared Pearson correlation between fitted and observed
+  responses (Racine–Hastie goodness of fit), or fitted classification
+  accuracy;
 
 - `"SE"` returns the overall standard error of the estimate between `y`
   and `y.hat`;
 
-- `"Prediction.Accuracy"` returns the correct rounded `"Point.est"` used
-  in classifications versus the categorical `y`;
+- `"Prediction.Accuracy"` returns the proportion of fitted class
+  decisions equal to the observed class;
 
 - `"derivative"` for the coefficient of the `x` and its applicable
   range;
@@ -221,7 +231,9 @@ UNIVARIATE REGRESSION RETURNS THE FOLLOWING VALUES:
 
 MULTIVARIATE REGRESSION RETURNS THE FOLLOWING VALUES:
 
-- `"R2"` provides the goodness of fit;
+- `"R2"` is squared Pearson correlation between fitted and observed
+  responses (Racine–Hastie goodness of fit), or fitted classification
+  accuracy;
 
 - `"equation"` returns the numerator of the synthetic X\* dimension
   reduction equation as a `data.frame` consisting of regressor and its
@@ -248,6 +260,54 @@ MULTIVARIATE REGRESSION RETURNS THE FOLLOWING VALUES:
   dimension reduction regression. `confidence.interval` adds
   `conf.int.neg` and `conf.int.pos`.
 
+## Details
+
+For regression, `R2` measures association between fitted and observed
+responses: it is \\cor(y, \hat y)^2\\, with the package's finite
+constant-vector convention. It is not \\1-SSE/SST\\; a biased or
+incorrectly scaled prediction can have `R2 = 1`. Evaluate held-out
+prediction errors for predictive accuracy.
+
+The default partition order combines a finite-partition dependence score
+with the average of the duplicated-predictor copula score under both
+response orientations. This complexity heuristic is invariant to
+reflecting the response; the underlying directional dependence and
+copula definitions are unchanged. A supplied order bypasses this
+heuristic.
+
+Univariate regression linearly interpolates the selected regression
+points and extends the first or last segment beyond their range (unless
+a smoothing spline is requested). Endpoint slopes can be unstable with
+sparse or noisy boundary points. Multivariate distance weighting is a
+weighted average of regression-point responses, so it does not
+automatically continue a trend outside the training support. Neither
+construction supplies a general extrapolation guarantee. With the
+default `n.best = NULL`, purely categorical predictors use exact
+observed joint cells, and an unobserved joint combination uses its
+nearest cells. An explicit `n.best` weights that many nearest cells, as
+for numeric predictors. A declared factor level with no training rows is
+accepted in `point.est` and is placed by the same distance rule. A
+coordinate with exactly two observed values retains both terminal cells,
+including a dummy column in a mixed design. Other finite-order numeric
+coordinates retain interval cells; `order = "max"` uses exact joint
+support.
+
+Classification forms an indicator for each observed class, retains the
+empirical class frequencies in each predictor cell, and interpolates or
+distance-weights those probability vectors. Class labels never enter
+numeric interpolation. `Point.probabilities`, `Fitted.probabilities`,
+and `RPM.probabilities` expose the corresponding vectors. Tied class
+decisions follow first appearance in the training response. Factor and
+character responses retain numeric output codes with `class.levels`;
+numeric responses retain their supplied values. For dimension reduction,
+one signed NNS index is fitted per class indicator, and the resulting
+probabilities are normalized across classes; `equation` is then a list
+indexed by class. `confidence.interval` returns `Prediction.set`, the
+smallest leading set of classes attaining the requested estimated
+probability mass. These are descriptive probability sets, not calibrated
+coverage guarantees; nominal classes have no numeric prediction
+interval.
+
 ## Note
 
 - Please ensure `point.est` is of compatible dimensions to `x`, error
@@ -255,8 +315,8 @@ MULTIVARIATE REGRESSION RETURNS THE FOLLOWING VALUES:
 
 - Like a logistic regression, the `(type = "CLASS")` setting is not
   necessary for target variable of two classes e.g. \[0, 1\]. For other
-  numeric responses set `type = "CLASS"`; the response variable base
-  category should be 1 for multi-class problems.
+  numeric responses set `type = "CLASS"`; class values can be any
+  distinct numbers.
 
 - For low signal:noise instances, increasing the dimension may yield
   better results using `NNS.stack(cbind(x,x), y, method = 1, ...)`.

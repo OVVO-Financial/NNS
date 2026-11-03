@@ -62,10 +62,6 @@
 
     
     
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/OVVO-Financial/NNS" class="external-link">NNS</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="va"><a href="https://yihui.org/knitr/" class="external-link">knitr</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="va"><a href="https://github.com/dmurdoch/rgl" class="external-link">rgl</a></span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="forecasting">Forecasting<a class="anchor" aria-label="anchor" href="#forecasting"></a>
 </h2>
@@ -78,8 +74,9 @@ analysts can choose the correct model and parameters efficiently given
 this array of choices.’’</em></p>
 <p><code>NNS</code> simplifies the forecasting process. Below are some
 examples demonstrating <strong><code>NNS.ARMA</code></strong> and its
-<strong>assumption free, minimal parameter</strong> forecasting
-method.</p>
+partial-moment component forecasting method. It does not require a
+parametric distribution family; predictive assessment still requires a
+suitable temporal validation design.</p>
 <div class="section level3">
 <h3 id="linear-regression">Linear Regression<a class="anchor" aria-label="anchor" href="#linear-regression"></a>
 </h3>
@@ -96,16 +93,16 @@ observations. We will then test this against our validation set of
 <code>seasonal.factor = 12</code>.</p>
 <p>Below is the linear fit and associated root mean squared error (RMSE)
 using <code>method = "lin"</code>.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">nns_lin</span> <span class="op">=</span> <span class="fu"><a href="../reference/NNS.ARMA.html">NNS.ARMA</a></span><span class="op">(</span><span class="va">AirPassengers</span>, </span>
-<span>               h <span class="op">=</span> <span class="fl">44</span>, </span>
-<span>               training.set <span class="op">=</span> <span class="fl">100</span>, </span>
-<span>               method <span class="op">=</span> <span class="st">"lin"</span>, </span>
-<span>               plot <span class="op">=</span> <span class="cn">TRUE</span>, </span>
-<span>               seasonal.factor <span class="op">=</span> <span class="fl">12</span>, </span>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">nns_lin</span> <span class="op">=</span> <span class="fu"><a href="../reference/NNS.ARMA.html">NNS.ARMA</a></span><span class="op">(</span><span class="va">AirPassengers</span>,</span>
+<span>               h <span class="op">=</span> <span class="fl">44</span>,</span>
+<span>               training.set <span class="op">=</span> <span class="fl">100</span>,</span>
+<span>               method <span class="op">=</span> <span class="st">"lin"</span>,</span>
+<span>               plot <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>               seasonal.factor <span class="op">=</span> <span class="fl">12</span>,</span>
 <span>               seasonal.plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="NNSvignette_09_Forecasting_files/figure-html/linear-1.png" class="r-plt" alt="" width="480" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="op">(</span><span class="va">nns_lin</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">tail</a></span><span class="op">(</span><span class="va">AirPassengers</span>, <span class="fl">44</span><span class="op">)</span><span class="op">)</span> <span class="op">^</span> <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] 35.39965</span></span></code></pre>
 </div>
@@ -114,77 +111,75 @@ using <code>method = "lin"</code>.</p>
 </h3>
 <p>Now we can try using a nonlinear regression on the relevant component
 series using <code>method = "nonlin"</code>.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">nns_nonlin</span> <span class="op">=</span> <span class="fu"><a href="../reference/NNS.ARMA.html">NNS.ARMA</a></span><span class="op">(</span><span class="va">AirPassengers</span>,</span>
+<span>               h <span class="op">=</span> <span class="fl">44</span>,</span>
+<span>               training.set <span class="op">=</span> <span class="fl">100</span>,</span>
+<span>               method <span class="op">=</span> <span class="st">"nonlin"</span>,</span>
+<span>               plot <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>               seasonal.factor <span class="op">=</span> <span class="fl">12</span>,</span>
+<span>               seasonal.plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+<p><img src="NNSvignette_09_Forecasting_files/figure-html/nonlinear-1.png" class="r-plt" alt="" width="480" style="display: block; margin: auto;"></p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">nns_nonlin</span> <span class="op">=</span> <span class="fu"><a href="../reference/NNS.ARMA.html">NNS.ARMA</a></span><span class="op">(</span><span class="va">AirPassengers</span>, </span>
-<span>               h <span class="op">=</span> <span class="fl">44</span>, </span>
-<span>               training.set <span class="op">=</span> <span class="fl">100</span>, </span>
-<span>               method <span class="op">=</span> <span class="st">"nonlin"</span>, </span>
-<span>               plot <span class="op">=</span> <span class="cn">FALSE</span>, </span>
-<span>               seasonal.factor <span class="op">=</span> <span class="fl">12</span>, </span>
-<span>               seasonal.plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="op">(</span><span class="va">nns_nonlin</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">tail</a></span><span class="op">(</span><span class="va">AirPassengers</span>, <span class="fl">44</span><span class="op">)</span><span class="op">)</span> <span class="op">^</span> <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">18.1809</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="op">(</span><span class="va">nns_nonlin</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">tail</a></span><span class="op">(</span><span class="va">AirPassengers</span>, <span class="fl">44</span><span class="op">)</span><span class="op">)</span> <span class="op">^</span> <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1] 17.90252</span></span></code></pre>
+<p>The plot and RMSE are computed when this vignette is built, using the
+installed NNS version. They describe this fixed training/test split;
+historical values are not a performance guarantee.</p>
 </div>
 <div class="section level3">
 <h3 id="cross-validation">Cross-Validation<a class="anchor" aria-label="anchor" href="#cross-validation"></a>
 </h3>
-<p>We can test a series of <code>seasonal.factors</code> and select the
-best one to fit. The largest period to consider would be
-<code>0.5 * length(variable)</code>, since we need more than 2 points
-for a regression! Remember, we are testing the first 100 observations of
-<code>AirPassengers</code>, not the full 144 observations.</p>
+<p>We select the period using only the first 100 observations. Within
+that training prefix, the first 80 observations fit candidate models and
+observations 81–100 select the period. The final 44 observations remain
+untouched until the selected model is evaluated. Known monthly frequency
+is also a legitimate pre-specified choice; selecting a period on those
+final 44 outcomes would make their error a tuning score rather than a
+test score.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">seas</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="fl">1</span> <span class="op">:</span> <span class="fl">25</span>, <span class="kw">function</span><span class="op">(</span><span class="va">i</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">i</span>, <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span> <span class="op">(</span><span class="fu"><a href="../reference/NNS.ARMA.html">NNS.ARMA</a></span><span class="op">(</span><span class="va">AirPassengers</span>, h <span class="op">=</span> <span class="fl">44</span>, training.set <span class="op">=</span> <span class="fl">100</span>, method <span class="op">=</span> <span class="st">"lin"</span>, seasonal.factor <span class="op">=</span> <span class="va">i</span>, plot<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">tail</a></span><span class="op">(</span><span class="va">AirPassengers</span>, <span class="fl">44</span><span class="op">)</span><span class="op">)</span> <span class="op">^</span> <span class="fl">2</span><span class="op">)</span> <span class="op">)</span> <span class="op">)</span> <span class="op">)</span> <span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">seas</span><span class="op">)</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Period"</span>, <span class="st">"RMSE"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">training</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">AirPassengers</span>, <span class="fl">100</span><span class="op">)</span></span>
+<span><span class="va">inner_n</span> <span class="op">&lt;-</span> <span class="fl">80L</span></span>
+<span><span class="va">candidates</span> <span class="op">&lt;-</span> <span class="fl">1</span><span class="op">:</span><span class="fl">16</span></span>
+<span><span class="va">seas</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  Period <span class="op">=</span> <span class="va">candidates</span>,</span>
+<span>  validation_RMSE <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span><span class="va">candidates</span>, <span class="kw">function</span><span class="op">(</span><span class="va">period</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">predicted</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/NNS.ARMA.html">NNS.ARMA</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">training</span>, <span class="va">inner_n</span><span class="op">)</span>, h <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">training</span><span class="op">)</span> <span class="op">-</span> <span class="va">inner_n</span>,</span>
+<span>                          method <span class="op">=</span> <span class="st">"lin"</span>, seasonal.factor <span class="op">=</span> <span class="va">period</span>,</span>
+<span>                          plot <span class="op">=</span> <span class="cn">FALSE</span>, seasonal.plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="op">(</span><span class="va">predicted</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">tail</a></span><span class="op">(</span><span class="va">training</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">training</span><span class="op">)</span> <span class="op">-</span> <span class="va">inner_n</span><span class="op">)</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="op">}</span>, <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">a</span> <span class="op">&lt;-</span> <span class="va">seas</span><span class="op">$</span><span class="va">Period</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/which.min.html" class="external-link">which.min</a></span><span class="op">(</span><span class="va">seas</span><span class="op">$</span><span class="va">validation_RMSE</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="va">seas</span></span></code></pre></div>
-<pre><code><span><span class="co">##       Period      RMSE</span></span>
-<span><span class="co">##  [1,]      1  75.67783</span></span>
-<span><span class="co">##  [2,]      2  75.71250</span></span>
-<span><span class="co">##  [3,]      3  75.87604</span></span>
-<span><span class="co">##  [4,]      4  75.16563</span></span>
-<span><span class="co">##  [5,]      5  76.07418</span></span>
-<span><span class="co">##  [6,]      6  70.43185</span></span>
-<span><span class="co">##  [7,]      7  77.98493</span></span>
-<span><span class="co">##  [8,]      8  75.48997</span></span>
-<span><span class="co">##  [9,]      9  79.16378</span></span>
-<span><span class="co">## [10,]     10  81.47260</span></span>
-<span><span class="co">## [11,]     11 106.56886</span></span>
-<span><span class="co">## [12,]     12  35.39965</span></span>
-<span><span class="co">## [13,]     13  90.98265</span></span>
-<span><span class="co">## [14,]     14  95.64979</span></span>
-<span><span class="co">## [15,]     15  82.05345</span></span>
-<span><span class="co">## [16,]     16  74.63052</span></span>
-<span><span class="co">## [17,]     17  87.54036</span></span>
-<span><span class="co">## [18,]     18  74.90881</span></span>
-<span><span class="co">## [19,]     19  96.96011</span></span>
-<span><span class="co">## [20,]     20  88.75015</span></span>
-<span><span class="co">## [21,]     21 100.21346</span></span>
-<span><span class="co">## [22,]     22 108.68674</span></span>
-<span><span class="co">## [23,]     23  85.06430</span></span>
-<span><span class="co">## [24,]     24  35.49018</span></span>
-<span><span class="co">## [25,]     25  75.16192</span></span></code></pre>
-<p>Now we know <code>seasonal.factor = 12</code> is our best fit, we can
-see if there’s any benefit from using a nonlinear regression.
-Alternatively, we can define our best fit as the corresponding
-<code>seas$Period</code> entry of the minimum value in our
-<code>seas$RMSE</code> column.</p>
+<pre><code><span><span class="co">##    Period validation_RMSE</span></span>
+<span><span class="co">## 1       1        43.78888</span></span>
+<span><span class="co">## 2       2        43.80467</span></span>
+<span><span class="co">## 3       3        43.10466</span></span>
+<span><span class="co">## 4       4        44.27946</span></span>
+<span><span class="co">## 5       5        46.43585</span></span>
+<span><span class="co">## 6       6        41.88094</span></span>
+<span><span class="co">## 7       7        46.64724</span></span>
+<span><span class="co">## 8       8        46.23633</span></span>
+<span><span class="co">## 9       9        51.19663</span></span>
+<span><span class="co">## 10     10        54.06680</span></span>
+<span><span class="co">## 11     11        56.15792</span></span>
+<span><span class="co">## 12     12        31.63458</span></span>
+<span><span class="co">## 13     13        55.53088</span></span>
+<span><span class="co">## 14     14        67.55522</span></span>
+<span><span class="co">## 15     15        60.16975</span></span>
+<span><span class="co">## 16     16        58.26864</span></span></code></pre>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">a</span> <span class="op">=</span> <span class="va">seas</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/which.min.html" class="external-link">which.min</a></span><span class="op">(</span><span class="va">seas</span><span class="op">[</span> , <span class="fl">2</span><span class="op">]</span><span class="op">)</span>, <span class="fl">1</span><span class="op">]</span></span></code></pre></div>
-<p>Below you will notice the use of <code>seasonal.factor = a</code>
-generates the same output.</p>
+<code class="sourceCode R"><span><span class="va">selected</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/NNS.ARMA.html">NNS.ARMA</a></span><span class="op">(</span><span class="va">training</span>, h <span class="op">=</span> <span class="fl">44</span>, method <span class="op">=</span> <span class="st">"lin"</span>, seasonal.factor <span class="op">=</span> <span class="va">a</span>,</span>
+<span>                     plot <span class="op">=</span> <span class="cn">TRUE</span>, seasonal.plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+<p><img src="NNSvignette_09_Forecasting_files/figure-html/selected-period-test-1.png" class="r-plt" alt="" width="480" style="display: block; margin: auto;"></p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">nns</span> <span class="op">=</span> <span class="fu"><a href="../reference/NNS.ARMA.html">NNS.ARMA</a></span><span class="op">(</span><span class="va">AirPassengers</span>, </span>
-<span>               h <span class="op">=</span> <span class="fl">44</span>, </span>
-<span>               training.set <span class="op">=</span> <span class="fl">100</span>, </span>
-<span>               method <span class="op">=</span> <span class="st">"nonlin"</span>, </span>
-<span>               seasonal.factor <span class="op">=</span> <span class="va">a</span>, </span>
-<span>               plot <span class="op">=</span> <span class="cn">TRUE</span>, seasonal.plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
-<p><img src="NNSvignette_09_Forecasting_files/figure-html/best%20nonlinear-1.png" class="r-plt" alt="" width="480" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="op">(</span><span class="va">nns</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">tail</a></span><span class="op">(</span><span class="va">AirPassengers</span>, <span class="fl">44</span><span class="op">)</span><span class="op">)</span> <span class="op">^</span> <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## [1] 17.32624</span></span></code></pre>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="op">(</span><span class="va">selected</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">tail</a></span><span class="op">(</span><span class="va">AirPassengers</span>, <span class="fl">44</span><span class="op">)</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1] 35.39965</span></span></code></pre>
+<p>This outer test score evaluates one selected procedure. The earlier
+linear and nonlinear illustrations are separate pre-specified
+comparisons; choosing among them after seeing their test errors would
+require a new test period.</p>
 <p><strong>Note:</strong> You may experience instances with monthly data
 that report <code>seasonal.factor</code> close to multiples of 3, 4, 6
 or 12. For instance, if the reported
@@ -195,131 +190,199 @@ or 12. For instance, if the reported
 suggestion holds for daily data and multiples of 7, or any other time
 series with logically inferred cyclical patterns. The nearest periods to
 that <code>modulo</code> will be in the expanded output.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/NNS.seas.html">NNS.seas</a></span><span class="op">(</span><span class="va">AirPassengers</span>, modulo <span class="op">=</span> <span class="fl">12</span>, plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/NNS.seas.html">NNS.seas</a></span><span class="op">(</span><span class="va">training</span>, modulo <span class="op">=</span> <span class="fl">12</span>, plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## $all.periods</span></span>
 <span><span class="co">##   Period Coefficient.of.Variation Variable.Coefficient.of.Variation</span></span>
-<span><span class="co">## 1     12               0.09860445                         0.1776757</span></span>
-<span><span class="co">## 2     24               0.10336370                         0.1776757</span></span>
-<span><span class="co">## 3     36               0.10754609                         0.1776757</span></span>
+<span><span class="co">## 1     12               0.08014336                         0.1532545</span></span>
+<span><span class="co">## 2     24               0.08386687                         0.1532545</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $best.period</span></span>
 <span><span class="co">## [1] 12</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $periods</span></span>
-<span><span class="co">## [1] 12 24 36</span></span></code></pre>
+<span><span class="co">## [1] 12 24</span></span></code></pre>
 </div>
 <div class="section level3">
-<h3 id="cross-validating-all-combinations-of-seasonal-factor">Cross-Validating All Combinations of
-<code>seasonal.factor</code><a class="anchor" aria-label="anchor" href="#cross-validating-all-combinations-of-seasonal-factor"></a>
+<h3 id="selecting-seasonal-factors-with-nns-arma-optim">Selecting Seasonal Factors with <code>NNS.ARMA.optim</code><a class="anchor" aria-label="anchor" href="#selecting-seasonal-factors-with-nns-arma-optim"></a>
 </h3>
 <p>NNS also offers a wrapper function
-<strong><code><a href="../reference/NNS.ARMA.optim.html">NNS.ARMA.optim()</a></code></strong> to test a given vector of
-<code>seasonal.factor</code> and returns the optimized objective
-function (in this case RMSE written as
+<strong><code><a href="../reference/NNS.ARMA.optim.html">NNS.ARMA.optim()</a></code></strong> that searches
+combinations from a supplied vector of <code>seasonal.factor</code> and
+returns the selected objective value (in this case RMSE written as
 <code>obj.fn = expression( sqrt(mean((predicted - actual)^2)) )</code>)
 and the corresponding periods, as well as the
 <strong><code>NNS.ARMA</code></strong> regression method used.
 Alternatively, using external package objective functions work as well
 such as
 <code>obj.fn = expression(Metrics::rmse(actual, predicted))</code>.</p>
-<p><strong><code><a href="../reference/NNS.ARMA.optim.html">NNS.ARMA.optim()</a></code></strong> will also test whether
-to regress the underlying data first, <code>shrink</code> the estimates
-to their subset mean values, include a <code>bias.shift</code> based on
-its internal validation errors, and compare different
-<code>weights</code> of both linear and nonlinear estimates.</p>
-<p>Given our monthly dataset, we will try multiple years by setting
-<code>seasonal.factor = seq(12, 60, 6)</code> every 6 months based on
-our <strong>NNS.seas()</strong> insights above.</p>
+<p><strong><code><a href="../reference/NNS.ARMA.optim.html">NNS.ARMA.optim()</a></code></strong> also compares
+smoothing the training series, shrinking component forecasts toward
+their means, and weighting seasonal estimates. The default linear
+approximation uses the linear search to select seasonal candidates
+before comparing nonlinear and mixed forecasts. By default it adds no
+bias shift (<code>bias.correction = "none"</code>); <code>"split"</code>
+estimates a gravity shift from the first half of the internal validation
+errors and accepts it on the later half, and
+<code>bias.validation</code> reports that decision. These are tuning
+steps within the first 100 observations.</p>
+<p>For this monthly series, we specify periods of 12, 18 and 24 months
+before inspecting the reserved test outcomes. Each leaves at least three
+observations per phase in the 80-observation inner training window.
+Longer candidates up to 60 would be removed by the optimizer’s
+sample-support rule for this window, so the code lists the supported
+candidates explicitly.</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">optimizer_periods</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">12L</span>, <span class="fl">18L</span>, <span class="fl">24L</span><span class="op">)</span></span>
+<span><span class="va">nns.optimal</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/NNS.ARMA.optim.html">NNS.ARMA.optim</a></span><span class="op">(</span><span class="va">training</span>,</span>
+<span>                              training.set <span class="op">=</span> <span class="va">inner_n</span>, h <span class="op">=</span> <span class="fl">44</span>,</span>
+<span>                              seasonal.factor <span class="op">=</span> <span class="va">optimizer_periods</span>,</span>
+<span>                              obj.fn <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="op">(</span><span class="va">predicted</span> <span class="op">-</span> <span class="va">actual</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>                              objective <span class="op">=</span> <span class="st">"min"</span>,</span>
+<span>                              ncores <span class="op">=</span> <span class="fl">1</span>, print.trace <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>                              pred.int <span class="op">=</span> <span class="fl">.95</span>, plot <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<p><img src="NNSvignette_09_Forecasting_files/figure-html/optimizer-1.png" class="r-plt" alt="" width="576" style="display: block; margin: auto;"></p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">nns.optimal</span> <span class="op">=</span> <span class="fu"><a href="../reference/NNS.ARMA.optim.html">NNS.ARMA.optim</a></span><span class="op">(</span><span class="va">AirPassengers</span>,</span>
-<span>                             training.set <span class="op">=</span> <span class="fl">100</span>, </span>
-<span>                             seasonal.factor <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">12</span>, <span class="fl">60</span>, <span class="fl">6</span><span class="op">)</span>,</span>
-<span>                             obj.fn <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="op">(</span><span class="va">predicted</span> <span class="op">-</span> <span class="va">actual</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span> <span class="op">)</span>,</span>
-<span>                             objective <span class="op">=</span> <span class="st">"min"</span>,</span>
-<span>                             pred.int <span class="op">=</span> <span class="fl">.95</span>, plot <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">nns.optimal</span></span></code></pre></div>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">"CURRNET METHOD: lin"</span></span>
-<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">"COPY LATEST PARAMETERS DIRECTLY FOR NNS.ARMA() IF ERROR:"</span></span>
-<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">"NNS.ARMA(... method =  'lin' , seasonal.factor =  c( 12 ) ...)"</span></span>
-<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">"CURRENT lin OBJECTIVE FUNCTION = 35.3996540135277"</span></span>
-<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">"BEST method = 'lin', seasonal.factor = c( 12 )"</span></span>
-<span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">"BEST lin OBJECTIVE FUNCTION = 35.3996540135277"</span></span>
-<span id="cb16-7"><a href="#cb16-7" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">"CURRNET METHOD: nonlin"</span></span>
-<span id="cb16-8"><a href="#cb16-8" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">"COPY LATEST PARAMETERS DIRECTLY FOR NNS.ARMA() IF ERROR:"</span></span>
-<span id="cb16-9"><a href="#cb16-9" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">"NNS.ARMA(... method =  'nonlin' , seasonal.factor =  c( 12 ) ...)"</span></span>
-<span id="cb16-10"><a href="#cb16-10" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">"CURRENT nonlin OBJECTIVE FUNCTION = 18.1809033101955"</span></span>
-<span id="cb16-11"><a href="#cb16-11" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">"BEST method = 'nonlin' PATH MEMBER = c( 12 )"</span></span>
-<span id="cb16-12"><a href="#cb16-12" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">"BEST nonlin OBJECTIVE FUNCTION = 18.1809033101955"</span></span>
-<span id="cb16-13"><a href="#cb16-13" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">"CURRNET METHOD: both"</span></span>
-<span id="cb16-14"><a href="#cb16-14" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">"COPY LATEST PARAMETERS DIRECTLY FOR NNS.ARMA() IF ERROR:"</span></span>
-<span id="cb16-15"><a href="#cb16-15" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">"NNS.ARMA(... method =  'both' , seasonal.factor =  c( 12 ) ...)"</span></span>
-<span id="cb16-16"><a href="#cb16-16" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">"CURRENT both OBJECTIVE FUNCTION = 22.7363330823967"</span></span>
-<span id="cb16-17"><a href="#cb16-17" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">"BEST method = 'both' PATH MEMBER = c( 12 )"</span></span>
-<span id="cb16-18"><a href="#cb16-18" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">"BEST both OBJECTIVE FUNCTION = 22.7363330823967"</span></span>
-<span id="cb16-19"><a href="#cb16-19" tabindex="-1"></a><span class="sc">&gt;</span> </span>
-<span id="cb16-20"><a href="#cb16-20" tabindex="-1"></a><span class="er">&gt;</span> nns.optimal</span>
-<span id="cb16-21"><a href="#cb16-21" tabindex="-1"></a><span class="sc">$</span>periods</span>
-<span id="cb16-22"><a href="#cb16-22" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">12</span></span>
-<span id="cb16-23"><a href="#cb16-23" tabindex="-1"></a></span>
-<span id="cb16-24"><a href="#cb16-24" tabindex="-1"></a><span class="sc">$</span>weights</span>
-<span id="cb16-25"><a href="#cb16-25" tabindex="-1"></a><span class="cn">NULL</span></span>
-<span id="cb16-26"><a href="#cb16-26" tabindex="-1"></a></span>
-<span id="cb16-27"><a href="#cb16-27" tabindex="-1"></a><span class="sc">$</span>obj.fn</span>
-<span id="cb16-28"><a href="#cb16-28" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">18.1809</span></span>
-<span id="cb16-29"><a href="#cb16-29" tabindex="-1"></a></span>
-<span id="cb16-30"><a href="#cb16-30" tabindex="-1"></a><span class="sc">$</span>method</span>
-<span id="cb16-31"><a href="#cb16-31" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">"nonlin"</span></span>
-<span id="cb16-32"><a href="#cb16-32" tabindex="-1"></a></span>
-<span id="cb16-33"><a href="#cb16-33" tabindex="-1"></a><span class="sc">$</span>shrink</span>
-<span id="cb16-34"><a href="#cb16-34" tabindex="-1"></a>[<span class="dv">1</span>] <span class="cn">FALSE</span></span>
-<span id="cb16-35"><a href="#cb16-35" tabindex="-1"></a></span>
-<span id="cb16-36"><a href="#cb16-36" tabindex="-1"></a><span class="sc">$</span>nns.regress</span>
-<span id="cb16-37"><a href="#cb16-37" tabindex="-1"></a>[<span class="dv">1</span>] <span class="cn">FALSE</span></span>
-<span id="cb16-38"><a href="#cb16-38" tabindex="-1"></a></span>
-<span id="cb16-39"><a href="#cb16-39" tabindex="-1"></a><span class="sc">$</span>bias.shift</span>
-<span id="cb16-40"><a href="#cb16-40" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">0</span></span>
-<span id="cb16-41"><a href="#cb16-41" tabindex="-1"></a></span>
-<span id="cb16-42"><a href="#cb16-42" tabindex="-1"></a><span class="sc">$</span>errors</span>
-<span id="cb16-43"><a href="#cb16-43" tabindex="-1"></a> [<span class="dv">1</span>]  <span class="sc">-</span><span class="fl">6.0626221</span> <span class="sc">-</span><span class="fl">10.8434613</span> <span class="sc">-</span><span class="fl">10.7646998</span> <span class="sc">-</span><span class="fl">22.7134790</span> <span class="sc">-</span><span class="fl">15.3519569</span> <span class="sc">-</span><span class="fl">12.9673866</span>  <span class="sc">-</span><span class="fl">9.1626428</span>   <span class="fl">3.9393939</span>   <span class="fl">7.4882812</span>  <span class="fl">12.3750000</span>  <span class="fl">29.1132812</span>  <span class="fl">34.3281250</span>  <span class="fl">19.7002739</span></span>
-<span id="cb16-44"><a href="#cb16-44" tabindex="-1"></a>[<span class="dv">14</span>]  <span class="fl">20.0656989</span>  <span class="fl">11.8833952</span> <span class="sc">-</span><span class="fl">15.1389735</span>  <span class="fl">24.1108241</span>   <span class="fl">7.4289721</span>  <span class="fl">15.2385271</span>  <span class="fl">38.3826941</span>  <span class="fl">19.2903993</span>  <span class="fl">17.4644272</span>  <span class="fl">19.3331767</span>  <span class="fl">19.8155057</span>  <span class="sc">-</span><span class="fl">4.0856291</span>  <span class="fl">26.3260739</span></span>
-<span id="cb16-45"><a href="#cb16-45" tabindex="-1"></a>[<span class="dv">27</span>]   <span class="fl">2.6153110</span> <span class="sc">-</span><span class="fl">24.3491085</span>   <span class="fl">3.9057436</span>  <span class="sc">-</span><span class="fl">8.8271346</span>  <span class="sc">-</span><span class="fl">7.9236143</span>   <span class="fl">5.9867956</span>  <span class="sc">-</span><span class="fl">3.9068174</span>  <span class="sc">-</span><span class="fl">0.7986170</span>  <span class="fl">42.1995863</span> <span class="sc">-</span><span class="fl">10.1324609</span> <span class="sc">-</span><span class="fl">20.0852820</span>   <span class="fl">8.6573328</span> <span class="sc">-</span><span class="fl">21.3067790</span></span>
-<span id="cb16-46"><a href="#cb16-46" tabindex="-1"></a>[<span class="dv">40</span>] <span class="sc">-</span><span class="fl">24.3403514</span>  <span class="sc">-</span><span class="fl">0.6332912</span> <span class="sc">-</span><span class="fl">29.8418247</span>  <span class="sc">-</span><span class="fl">5.8572216</span>  <span class="fl">14.8998761</span></span>
-<span id="cb16-47"><a href="#cb16-47" tabindex="-1"></a></span>
-<span id="cb16-48"><a href="#cb16-48" tabindex="-1"></a><span class="sc">$</span>results</span>
-<span id="cb16-49"><a href="#cb16-49" tabindex="-1"></a> [<span class="dv">1</span>] <span class="fl">348.9374</span> <span class="fl">411.1565</span> <span class="fl">454.2353</span> <span class="fl">444.2865</span> <span class="fl">388.6480</span> <span class="fl">334.0326</span> <span class="fl">295.8374</span> <span class="fl">339.9394</span> <span class="fl">347.4883</span> <span class="fl">330.3750</span> <span class="fl">391.1133</span> <span class="fl">382.3281</span> <span class="fl">382.7003</span> <span class="fl">455.0657</span> <span class="fl">502.8834</span> <span class="fl">489.8610</span> <span class="fl">428.1108</span></span>
-<span id="cb16-50"><a href="#cb16-50" tabindex="-1"></a>[<span class="dv">18</span>] <span class="fl">366.4290</span> <span class="fl">325.2385</span> <span class="fl">375.3827</span> <span class="fl">379.2904</span> <span class="fl">359.4644</span> <span class="fl">425.3332</span> <span class="fl">415.8155</span> <span class="fl">415.9144</span> <span class="fl">498.3261</span> <span class="fl">550.6153</span> <span class="fl">534.6509</span> <span class="fl">466.9057</span> <span class="fl">398.1729</span> <span class="fl">354.0764</span> <span class="fl">410.9868</span> <span class="fl">413.0932</span> <span class="fl">390.2014</span></span>
-<span id="cb16-51"><a href="#cb16-51" tabindex="-1"></a>[<span class="dv">35</span>] <span class="fl">461.1996</span> <span class="fl">450.8675</span> <span class="fl">451.9147</span> <span class="fl">543.6573</span> <span class="fl">600.6932</span> <span class="fl">581.6596</span> <span class="fl">507.3667</span> <span class="fl">431.1582</span> <span class="fl">384.1428</span> <span class="fl">446.8999</span></span>
-<span id="cb16-52"><a href="#cb16-52" tabindex="-1"></a></span>
-<span id="cb16-53"><a href="#cb16-53" tabindex="-1"></a><span class="sc">$</span>lower.pred.int</span>
-<span id="cb16-54"><a href="#cb16-54" tabindex="-1"></a> [<span class="dv">1</span>] <span class="fl">310.8588</span> <span class="fl">373.0779</span> <span class="fl">416.1567</span> <span class="fl">406.2079</span> <span class="fl">350.5694</span> <span class="fl">295.9540</span> <span class="fl">257.7588</span> <span class="fl">301.8608</span> <span class="fl">309.4097</span> <span class="fl">292.2964</span> <span class="fl">353.0347</span> <span class="fl">344.2495</span> <span class="fl">344.6217</span> <span class="fl">416.9871</span> <span class="fl">464.8048</span> <span class="fl">451.7824</span> <span class="fl">390.0322</span></span>
-<span id="cb16-55"><a href="#cb16-55" tabindex="-1"></a>[<span class="dv">18</span>] <span class="fl">328.3504</span> <span class="fl">287.1599</span> <span class="fl">337.3041</span> <span class="fl">341.2118</span> <span class="fl">321.3858</span> <span class="fl">387.2546</span> <span class="fl">377.7369</span> <span class="fl">377.8358</span> <span class="fl">460.2475</span> <span class="fl">512.5367</span> <span class="fl">496.5723</span> <span class="fl">428.8271</span> <span class="fl">360.0943</span> <span class="fl">315.9978</span> <span class="fl">372.9082</span> <span class="fl">375.0146</span> <span class="fl">352.1228</span></span>
-<span id="cb16-56"><a href="#cb16-56" tabindex="-1"></a>[<span class="dv">35</span>] <span class="fl">423.1210</span> <span class="fl">412.7889</span> <span class="fl">413.8361</span> <span class="fl">505.5787</span> <span class="fl">562.6146</span> <span class="fl">543.5810</span> <span class="fl">469.2881</span> <span class="fl">393.0796</span> <span class="fl">346.0642</span> <span class="fl">408.8213</span></span>
-<span id="cb16-57"><a href="#cb16-57" tabindex="-1"></a></span>
-<span id="cb16-58"><a href="#cb16-58" tabindex="-1"></a><span class="sc">$</span>upper.pred.int</span>
-<span id="cb16-59"><a href="#cb16-59" tabindex="-1"></a> [<span class="dv">1</span>] <span class="fl">387.0160</span> <span class="fl">449.2351</span> <span class="fl">492.3139</span> <span class="fl">482.3651</span> <span class="fl">426.7266</span> <span class="fl">372.1112</span> <span class="fl">333.9160</span> <span class="fl">378.0180</span> <span class="fl">385.5669</span> <span class="fl">368.4536</span> <span class="fl">429.1919</span> <span class="fl">420.4067</span> <span class="fl">420.7789</span> <span class="fl">493.1443</span> <span class="fl">540.9620</span> <span class="fl">527.9396</span> <span class="fl">466.1894</span></span>
-<span id="cb16-60"><a href="#cb16-60" tabindex="-1"></a>[<span class="dv">18</span>] <span class="fl">404.5076</span> <span class="fl">363.3171</span> <span class="fl">413.4613</span> <span class="fl">417.3690</span> <span class="fl">397.5430</span> <span class="fl">463.4118</span> <span class="fl">453.8941</span> <span class="fl">453.9930</span> <span class="fl">536.4047</span> <span class="fl">588.6939</span> <span class="fl">572.7295</span> <span class="fl">504.9843</span> <span class="fl">436.2515</span> <span class="fl">392.1550</span> <span class="fl">449.0654</span> <span class="fl">451.1718</span> <span class="fl">428.2800</span></span>
-<span id="cb16-61"><a href="#cb16-61" tabindex="-1"></a>[<span class="dv">35</span>] <span class="fl">499.2782</span> <span class="fl">488.9461</span> <span class="fl">489.9933</span> <span class="fl">581.7359</span> <span class="fl">638.7718</span> <span class="fl">619.7382</span> <span class="fl">545.4453</span> <span class="fl">469.2368</span> <span class="fl">422.2214</span> <span class="fl">484.9785</span></span></code></pre></div>
-<center>
-<p><img src="images/ARMA_optim.png" width="600" height="400"></p>
-</center>
+<code class="sourceCode R"><span><span class="va">nns.optimal</span></span></code></pre></div>
+<pre><code><span><span class="co">## $periods</span></span>
+<span><span class="co">## [1] 12</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## $weights</span></span>
+<span><span class="co">## NULL</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## $obj.fn</span></span>
+<span><span class="co">## [1] 26.17135</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## $method</span></span>
+<span><span class="co">## [1] "nonlin"</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## $shrink</span></span>
+<span><span class="co">## [1] FALSE</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## $nns.regress</span></span>
+<span><span class="co">## [1] FALSE</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## $bias.shift</span></span>
+<span><span class="co">## [1] 0</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## $bias.validation</span></span>
+<span><span class="co">## $bias.validation$policy</span></span>
+<span><span class="co">## [1] "none"</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## $bias.validation$estimated.shift</span></span>
+<span><span class="co">## [1] 0</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## $bias.validation$applied.shift</span></span>
+<span><span class="co">## [1] 0</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## $bias.validation$estimate.rows</span></span>
+<span><span class="co">## integer(0)</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## $bias.validation$acceptance.rows</span></span>
+<span><span class="co">## integer(0)</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## $bias.validation$raw.score</span></span>
+<span><span class="co">## [1] NA</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## $bias.validation$adjusted.score</span></span>
+<span><span class="co">## [1] NA</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## $bias.validation$accepted</span></span>
+<span><span class="co">## [1] FALSE</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## $bias.validation$status</span></span>
+<span><span class="co">## [1] "disabled"</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## $raw.results</span></span>
+<span><span class="co">##  [1] 351.5357 416.9881 458.7143 449.3373 392.5159 336.5437 298.9365 336.4444</span></span>
+<span><span class="co">##  [9] 346.3643 329.2791 391.0775 381.8643 386.0959 460.4725 504.8682 494.0918</span></span>
+<span><span class="co">## [17] 430.5114 367.5057 327.2567 367.1606 377.4073 357.0265 425.9934 415.2036</span></span>
+<span><span class="co">## [25] 420.6647 503.5999 550.2190 538.3911 467.7517 397.7587 355.3077 396.9306</span></span>
+<span><span class="co">## [33] 407.5023 383.8903 459.2223 447.3086 453.5746 545.6254 595.4617 581.6900</span></span>
+<span><span class="co">## [41] 504.6181 428.0697 383.3069 427.4418</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## $validation.forecast</span></span>
+<span><span class="co">##  [1] 283.1667 250.8667 225.0667 252.9667 267.4438 255.6970 290.5894 295.0285</span></span>
+<span><span class="co">##  [9] 297.5839 349.4541 406.5728 383.8038 307.7166 273.1074 247.6094 276.5102</span></span>
+<span><span class="co">## [17] 292.4705 277.8527 313.5819 321.0222</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## $errors</span></span>
+<span><span class="co">##  [1] -28.833333 -23.133333 -11.933333 -25.033333 -16.556171 -21.303006</span></span>
+<span><span class="co">##  [7] -26.410601 -17.971519 -20.416139 -24.545886  -6.427215 -21.196203</span></span>
+<span><span class="co">## [13] -47.283360 -32.892616 -23.390559 -29.489847 -22.529482 -23.147274</span></span>
+<span><span class="co">## [19] -42.418145 -26.977785</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## $results</span></span>
+<span><span class="co">##  [1] 351.5357 416.9881 458.7143 449.3373 392.5159 336.5437 298.9365 336.4444</span></span>
+<span><span class="co">##  [9] 346.3643 329.2791 391.0775 381.8643 386.0959 460.4725 504.8682 494.0918</span></span>
+<span><span class="co">## [17] 430.5114 367.5057 327.2567 367.1606 377.4073 357.0265 425.9934 415.2036</span></span>
+<span><span class="co">## [25] 420.6647 503.5999 550.2190 538.3911 467.7517 397.7587 355.3077 396.9306</span></span>
+<span><span class="co">## [33] 407.5023 383.8903 459.2223 447.3086 453.5746 545.6254 595.4617 581.6900</span></span>
+<span><span class="co">## [41] 504.6181 428.0697 383.3069 427.4418</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## $lower.pred.int</span></span>
+<span><span class="co">##  [1] 360.5783 426.0307 467.7569 458.3799 401.5585 345.5863 307.9791 345.4871</span></span>
+<span><span class="co">##  [9] 355.4070 338.3217 400.1201 390.9070 395.1386 469.5152 513.9108 503.1345</span></span>
+<span><span class="co">## [17] 439.5540 376.5483 336.2993 376.2033 386.4499 366.0691 435.0360 424.2463</span></span>
+<span><span class="co">## [25] 429.7073 512.6425 559.2616 547.4337 476.7943 406.8013 364.3503 405.9733</span></span>
+<span><span class="co">## [33] 416.5450 392.9329 468.2650 456.3513 462.6173 554.6680 604.5044 590.7326</span></span>
+<span><span class="co">## [41] 513.6607 437.1123 392.3495 436.4844</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## $upper.pred.int</span></span>
+<span><span class="co">##  [1] 396.5081 461.9605 503.6867 494.3097 437.4883 381.5160 343.9089 381.4168</span></span>
+<span><span class="co">##  [9] 391.3367 374.2515 436.0499 426.8367 431.0683 505.4449 549.8406 539.0642</span></span>
+<span><span class="co">## [17] 475.4838 412.4781 372.2291 412.1330 422.3797 401.9989 470.9658 460.1760</span></span>
+<span><span class="co">## [25] 465.6371 548.5723 595.1914 583.3635 512.7241 442.7310 400.2801 441.9030</span></span>
+<span><span class="co">## [33] 452.4747 428.8627 504.1947 492.2810 498.5470 590.5978 640.4341 626.6624</span></span>
+<span><span class="co">## [41] 549.5905 473.0421 428.2792 472.4142</span></span></code></pre>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>internal_validation_RMSE <span class="op">=</span> <span class="va">nns.optimal</span><span class="op">$</span><span class="va">obj.fn</span>,</span>
+<span>  raw_reserved_test_RMSE <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="op">(</span><span class="va">nns.optimal</span><span class="op">$</span><span class="va">raw.results</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">tail</a></span><span class="op">(</span><span class="va">AirPassengers</span>, <span class="fl">44</span><span class="op">)</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  corrected_reserved_test_RMSE <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="op">(</span><span class="va">nns.optimal</span><span class="op">$</span><span class="va">results</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">tail</a></span><span class="op">(</span><span class="va">AirPassengers</span>, <span class="fl">44</span><span class="op">)</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##     internal_validation_RMSE       raw_reserved_test_RMSE </span></span>
+<span><span class="co">##                     26.17135                     17.90252 </span></span>
+<span><span class="co">## corrected_reserved_test_RMSE </span></span>
+<span><span class="co">##                     17.90252</span></span></code></pre>
+<p>The optimizer’s <code>obj.fn</code> describes its final
+<strong>internal validation</strong> forecast. The other two scores
+evaluate the raw forecast and the returned, corrected forecast against
+the reserved final 44 observations. They are diagnostics; the example
+does not use them to choose a bias policy. Selecting a policy from these
+comparisons would require a new chronological test window. All values
+and the returned forecasts are regenerated at each build. A fitted bias
+shift is a model parameter, not proof of persistent future bias.</p>
 </div>
 <div class="section level3">
 <h3 id="extension-of-estimates">Extension of Estimates<a class="anchor" aria-label="anchor" href="#extension-of-estimates"></a>
 </h3>
 <p>We can forecast another 50 periods out-of-sample
-(<code>h = 50</code>), by dropping the <code>training.set</code>
-parameter while generating the 95% prediction intervals.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/NNS.ARMA.optim.html">NNS.ARMA.optim</a></span><span class="op">(</span><span class="va">AirPassengers</span>, </span>
-<span>                seasonal.factor <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">12</span>, <span class="fl">60</span>, <span class="fl">6</span><span class="op">)</span>,</span>
-<span>                obj.fn <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="op">(</span><span class="va">predicted</span> <span class="op">-</span> <span class="va">actual</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span> <span class="op">)</span>,</span>
-<span>                objective <span class="op">=</span> <span class="st">"min"</span>,</span>
-<span>                pred.int <span class="op">=</span> <span class="fl">.95</span>, h <span class="op">=</span> <span class="fl">50</span>, plot <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<center>
-<p><img src="images/ARMA_optim_h_50.png" width="600" height="400"></p>
-</center>
+(<code>h = 50</code>), using all observations now available as training
+history. The requested interval level names the residual-quantile
+construction; future coverage must be assessed separately.</p>
+<p>The longer history supports candidate periods through 36 months under
+the optimizer’s default 80% internal training split. This deployment
+example has no observed future outcomes to score.</p>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">extended</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/NNS.ARMA.optim.html">NNS.ARMA.optim</a></span><span class="op">(</span><span class="va">AirPassengers</span>,</span>
+<span>                            seasonal.factor <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">12</span>, <span class="fl">36</span>, <span class="fl">6</span><span class="op">)</span>,</span>
+<span>                            obj.fn <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="op">(</span><span class="va">predicted</span> <span class="op">-</span> <span class="va">actual</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>                            objective <span class="op">=</span> <span class="st">"min"</span>,</span>
+<span>                            ncores <span class="op">=</span> <span class="fl">1</span>, print.trace <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>                            pred.int <span class="op">=</span> <span class="fl">.95</span>, h <span class="op">=</span> <span class="fl">50</span>, plot <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<p><img src="NNSvignette_09_Forecasting_files/figure-html/extension-1.png" class="r-plt" alt="" width="576" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>horizon <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">extended</span><span class="op">$</span><span class="va">results</span><span class="op">)</span>,</span>
+<span>                forecast <span class="op">=</span> <span class="va">extended</span><span class="op">$</span><span class="va">results</span>,</span>
+<span>                lower <span class="op">=</span> <span class="va">extended</span><span class="op">$</span><span class="va">lower.pred.int</span>,</span>
+<span>                upper <span class="op">=</span> <span class="va">extended</span><span class="op">$</span><span class="va">upper.pred.int</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##   horizon forecast    lower    upper</span></span>
+<span><span class="co">## 1       1 414.3000 389.7333 455.3167</span></span>
+<span><span class="co">## 2       2 382.7071 358.1405 423.7238</span></span>
+<span><span class="co">## 3       3 437.3357 412.7690 478.3524</span></span>
+<span><span class="co">## 4       4 421.4714 396.9048 462.4881</span></span>
+<span><span class="co">## 5       5 443.2357 418.6690 484.2524</span></span>
+<span><span class="co">## 6       6 533.5429 508.9762 574.5595</span></span></code></pre>
 </div>
 <div class="section level3">
 <h3 id="brief-notes-on-other-parameters">Brief Notes on Other Parameters<a class="anchor" aria-label="anchor" href="#brief-notes-on-other-parameters"></a>

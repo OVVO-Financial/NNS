@@ -27,7 +27,8 @@ NNS.stack(
   pred.int = NULL,
   status = TRUE,
   ncores = NULL,
-  seed = 123L
+  seed = 123L,
+  .validation = NULL
 )
 ```
 
@@ -55,11 +56,11 @@ NNS.stack(
 
 - type:
 
-  `NULL` (default). To perform a classification of discrete integer
-  classes from factor target variable `(DV.train)` with a base category
-  of 1, set to `(type = "CLASS")`, else for continuous `(DV.train)` set
-  to `(type = NULL)`. Like a logistic regression, this setting is not
-  necessary for target variable of two classes e.g. \[0, 1\].
+  `NULL` (default) automatically classifies factor, character, logical
+  and two-valued numeric responses. Set `type = "CLASS"` for nominal
+  classification of any numeric labels, or `type = "REG"` to fit a
+  numeric response as regression regardless of its number of distinct
+  values. Forecasting calls use `type = "REG"`.
 
 - obj.fn:
 
@@ -75,9 +76,9 @@ NNS.stack(
 
 - optimize.threshold:
 
-  logical; `TRUE` (default) Will optimize the probability threshold
-  value for rounding in classification problems. If `FALSE`, returns
-  0.5.
+  logical; `TRUE` (default) Optimizes the threshold for the second
+  first-observed class in binary classification; multiclass decisions
+  use the largest class probability. If `FALSE`, returns 0.5.
 
 - dist:
 
@@ -133,8 +134,10 @@ NNS.stack(
 
 - stack:
 
-  logical; `TRUE` (default) Uses dimension reduction output in `n.best`
-  optimization, otherwise performs both analyses independently.
+  logical; `TRUE` (default) Uses dimension reduction to select actual
+  predictor coordinates for the multivariate neighbour search; the
+  dimension-reduction component separately uses its synthetic index. If
+  FALSE, both components use their own full predictor designs.
 
 - dim.red.method:
 
@@ -146,8 +149,8 @@ NNS.stack(
   for nonlinear dependence weights, while
   `(dim.red.method = "NNS.caus")` uses
   [NNS.caus](https://OVVO-Financial.github.io/NNS/reference/NNS.caus.md)
-  for causal weights. `(dim.red.method = "all")` averages all methods
-  for further feature engineering.
+  for directional association weights. `(dim.red.method = "all")`
+  averages all methods for further feature engineering.
 
 - pred.int:
 
@@ -165,6 +168,19 @@ NNS.stack(
   [NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md).
   If NULL (default), the number of cores to be used is equal to the
   number of cores of the machine - 1.
+
+- .validation:
+
+  Internal forecast-validation contract, normally NULL. A list with
+  `IVs.train`, `DV.train`, `IVs.test`, and `DV.test` supplies the single
+  chronological validation fold when `ts.test` is set, `folds = 1`, and
+  `CV.size = NULL`. It requires exactly `N-ts.test` training rows and
+  one through `ts.test` held-out rows; this allows scoring only observed
+  future targets. Training prefixes and generated validation predictors
+  must be constructed without later data. Used only for regression
+  tuning; numeric two-level responses remain regression when this
+  contract is supplied with type = NULL. The final model still fits all
+  original training observations.
 
 - seed:
 
@@ -186,9 +202,10 @@ for all models.
   [NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md)
   multivariate regression.
 
-- `"OBJfn.reg"` returns the `obj.fn` for the
+- `"OBJfn.reg"` returns the best `obj.fn` value of the
   [NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md)
-  regression.
+  regression's tuning on the out-of-fold predictions; it is
+  selection-optimized, not an estimate of out-of-sample performance.
 
 - `"NNS.dim.red.threshold"` returns the optimum `"threshold"` from the
   [NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md)
@@ -206,9 +223,11 @@ for all models.
   reduction coefficients for every encoded predictor column (zero for
   predictors not selected). `NULL` when `method` does not include 2.
 
-- `"OBJfn.dim.red"` returns the `obj.fn` for the
+- `"OBJfn.dim.red"` returns the best `obj.fn` value of the
   [NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md)
-  dimension reduction regression.
+  dimension reduction regression's tuning on the out-of-fold
+  predictions; it is selection-optimized, not an estimate of
+  out-of-sample performance.
 
 - `"probability.threshold"` returns the optimum probability threshold
   for classification, else 0.5 when set to `FALSE`.
@@ -231,6 +250,51 @@ for all models.
 
 - `"pred.int"` returns the prediction intervals for the stacked model.
 
+## Details
+
+Classification tunes and combines class-probability vectors from the NNS
+predictor cells, preserving nominal label identity. `probabilities`,
+`reg.probabilities`, and `dim.red.probabilities` return the final
+probability matrices. Class balancing resamples the training rows of
+each fold. The neighbour count, the dimension count, the blend weight
+and the binary probability threshold are chosen by optimizing `obj.fn`
+on the pooled out-of-fold predictions; the default classification
+objective is accuracy. `OBJfn.reg` and `OBJfn.dim.red` are the best
+scores of that search on the same predictions, so they are
+selection-optimized and overstate held-out performance; assess the final
+model on an independent test set. Custom objectives receive original
+numeric or logical response values, and factor/character codes as
+identified by `class.levels`. Relabelling is invariant for
+label-invariant objectives such as accuracy; a custom loss assigning
+different costs to classes can deliberately change the result.
+
+Named numeric dimension-reduction coefficients are matched to encoded
+predictor names in both regression and classification. Factor columns
+use `predictor__level` names; unnamed vectors follow encoded column
+order. Classification dimension reduction uses one signed index per
+class indicator. Its reported coefficients are a list of class-specific
+equations. The tuned dimension count is returned as `NNS.dim.red.count`;
+`NNS.dim.red.threshold` is NA because there is no single coefficient
+cutoff shared by all class indices. The field `NNS.dim.red.variables` is
+the union of their active encoded columns. These equations describe the
+synthetic indices, not a complete saved prediction model: reconstruction
+also requires training-fitted scaling, the predictor cells, their class
+frequencies, and the selected smoothing controls. With `stack = TRUE`,
+the multivariate classification component retains the selected number of
+actual encoded coordinates ranked by maximum class-indicator dependence.
+`Prediction.set` contains classes attaining the requested estimated
+probability mass. Binary interval fields contain the range of this set
+for compatibility; multiclass interval fields are NULL. The sets do not
+assert calibrated coverage.
+
+For regression, all dimension-reduction coefficients, normalizations,
+and candidate predictions used in validation are fitted to the
+corresponding training fold. The final coefficients and regressions are
+refitted to the full supplied training data. Method 1 retains the
+selected predictor coordinates, while method 2 evaluates their signed
+synthetic index; the components can therefore represent different
+regression geometry.
+
 ## Note
 
 - Incorporate any objective function from external packages (such as
@@ -238,9 +302,10 @@ for all models.
   `NNS.stack(..., obj.fn = expression(Metrics::mape(actual, predicted)), objective = "min")`
 
 - Like a logistic regression, the `(type = "CLASS")` setting is not
-  necessary for target variable of two classes e.g. \[0, 1\]. The
-  response variable base category should be 1 for multiple class
-  problems.
+  necessary for target variable of two classes e.g. \[0, 1\]. Numeric
+  class values are returned on their original scale; factor and
+  character responses use codes with the returned `class.levels`
+  mapping.
 
 - Missing data should be handled prior as well using
   [na.omit](https://rdrr.io/r/stats/na.fail.html) or
@@ -259,10 +324,12 @@ Fred Viole, OVVO Financial Systems
 ## Examples
 
 ``` r
- ## Using 'iris' dataset where test set [IVs.test] is 'iris' rows 141:150.
+ ## Using 'iris' dataset with a stratified test set of ten rows per species
+ ## (rows 141:150 alone are all virginica).
  if (FALSE) { # \dontrun{
- NNS.stack(iris[1:140, 1:4], iris[1:140, 5], IVs.test = iris[141:150, 1:4], type = "CLASS", 
- balance = TRUE)
+ test.set <- c(41:50, 91:100, 141:150)
+ NNS.stack(iris[-test.set, 1:4], iris[-test.set, 5], IVs.test = iris[test.set, 1:4],
+ type = "CLASS", balance = TRUE)
 
  ## Using 'iris' dataset to determine [n.best] and [threshold] with no test set.
  NNS.stack(iris[ , 1:4], iris[ , 5], type = "CLASS")

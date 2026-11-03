@@ -23,7 +23,6 @@
       margin: 0 0.8em 0.2em -1.6em;
       vertical-align: middle;
     }
-    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
     /* CSS for syntax highlighting */
     html { -webkit-text-size-adjust: 100%; }
     pre > code.sourceCode { white-space: pre; position: relative; }
@@ -91,6 +90,9 @@
     code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
   </style>
   <link rel="stylesheet" href="pages.css" />
+  <script defer=""
+  src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"
+  type="text/javascript"></script>
 </head>
 <body>
 <nav class="nns-site-nav">
@@ -110,12 +112,11 @@ href="https://ovvo-financial.github.io/NNS/book/directional-spectral-decompositi
 <li><p><strong>Full orthant decomposition</strong><br />
 The complete mean-split partition gives an exact spectral genealogy of
 covariance and PCA, but it scales as <span
-class="math inline">2<sup><em>d</em></sup></span>.</p></li>
+class="math inline">\(2^d\)</span>.</p></li>
 <li><p><strong>Pairwise partial-moment matrices</strong><br />
 Pairwise directional matrices recover covariance and PCA exactly while
-scaling as <span
-class="math inline"><em>O</em>(<em>d</em><sup>2</sup>)</span>. This is
-the practical high-dimensional PCA attribution layer.</p></li>
+scaling as <span class="math inline">\(O(d^2)\)</span>. This is the
+practical high-dimensional PCA attribution layer.</p></li>
 <li><p><strong><code>DPM_nD</code> aggregation</strong><br />
 The n-dimensional NNS functions collapse the full orthant partition into
 three global states: all-lower, all-upper, and mixed-sign. This is
@@ -133,67 +134,79 @@ for spectral decomposition.</p>
 <hr />
 <h2 id="executive-summary">Executive Summary</h2>
 <p>Classical PCA starts with a covariance matrix:</p>
-<p><span class="math display"><em>Σ</em>,</span></p>
+<p><span class="math display">\[\Sigma,\]</span></p>
 <p>and diagonalizes it:</p>
-<p><span
-class="math display"><em>Σ</em><em>v</em><sub><em>i</em></sub> = <em>λ</em><sub><em>i</em></sub><em>v</em><sub><em>i</em></sub>.</span></p>
+<p><span class="math display">\[\Sigma v_i = \lambda_i v_i.\]</span></p>
 <p>PCA reports eigenvalues and eigenvectors, but it does not explain
 which directional regions of the data generated them.</p>
 <p>The NNS directional framework begins with observable directional
 structure. In the full orthant version, every observation is assigned to
-a mean-split orthant. For <span class="math inline"><em>d</em></span>
+a mean-split orthant. For <span class="math inline">\(d\)</span>
 variables, this gives:</p>
-<p><span class="math display">2<sup><em>d</em></sup></span></p>
+<p><span class="math display">\[2^d\]</span></p>
 <p>possible states.</p>
-<p>Each occupied orthant <span class="math inline"><em>r</em></span>
-has:</p>
+<p>Each occupied orthant <span class="math inline">\(r\)</span> has:</p>
 <ul>
-<li>empirical probability <span
-class="math inline"><em>p</em><sub><em>r</em></sub></span>;</li>
-<li>conditional mean <span
-class="math inline"><em>m</em><sub><em>r</em></sub></span>;</li>
-<li>centered displacement <span
-class="math inline"><em>u</em><sub><em>r</em></sub> = <em>m</em><sub><em>r</em></sub> − <em>μ</em></span>;</li>
+<li>empirical probability <span class="math inline">\(p_r\)</span>;</li>
+<li>conditional mean <span class="math inline">\(m_r\)</span>;</li>
+<li>centered displacement <span class="math inline">\(u_r =
+m_r-\mu\)</span>;</li>
 <li>within-orthant covariance <span
-class="math inline"><em>Σ</em><sub><em>r</em></sub></span>.</li>
+class="math inline">\(\Sigma_r\)</span>.</li>
 </ul>
 <p>The covariance matrix decomposes exactly as:</p>
-<p><span
-class="math display"><em>Σ</em> = <em>Σ</em><sub><em>Q</em></sub> + <em>Σ</em><sub><em>W</em></sub>,</span></p>
+<p><span class="math display">\[\Sigma
+=
+\Sigma_Q+\Sigma_W,\]</span></p>
 <p>where:</p>
-<p><span
-class="math display"><em>Σ</em><sub><em>Q</em></sub> = ∑<sub><em>r</em></sub><em>p</em><sub><em>r</em></sub><em>u</em><sub><em>r</em></sub><em>u</em><sub><em>r</em></sub><sup>⊤</sup>,</span></p>
+<p><span class="math display">\[\Sigma_Q
+=
+\sum_r p_r u_r u_r^\top,\]</span></p>
 <p>and:</p>
-<p><span
-class="math display"><em>Σ</em><sub><em>W</em></sub> = ∑<sub><em>r</em></sub><em>p</em><sub><em>r</em></sub><em>Σ</em><sub><em>r</em></sub>.</span></p>
+<p><span class="math display">\[\Sigma_W
+=
+\sum_r p_r\Sigma_r.\]</span></p>
 <p>Thus:</p>
-<p><span
-class="math display"><em>Σ</em> = ∑<sub><em>r</em></sub><em>p</em><sub><em>r</em></sub><em>u</em><sub><em>r</em></sub><em>u</em><sub><em>r</em></sub><sup>⊤</sup> + ∑<sub><em>r</em></sub><em>p</em><sub><em>r</em></sub><em>Σ</em><sub><em>r</em></sub>.</span></p>
+<p><span class="math display">\[\Sigma
+=
+\sum_r p_r u_r u_r^\top
++
+\sum_r p_r\Sigma_r.\]</span></p>
 <p>Diagonalizing the recovered matrix gives the same classical PCA
 eigensystem.</p>
 <p>The full orthant decomposition is exact, but it becomes infeasible in
-high dimensions. For <span
-class="math inline"><em>d</em> = 50</span>,</p>
-<p><span
-class="math display">2<sup>50</sup> ≈ 1.1259 × 10<sup>15</sup>.</span></p>
+high dimensions. For <span class="math inline">\(d=50\)</span>,</p>
+<p><span class="math display">\[2^{50}
+\approx
+1.1259\times 10^{15}.\]</span></p>
 <p>The practical high-dimensional alternative is to use pairwise
 partial-moment matrices. These recover covariance through:</p>
-<p><span
-class="math display"><em>Σ</em> = CLPM + CUPM − DLPM − DUPM.</span></p>
+<p><span class="math display">\[\Sigma
+=
+\mathrm{CLPM}
++
+\mathrm{CUPM}
+-
+\mathrm{DLPM}
+-
+\mathrm{DUPM}.\]</span></p>
 <p>Then PCA is recovered from:</p>
 <p><span
-class="math display">(CLPM, CUPM, DLPM, DUPM) → <em>Σ</em> → (<em>λ</em><sub><em>i</em></sub>, <em>v</em><sub><em>i</em></sub>).</span></p>
+class="math display">\[(\mathrm{CLPM},\mathrm{CUPM},\mathrm{DLPM},\mathrm{DUPM})
+\longrightarrow
+\Sigma
+\longrightarrow
+(\lambda_i,v_i).\]</span></p>
 <p>This preserves exact covariance and PCA recovery while scaling with
-four <span class="math inline"><em>d</em> × <em>d</em></span> matrices
-rather than <span class="math inline">2<sup><em>d</em></sup></span>
-orthant states.</p>
+four <span class="math inline">\(d\times d\)</span> matrices rather than
+<span class="math inline">\(2^d\)</span> orthant states.</p>
 <hr />
 <h1 id="part-i--full-orthant-decomposition">Part I — Full Orthant
 Decomposition</h1>
 <h2 id="1-setup">1. Setup</h2>
-<p>Generate <span class="math inline"><em>n</em> = 10, 000</span>
-observations from a five-dimensional distribution with approximately
-uniform pairwise correlation <span class="math inline">0.5</span>.</p>
+<p>Generate <span class="math inline">\(n=10{,}000\)</span> observations
+from a five-dimensional distribution with approximately uniform pairwise
+correlation <span class="math inline">\(0.5\)</span>.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2024</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">10000</span></span>
@@ -284,7 +297,7 @@ correlation structure.</p>
 Partition</h2>
 <p>Partition each variable at its component mean. For five variables,
 the full mean-split partition contains:</p>
-<p><span class="math display">2<sup>5</sup> = 32</span></p>
+<p><span class="math display">\[2^5 = 32\]</span></p>
 <p>possible orthants.</p>
 <p>Each observation is encoded according to whether each variable is
 above or below its component mean:</p>
@@ -300,29 +313,27 @@ partition.</p>
 <hr />
 <h2 id="4-between-within-orthant-decomposition">4. Between-Within
 Orthant Decomposition</h2>
-<p>For each orthant <span class="math inline"><em>r</em></span>,
-compute:</p>
+<p>For each orthant <span class="math inline">\(r\)</span>, compute:</p>
 <ul>
-<li>empirical probability <span
-class="math inline"><em>p</em><sub><em>r</em></sub></span>;</li>
-<li>conditional mean <span
-class="math inline"><em>m</em><sub><em>r</em></sub></span>;</li>
-<li>centered displacement <span
-class="math inline"><em>u</em><sub><em>r</em></sub> = <em>m</em><sub><em>r</em></sub> − <em>μ</em></span>;</li>
+<li>empirical probability <span class="math inline">\(p_r\)</span>;</li>
+<li>conditional mean <span class="math inline">\(m_r\)</span>;</li>
+<li>centered displacement <span class="math inline">\(u_r =
+m_r-\mu\)</span>;</li>
 <li>within-orthant covariance <span
-class="math inline"><em>Σ</em><sub><em>r</em></sub></span>.</li>
+class="math inline">\(\Sigma_r\)</span>.</li>
 </ul>
 <p>Then accumulate:</p>
-<p><span class="math display">$$\Sigma_Q
+<p><span class="math display">\[\Sigma_Q
 =
-\sum_{r=1}^{2^d}p_r u_r u_r^\top,$$</span></p>
+\sum_{r=1}^{2^d}p_r u_r u_r^\top,\]</span></p>
 <p>and:</p>
-<p><span class="math display">$$\Sigma_W
+<p><span class="math display">\[\Sigma_W
 =
-\sum_{r=1}^{2^d}p_r\Sigma_r.$$</span></p>
+\sum_{r=1}^{2^d}p_r\Sigma_r.\]</span></p>
 <p>The full covariance identity is:</p>
-<p><span
-class="math display"><em>Σ</em> = <em>Σ</em><sub><em>Q</em></sub> + <em>Σ</em><sub><em>W</em></sub>.</span></p>
+<p><span class="math display">\[\Sigma
+=
+\Sigma_Q+\Sigma_W.\]</span></p>
 <p>In code:</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>Sigma_Q <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, d, d)</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>Sigma_W <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, d, d)</span>
@@ -343,13 +354,13 @@ class="math display"><em>Σ</em> = <em>Σ</em><sub><em>Q</em></sub> + <e
 <span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>Sigma_rec <span class="ot">&lt;-</span> Sigma_Q <span class="sc">+</span> Sigma_W</span></code></pre></div>
 <p>Each orthant contributes a rank-one between-orthant primitive:</p>
-<p><span
-class="math display"><em>B</em><sub><em>r</em></sub> = <em>p</em><sub><em>r</em></sub><em>u</em><sub><em>r</em></sub><em>u</em><sub><em>r</em></sub><sup>⊤</sup>.</span></p>
-<p>If <span
-class="math inline"><em>u</em><sub><em>r</em></sub> ≠ 0</span>,
-then:</p>
-<p><span
-class="math display"><em>B</em><sub><em>r</em></sub><em>u</em><sub><em>r</em></sub> = <em>p</em><sub><em>r</em></sub>∥<em>u</em><sub><em>r</em></sub>∥<sup>2</sup><em>u</em><sub><em>r</em></sub>.</span></p>
+<p><span class="math display">\[B_r
+=
+p_r u_r u_r^\top.\]</span></p>
+<p>If <span class="math inline">\(u_r\neq 0\)</span>, then:</p>
+<p><span class="math display">\[B_r u_r
+=
+p_r\|u_r\|^2u_r.\]</span></p>
 <p>So each centered orthant conditional mean is the nonzero eigenvector
 of its own rank-one between-orthant contribution.</p>
 <hr />
@@ -366,8 +377,13 @@ floating-point precision:</p>
 Full orthant eigenvector alignments:
 1 1 1 1 1</code></pre>
 <p>Thus:</p>
-<p><span
-class="math display">{<em>p</em><sub><em>r</em></sub>, <em>m</em><sub><em>r</em></sub>, <em>Σ</em><sub><em>r</em></sub>}<sub><em>r</em> = 1</sub><sup>2<sup><em>d</em></sup></sup> → <em>Σ</em><sub><em>Q</em></sub> + <em>Σ</em><sub><em>W</em></sub> → <em>Σ</em> → (<em>λ</em><sub><em>i</em></sub>, <em>v</em><sub><em>i</em></sub>).</span></p>
+<p><span class="math display">\[\{p_r,m_r,\Sigma_r\}_{r=1}^{2^d}
+\longrightarrow
+\Sigma_Q+\Sigma_W
+\longrightarrow
+\Sigma
+\longrightarrow
+(\lambda_i,v_i).\]</span></p>
 <p>The full orthant decomposition recovers the covariance matrix and
 therefore recovers the classical PCA eigensystem.</p>
 <hr />
@@ -375,16 +391,18 @@ therefore recovers the classical PCA eigensystem.</p>
 Attribution from Full Orthants</h2>
 <p>Each classical eigenvalue decomposes into a between-orthant
 contribution and a within-orthant contribution.</p>
-<p>For unit eigenvector <span
-class="math inline"><em>v</em><sub><em>i</em></sub></span>:</p>
-<p><span
-class="math display"><em>λ</em><sub><em>i</em></sub> = <em>v</em><sub><em>i</em></sub><sup>⊤</sup><em>Σ</em><sub><em>Q</em></sub><em>v</em><sub><em>i</em></sub> + <em>v</em><sub><em>i</em></sub><sup>⊤</sup><em>Σ</em><sub><em>W</em></sub><em>v</em><sub><em>i</em></sub>.</span></p>
+<p>For unit eigenvector <span class="math inline">\(v_i\)</span>:</p>
+<p><span class="math display">\[\lambda_i
+=
+v_i^\top\Sigma_Qv_i
++
+v_i^\top\Sigma_Wv_i.\]</span></p>
 <p>Using the orthant decomposition:</p>
-<p><span class="math display">$$\lambda_i
+<p><span class="math display">\[\lambda_i
 =
 \sum_{r=1}^{2^d}p_r(v_i^\top u_r)^2
 +
-\sum_{r=1}^{2^d}p_rv_i^\top\Sigma_rv_i.$$</span></p>
+\sum_{r=1}^{2^d}p_rv_i^\top\Sigma_rv_i.\]</span></p>
 <p>The attribution table was:</p>
 <table>
 <thead>
@@ -441,15 +459,15 @@ class="math display"><em>λ</em><sub><em>i</em></sub> = <em>v</em><sub><em>i
 </tbody>
 </table>
 <p>For PC1:</p>
-<p><span class="math display">$$\frac{2.439089}{2.965193}
+<p><span class="math display">\[\frac{2.439089}{2.965193}
 =
-0.8225735.$$</span></p>
+0.8225735.\]</span></p>
 <p>So about 82.3 percent of PC1 came from between-orthant conditional
 mean separation.</p>
 <p>A useful global summary is:</p>
-<p><span class="math display">$$D_{\mathrm{spectral}}
+<p><span class="math display">\[D_{\mathrm{spectral}}
 =
-\frac{\mathrm{tr}(\Sigma_Q)}{\mathrm{tr}(\Sigma)}.$$</span></p>
+\frac{\mathrm{tr}(\Sigma_Q)}{\mathrm{tr}(\Sigma)}.\]</span></p>
 <p>In this run:</p>
 <pre class="text"><code>D_spectral = 0.685432</code></pre>
 <p>So about 68.5 percent of total variance came from between-orthant
@@ -459,9 +477,9 @@ conditional mean displacement.</p>
 of PC1</h2>
 <p>The between-orthant part of PC1 decomposes further into individual
 orthant contributions:</p>
-<p><span class="math display">$$\lambda_{1,Q}
+<p><span class="math display">\[\lambda_{1,Q}
 =
-\sum_{r=1}^{2^d}p_r(v_1^\top u_r)^2.$$</span></p>
+\sum_{r=1}^{2^d}p_r(v_1^\top u_r)^2.\]</span></p>
 <p>The top ten orthant contributions to PC1 were:</p>
 <table>
 <thead>
@@ -561,8 +579,9 @@ orthant contributions:</p>
 <pre class="text"><code>X1+ X2+ X3+ X4+ X5+
 X1- X2- X3- X4- X5-</code></pre>
 <p>Together they contributed:</p>
-<p><span
-class="math display">32.63223% + 31.51253% = 64.14476%</span></p>
+<p><span class="math display">\[32.63223\% + 31.51253\%
+=
+64.14476\%\]</span></p>
 <p>of PC1.</p>
 <p>The orthant-level PC1 contributions summed exactly to the direct
 Rayleigh quotient:</p>
@@ -577,19 +596,25 @@ Direct Sigma_Q between contribution for PC1:
 <p>The decomposition runs in one direction.</p>
 <p>From the full orthant decomposition, one recovers the covariance
 matrix:</p>
-<p><span
-class="math display">{<em>p</em><sub><em>r</em></sub>, <em>m</em><sub><em>r</em></sub>, <em>Σ</em><sub><em>r</em></sub>}<sub><em>r</em> = 1</sub><sup>2<sup><em>d</em></sup></sup> → <em>Σ</em>.</span></p>
+<p><span class="math display">\[\{p_r,m_r,\Sigma_r\}_{r=1}^{2^d}
+\longrightarrow
+\Sigma.\]</span></p>
 <p>From the covariance matrix, one recovers the PCA eigensystem:</p>
-<p><span
-class="math display"><em>Σ</em> → (<em>λ</em><sub><em>i</em></sub>, <em>v</em><sub><em>i</em></sub>).</span></p>
+<p><span class="math display">\[\Sigma
+\longrightarrow
+(\lambda_i,v_i).\]</span></p>
 <p>But PCA output alone does not recover the orthant probabilities,
 orthant assignments, or orthant conditional means.</p>
 <p>Therefore:</p>
-<p><span
-class="math display">{<em>p</em><sub><em>r</em></sub>, <em>m</em><sub><em>r</em></sub>, <em>Σ</em><sub><em>r</em></sub>}<sub><em>r</em> = 1</sub><sup>2<sup><em>d</em></sup></sup> ⇒ <em>Σ</em> ⇒ (<em>λ</em><sub><em>i</em></sub>, <em>v</em><sub><em>i</em></sub>),</span></p>
+<p><span class="math display">\[\{p_r,m_r,\Sigma_r\}_{r=1}^{2^d}
+\Rightarrow
+\Sigma
+\Rightarrow
+(\lambda_i,v_i),\]</span></p>
 <p>but generally:</p>
-<p><span
-class="math display">(<em>λ</em><sub><em>i</em></sub>, <em>v</em><sub><em>i</em></sub>) ⇏ {<em>p</em><sub><em>r</em></sub>, <em>m</em><sub><em>r</em></sub>, <em>Σ</em><sub><em>r</em></sub>}<sub><em>r</em> = 1</sub><sup>2<sup><em>d</em></sup></sup>.</span></p>
+<p><span class="math display">\[(\lambda_i,v_i)
+\not\Rightarrow
+\{p_r,m_r,\Sigma_r\}_{r=1}^{2^d}.\]</span></p>
 <p>PCA is a downstream summary. The orthant decomposition contains
 strictly more directional information.</p>
 <hr />
@@ -598,42 +623,46 @@ strictly more directional information.</p>
 <h2 id="9-why-dpm_nd-is-useful-but-coarse">9. Why <code>DPM_nD</code> Is
 Useful but Coarse</h2>
 <p>The full orthant decomposition is exact, but it scales as:</p>
-<p><span class="math display">2<sup><em>d</em></sup>.</span></p>
+<p><span class="math display">\[2^d.\]</span></p>
 <p>For five variables:</p>
-<p><span class="math display">2<sup>5</sup> = 32.</span></p>
+<p><span class="math display">\[2^5 = 32.\]</span></p>
 <p>For 50 variables:</p>
-<p><span
-class="math display">2<sup>50</sup> ≈ 1.1259 × 10<sup>15</sup>.</span></p>
+<p><span class="math display">\[2^{50}
+\approx
+1.1259\times10^{15}.\]</span></p>
 <p>Most high-dimensional orthants would be empty or too sparsely
 populated to support stable conditional mean and covariance
 estimates.</p>
 <p>The NNS n-dimensional partial moment functions collapse the full
 orthant partition into three observable aggregate states:</p>
-<p><span
-class="math display">CLPM<sub><em>n</em><em>D</em></sub> = all variables below target,</span></p>
-<p><span
-class="math display">CUPM<sub><em>n</em><em>D</em></sub> = all variables above target,</span></p>
-<p><span
-class="math display">DPM<sub><em>n</em><em>D</em></sub> = all mixed sign configurations.</span></p>
+<p><span class="math display">\[\mathrm{CLPM}_{nD}
+=
+\mathrm{all\ variables\ below\ target},\]</span></p>
+<p><span class="math display">\[\mathrm{CUPM}_{nD}
+=
+\mathrm{all\ variables\ above\ target},\]</span></p>
+<p><span class="math display">\[\mathrm{DPM}_{nD}
+=
+\mathrm{all\ mixed\ sign\ configurations}.\]</span></p>
 <p>So the state count is reduced from:</p>
-<p><span class="math display">2<sup><em>d</em></sup></span></p>
+<p><span class="math display">\[2^d\]</span></p>
 <p>to:</p>
-<p><span class="math display">3.</span></p>
-<p>For <span class="math inline"><em>d</em> = 5</span>, the full
-partition has 32 orthants. The three-state aggregation is:</p>
-<p><span
-class="math display"><em>G</em><sub><em>L</em></sub> = {0},</span></p>
-<p><span
-class="math display"><em>G</em><sub><em>U</em></sub> = {31},</span></p>
-<p><span
-class="math display"><em>G</em><sub><em>D</em></sub> = {1, 2, …, 30}.</span></p>
+<p><span class="math display">\[3.\]</span></p>
+<p>For <span class="math inline">\(d=5\)</span>, the full partition has
+32 orthants. The three-state aggregation is:</p>
+<p><span class="math display">\[G_L=\{0\},\]</span></p>
+<p><span class="math display">\[G_U=\{31\},\]</span></p>
+<p><span class="math display">\[G_D=\{1,2,\ldots,30\}.\]</span></p>
 <p>Thus:</p>
-<p><span
-class="math display">CLPM<sub><em>n</em><em>D</em></sub> = ∑<sub><em>r</em> ∈ <em>G</em><sub><em>L</em></sub></sub><em>p</em><sub><em>r</em></sub>,</span></p>
-<p><span
-class="math display">CUPM<sub><em>n</em><em>D</em></sub> = ∑<sub><em>r</em> ∈ <em>G</em><sub><em>U</em></sub></sub><em>p</em><sub><em>r</em></sub>,</span></p>
-<p><span
-class="math display">DPM<sub><em>n</em><em>D</em></sub> = ∑<sub><em>r</em> ∈ <em>G</em><sub><em>D</em></sub></sub><em>p</em><sub><em>r</em></sub>.</span></p>
+<p><span class="math display">\[\mathrm{CLPM}_{nD}
+=
+\sum_{r\in G_L}p_r,\]</span></p>
+<p><span class="math display">\[\mathrm{CUPM}_{nD}
+=
+\sum_{r\in G_U}p_r,\]</span></p>
+<p><span class="math display">\[\mathrm{DPM}_{nD}
+=
+\sum_{r\in G_D}p_r.\]</span></p>
 <p>At degree zero, <code>DPM_nD</code> is not separate from the full
 orthant decomposition. It is the coarse three-state projection of
 it.</p>
@@ -784,23 +813,28 @@ of <code>DPM_nD</code> for Spectral Genealogy</h2>
 requires each orthant displacement vector and each within-orthant
 covariance:</p>
 <p><span
-class="math display">{<em>p</em><sub><em>r</em></sub>, <em>u</em><sub><em>r</em></sub>, <em>Σ</em><sub><em>r</em></sub>}<sub><em>r</em> = 1</sub><sup>2<sup><em>d</em></sup></sup>.</span></p>
+class="math display">\[\{p_r,u_r,\Sigma_r\}_{r=1}^{2^d}.\]</span></p>
 <p>The full between-orthant covariance is:</p>
-<p><span class="math display">$$\Sigma_Q
+<p><span class="math display">\[\Sigma_Q
 =
-\sum_{r=1}^{2^d}p_r u_r u_r^\top.$$</span></p>
+\sum_{r=1}^{2^d}p_r u_r u_r^\top.\]</span></p>
 <p>When the mixed orthants are collapsed into a single
 <code>DPM_nD</code> value, their individual displacement vectors are no
 longer separately retained.</p>
 <p>Therefore:</p>
-<p><span
-class="math display">full orthant decomposition ⇒ (CLPM<sub><em>n</em><em>D</em></sub>, CUPM<sub><em>n</em><em>D</em></sub>, DPM<sub><em>n</em><em>D</em></sub>),</span></p>
+<p><span class="math display">\[\mathrm{full\ orthant\ decomposition}
+\Rightarrow
+(\mathrm{CLPM}_{nD},\mathrm{CUPM}_{nD},\mathrm{DPM}_{nD}),\]</span></p>
 <p>but:</p>
 <p><span
-class="math display">(CLPM<sub><em>n</em><em>D</em></sub>, CUPM<sub><em>n</em><em>D</em></sub>, DPM<sub><em>n</em><em>D</em></sub>) ⇏ full orthant decomposition.</span></p>
+class="math display">\[(\mathrm{CLPM}_{nD},\mathrm{CUPM}_{nD},\mathrm{DPM}_{nD})
+\not\Rightarrow
+\mathrm{full\ orthant\ decomposition}.\]</span></p>
 <p>So the correct role of <code>DPM_nD</code> is:</p>
-<p><span
-class="math display">DPM<sub><em>n</em><em>D</em></sub> = scalable three state global directional diagnostic.</span></p>
+<p><span class="math display">\[\mathrm{DPM}_{nD}
+=
+\mathrm{scalable\ three\ state\ global\ directional\
+diagnostic}.\]</span></p>
 <p>It is not the main high-dimensional PCA recovery method.</p>
 <hr />
 <h1
@@ -810,13 +844,26 @@ III — Pairwise Partial-Moment Matrices as the Scalable PCA Method</h1>
 Directional Matrix Identity</h2>
 <p>The scalable alternative is to use pairwise directional
 partial-moment matrices.</p>
-<p>For a <span class="math inline"><em>d</em></span>-variable matrix
-<span class="math inline"><em>Z</em></span>, compute the four <span
-class="math inline"><em>d</em> × <em>d</em></span> matrices:</p>
-<p><span class="math display">CLPM,   CUPM,   DLPM,   DUPM.</span></p>
+<p>For a <span class="math inline">\(d\)</span>-variable matrix <span
+class="math inline">\(Z\)</span>, compute the four <span
+class="math inline">\(d\times d\)</span> matrices:</p>
+<p><span class="math display">\[\mathrm{CLPM},
+\qquad
+\mathrm{CUPM},
+\qquad
+\mathrm{DLPM},
+\qquad
+\mathrm{DUPM}.\]</span></p>
 <p>These reassemble covariance as:</p>
-<p><span
-class="math display"><em>Σ</em> = CLPM + CUPM − DLPM − DUPM.</span></p>
+<p><span class="math display">\[\Sigma
+=
+\mathrm{CLPM}
++
+\mathrm{CUPM}
+-
+\mathrm{DLPM}
+-
+\mathrm{DUPM}.\]</span></p>
 <p>In R:</p>
 <div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>pm <span class="ot">&lt;-</span> NNS<span class="sc">::</span><span class="fu">PM.matrix</span>(</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">LPM_degree =</span> <span class="dv">1</span>,</span>
@@ -837,20 +884,32 @@ class="math display"><em>Σ</em> = CLPM + CUPM − DLPM − DUPM
 <div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>pca_nns <span class="ot">&lt;-</span> <span class="fu">eigen</span>(Sigma_nns, <span class="at">symmetric =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
 <p>The recovery chain is:</p>
 <p><span
-class="math display">(CLPM, CUPM, DLPM, DUPM) → <em>Σ</em> → (<em>λ</em><sub><em>i</em></sub>, <em>v</em><sub><em>i</em></sub>).</span></p>
-<p>This uses four <span
-class="math inline"><em>d</em> × <em>d</em></span> matrices rather than
-<span class="math inline">2<sup><em>d</em></sup></span> orthants.</p>
+class="math display">\[(\mathrm{CLPM},\mathrm{CUPM},\mathrm{DLPM},\mathrm{DUPM})
+\longrightarrow
+\Sigma
+\longrightarrow
+(\lambda_i,v_i).\]</span></p>
+<p>This uses four <span class="math inline">\(d\times d\)</span>
+matrices rather than <span class="math inline">\(2^d\)</span>
+orthants.</p>
 <hr />
 <h2 id="14-pairwise-eigenvalue-attribution">14. Pairwise Eigenvalue
 Attribution</h2>
 <p>For any classical PCA direction <span
-class="math inline"><em>v</em><sub><em>i</em></sub></span>,</p>
-<p><span
-class="math display"><em>λ</em><sub><em>i</em></sub> = <em>v</em><sub><em>i</em></sub><sup>⊤</sup><em>Σ</em><em>v</em><sub><em>i</em></sub>.</span></p>
+class="math inline">\(v_i\)</span>,</p>
+<p><span class="math display">\[\lambda_i
+=
+v_i^\top \Sigma v_i.\]</span></p>
 <p>Substituting the pairwise directional decomposition gives:</p>
-<p><span
-class="math display"><em>λ</em><sub><em>i</em></sub> = <em>v</em><sub><em>i</em></sub><sup>⊤</sup>CLPM<em>v</em><sub><em>i</em></sub> + <em>v</em><sub><em>i</em></sub><sup>⊤</sup>CUPM<em>v</em><sub><em>i</em></sub> − <em>v</em><sub><em>i</em></sub><sup>⊤</sup>DLPM<em>v</em><sub><em>i</em></sub> − <em>v</em><sub><em>i</em></sub><sup>⊤</sup>DUPM<em>v</em><sub><em>i</em></sub>.</span></p>
+<p><span class="math display">\[\lambda_i
+=
+v_i^\top\mathrm{CLPM}v_i
++
+v_i^\top\mathrm{CUPM}v_i
+-
+v_i^\top\mathrm{DLPM}v_i
+-
+v_i^\top\mathrm{DUPM}v_i.\]</span></p>
 <p>This identifies whether a principal component is generated by:</p>
 <ul>
 <li>lower concordance;</li>
@@ -1057,8 +1116,15 @@ Five-Variable Pairwise Directional Attribution</h2>
 </tbody>
 </table>
 <p>For PC1:</p>
-<p><span
-class="math display">2.965489 = 1.693504 + 1.708038 − 0.218026 − 0.218026.</span></p>
+<p><span class="math display">\[2.965489
+=
+1.693504
++
+1.708038
+-
+0.218026
+-
+0.218026.\]</span></p>
 <p>So PC1 is dominated by pairwise lower and upper concordance, with
 divergent pairwise movement subtracting from the common direction.</p>
 <p>At the trace level:</p>
@@ -1105,20 +1171,21 @@ diagonal structure in this symmetric correlated example.</p>
 Pairwise Scalability</h1>
 <h2 id="17-why-full-orthants-fail-at-50-variables">17. Why Full Orthants
 Fail at 50 Variables</h2>
-<p>For <span class="math inline"><em>d</em> = 50</span>, the full
-orthant state count is:</p>
-<p><span
-class="math display">2<sup>50</sup> = 1.1259 × 10<sup>15</sup>.</span></p>
-<p>With <span class="math inline"><em>n</em> = 5000</span> observations,
-the observation-to-orthant ratio is:</p>
-<p><span class="math display">$$\frac{5000}{2^{50}}
+<p>For <span class="math inline">\(d=50\)</span>, the full orthant state
+count is:</p>
+<p><span class="math display">\[2^{50}
 =
-4.440892\times 10^{-12}.$$</span></p>
+1.1259\times 10^{15}.\]</span></p>
+<p>With <span class="math inline">\(n=5000\)</span> observations, the
+observation-to-orthant ratio is:</p>
+<p><span class="math display">\[\frac{5000}{2^{50}}
+=
+4.440892\times 10^{-12}.\]</span></p>
 <p>This is not estimable as a full orthant partition. Almost every
 possible orthant is unobserved, and any occupied orthant would be too
 sparse for stable covariance estimation.</p>
 <p>Pairwise <code>PM.matrix</code> avoids this problem by estimating
-four <span class="math inline">50 × 50</span> matrices.</p>
+four <span class="math inline">\(50\times 50\)</span> matrices.</p>
 <hr />
 <h2 id="18-50-variable-commonsector-simulation">18. 50-Variable
 Common/Sector Simulation</h2>
@@ -1373,23 +1440,30 @@ the market direction.</p>
 simulation where the spread factor is deliberately stronger than the
 market factor.</p>
 <p>The market vector is:</p>
-<p><span class="math display">$$m
+<p><span class="math display">\[m
 =
-\frac{1}{\sqrt{50}}(1,1,\ldots,1).$$</span></p>
+\frac{1}{\sqrt{50}}(1,1,\ldots,1).\]</span></p>
 <p>The spread vector is:</p>
-<p><span class="math display">$$s
+<p><span class="math display">\[s
 =
 \frac{1}{\sqrt{50}}(\underbrace{1,\ldots,1}_{25},
-\underbrace{-1,\ldots,-1}_{25}).$$</span></p>
+\underbrace{-1,\ldots,-1}_{25}).\]</span></p>
 <p>The two vectors are orthogonal:</p>
-<p><span
-class="math display"><em>m</em><sup>⊤</sup><em>s</em> = 0.</span></p>
+<p><span class="math display">\[m^\top s = 0.\]</span></p>
 <p>The data are generated as:</p>
-<p><span
-class="math display"><em>Z</em> = <em>σ</em><sub><em>m</em></sub><em>M</em><em>m</em><sup>⊤</sup> + <em>σ</em><sub><em>s</em></sub><em>S</em><em>s</em><sup>⊤</sup> + <em>σ</em><sub><em>e</em></sub><em>E</em>,</span></p>
+<p><span class="math display">\[Z
+=
+\sigma_m M m^\top
++
+\sigma_s S s^\top
++
+\sigma_e E,\]</span></p>
 <p>with:</p>
-<p><span
-class="math display"><em>σ</em><sub><em>m</em></sub> = 0.70,   <em>σ</em><sub><em>s</em></sub> = 1.80,   <em>σ</em><sub><em>e</em></sub> = 0.35.</span></p>
+<p><span class="math display">\[\sigma_m = 0.70,
+\qquad
+\sigma_s = 1.80,
+\qquad
+\sigma_e = 0.35.\]</span></p>
 <p>Because the spread factor is stronger than the market factor, PC1
 should be the spread factor, not the market factor.</p>
 <hr />
@@ -1436,23 +1510,23 @@ Market</h2>
 </thead>
 <tbody>
 <tr>
-<td><span
-class="math inline">|⟨<em>P</em><em>C</em>1, market⟩|</span></td>
+<td><span class="math inline">\(\left\lvert\langle
+PC1,\mathrm{market}\rangle\right\rvert\)</span></td>
 <td style="text-align: right;">0.00000742</td>
 </tr>
 <tr>
-<td><span
-class="math inline">|⟨<em>P</em><em>C</em>1, spread⟩|</span></td>
+<td><span class="math inline">\(\left\lvert\langle
+PC1,\mathrm{spread}\rangle\right\rvert\)</span></td>
 <td style="text-align: right;">0.99982464</td>
 </tr>
 <tr>
-<td><span
-class="math inline">|⟨<em>P</em><em>C</em>2, market⟩|</span></td>
+<td><span class="math inline">\(\left\lvert\langle
+PC2,\mathrm{market}\rangle\right\rvert\)</span></td>
 <td style="text-align: right;">0.99827428</td>
 </tr>
 <tr>
-<td><span
-class="math inline">|⟨<em>P</em><em>C</em>2, spread⟩|</span></td>
+<td><span class="math inline">\(\left\lvert\langle
+PC2,\mathrm{spread}\rangle\right\rvert\)</span></td>
 <td style="text-align: right;">0.00016201</td>
 </tr>
 </tbody>
@@ -1592,8 +1666,15 @@ Attribution in the Stress Test</h2>
 </tbody>
 </table>
 <p>For PC1:</p>
-<p><span
-class="math display">3.492035 = 0.924240 + 0.908033 − (−0.829881) − (−0.829881).</span></p>
+<p><span class="math display">\[3.492035
+=
+0.924240
++
+0.908033
+-
+(-0.829881)
+-
+(-0.829881).\]</span></p>
 <p>So PC1 is not only concordant. It is substantially generated by
 divergent pairwise structure.</p>
 <p>Interpretation:</p>
@@ -1658,22 +1739,30 @@ dimensions:</p>
 </tbody>
 </table>
 <p>This table shows the scaling contrast directly:</p>
-<p><span
-class="math display">full orthants = <em>O</em>(2<sup><em>d</em></sup>),</span></p>
+<p><span class="math display">\[\mathrm{full\ orthants}
+=
+O(2^d),\]</span></p>
 <p>while:</p>
-<p><span
-class="math display">pairwise PM matrices = <em>O</em>(<em>d</em><sup>2</sup>).</span></p>
+<p><span class="math display">\[\mathrm{pairwise\ PM\ matrices}
+=
+O(d^2).\]</span></p>
 <p>The pairwise method recovered covariance and PC1 exactly at displayed
 precision across all tested dimensions.</p>
 <hr />
 <h1 id="part-vii--final-hierarchy">Part VII — Final Hierarchy</h1>
 <p>The updated hierarchy is:</p>
-<p><span
-class="math display">full orthant decomposition ⇒ complete spectral genealogy, exact but exponential.</span></p>
-<p><span
-class="math display">pairwise PM matrices ⇒ exact covariance/PCA recovery and directional attribution, scalable.</span></p>
-<p><span
-class="math display">DPM<sub><em>n</em><em>D</em></sub> ⇒ three state global directional diagnostic, scalable but coarse.</span></p>
+<p><span class="math display">\[\mathrm{full\ orthant\ decomposition}
+\Rightarrow
+\mathrm{complete\ spectral\ genealogy,\ exact\ but\
+exponential}.\]</span></p>
+<p><span class="math display">\[\mathrm{pairwise\ PM\ matrices}
+\Rightarrow
+\mathrm{exact\ covariance/PCA\ recovery\ and\ directional\ attribution,\
+scalable}.\]</span></p>
+<p><span class="math display">\[\mathrm{DPM}_{nD}
+\Rightarrow
+\mathrm{three\ state\ global\ directional\ diagnostic,\ scalable\ but\
+coarse}.\]</span></p>
 <p>The three layers answer different questions.</p>
 <table>
 <thead>
@@ -1687,18 +1776,18 @@ class="math display">DPM<sub><em>n</em><em>D</em></sub> ⇒ three state gl
 <tbody>
 <tr>
 <td>Full orthants</td>
-<td style="text-align: right;"><span
-class="math inline">2<sup><em>d</em></sup></span> states</td>
+<td style="text-align: right;"><span class="math inline">\(2^d\)</span>
+states</td>
 <td>Complete orthant-level PCA genealogy</td>
 <td>Practical high-dimensional estimation</td>
 </tr>
 <tr>
 <td>Pairwise PM matrices</td>
-<td style="text-align: right;">Four <span
-class="math inline"><em>d</em> × <em>d</em></span> matrices</td>
+<td style="text-align: right;">Four <span class="math inline">\(d\times
+d\)</span> matrices</td>
 <td>Exact covariance/PCA recovery; directional pairwise attribution</td>
-<td>Full simultaneous <span
-class="math inline"><em>d</em></span>-orthant labels</td>
+<td>Full simultaneous <span class="math inline">\(d\)</span>-orthant
+labels</td>
 </tr>
 <tr>
 <td><code>DPM_nD</code></td>
@@ -1710,7 +1799,7 @@ class="math inline"><em>d</em></span>-orthant labels</td>
 </table>
 <p>The strongest practical conclusion is:</p>
 <blockquote>
-<p>Use full orthants when <span class="math inline"><em>d</em></span> is
+<p>Use full orthants when <span class="math inline">\(d\)</span> is
 small and complete regime genealogy is desired.<br />
 Use pairwise <code>PM.matrix</code> for scalable high-dimensional PCA
 recovery and directional attribution.<br />

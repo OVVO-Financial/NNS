@@ -62,7 +62,8 @@
 <span>  <span class="va">colsubj</span>,</span>
 <span>  <span class="va">coldata</span>,</span>
 <span>  <span class="va">coltimes</span>,</span>
-<span>  <span class="va">...</span></span>
+<span>  <span class="va">...</span>,</span>
+<span>  expand.residual.sd <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -120,7 +121,7 @@ xmax = largest value + trimmed mean) are given when the random draw happens to b
 
 
 <dt id="arg-force-clt">force.clt<a class="anchor" aria-label="anchor" href="#arg-force-clt"></a></dt>
-<dd><p>logical; If <code>TRUE</code> the ensemble is forced to satisfy the central limit theorem: the replicate means are spread as a normal sample centred on <code>mean(x)</code> with standard deviation <code>sd(x) / sqrt(n)</code>, the standard error of the mean of the <code>n</code> observations, whatever the number of <code>reps</code>.  See <code>force.clt</code> in <code>meboot::meboot</code>, whose code divides by the number of replicates instead (its comment says <code>n</code>).  When <code>drift = FALSE</code>, <code>target_drift</code> or <code>target_drift_scale</code> replaces the original drift, the replicate means are centred and spread using the new baseline plus the original residuals instead of <code>x</code>.</p></dd>
+<dd><p>logical; If <code>TRUE</code> the replicate means are assigned an iid normal-reference scale: the replicate means are spread as a normal sample centred on <code>mean(x)</code> with standard deviation <code>sd(x) / sqrt(n)</code>, the standard error of the mean of the <code>n</code> observations, whatever the number of <code>reps</code>.  See <code>force.clt</code> in <code>meboot::meboot</code>, whose code divides by the number of replicates instead (its comment says <code>n</code>).  When <code>drift = FALSE</code>, <code>target_drift</code> or <code>target_drift_scale</code> replaces the original drift, the replicate means are centred and spread using the new baseline plus the original residuals instead of <code>x</code>.</p></dd>
 
 
 <dt id="arg-scl-adjustment">scl.adjustment<a class="anchor" aria-label="anchor" href="#arg-scl-adjustment"></a></dt>
@@ -152,6 +153,10 @@ xmax = largest value + trimmed mean) are given when the random draw happens to b
 is not a <code>pdata.frame</code> object.</p></dd>
 
 
+<dt id="arg-expand-residual-sd">expand.residual.sd<a class="anchor" aria-label="anchor" href="#arg-expand-residual-sd"></a></dt>
+<dd><p>Logical; TRUE retains residual-space SD expansion before trend reconstruction. FALSE leaves the generated residual scales unexpanded, separately from the later level-space expand.sd switch.</p></dd>
+
+
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>possible argument <code>fiv</code> to be passed to <code>expand.sd</code>.</p></dd>
 
@@ -174,7 +179,8 @@ is not a <code>pdata.frame</code> object.</p></dd>
 </ul></div>
     <div class="section level2">
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
-    <p>Vectorized <code>rho</code> and <code>drift</code> parameters will not vectorize both simultaneously.  Also, do not specify <code>target_drift = NULL</code>.</p>
+    <p>These are dependence-targeted synthetic scenarios. Zero rank or linear correlation does not imply independence, and interior-rho mixing can alter marginal distributions. The force.clt scale sd(x)/sqrt(n) is an iid finite-variance reference, not a serial-dependence long-run standard error or a calibration for arbitrary statistics.</p>
+<p>Vectorized <code>rho</code> and <code>drift</code> parameters will not vectorize both simultaneously.  Also, do not specify <code>target_drift = NULL</code>.</p>
 <p>The <code>rho</code> dependence alignment is calibrated on each individual <code>replicate</code>: every replicate's <em>detrended residuals</em> are mixed so that their dependence on the original series' detrended residuals matches <code>rho</code>, in the metric implied by <code>type</code>; the trend is added back afterwards. If the detrended residuals are all exactly zero (a constant or exactly linear series) there is nothing to align and <code>rho</code> has no effect.  For a trending series the replicate levels therefore stay strongly correlated with the original even at <code>rho = -1</code> (e.g. AirPassengers: mean Spearman 0.81 at <code>rho = -1</code>).  Assess a result in that <strong>same</strong> metric – a <code>"NNSdep"</code> target with <a href="NNS.dep.html">NNS.dep</a><code>$Dependence</code> (unsigned) and a <code>"spearman"</code>/<code>"pearson"</code> target with rank/linear correlation – because a signed correlation taken on an unsigned <code>"NNSdep"</code> target is not comparable to <code>rho</code> (it can even read negative while the dependence target is met).  Separately, the <code>ensemble</code> is the per-observation mean of the replicates – a central summary, not a single series carrying the target dependence – so a rank or linear correlation computed directly on the <code>ensemble</code> tends to read higher than the per-replicate <code>rho</code> (averaging amplifies the shared order).  Verify <code>rho</code> on the <code>replicates</code>, in the metric implied by <code>type</code>, rather than on the <code>ensemble</code>.</p>
     </div>
     <div class="section level2">
@@ -190,11 +196,14 @@ is not a <code>pdata.frame</code> object.</p></dd>
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="co"># To generate an orthogonal rank correlated time-series to AirPassengers</span></span></span>
-<span class="r-in"><span><span class="va">boots</span> <span class="op">&lt;-</span> <span class="fu">NNS.meboot</span><span class="op">(</span><span class="va">AirPassengers</span>, reps <span class="op">=</span> <span class="fl">100</span>, rho <span class="op">=</span> <span class="fl">0</span>, xmin <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># Target zero Spearman correlation of individual detrended residuals</span></span></span>
+<span class="r-in"><span><span class="va">boots</span> <span class="op">&lt;-</span> <span class="fu">NNS.meboot</span><span class="op">(</span><span class="va">AirPassengers</span>, reps <span class="op">=</span> <span class="fl">100</span>, rho <span class="op">=</span> <span class="fl">0</span>, drift <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
+<span class="r-in"><span>  expand.sd <span class="op">=</span> <span class="cn">FALSE</span>, force.clt <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Verify correlation of replicates ensemble to original</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">cor</a></span><span class="op">(</span><span class="va">boots</span><span class="op">[</span><span class="st">"ensemble"</span>,<span class="op">]</span><span class="op">$</span><span class="va">ensemble</span>, <span class="va">AirPassengers</span>, method <span class="op">=</span> <span class="st">"spearman"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># Inspect residual correlations on individual replicates</span></span></span>
+<span class="r-in"><span><span class="va">detrend</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">z</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/stats/residuals.html" class="external-link">residuals</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">z</span><span class="op">)</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">z</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">boots</span><span class="op">[</span><span class="st">"replicates"</span>,<span class="op">]</span><span class="op">$</span><span class="va">replicates</span>, <span class="fl">2</span>, <span class="kw">function</span><span class="op">(</span><span class="va">z</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">cor</a></span><span class="op">(</span><span class="va">z</span>, <span class="fu">detrend</span><span class="op">(</span><span class="va">AirPassengers</span><span class="op">)</span>, method <span class="op">=</span> <span class="st">"spearman"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Plot all replicates</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/matplot.html" class="external-link">matplot</a></span><span class="op">(</span><span class="va">boots</span><span class="op">[</span><span class="st">"replicates"</span>,<span class="op">]</span><span class="op">$</span><span class="va">replicates</span> , type <span class="op">=</span> <span class="st">'l'</span><span class="op">)</span></span></span>

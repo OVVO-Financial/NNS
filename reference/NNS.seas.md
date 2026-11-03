@@ -31,7 +31,8 @@ NNS.seas(
   detrend = TRUE,
   max.period = NULL,
   p.value = FALSE,
-  nperm = 100L
+  nperm = 100L,
+  dispersion = c("auto", "absolute")
 )
 ```
 
@@ -72,11 +73,18 @@ NNS.seas(
 
   logical; `FALSE` (default). If `TRUE`, each period's dispersion ratio
   is compared with the best ratio over all lags in `nperm` shuffled
-  copies of the (detrended) variable, which have no seasonality by
-  construction. `all.periods` gains a `p.value` column, and `periods`
-  and `best.period` keep only the periods with `p.value <= 0.05` (`1` if
-  none); since each copy contributes its best lag, the 5 percent level
-  holds for the whole scan. Uses the random number generator.
+  copies of the (detrended) variable, which remove the original temporal
+  ordering. `all.periods` gains a `p.value` column, and `periods` and
+  `best.period` keep only the periods with `p.value <= 0.05` (`1` if
+  none); each copy contributes its best lag, accounting for multiple
+  lags under an exchangeable null. Serially dependent nonseasonal series
+  need not satisfy that null. Uses the random number generator.
+
+- dispersion:
+
+  "auto" retains existing relative/absolute scoring. "absolute" centers
+  the data first and compares Gini dispersion without a level
+  denominator; use for interval-scale data such as temperature.
 
 - nperm:
 
@@ -104,6 +112,19 @@ Using Partial Moments" (ISBN: 1490523995, 2nd edition:
 ## Author
 
 Fred Viole, OVVO Financial Systems
+
+## Note
+
+The historical column names `Coefficient.of.Variation` and
+`Variable.Coefficient.of.Variation` are retained in absolute mode; their
+values then contain absolute Gini dispersions.
+
+best.period is a predictive lag, not a guarantee of the smallest
+fundamental period. Multiples can score well. The five-observation
+default limits long-lag instability; modulo supplies longer
+domain-informed candidates. Shuffled-data p-values require an
+exchangeable null and are not a general test of no seasonality under
+arbitrary serial dependence.
 
 ## Examples
 

@@ -32,6 +32,18 @@ NNS.mode(x, discrete = FALSE, multi = TRUE)
 Returns the mode of the distribution: a numeric vector of all modes when
 `multi = TRUE` (default), otherwise a single numeric value.
 
+## Details
+
+The continuous mode finds the peaks of a smoothed histogram with bin
+width IQR / sqrt(n), peaks in the first and last bins included, and
+centres each peak on the mean of the observations within three bins of
+it, so a peak on a single value returns that value. When every gap
+between consecutive distinct values is wider than a bin, the data are
+treated as discrete-valued: the modes are the values more frequent than
+their neighbouring values, a run of equally frequent values counting
+together. `discrete = TRUE` instead rounds to integers and returns the
+most frequent integers.
+
 ## Author
 
 Fred Viole, OVVO Financial Systems

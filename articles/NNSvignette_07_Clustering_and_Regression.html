@@ -64,8 +64,7 @@
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/OVVO-Financial/NNS" class="external-link">NNS</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="va"><a href="https://yihui.org/knitr/" class="external-link">knitr</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="va"><a href="https://github.com/dmurdoch/rgl" class="external-link">rgl</a></span><span class="op">)</span></span></code></pre></div>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="va"><a href="https://yihui.org/knitr/" class="external-link">knitr</a></span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="clustering-and-regression">Clustering and Regression<a class="anchor" aria-label="anchor" href="#clustering-and-regression"></a>
 </h2>
@@ -82,8 +81,10 @@ the joint distribution into partial moment quadrants, and then assigns a
 quadrant identification (1:4) at each partition.</p>
 <p><strong><code>NNS.part</code></strong> returns a
 <code>data.frame</code> of observations along with their final quadrant
-identification. It also returns the regression points, which are the
-quadrant means used in <strong><code>NNS.reg</code></strong>.</p>
+identification. It also returns regression points that summarize
+observations within occupied cells. Their location follows the chosen
+reduction rule; these points support the subsequent
+<strong><code>NNS.reg</code></strong> fit.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fl">5</span>, <span class="fl">5</span>, <span class="fl">.05</span><span class="op">)</span>; <span class="va">y</span> <span class="op">=</span> <span class="va">x</span> <span class="op">^</span> <span class="fl">3</span></span>
 <span></span>
@@ -96,12 +97,10 @@ quadrant means used in <strong><code>NNS.reg</code></strong>.</p>
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math>
 values only
 <strong><code>NNS.part(x, y, type = "XONLY", ...)</code></strong>, using
-the entire bandwidth in its regression point derivation, and shares the
-same limit condition as partitioning via both
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math>
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>y</mi><annotation encoding="application/x-tex">y</annotation></semantics></math>
-values.</p>
+the response observations within each predictor cell to form regression
+points. Consistency requires suitable shrinking cells and growing cell
+occupancy; a fixed order or occupancy cutoff alone does not establish
+those conditions.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">for</span><span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span> <span class="op">:</span> <span class="fl">4</span><span class="op">)</span><span class="op">{</span><span class="fu"><a href="../reference/NNS.part.html">NNS.part</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, order <span class="op">=</span> <span class="va">i</span>, type <span class="op">=</span> <span class="st">"XONLY"</span>, Voronoi <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">}</span></span></code></pre></div>
 <p><img src="NNSvignette_07_Clustering_and_Regression_files/figure-html/x%20part-1.png" class="r-plt" alt="" width="700"><img src="NNSvignette_07_Clustering_and_Regression_files/figure-html/x%20part-2.png" class="r-plt" alt="" width="700"><img src="NNSvignette_07_Clustering_and_Regression_files/figure-html/x%20part-3.png" class="r-plt" alt="" width="700"><img src="NNSvignette_07_Clustering_and_Regression_files/figure-html/x%20part-4.png" class="r-plt" alt="" width="700"></p>
@@ -133,15 +132,15 @@ partitioning.</p>
 <span><span class="co">## --- [ 201 rows x 4 cols ]; showing first and last 6. Use as.data.frame(x) for all. ---</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $regression.points</span></span>
-<span><span class="co">##   quadrant          x            y</span></span>
-<span><span class="co">## 1     q111 -4.4523966 -89.31996002</span></span>
-<span><span class="co">## 2     q112 -3.2250000 -31.51531806</span></span>
-<span><span class="co">## 3     q121 -2.0023966  -7.46341667</span></span>
-<span><span class="co">## 4     q122 -0.7590415  -0.51890098</span></span>
-<span><span class="co">## 5     q211  0.3739355   0.08338409</span></span>
-<span><span class="co">## 6     q212  1.3499632   2.26930682</span></span>
-<span><span class="co">## 7     q221  2.6206250  16.42843100</span></span>
-<span><span class="co">## 8     q222  4.1955267  75.78894504</span></span></code></pre>
+<span><span class="co">##   quadrant      x           y</span></span>
+<span><span class="co">## 1     q111 -4.375 -84.9871094</span></span>
+<span><span class="co">## 2     q112 -3.100 -30.6047500</span></span>
+<span><span class="co">## 3     q121 -1.850  -5.8342500</span></span>
+<span><span class="co">## 4     q122 -0.600  -0.2723437</span></span>
+<span><span class="co">## 5     q211  0.650   0.3331250</span></span>
+<span><span class="co">## 6     q212  1.900   6.2745313</span></span>
+<span><span class="co">## 7     q221  3.150  28.9026563</span></span>
+<span><span class="co">## 8     q222  4.400  79.7522344</span></span></code></pre>
 </div>
 </div>
 <div class="section level3">
@@ -152,17 +151,19 @@ endpoints and central point) for the order of <code>NNS</code>
 partitioning.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">for</span><span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span> <span class="op">:</span> <span class="fl">3</span><span class="op">)</span><span class="op">{</span><span class="fu"><a href="../reference/NNS.part.html">NNS.part</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, order <span class="op">=</span> <span class="va">i</span>, obs.req <span class="op">=</span> <span class="fl">0</span>, Voronoi <span class="op">=</span> <span class="cn">TRUE</span>, type <span class="op">=</span> <span class="st">"XONLY"</span><span class="op">)</span> ; <span class="fu"><a href="../reference/NNS.reg.html">NNS.reg</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, order <span class="op">=</span> <span class="va">i</span>, ncores <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">}</span></span></code></pre></div>
-<p><img src="NNSvignette_07_Clustering_and_Regression_files/figure-html/depreg%7D-1.png" class="r-plt" alt="" width="700"><img src="NNSvignette_07_Clustering_and_Regression_files/figure-html/depreg%7D-2.png" class="r-plt" alt="" width="700"><img src="NNSvignette_07_Clustering_and_Regression_files/figure-html/depreg%7D-3.png" class="r-plt" alt="" width="700"><img src="NNSvignette_07_Clustering_and_Regression_files/figure-html/depreg%7D-4.png" class="r-plt" alt="" width="700"><img src="NNSvignette_07_Clustering_and_Regression_files/figure-html/depreg%7D-5.png" class="r-plt" alt="" width="700"><img src="NNSvignette_07_Clustering_and_Regression_files/figure-html/depreg%7D-6.png" class="r-plt" alt="" width="700"></p>
+<p><img src="NNSvignette_07_Clustering_and_Regression_files/figure-html/depreg-1.png" class="r-plt" alt="" width="700"><img src="NNSvignette_07_Clustering_and_Regression_files/figure-html/depreg-2.png" class="r-plt" alt="" width="700"><img src="NNSvignette_07_Clustering_and_Regression_files/figure-html/depreg-3.png" class="r-plt" alt="" width="700"><img src="NNSvignette_07_Clustering_and_Regression_files/figure-html/depreg-4.png" class="r-plt" alt="" width="700"><img src="NNSvignette_07_Clustering_and_Regression_files/figure-html/depreg-5.png" class="r-plt" alt="" width="700"><img src="NNSvignette_07_Clustering_and_Regression_files/figure-html/depreg-6.png" class="r-plt" alt="" width="700"></p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="nns-regression-nns-reg">NNS Regression <code>NNS.reg()</code><a class="anchor" aria-label="anchor" href="#nns-regression-nns-reg"></a>
 </h2>
-<p><strong><code>NNS.reg</code></strong> can fit any
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">f(x)</annotation></semantics></math>,
-for both uni- and multivariate cases.
-<strong><code>NNS.reg</code></strong> returns a self-evident list of
-values provided below.</p>
+<p><strong><code>NNS.reg</code></strong> estimates nonlinear
+relationships in univariate and multivariate settings using partition
+summaries and interpolation or distance weighting. Its fit depends on
+the observed support, selected resolution, and reduction rule. The
+examples below show its main outputs. Set <code>type = "REG"</code> when
+a numeric response should be treated as regression even if its values
+could trigger automatic classification.</p>
 <div class="section level3">
 <h3 id="univariate">Univariate:<a class="anchor" aria-label="anchor" href="#univariate"></a>
 </h3>
@@ -170,10 +171,10 @@ values provided below.</p>
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/NNS.reg.html">NNS.reg</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, ncores <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
 <p><img src="NNSvignette_07_Clustering_and_Regression_files/figure-html/nonlinear-1.png" class="r-plt" alt="" width="480" style="display: block; margin: auto;"></p>
 <pre><code><span><span class="co">## $R2</span></span>
-<span><span class="co">## [1] 0.9999863</span></span>
+<span><span class="co">## [1] 0.9999996</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $SE</span></span>
-<span><span class="co">## [1] 0.18182</span></span>
+<span><span class="co">## [1] 0.04417645</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $Prediction.Accuracy</span></span>
 <span><span class="co">## NULL</span></span>
@@ -186,19 +187,19 @@ values provided below.</p>
 <span><span class="co">## </span></span>
 <span><span class="co">## $derivative</span></span>
 <span><span class="co">##   Coefficient X.Lower.Range X.Upper.Range</span></span>
-<span><span class="co">## 1    74.25250     -5.000000     -4.975000</span></span>
-<span><span class="co">## 2    72.47650     -4.975000     -4.850000</span></span>
-<span><span class="co">## 3    68.69350     -4.850000     -4.725000</span></span>
-<span><span class="co">## 4    64.88657     -4.725000     -4.585417</span></span>
-<span><span class="co">## 5    61.01481     -4.585417     -4.425000</span></span>
-<span><span class="co">## 6    57.64629     -4.425000     -4.287500</span></span>
+<span><span class="co">## 1    74.25250        -5.000        -4.950</span></span>
+<span><span class="co">## 2    70.76031        -4.950        -4.775</span></span>
+<span><span class="co">## 3    66.10469        -4.775        -4.600</span></span>
+<span><span class="co">## 4    61.43250        -4.600        -4.450</span></span>
+<span><span class="co">## 5    57.42750        -4.450        -4.300</span></span>
+<span><span class="co">## 6    53.08844        -4.300        -4.125</span></span>
 <span><span class="co">## ---</span></span>
-<span><span class="co">## 60    42.67514      3.843750      4.062500</span></span>
-<span><span class="co">## 61    57.09308      4.062500      4.225000</span></span>
-<span><span class="co">## 62    55.24079      4.225000      4.343750</span></span>
-<span><span class="co">## 63    59.68593      4.343750      4.567158</span></span>
-<span><span class="co">## 64    66.33741      4.567158      4.830103</span></span>
-<span><span class="co">## 65    72.01977      4.830103      5.000000</span></span>
+<span><span class="co">## 60     54.8325          4.20          4.35</span></span>
+<span><span class="co">## 61     58.7475          4.35          4.50</span></span>
+<span><span class="co">## 62     62.7975          4.50          4.65</span></span>
+<span><span class="co">## 63     66.9825          4.65          4.80</span></span>
+<span><span class="co">## 64     71.3025          4.80          4.95</span></span>
+<span><span class="co">## 65     74.2525          4.95          5.00</span></span>
 <span><span class="co">## --- [ 65 rows x 3 cols ]; showing first and last 6. Use as.data.frame(x) for all. ---</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $Point.est</span></span>
@@ -208,39 +209,39 @@ values provided below.</p>
 <span><span class="co">## NULL</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $regression.points</span></span>
-<span><span class="co">##           x          y</span></span>
-<span><span class="co">## 1 -5.000000 -125.00000</span></span>
-<span><span class="co">## 2 -4.975000 -123.14369</span></span>
-<span><span class="co">## 3 -4.850000 -114.08412</span></span>
-<span><span class="co">## 4 -4.725000 -105.49744</span></span>
-<span><span class="co">## 5 -4.585417  -96.44035</span></span>
-<span><span class="co">## 6 -4.425000  -86.65256</span></span>
+<span><span class="co">##        x          y</span></span>
+<span><span class="co">## 1 -5.000 -125.00000</span></span>
+<span><span class="co">## 2 -4.950 -121.28738</span></span>
+<span><span class="co">## 3 -4.775 -108.90432</span></span>
+<span><span class="co">## 4 -4.600  -97.33600</span></span>
+<span><span class="co">## 5 -4.450  -88.12113</span></span>
+<span><span class="co">## 6 -4.300  -79.50700</span></span>
 <span><span class="co">## ---</span></span>
-<span><span class="co">##           x         y</span></span>
-<span><span class="co">## 61 4.062500  66.14919</span></span>
-<span><span class="co">## 62 4.225000  75.42681</span></span>
-<span><span class="co">## 63 4.343750  81.98666</span></span>
-<span><span class="co">## 64 4.567158  95.32100</span></span>
-<span><span class="co">## 65 4.830103 112.76406</span></span>
-<span><span class="co">## 66 5.000000 125.00000</span></span>
+<span><span class="co">##       x         y</span></span>
+<span><span class="co">## 61 4.35  82.31287</span></span>
+<span><span class="co">## 62 4.50  91.12500</span></span>
+<span><span class="co">## 63 4.65 100.54463</span></span>
+<span><span class="co">## 64 4.80 110.59200</span></span>
+<span><span class="co">## 65 4.95 121.28738</span></span>
+<span><span class="co">## 66 5.00 125.00000</span></span>
 <span><span class="co">## --- [ 66 rows x 2 cols ]; showing first and last 6. Use as.data.frame(x) for all. ---</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $Fitted.xy</span></span>
-<span><span class="co">##       x         y     y.hat NNS.ID gradient residuals</span></span>
-<span><span class="co">## 1 -5.00 -125.0000 -125.0000      1  74.2525   0.00000</span></span>
-<span><span class="co">## 2 -4.95 -121.2874 -121.3318      2  72.4765  -0.04440</span></span>
-<span><span class="co">## 3 -4.90 -117.6490 -117.7080      2  72.4765  -0.05895</span></span>
-<span><span class="co">## 4 -4.85 -114.0841 -114.0841      3  68.6935   0.00000</span></span>
-<span><span class="co">## 5 -4.80 -110.5920 -110.6495      3  68.6935  -0.05745</span></span>
-<span><span class="co">## 6 -4.75 -107.1719 -107.2148      3  68.6935  -0.04290</span></span>
+<span><span class="co">##       x         y     y.hat NNS.ID gradient   residuals</span></span>
+<span><span class="co">## 1 -5.00 -125.0000 -125.0000      1 74.25250  0.00000000</span></span>
+<span><span class="co">## 2 -4.95 -121.2874 -121.2874      2 70.76031  0.00000000</span></span>
+<span><span class="co">## 3 -4.90 -117.6490 -117.7494      2 70.76031 -0.10035937</span></span>
+<span><span class="co">## 4 -4.85 -114.0841 -114.2113      2 70.76031 -0.12721875</span></span>
+<span><span class="co">## 5 -4.80 -110.5920 -110.6733      2 70.76031 -0.08132812</span></span>
+<span><span class="co">## 6 -4.75 -107.1719 -107.2517      3 66.10469 -0.07982812</span></span>
 <span><span class="co">## ---</span></span>
 <span><span class="co">##        x        y    y.hat NNS.ID gradient residuals</span></span>
-<span><span class="co">## 196 4.75 107.1719 107.4502     64 66.33741 0.2783568</span></span>
-<span><span class="co">## 197 4.80 110.5920 110.7671     64 66.33741 0.1751022</span></span>
-<span><span class="co">## 198 4.85 114.0841 114.1970     65 72.01977 0.1129090</span></span>
-<span><span class="co">## 199 4.90 117.6490 117.7980     65 72.01977 0.1490227</span></span>
-<span><span class="co">## 200 4.95 121.2874 121.3990     65 72.01977 0.1116363</span></span>
-<span><span class="co">## 201 5.00 125.0000 125.0000     65 72.01977 0.0000000</span></span>
+<span><span class="co">## 196 4.75 107.1719 107.2429     63  66.9825   0.07100</span></span>
+<span><span class="co">## 197 4.80 110.5920 110.5920     64  71.3025   0.00000</span></span>
+<span><span class="co">## 198 4.85 114.0841 114.1571     64  71.3025   0.07300</span></span>
+<span><span class="co">## 199 4.90 117.6490 117.7223     64  71.3025   0.07325</span></span>
+<span><span class="co">## 200 4.95 121.2874 121.2874     65  71.3025   0.00000</span></span>
+<span><span class="co">## 201 5.00 125.0000 125.0000     65  74.2525   0.00000</span></span>
 <span><span class="co">## --- [ 201 rows x 6 cols ]; showing first and last 6. Use as.data.frame(x) for all. ---</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## $class.levels</span></span>
@@ -342,62 +343,114 @@ and called specifically with
 <div class="section level3">
 <h3 id="nns-dimension-reduction-regression">NNS Dimension Reduction Regression<a class="anchor" aria-label="anchor" href="#nns-dimension-reduction-regression"></a>
 </h3>
-<p><strong><code>NNS.reg</code></strong> also provides a dimension
-reduction regression by including a parameter
-<strong><code>NNS.reg(x, y, dim.red.method = "cor", ...)</code></strong>.
-Reducing all regressors to a single dimension using the returned
-equation
-<strong><code>NNS.reg(..., dim.red.method = "cor", ...)$equation</code></strong>.</p>
+<p><code>dim.red.method = "cor"</code> builds a signed synthetic
+predictor from the selected correlations. For a continuous response,
+<code>$equation</code> reports its coefficients and denominator. The
+response is fitted as a nonlinear function of that index; the index
+itself is not a linear prediction equation for the response.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/NNS.reg.html">NNS.reg</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span> , <span class="fl">1</span> <span class="op">:</span> <span class="fl">4</span><span class="op">]</span>, <span class="va">iris</span><span class="op">[</span> , <span class="fl">5</span><span class="op">]</span>, dim.red.method <span class="op">=</span> <span class="st">"cor"</span>, location <span class="op">=</span> <span class="st">"topleft"</span>, ncores <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">$</span><span class="va">equation</span></span></code></pre></div>
-<p><img src="NNSvignette_07_Clustering_and_Regression_files/figure-html/nonlinear_class-1.png" class="r-plt" alt="" width="480" style="display: block; margin: auto;"></p>
+<code class="sourceCode R"><span><span class="va">regression_x</span> <span class="op">&lt;-</span> <span class="va">iris</span><span class="op">[</span>, <span class="fl">2</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span></span>
+<span><span class="va">regression_y</span> <span class="op">&lt;-</span> <span class="va">iris</span><span class="op">$</span><span class="va">Sepal.Length</span></span>
+<span><span class="va">reduced</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/NNS.reg.html">NNS.reg</a></span><span class="op">(</span><span class="va">regression_x</span>, <span class="va">regression_y</span>, dim.red.method <span class="op">=</span> <span class="st">"cor"</span>,</span>
+<span>                   plot <span class="op">=</span> <span class="cn">FALSE</span>, ncores <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">reduced</span><span class="op">$</span><span class="va">equation</span></span></code></pre></div>
 <pre><code><span><span class="co">##       Variable Coefficient</span></span>
-<span><span class="co">## 1 Sepal.Length   0.7980781</span></span>
-<span><span class="co">## 2  Sepal.Width  -0.4402896</span></span>
-<span><span class="co">## 3 Petal.Length   0.9354305</span></span>
-<span><span class="co">## 4  Petal.Width   0.9381792</span></span>
-<span><span class="co">## 5  DENOMINATOR   4.0000000</span></span></code></pre>
-<p>Thus, our model for this regression would be:
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>S</mi><mi>p</mi><mi>e</mi><mi>c</mi><mi>i</mi><mi>e</mi><mi>s</mi><mo>=</mo><mfrac><mrow><mn>0.798</mn><mo>*</mo><mi>S</mi><mi>e</mi><mi>p</mi><mi>a</mi><mi>l</mi><mi>.</mi><mi>L</mi><mi>e</mi><mi>n</mi><mi>g</mi><mi>t</mi><mi>h</mi><mo>−</mo><mn>0.44</mn><mo>*</mo><mi>S</mi><mi>e</mi><mi>p</mi><mi>a</mi><mi>l</mi><mi>.</mi><mi>W</mi><mi>i</mi><mi>d</mi><mi>t</mi><mi>h</mi><mo>+</mo><mn>0.935</mn><mo>*</mo><mi>P</mi><mi>e</mi><mi>t</mi><mi>a</mi><mi>l</mi><mi>.</mi><mi>L</mi><mi>e</mi><mi>n</mi><mi>g</mi><mi>t</mi><mi>h</mi><mo>+</mo><mn>0.938</mn><mo>*</mo><mi>P</mi><mi>e</mi><mi>t</mi><mi>a</mi><mi>l</mi><mi>.</mi><mi>W</mi><mi>i</mi><mi>d</mi><mi>t</mi><mi>h</mi></mrow><mn>4</mn></mfrac></mrow><annotation encoding="application/x-tex">Species = \frac{0.798*Sepal.Length -0.44*Sepal.Width +0.935*Petal.Length +0.938*Petal.Width}{4} </annotation></semantics></math></p>
+<span><span class="co">## 1  Sepal.Width  -0.1667777</span></span>
+<span><span class="co">## 2 Petal.Length   0.8818981</span></span>
+<span><span class="co">## 3  Petal.Width   0.8342888</span></span>
+<span><span class="co">## 4  DENOMINATOR   3.0000000</span></span></code></pre>
+<p>With retained coefficients
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>c</mi><mi>j</mi></msub><annotation encoding="application/x-tex">c_j</annotation></semantics></math>,
+the index is
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>X</mi><mo>⋆</mo></msup><mo>=</mo><msub><mo>∑</mo><mi>j</mi></msub><msub><mi>c</mi><mi>j</mi></msub><msub><mi>X</mi><mi>j</mi></msub><mi>/</mi><msub><mo>∑</mo><mi>j</mi></msub><mn>𝟏</mn><mo stretchy="false" form="prefix">{</mo><mo stretchy="false" form="prefix">|</mo><msub><mi>c</mi><mi>j</mi></msub><mo stretchy="false" form="prefix">|</mo><mo>&gt;</mo><mn>0</mn><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">X^\star = \sum_j c_j X_j / \sum_j \mathbf{1}\{|c_j| &gt; 0\}</annotation></semantics></math>,
+and the regression estimates a function
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>y</mi><mo accent="true">̂</mo></mover><mo>=</mo><mi>g</mi><mo stretchy="false" form="prefix">(</mo><msup><mi>X</mi><mo>⋆</mo></msup><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\hat y = g(X^\star)</annotation></semantics></math>.</p>
 <div class="section level4">
 <h4 id="threshold">Threshold<a class="anchor" aria-label="anchor" href="#threshold"></a>
 </h4>
-<p><strong><code>NNS.reg(x, y, dim.red.method = "cor", threshold = ...)</code></strong>
-offers a method of reducing regressors further by controlling the
-absolute value of required correlation.</p>
+<p><code>threshold</code> retains coefficients whose absolute
+association meets the cutoff. This controls which coordinates contribute
+to the synthetic index; it does not establish a significance level.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/NNS.reg.html">NNS.reg</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span> , <span class="fl">1</span> <span class="op">:</span> <span class="fl">4</span><span class="op">]</span>, <span class="va">iris</span><span class="op">[</span> , <span class="fl">5</span><span class="op">]</span>, dim.red.method <span class="op">=</span> <span class="st">"cor"</span>, threshold <span class="op">=</span> <span class="fl">.75</span>, location <span class="op">=</span> <span class="st">"topleft"</span>, ncores <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">$</span><span class="va">equation</span></span></code></pre></div>
-<p><img src="NNSvignette_07_Clustering_and_Regression_files/figure-html/nonlinear%20class%20threshold-1.png" class="r-plt" alt="" width="480" style="display: block; margin: auto;"></p>
+<code class="sourceCode R"><span><span class="va">reduced_threshold</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/NNS.reg.html">NNS.reg</a></span><span class="op">(</span><span class="va">regression_x</span>, <span class="va">regression_y</span>,</span>
+<span>                            dim.red.method <span class="op">=</span> <span class="st">"cor"</span>, threshold <span class="op">=</span> <span class="fl">.75</span>,</span>
+<span>                            point.est <span class="op">=</span> <span class="va">regression_x</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span>, <span class="op">]</span>,</span>
+<span>                            plot <span class="op">=</span> <span class="cn">FALSE</span>, ncores <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">reduced_threshold</span><span class="op">$</span><span class="va">equation</span></span></code></pre></div>
 <pre><code><span><span class="co">##       Variable Coefficient</span></span>
-<span><span class="co">## 1 Sepal.Length   0.7980781</span></span>
-<span><span class="co">## 2  Sepal.Width   0.0000000</span></span>
-<span><span class="co">## 3 Petal.Length   0.9354305</span></span>
-<span><span class="co">## 4  Petal.Width   0.9381792</span></span>
-<span><span class="co">## 5  DENOMINATOR   3.0000000</span></span></code></pre>
-<p>Thus, our model for this further reduced dimension regression would
-be:
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>S</mi><mi>p</mi><mi>e</mi><mi>c</mi><mi>i</mi><mi>e</mi><mi>s</mi><mo>=</mo><mfrac><mrow><mspace width="0.222em"></mspace><mn>0.798</mn><mo>*</mo><mi>S</mi><mi>e</mi><mi>p</mi><mi>a</mi><mi>l</mi><mi>.</mi><mi>L</mi><mi>e</mi><mi>n</mi><mi>g</mi><mi>t</mi><mi>h</mi><mo>+</mo><mn>0</mn><mo>*</mo><mi>S</mi><mi>e</mi><mi>p</mi><mi>a</mi><mi>l</mi><mi>.</mi><mi>W</mi><mi>i</mi><mi>d</mi><mi>t</mi><mi>h</mi><mo>+</mo><mn>0.935</mn><mo>*</mo><mi>P</mi><mi>e</mi><mi>t</mi><mi>a</mi><mi>l</mi><mi>.</mi><mi>L</mi><mi>e</mi><mi>n</mi><mi>g</mi><mi>t</mi><mi>h</mi><mo>+</mo><mn>0.938</mn><mo>*</mo><mi>P</mi><mi>e</mi><mi>t</mi><mi>a</mi><mi>l</mi><mi>.</mi><mi>W</mi><mi>i</mi><mi>d</mi><mi>t</mi><mi>h</mi></mrow><mn>3</mn></mfrac></mrow><annotation encoding="application/x-tex">Species = \frac{\: 0.798*Sepal.Length + 0*Sepal.Width +0.935*Petal.Length +0.938*Petal.Width}{3} </annotation></semantics></math></p>
-<p>and the <code>point.est = (...)</code> operates in the same manner as
-the full regression above, again called with
-<strong><code>NNS.reg(...)$Point.est</code></strong>.</p>
+<span><span class="co">## 1  Sepal.Width   0.0000000</span></span>
+<span><span class="co">## 2 Petal.Length   0.8818981</span></span>
+<span><span class="co">## 3  Petal.Width   0.8342888</span></span>
+<span><span class="co">## 4  DENOMINATOR   2.0000000</span></span></code></pre>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/NNS.reg.html">NNS.reg</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span> , <span class="fl">1</span> <span class="op">:</span> <span class="fl">4</span><span class="op">]</span>, <span class="va">iris</span><span class="op">[</span> , <span class="fl">5</span><span class="op">]</span>, dim.red.method <span class="op">=</span> <span class="st">"cor"</span>, threshold <span class="op">=</span> <span class="fl">.75</span>, point.est <span class="op">=</span> <span class="va">iris</span><span class="op">[</span><span class="fl">1</span> <span class="op">:</span> <span class="fl">10</span>, <span class="fl">1</span> <span class="op">:</span> <span class="fl">4</span><span class="op">]</span>, location <span class="op">=</span> <span class="st">"topleft"</span>, ncores <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">$</span><span class="va">Point.est</span></span></code></pre></div>
-<p><img src="NNSvignette_07_Clustering_and_Regression_files/figure-html/final-1.png" class="r-plt" alt="" width="480" style="display: block; margin: auto;"></p>
-<pre><code><span><span class="co">##  [1] 1 1 1 1 1 1 1 1 1 1</span></span></code></pre>
+<code class="sourceCode R"><span><span class="va">reduced_threshold</span><span class="op">$</span><span class="va">Point.est</span></span></code></pre></div>
+<pre><code><span><span class="co">##  [1] 4.984375 4.984375 4.833689 5.085714 4.984375 5.183574 4.980726 5.085714</span></span>
+<span><span class="co">##  [9] 4.984375 4.831294</span></span></code></pre>
 </div>
 </div>
 </div>
 <div class="section level2">
 <h2 id="classification">Classification<a class="anchor" aria-label="anchor" href="#classification"></a>
 </h2>
-<p>For a classification problem, we simply set
-<strong><code>NNS.reg(x, y, type = "CLASS", ...)</code></strong>.</p>
-<p><strong>NOTE: Base category of response variable should be 1, not 0
-for classification problems.</strong></p>
+<p>Set <code>type = "CLASS"</code> for nominal classes. Factor,
+character, logical, and numeric <code>0/1</code> responses are
+classified automatically. Numeric class values need not start at one.
+Factor and character predictions retain numeric codes with the mapping
+returned in <code>$class.levels</code>.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/NNS.reg.html">NNS.reg</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span> , <span class="fl">1</span> <span class="op">:</span> <span class="fl">4</span><span class="op">]</span>, <span class="va">iris</span><span class="op">[</span> , <span class="fl">5</span><span class="op">]</span>, type <span class="op">=</span> <span class="st">"CLASS"</span>, point.est <span class="op">=</span> <span class="va">iris</span><span class="op">[</span><span class="fl">1</span> <span class="op">:</span> <span class="fl">10</span>, <span class="fl">1</span> <span class="op">:</span> <span class="fl">4</span><span class="op">]</span>, location <span class="op">=</span> <span class="st">"topleft"</span>, ncores <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">$</span><span class="va">Point.est</span></span></code></pre></div>
-<p><img src="NNSvignette_07_Clustering_and_Regression_files/figure-html/class-1.png" class="r-plt" alt="" width="480" style="display: block; margin: auto;"></p>
-<pre><code><span><span class="co">##  [1] 1 1 1 1 1 1 1 1 1 1</span></span></code></pre>
+<code class="sourceCode R"><span><span class="va">classification</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/NNS.reg.html">NNS.reg</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, <span class="va">iris</span><span class="op">$</span><span class="va">Species</span>, type <span class="op">=</span> <span class="st">"CLASS"</span>,</span>
+<span>                          point.est <span class="op">=</span> <span class="va">iris</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, plot <span class="op">=</span> <span class="cn">FALSE</span>, ncores <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">classification</span><span class="op">$</span><span class="va">class.levels</span><span class="op">[</span><span class="va">classification</span><span class="op">$</span><span class="va">Point.est</span><span class="op">]</span></span></code></pre></div>
+<pre><code><span><span class="co">##  [1] "setosa" "setosa" "setosa" "setosa" "setosa" "setosa" "setosa" "setosa"</span></span>
+<span><span class="co">##  [9] "setosa" "setosa"</span></span></code></pre>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">classification</span><span class="op">$</span><span class="va">Point.probabilities</span></span></code></pre></div>
+<pre><code><span><span class="co">##       setosa versicolor virginica</span></span>
+<span><span class="co">##  [1,]      1          0         0</span></span>
+<span><span class="co">##  [2,]      1          0         0</span></span>
+<span><span class="co">##  [3,]      1          0         0</span></span>
+<span><span class="co">##  [4,]      1          0         0</span></span>
+<span><span class="co">##  [5,]      1          0         0</span></span>
+<span><span class="co">##  [6,]      1          0         0</span></span>
+<span><span class="co">##  [7,]      1          0         0</span></span>
+<span><span class="co">##  [8,]      1          0         0</span></span>
+<span><span class="co">##  [9,]      1          0         0</span></span>
+<span><span class="co">## [10,]      1          0         0</span></span></code></pre>
+<p>With dimension reduction, classification uses one signed index per
+class indicator. Its <code>$equation</code> is therefore a named list,
+with one equation per class. Class probabilities are combined before
+labels are chosen; the numeric labels are never interpolation
+coordinates.</p>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">class_reduced</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/NNS.reg.html">NNS.reg</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, <span class="va">iris</span><span class="op">$</span><span class="va">Species</span>, dim.red.method <span class="op">=</span> <span class="st">"cor"</span>,</span>
+<span>                         plot <span class="op">=</span> <span class="cn">FALSE</span>, ncores <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">class_reduced</span><span class="op">$</span><span class="va">equation</span></span></code></pre></div>
+<pre><code><span><span class="co">## $setosa</span></span>
+<span><span class="co">##       Variable Coefficient</span></span>
+<span><span class="co">## 1 Sepal.Length  -0.7495899</span></span>
+<span><span class="co">## 2  Sepal.Width   0.6225472</span></span>
+<span><span class="co">## 3 Petal.Length  -0.8173813</span></span>
+<span><span class="co">## 4  Petal.Width  -0.8205282</span></span>
+<span><span class="co">## 5  DENOMINATOR   4.0000000</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## $versicolor</span></span>
+<span><span class="co">##       Variable Coefficient</span></span>
+<span><span class="co">## 1 Sepal.Length  0.11686803</span></span>
+<span><span class="co">## 2  Sepal.Width -0.48249049</span></span>
+<span><span class="co">## 3 Petal.Length  0.01454939</span></span>
+<span><span class="co">## 4  Petal.Width  0.01608235</span></span>
+<span><span class="co">## 5  DENOMINATOR  4.00000000</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## $virginica</span></span>
+<span><span class="co">##       Variable Coefficient</span></span>
+<span><span class="co">## 1 Sepal.Length   0.6327219</span></span>
+<span><span class="co">## 2  Sepal.Width  -0.1400567</span></span>
+<span><span class="co">## 3 Petal.Length   0.8028319</span></span>
+<span><span class="co">## 4  Petal.Width   0.8044458</span></span>
+<span><span class="co">## 5  DENOMINATOR   4.0000000</span></span></code></pre>
+<p>These examples demonstrate fitted outputs at training observations.
+Independent classification accuracy requires heldout observations, as
+shown in the classification vignette.</p>
 </div>
 <div class="section level2">
 <h2 id="cross-validation-nns-stack">Cross-Validation <code>NNS.stack()</code><a class="anchor" aria-label="anchor" href="#cross-validation-nns-stack"></a>
@@ -411,98 +464,75 @@ the <code>threshold</code> parameter in the dimension reduction
 classification:</p>
 <p><strong><code>NNS.stack(..., type = "CLASS", ...)</code></strong></p>
 <p>or continuous dependent variables:</p>
-<p><strong><code>NNS.stack(..., type = NULL, ...)</code></strong>.</p>
+<p><strong><code>NNS.stack(..., type = "REG", ...)</code></strong>.</p>
 <p>Any objective function <code>obj.fn</code> can be called using
 <code><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression()</a></code> with the terms <code>predicted</code> and
 <code>actual</code>, even from external packages such as
 <code>Metrics</code>.</p>
 <p><strong><code>NNS.stack(..., obj.fn = expression(Metrics::mape(actual, predicted)), objective = "min")</code></strong>.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/NNS.stack.html">NNS.stack</a></span><span class="op">(</span>IVs.train <span class="op">=</span> <span class="va">iris</span><span class="op">[</span> , <span class="fl">1</span> <span class="op">:</span> <span class="fl">4</span><span class="op">]</span>, </span>
-<span>          DV.train <span class="op">=</span> <span class="va">iris</span><span class="op">[</span> , <span class="fl">5</span><span class="op">]</span>, </span>
-<span>          IVs.test <span class="op">=</span> <span class="va">iris</span><span class="op">[</span><span class="fl">1</span> <span class="op">:</span> <span class="fl">10</span>, <span class="fl">1</span> <span class="op">:</span> <span class="fl">4</span><span class="op">]</span>,</span>
-<span>          dim.red.method <span class="op">=</span> <span class="st">"cor"</span>,</span>
-<span>          obj.fn <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">predicted</span><span class="op">)</span> <span class="op">==</span> <span class="va">actual</span><span class="op">)</span> <span class="op">)</span>,</span>
-<span>          objective <span class="op">=</span> <span class="st">"max"</span>, type <span class="op">=</span> <span class="st">"CLASS"</span>, </span>
-<span>          folds <span class="op">=</span> <span class="fl">1</span>, ncores <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a>Method <span class="dv">2</span> fold <span class="dv">1</span><span class="sc">/</span><span class="dv">1</span><span class="sc">:</span> generating <span class="dv">4</span> cumulative projections</span>
-<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a>Method <span class="dv">2</span> fold <span class="dv">1</span><span class="sc">/</span><span class="dv">1</span><span class="sc">:</span> evaluating <span class="dv">4</span> unique candidates</span>
-<span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a>Method <span class="dv">2</span> fold <span class="dv">1</span><span class="sc">/</span><span class="dv">1</span> complete</span>
-<span id="cb19-4"><a href="#cb19-4" tabindex="-1"></a>Current dimension count <span class="ot">=</span> <span class="dv">1</span> <span class="sc">|</span> OOF <span class="fu">eval</span>(obj.fn) <span class="ot">=</span> <span class="fl">0.944444</span> <span class="sc">|</span> Iterations remaining <span class="ot">=</span> <span class="dv">3</span></span>
-<span id="cb19-5"><a href="#cb19-5" tabindex="-1"></a>Current dimension count <span class="ot">=</span> <span class="dv">2</span> <span class="sc">|</span> OOF <span class="fu">eval</span>(obj.fn) <span class="ot">=</span> <span class="fl">0.972222</span> <span class="sc">|</span> Iterations remaining <span class="ot">=</span> <span class="dv">2</span></span>
-<span id="cb19-6"><a href="#cb19-6" tabindex="-1"></a>Current dimension count <span class="ot">=</span> <span class="dv">3</span> <span class="sc">|</span> OOF <span class="fu">eval</span>(obj.fn) <span class="ot">=</span> <span class="fl">0.944444</span> <span class="sc">|</span> Iterations remaining <span class="ot">=</span> <span class="dv">1</span></span>
-<span id="cb19-7"><a href="#cb19-7" tabindex="-1"></a>Current dimension count <span class="ot">=</span> <span class="dv">4</span> <span class="sc">|</span> OOF <span class="fu">eval</span>(obj.fn) <span class="ot">=</span> <span class="fl">0.916667</span> <span class="sc">|</span> Iterations remaining <span class="ot">=</span> <span class="dv">0</span></span>
-<span id="cb19-8"><a href="#cb19-8" tabindex="-1"></a>Method <span class="dv">1</span> fold <span class="dv">1</span><span class="sc">/</span><span class="dv">1</span><span class="sc">:</span> preparing fold design</span>
-<span id="cb19-9"><a href="#cb19-9" tabindex="-1"></a>Method <span class="dv">1</span> fold <span class="dv">1</span><span class="sc">/</span><span class="dv">1</span><span class="sc">:</span> building partitions</span>
-<span id="cb19-10"><a href="#cb19-10" tabindex="-1"></a>RPM rows <span class="ot">=</span> <span class="dv">29</span>; validation rows <span class="ot">=</span> <span class="dv">36</span></span>
-<span id="cb19-11"><a href="#cb19-11" tabindex="-1"></a>  small candidates <span class="ot">=</span> <span class="dv">1</span>...<span class="dv">12</span></span>
-<span id="cb19-12"><a href="#cb19-12" tabindex="-1"></a>  early stopping at k <span class="ot">=</span> <span class="dv">4</span></span>
-<span id="cb19-13"><a href="#cb19-13" tabindex="-1"></a>  limit candidate <span class="ot">=</span> <span class="fu">all</span> (<span class="at">k =</span> <span class="dv">29</span>), score <span class="ot">=</span> <span class="fl">0.333333</span></span>
-<span id="cb19-14"><a href="#cb19-14" tabindex="-1"></a>Best Method <span class="dv">1</span> candidate<span class="sc">:</span> k <span class="ot">=</span> <span class="dv">2</span>, score <span class="ot">=</span> <span class="fl">0.972222</span></span>
-<span id="cb19-15"><a href="#cb19-15" tabindex="-1"></a>Generating final estimates</span>
-<span id="cb19-16"><a href="#cb19-16" tabindex="-1"></a><span class="sc">$</span>OBJfn.reg</span>
-<span id="cb19-17"><a href="#cb19-17" tabindex="-1"></a>        <span class="dv">2</span> </span>
-<span id="cb19-18"><a href="#cb19-18" tabindex="-1"></a><span class="fl">0.9722222</span> </span>
-<span id="cb19-19"><a href="#cb19-19" tabindex="-1"></a></span>
-<span id="cb19-20"><a href="#cb19-20" tabindex="-1"></a><span class="sc">$</span>NNS.reg.n.best</span>
-<span id="cb19-21"><a href="#cb19-21" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">2</span></span>
-<span id="cb19-22"><a href="#cb19-22" tabindex="-1"></a></span>
-<span id="cb19-23"><a href="#cb19-23" tabindex="-1"></a><span class="sc">$</span>probability.threshold</span>
-<span id="cb19-24"><a href="#cb19-24" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.48</span></span>
-<span id="cb19-25"><a href="#cb19-25" tabindex="-1"></a></span>
-<span id="cb19-26"><a href="#cb19-26" tabindex="-1"></a><span class="sc">$</span>OBJfn.dim.red</span>
-<span id="cb19-27"><a href="#cb19-27" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.9722222</span></span>
-<span id="cb19-28"><a href="#cb19-28" tabindex="-1"></a></span>
-<span id="cb19-29"><a href="#cb19-29" tabindex="-1"></a><span class="sc">$</span>NNS.dim.red.threshold</span>
-<span id="cb19-30"><a href="#cb19-30" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.9354305</span></span>
-<span id="cb19-31"><a href="#cb19-31" tabindex="-1"></a></span>
-<span id="cb19-32"><a href="#cb19-32" tabindex="-1"></a><span class="sc">$</span>reg</span>
-<span id="cb19-33"><a href="#cb19-33" tabindex="-1"></a> [<span class="dv">1</span>] <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span></span>
-<span id="cb19-34"><a href="#cb19-34" tabindex="-1"></a></span>
-<span id="cb19-35"><a href="#cb19-35" tabindex="-1"></a><span class="sc">$</span>reg.pred.int</span>
-<span id="cb19-36"><a href="#cb19-36" tabindex="-1"></a><span class="cn">NULL</span></span>
-<span id="cb19-37"><a href="#cb19-37" tabindex="-1"></a></span>
-<span id="cb19-38"><a href="#cb19-38" tabindex="-1"></a><span class="sc">$</span>dim.red</span>
-<span id="cb19-39"><a href="#cb19-39" tabindex="-1"></a> [<span class="dv">1</span>] <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span></span>
-<span id="cb19-40"><a href="#cb19-40" tabindex="-1"></a></span>
-<span id="cb19-41"><a href="#cb19-41" tabindex="-1"></a><span class="sc">$</span>dim.red.pred.int</span>
-<span id="cb19-42"><a href="#cb19-42" tabindex="-1"></a><span class="cn">NULL</span></span>
-<span id="cb19-43"><a href="#cb19-43" tabindex="-1"></a></span>
-<span id="cb19-44"><a href="#cb19-44" tabindex="-1"></a><span class="sc">$</span>stack</span>
-<span id="cb19-45"><a href="#cb19-45" tabindex="-1"></a> [<span class="dv">1</span>] <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span></span>
-<span id="cb19-46"><a href="#cb19-46" tabindex="-1"></a></span>
-<span id="cb19-47"><a href="#cb19-47" tabindex="-1"></a><span class="sc">$</span>pred.int</span>
-<span id="cb19-48"><a href="#cb19-48" tabindex="-1"></a><span class="cn">NULL</span></span>
-<span id="cb19-49"><a href="#cb19-49" tabindex="-1"></a></span>
-<span id="cb19-50"><a href="#cb19-50" tabindex="-1"></a><span class="sc">$</span>weights</span>
-<span id="cb19-51"><a href="#cb19-51" tabindex="-1"></a>    reg dim.red </span>
-<span id="cb19-52"><a href="#cb19-52" tabindex="-1"></a>    <span class="fl">0.5</span>     <span class="fl">0.5</span> </span>
-<span id="cb19-53"><a href="#cb19-53" tabindex="-1"></a></span>
-<span id="cb19-54"><a href="#cb19-54" tabindex="-1"></a><span class="sc">$</span>class.levels</span>
-<span id="cb19-55"><a href="#cb19-55" tabindex="-1"></a>[<span class="dv">1</span>] <span class="st">"setosa"</span>     <span class="st">"versicolor"</span> <span class="st">"virginica"</span> </span></code></pre></div>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
+<span><span class="va">stack_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/NNS.stack.html">NNS.stack</a></span><span class="op">(</span>IVs.train <span class="op">=</span> <span class="va">iris</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>,</span>
+<span>                       DV.train <span class="op">=</span> <span class="va">iris</span><span class="op">$</span><span class="va">Species</span>,</span>
+<span>                       IVs.test <span class="op">=</span> <span class="va">iris</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>,</span>
+<span>                       dim.red.method <span class="op">=</span> <span class="st">"cor"</span>,</span>
+<span>                       obj.fn <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">predicted</span> <span class="op">==</span> <span class="va">actual</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>                       objective <span class="op">=</span> <span class="st">"max"</span>, type <span class="op">=</span> <span class="st">"CLASS"</span>,</span>
+<span>                       folds <span class="op">=</span> <span class="fl">1</span>, ncores <span class="op">=</span> <span class="fl">1</span>, status <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="va">stack_fit</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"OBJfn.reg"</span>, <span class="st">"OBJfn.dim.red"</span>, <span class="st">"NNS.reg.n.best"</span>,</span>
+<span>            <span class="st">"NNS.dim.red.count"</span>, <span class="st">"weights"</span>, <span class="st">"class.levels"</span><span class="op">)</span><span class="op">]</span></span></code></pre></div>
+<pre><code><span><span class="co">## $OBJfn.reg</span></span>
+<span><span class="co">## [1] 0.9722222</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## $OBJfn.dim.red</span></span>
+<span><span class="co">## [1] 0.8888889</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## $NNS.reg.n.best</span></span>
+<span><span class="co">## [1] 1</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## $NNS.dim.red.count</span></span>
+<span><span class="co">## [1] 1</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## $weights</span></span>
+<span><span class="co">##     reg dim.red </span></span>
+<span><span class="co">##       1       0 </span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## $class.levels</span></span>
+<span><span class="co">## [1] "setosa"     "versicolor" "virginica"</span></span></code></pre>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">stack_fit</span><span class="op">$</span><span class="va">class.levels</span><span class="op">[</span><span class="va">stack_fit</span><span class="op">$</span><span class="va">stack</span><span class="op">]</span></span></code></pre></div>
+<pre><code><span><span class="co">##  [1] "setosa" "setosa" "setosa" "setosa" "setosa" "setosa" "setosa" "setosa"</span></span>
+<span><span class="co">##  [9] "setosa" "setosa"</span></span></code></pre>
+<p>The displayed objectives describe internal tuning folds. The final
+predictions above are at supplied training rows and are not an
+independent test score. For nominal models, the selected dimension count
+is reported directly; a single scalar coefficient threshold cannot
+summarize the class-specific equations.</p>
 </div>
 <div class="section level2">
 <h2 id="increasing-dimensions">Increasing Dimensions<a class="anchor" aria-label="anchor" href="#increasing-dimensions"></a>
 </h2>
-<p>Given multicollinearity is not an issue for nonparametric regressions
-as it is for OLS, in the case of an ill-fit univariate model a better
-option may be to increase the dimensionality of regressors with a copy
-of itself and cross-validate the number of clusters <code>n.best</code>
-via:</p>
+<p>A duplicated predictor changes its weight in the multivariate
+geometry and can be used to compare that prediction path with univariate
+interpolation. It adds no information. Choose this representation and
+the neighbor count <code>n.best</code> using heldout performance:</p>
 <p><strong><code>NNS.stack(IVs.train = cbind(x, x), DV.train = y, method = 1, ...)</code></strong>.</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
 <span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span>; <span class="va">y</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">nns.params</span> <span class="op">=</span> <span class="fu"><a href="../reference/NNS.stack.html">NNS.stack</a></span><span class="op">(</span>IVs.train <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">x</span><span class="op">)</span>,</span>
 <span>                        DV.train <span class="op">=</span> <span class="va">y</span>,</span>
 <span>                        method <span class="op">=</span> <span class="fl">1</span>, ncores <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/NNS.reg.html">NNS.reg</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">x</span><span class="op">)</span>, <span class="va">y</span>, </span>
-<span>        n.best <span class="op">=</span> <span class="va">nns.params</span><span class="op">$</span><span class="va">NNS.reg.n.best</span>,</span>
-<span>        point.est <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">x</span><span class="op">)</span>, </span>
-<span>        residual.plot <span class="op">=</span> <span class="cn">TRUE</span>,  </span>
-<span>        ncores <span class="op">=</span> <span class="fl">1</span>, confidence.interval <span class="op">=</span> <span class="fl">.95</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">duplicated_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/NNS.reg.html">NNS.reg</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">x</span><span class="op">)</span>, <span class="va">y</span>,</span>
+<span>                          n.best <span class="op">=</span> <span class="va">nns.params</span><span class="op">$</span><span class="va">NNS.reg.n.best</span>,</span>
+<span>                          point.est <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">x</span><span class="op">)</span>, plot <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>                          residual.plot <span class="op">=</span> <span class="cn">FALSE</span>, ncores <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>                          confidence.interval <span class="op">=</span> <span class="fl">.95</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, pch <span class="op">=</span> <span class="fl">19</span>, col <span class="op">=</span> <span class="st">"grey60"</span>, main <span class="op">=</span> <span class="st">"Tuned multivariate prediction path"</span><span class="op">)</span></span>
+<span><span class="va">o</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">x</span><span class="op">[</span><span class="va">o</span><span class="op">]</span>, <span class="va">duplicated_fit</span><span class="op">$</span><span class="va">Point.est</span><span class="op">[</span><span class="va">o</span><span class="op">]</span>, col <span class="op">=</span> <span class="st">"steelblue"</span>, lwd <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 <p><img src="NNSvignette_07_Clustering_and_Regression_files/figure-html/stack2res-1.png" class="r-plt" alt="" width="480" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level2">
@@ -512,7 +542,7 @@ via:</p>
 <code>NNS.reg</code> function offers an optional smoothed fit. This
 feature applies a smoothing spline to regression points generated
 internally using the partitioning method described earlier.</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/NNS.reg.html">NNS.reg</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, smooth <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="NNSvignette_07_Clustering_and_Regression_files/figure-html/smooth-1.png" class="r-plt" alt="" width="480" style="display: block; margin: auto;"></p>
 </div>
@@ -552,7 +582,7 @@ procedure.</p>
 <div class="section level3">
 <h3 id="univariate-imputation">Univariate Imputation<a class="anchor" aria-label="anchor" href="#univariate-imputation"></a>
 </h3>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Univariate predictor with nonlinear signal</span></span>
@@ -567,7 +597,7 @@ procedure.</p>
 <span></span>
 <span><span class="co"># ---- Increasing dimensions trick ----</span></span>
 <span><span class="co"># Duplicate x so the distance operates in a 2D space: cbind(x, x).</span></span>
-<span><span class="co"># This sharpens nearest-neighbor selection even in a nominally univariate setting.</span></span>
+<span><span class="co"># This chooses the multivariate neighbor path; duplication adds no information.</span></span>
 <span><span class="va">x2_train</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">x</span><span class="op">[</span><span class="op">!</span><span class="va">miss</span><span class="op">]</span>, <span class="va">x</span><span class="op">[</span><span class="op">!</span><span class="va">miss</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="va">x2_miss</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">x</span><span class="op">[</span><span class="va">miss</span><span class="op">]</span>,  <span class="va">x</span><span class="op">[</span><span class="va">miss</span><span class="op">]</span><span class="op">)</span></span>
 <span></span>
@@ -576,7 +606,7 @@ procedure.</p>
 <span>  x         <span class="op">=</span> <span class="va">x2_train</span>,             <span class="co"># predictors (duplicated x)</span></span>
 <span>  y         <span class="op">=</span> <span class="va">y</span><span class="op">[</span><span class="op">!</span><span class="va">miss</span><span class="op">]</span>,             <span class="co"># observed responses</span></span>
 <span>  point.est <span class="op">=</span> <span class="va">x2_miss</span>,              <span class="co"># rows to impute</span></span>
-<span>  order     <span class="op">=</span> <span class="st">"max"</span>,                <span class="co"># dependence-maximizing order</span></span>
+<span>  order     <span class="op">=</span> <span class="st">"max"</span>,                <span class="co"># maximum requested partition order</span></span>
 <span>  n.best    <span class="op">=</span> <span class="fl">1</span>,                    <span class="co"># 1-NN donor</span></span>
 <span>  plot      <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span><span class="op">$</span><span class="va">Point.est</span></span>
@@ -596,14 +626,12 @@ procedure.</p>
 <span>       pch    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">15</span><span class="op">)</span>,</span>
 <span>       pt.lwd <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="cn">NA</span><span class="op">)</span>,</span>
 <span>       bty    <span class="op">=</span> <span class="st">"n"</span><span class="op">)</span></span></code></pre></div>
-<center>
-<p><img src="images/uni_impute.png" width="600" height="600"></p>
-</center>
+<p><img src="NNSvignette_07_Clustering_and_Regression_files/figure-html/uniimpute-1.png" class="r-plt" alt="" width="672"></p>
 </div>
 <div class="section level3">
 <h3 id="multivariate-imputation">Multivariate Imputation<a class="anchor" aria-label="anchor" href="#multivariate-imputation"></a>
 </h3>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Multivariate predictors with nonlinear &amp; interaction structure</span></span>
@@ -632,7 +660,7 @@ procedure.</p>
 <span>  x         <span class="op">=</span> <span class="va">X_obs</span>,     <span class="co"># all observed predictors</span></span>
 <span>  y         <span class="op">=</span> <span class="va">y_obs</span>,     <span class="co"># observed responses</span></span>
 <span>  point.est <span class="op">=</span> <span class="va">X_mis</span>,     <span class="co"># rows to impute</span></span>
-<span>  order     <span class="op">=</span> <span class="st">"max"</span>,     <span class="co"># dependence-maximizing order</span></span>
+<span>  order     <span class="op">=</span> <span class="st">"max"</span>,     <span class="co"># maximum requested partition order</span></span>
 <span>  n.best    <span class="op">=</span> <span class="fl">1</span>,         <span class="co"># 1-NN donor</span></span>
 <span>  plot      <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span><span class="op">$</span><span class="va">Point.est</span></span>
@@ -657,28 +685,22 @@ procedure.</p>
 <span>       pch    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">15</span><span class="op">)</span>,</span>
 <span>       pt.lwd <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="cn">NA</span><span class="op">)</span>,</span>
 <span>       bty    <span class="op">=</span> <span class="st">"n"</span><span class="op">)</span></span></code></pre></div>
-<center>
-<p><img src="images/multi_impute.png" width="600" height="600"></p>
-</center>
+<p><img src="NNSvignette_07_Clustering_and_Regression_files/figure-html/multiimpute-1.png" class="r-plt" alt="" width="672"></p>
 </div>
 <div class="section level3">
 <h3 id="a-note-on-uncertainty-propagation">A Note on Uncertainty Propagation<a class="anchor" aria-label="anchor" href="#a-note-on-uncertainty-propagation"></a>
 </h3>
-<p>A common concern with local imputation methods is whether imputation
-uncertainty propagates correctly into downstream inference.
-<code>NNS</code> addresses this through bootstrap multiple imputation:
-resampling complete cases across <code>m</code> iterations generates
-between-imputation variance that flows through standard Rubin’s rules
-pooling identically to any classical procedure.</p>
-<p>Empirically, <code>NNS</code> bootstrap MI outperforms MICE with
-predictive mean matching on nonlinear data — producing a pooled estimate
-closer to the true parameter with a smaller pooled SE. The advantage
-comes not from compressing uncertainty but from a more accurate
-imputation model, which reduces between-imputation variance driven by
-model error rather than genuine data uncertainty.</p>
-<p>See <a href="https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/NNS_MI_vs_MICE.md" class="external-link">NNS
-Multiple Imputation vs MICE</a> for the full reproducible
-comparison.</p>
+<p>A completed data set does not by itself represent imputation
+uncertainty. Bootstrap model refits can produce multiple completed data
+sets, but valid pooled inference also depends on the missingness
+assumptions, estimand, imputation design, and sampling calibration.
+Applying Rubin’s pooling formula alone does not establish those
+conditions. A smaller pooled standard error is not, by itself, evidence
+of more accurate uncertainty.</p>
+<p><a href="https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/NNS_MI_vs_MICE.md" class="external-link">NNS
+Multiple Imputation vs MICE</a> supplies an illustrative simulation. A
+general comparison requires repeated samples and assessment of bias,
+interval coverage, and the missingness mechanism.</p>
 </div>
 </div>
 <div class="section level2">

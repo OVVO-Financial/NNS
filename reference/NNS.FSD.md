@@ -1,7 +1,7 @@
 # NNS FSD Test
 
-Bi-directional test of first degree stochastic dominance using lower
-partial moments.
+Compares empirical first-order stochastic dominance or degree-one
+area-ratio (Omega/expectile) dominance using partial moments.
 
 ## Usage
 
@@ -21,8 +21,11 @@ NNS.FSD(x, y, type = "discrete", plot = TRUE)
 
 - type:
 
-  options: ("discrete", "continuous"); `"discrete"` (default) selects
-  the type of CDF.
+  `"discrete"` (default) compares empirical CDFs for ordinary
+  first-order stochastic dominance. The legacy option `"continuous"`
+  compares degree-one ratios \\L_1/(L_1+U_1)\\, equivalently
+  Omega/expectile order; it does not carry the ordinary FSD guarantee
+  for every increasing utility.
 
 - plot:
 
@@ -30,18 +33,20 @@ NNS.FSD(x, y, type = "discrete", plot = TRUE)
 
 ## Value
 
-Returns one of the following FSD results: `"X FSD Y"`, `"Y FSD X"`, or
-`"NO FSD EXISTS"`.
+With `type = "discrete"`, returns `"X FSD Y"`, `"Y FSD X"`, or
+`"NO FSD EXISTS"`. With `type = "continuous"`, returns `"X OMEGA Y"`,
+`"Y OMEGA X"`, or `"NO OMEGA DOMINANCE EXISTS"`; the numerical
+area-order criterion is unchanged.
 
 ## Note
 
 The curves are compared on the merged sample points and, for TSD and
-continuous FSD, also at their closed-form extrema between those points.
-Differences smaller than `64 * .Machine$double.eps * S^d` (`S` = largest
-absolute value in `x` and `y`, `d` = 1 for SSD and the mean condition, 2
-for TSD; a ratio analogue for continuous FSD) are treated as ties, so
-that rounding noise does not decide dominance. Discrete FSD compares
-exact empirical CDF values.
+continuous area order, also at their closed-form extrema between those
+points. Differences smaller than `64 * .Machine$double.eps * S^d` (`S` =
+largest absolute value in `x` and `y`, `d` = 1 for SSD and the mean
+condition, 2 for TSD; a ratio analogue for continuous area order) are
+treated as ties, so that rounding noise does not decide dominance.
+Discrete FSD compares exact empirical CDF values.
 
 ## References
 

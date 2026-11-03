@@ -76,11 +76,33 @@ Returns column-wise matrix of wrt regressors:
 - `dy.d_(...)[, wrt]$Mixed` the mixed derivative (for two independent
   variables only).
 
+## Details
+
+Derivatives are finite-difference summaries of the fitted
+[NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md)
+surface, averaged over four local probability windows derived from
+degree-1 partial-moment quantiles. Window sizes depend on the number of
+observations; they are capped before constructing a local coordinate
+half-width. All evaluation points and perturbed coordinates must stay
+inside the observed coordinate ranges. Interior unequal spacings use
+polynomial finite-difference weights; support endpoints use one-sided
+three-point formulas. This avoids averaging artificial full-support
+extrapolation bands into a local derivative.
+
+The coordinate-range check does not establish that every perturbed tuple
+lies in a densely observed part of the joint support. Sparse cells,
+neighbour changes, fitted-surface bias, and correlated predictors can
+affect the result, including at the boundary. These are numerical
+derivatives of an estimated surface, with no universal recovery or
+coverage guarantee. A two-valued coordinate returns its finite contrast
+divided by the coordinate difference and an undefined (NA) second
+derivative. Constant coordinates return NA. Mixed derivatives require
+two predictors and explicit matrix evaluation points.
+
 ## Note
 
-For binary regressors, it is suggested to use
-`eval.points = seq(0, 1, .05)` for a better resolution around the
-midpoint.
+Binary regressors provide a finite contrast, not an identified
+continuous derivative between the two levels.
 
 ## References
 
@@ -97,3 +119,32 @@ Estimates from Nonlinear Nonparametric Regressions"
 Fred Viole, OVVO Financial Systems
 
 ## Examples
+
+``` r
+if (FALSE) { # \dontrun{
+set.seed(123) ; x_1 <- runif(1000) ; x_2 <- runif(1000) ; y <- x_1 ^ 2 * x_2 ^ 2
+B <- cbind(x_1, x_2)
+
+## To find derivatives of y wrt 1st regressor for specific points of both regressors
+dy.d_(B, y, wrt = 1, eval.points = t(c(.5, median(x_2))))
+
+## To find average partial derivative of y wrt 1st regressor,
+## only supply 1 value in [eval.points], or a vector of [eval.points]:
+dy.d_(B, y, wrt = 1, eval.points = .5)
+
+dy.d_(B, y, wrt = 1, eval.points = fivenum(B[,1]))
+
+
+## To find average partial derivative of y wrt 1st regressor,
+## for every observation of 1st regressor:
+apd <- dy.d_(B, y, wrt = 1, eval.points = "apd")
+plot(B[,1], apd[,1]$First)
+
+## Central 95% range across estimated partial derivatives (descriptive)
+### Lower CI
+LPM.VaR(.025, 0, apd[,1]$First)
+
+### Upper CI
+UPM.VaR(.025, 0, apd[,1]$First)
+} # }
+```
