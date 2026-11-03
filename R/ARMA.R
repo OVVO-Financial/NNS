@@ -14,7 +14,7 @@
 #' @param best.periods integer; 1 (default) used in conjunction with \code{(seasonal.factor = FALSE)}, uses the \code{best.periods} number of detected seasonal lags instead of \code{ALL} lags when
 #' \code{(seasonal.factor = FALSE, best.periods = NULL)}.
 #' @param negative.values logical; \code{FALSE} (default) If the variable can be negative, set to
-#' \code{(negative.values = TRUE)}.  If there are negative values within the variable, \code{negative.values} will automatically be detected.
+#' \code{(negative.values = TRUE)}.  If there are negative values within the training data \code{variable[1 : training.set]}, \code{negative.values} will automatically be detected.
 #' @param method options: ("lin", "nonlin", "both", "means"); \code{"nonlin"} (default)  To select the regression type of the component series, select \code{(method = "both")} where both linear and nonlinear estimates are generated.  To use a nonlinear regression, set to
 #' \code{(method = "nonlin")}; to use a linear regression set to \code{(method = "lin")}.  Means for each subset are returned with \code{(method = "means")}.
 #' @param dynamic logical; \code{FALSE} (default) To update the seasonal factor with each forecast point, set to \code{(dynamic = TRUE)}.  The default is \code{(dynamic = FALSE)} to retain the original seasonal factor from the inputted variable for all ensuing \code{h}.
@@ -94,8 +94,6 @@ NNS.ARMA <- function(variable,
   variable <- as.numeric(variable)
   OV <- variable
   
-  if(min(variable) < 0) negative.values <- TRUE
-  
   if(!is.null(training.set)){
     variable <- variable[1 : training.set]
     FV <- variable[1 : training.set]
@@ -103,6 +101,8 @@ NNS.ARMA <- function(variable,
     training.set <- length(variable)
     FV <- variable
   }
+  
+  if(min(variable) < 0) negative.values <- TRUE
   
   Estimates <- numeric(length = h)
   

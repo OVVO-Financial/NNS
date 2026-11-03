@@ -38,7 +38,7 @@ NNS.ARMA.optim(
 \item{lin.only}{logical; \code{FALSE} (default) For fast optimization of the linear regression method.  More robust than \code{lin.only = TRUE}.}
 
 \item{negative.values}{logical; \code{FALSE} (default) If the variable can be negative, set to
-\code{(negative.values = TRUE)}.  It will automatically select \code{(negative.values = TRUE)} if the minimum value of the \code{variable} is negative.}
+\code{(negative.values = TRUE)}.  It will automatically select \code{(negative.values = TRUE)} if the training data \code{variable[1 : training.set]} has a negative value, and for the out-of-sample forecast if \code{variable} does.}
 
 \item{obj.fn}{expression;
 The default is the mean squared error divided by the degree-1 co-movement of \code{predicted} and \code{actual}, \code{mean((predicted - actual)^2) / (Co.LPM(1, predicted, actual, mean(predicted), mean(actual)) + Co.UPM(1, predicted, actual, mean(predicted), mean(actual)))} (\code{Inf} when the co-movement is 0), to be minimized.  Any \code{expression(...)} using the specific terms \code{predicted} and \code{actual} can be used.}

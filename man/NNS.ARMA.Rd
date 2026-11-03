@@ -43,7 +43,7 @@ NNS.ARMA(
 \item{mod.only}{logical; \code{TRUE} (default) Limits the number of seasonal periods returned to the specified \code{modulo}.}
 
 \item{negative.values}{logical; \code{FALSE} (default) If the variable can be negative, set to
-\code{(negative.values = TRUE)}.  If there are negative values within the variable, \code{negative.values} will automatically be detected.}
+\code{(negative.values = TRUE)}.  If there are negative values within the training data \code{variable[1 : training.set]}, \code{negative.values} will automatically be detected.}
 
 \item{method}{options: ("lin", "nonlin", "both", "means"); \code{"nonlin"} (default)  To select the regression type of the component series, select \code{(method = "both")} where both linear and nonlinear estimates are generated.  To use a nonlinear regression, set to
 \code{(method = "nonlin")}; to use a linear regression set to \code{(method = "lin")}.  Means for each subset are returned with \code{(method = "means")}.}
