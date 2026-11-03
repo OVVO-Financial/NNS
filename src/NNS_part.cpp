@@ -65,6 +65,17 @@ struct Agg{
 
 struct Pair{ double x; double y; };
 
+// A data.frame assembled here instead of by DataFrame::create(), which calls
+// as.data.frame() back in R and took about 95% of a small partition's time.
+// Same columns, names, class and automatic (compact) row names.
+static List plain_data_frame(List cols){
+  const R_xlen_t nr = cols.size() ? Rf_xlength(cols[0]) : 0;
+  cols.attr("row.names") = nr > 0 ? IntegerVector::create(NA_INTEGER, -(int)nr)
+                                  : IntegerVector(0);
+  cols.attr("class") = "data.frame";
+  return cols;
+}
+
 // [[Rcpp::export]]
 List NNS_part_cpp(NumericVector x,
                   NumericVector y,
@@ -183,9 +194,8 @@ List NNS_part_cpp(NumericVector x,
   
   CharacterVector q_prior(n);
   for(int i = 0; i < n; ++i) q_prior[i] = prior_quadrant[i];
-  DataFrame part = DataFrame::create(_["x"] = x, _["y"] = y, _["quadrant"] = q_cur,
-                                     _["prior.quadrant"] = q_prior,
-                                     _["stringsAsFactors"] = false);
+  List part = plain_data_frame(List::create(_["x"] = x, _["y"] = y, _["quadrant"] = q_cur,
+                                            _["prior.quadrant"] = q_prior));
   std::unordered_map<std::string, std::vector<int>> by_prior; by_prior.reserve(n * 2);
   for(int i = 0; i < n; ++i) by_prior[prior_quadrant[i]].push_back(i);
   
@@ -203,19 +213,16 @@ List NNS_part_cpp(NumericVector x,
     rp_x.push_back(agg.for_x(xv));
     rp_y.push_back(agg.for_y(yv));
   }
-  DataFrame rp = DataFrame::create(_["quadrant"] = wrap(rp_q),
-                                   _["x"] = wrap(rp_x),
-                                   _["y"] = wrap(rp_y),
-                                   _["stringsAsFactors"] = false);
+  List rp = plain_data_frame(List::create(_["quadrant"] = wrap(rp_q),
+                                          _["x"] = wrap(rp_x),
+                                          _["y"] = wrap(rp_y)));
   
-  DataFrame seg_h = DataFrame::create(_["x0"] = wrap(H_x0),
-                                      _["x1"] = wrap(H_x1),
-                                      _["y"] = wrap(H_y),
-                                      _["stringsAsFactors"] = false);
-  DataFrame seg_v = DataFrame::create(_["x"] = wrap(V_x),
-                                      _["y0"] = wrap(V_y0),
-                                      _["y1"] = wrap(V_y1),
-                                      _["stringsAsFactors"] = false);
+  List seg_h = plain_data_frame(List::create(_["x0"] = wrap(H_x0),
+                                             _["x1"] = wrap(H_x1),
+                                             _["y"] = wrap(H_y)));
+  List seg_v = plain_data_frame(List::create(_["x"] = wrap(V_x),
+                                             _["y0"] = wrap(V_y0),
+                                             _["y1"] = wrap(V_y1)));
   
   return List::create(_["order"] = depth,
                       _["dt"] = part,

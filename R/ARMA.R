@@ -235,17 +235,21 @@ NNS.ARMA <- function(variable,
           
           reg.points <- NNS.reg(x, y, type = "REG", return.values = FALSE, plot = FALSE, multivariate.call = TRUE)
           
-          reg.points <- reg.points[complete.cases(reg.points), ]
-          
           rpx <- reg.points$x; rpy <- reg.points$y
+          ok <- !(is.na(rpx) | is.na(rpy))
+          rpx <- rpx[ok]; rpy <- rpy[ok]
           xs <- rpx[length(rpx)] - rpx
           ys <- rpy[length(rpy)] - rpy
           
           xs <- xs[-length(xs)]
           ys <- ys[-length(ys)]
           
-          run <- mean(rep(xs, (1:length(xs))^2))
-          rise <- mean(rep(ys, (1:length(ys))^2))
+          # Squared-index weighted means of the run and rise, mean(rep(xs, w)) with
+          # w = (1:k)^2, without building the sum(w) ~ k^3/3 long vector: that cost
+          # grew cubically with the number of regression points on long series.
+          w <- (1:length(xs))^2
+          run <- sum(w * xs) / sum(w)
+          rise <- sum(w * ys) / sum(w)
           
           last.y + (rise / run)
         })

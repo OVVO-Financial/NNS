@@ -67,6 +67,16 @@
   window and accepts it on the second and remains an option. Base-model
   tuning still requires independent outer evaluation. Raw/corrected forecasts
   and bias metadata are available for assessment.
+* `NNS.ARMA.optim` and the nonlinear `NNS.ARMA` methods run faster. The
+  nonlinear step's weighted rise and run were means of a vector about k^3/3
+  long for k regression points; they are now computed in closed form, which
+  agrees with the former value to rounding. The optimizer computes each
+  validation forecast once, partitions no longer build their data frames
+  through R, and small partial-moment kernels run on the calling thread; these
+  leave results bit-identical. On a synthetic monthly series of 8000
+  observations the optimizer took 13 s, against 126 s in 13.3 and 210 s
+  before this change; the AirPassengers example takes 0.10 s, against 0.30 s
+  and 0.39 s.
 * VAR keeps its two-stage forecast design and uses prefix-generated predictors
   for chronological validation by default. `validation = "observed"` is the
   compatibility option. Known contemporaneous outcomes and imputed future
