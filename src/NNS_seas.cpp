@@ -1,11 +1,63 @@
 // [[Rcpp::depends(Rcpp)]]
+// [[Rcpp::depends(RcppParallel)]]
 #include <Rcpp.h>
+#include <RcppParallel.h>
 #include <set>
 #include <algorithm>
 #include <cfloat>
 #include <numeric>
+#include <vector>
 
 using namespace Rcpp;
+
+// Running state of one component series while the sorted series is walked.
+struct SeasComponent { int rank; int len; double first; double last; double sum; double acc; };
+
+// Score of lag m: the length-weighted mean over its m component series of the
+// Gini mean difference, divided by the component mean when use_cv. xs holds the
+// series in increasing order and pos the original index of each value, so each
+// value lands in its component (pos mod m) at that component's next rank.
+static double seas_score(int m, int n, const double* xs, const int* pos, bool use_cv,
+                         std::vector<SeasComponent>& comp){
+  if ((int)comp.size() < m) comp.resize(m);
+  const double inv_m = 1.0 / (double)m;
+  for(int j=0;j<m;++j){ SeasComponent& c = comp[j]; c.rank = 0; c.len = (n-1-j)/m + 1; c.sum = 0.0; c.acc = 0.0; }
+  for(int t=0;t<n;++t){
+    const int i = pos[t];
+    int j = i - m * (int)((double)i * inv_m);   // i mod m without a division
+    if (j >= m) j -= m; else if (j < 0) j += m;
+    const double v = xs[t];
+    SeasComponent& c = comp[j];
+    if (c.rank == 0) c.first = v;
+    c.last = v;
+    // The weights sum to 0, so measuring from the component minimum avoids cancelling a large level.
+    c.acc += (2.0 * c.rank + 1.0 - c.len) * (v - c.first);
+    c.sum += v;
+    ++c.rank;
+  }
+  double wsum = 0.0;
+  for(int j=0;j<m;++j){
+    const SeasComponent& c = comp[j];
+    const double k = (double)c.len;
+    // a constant component (smallest value = largest) has dispersion 0
+    const double g = (c.len < 2 || c.first == c.last) ? 0.0 : std::max(0.0, 2.0 * c.acc / (k * (k - 1.0)));
+    wsum += k * (use_cv ? (g == 0.0 ? 0.0 : g / std::fabs(c.sum / k)) : g);
+  }
+  return wsum / (double)n;
+}
+
+// Scores lags begin + 1 .. end into out[begin .. end - 1]. Each lag is O(n) and
+// independent of the others, so the scan is split across threads; each chunk
+// keeps its own component buffer.
+struct SeasScanWorker : public RcppParallel::Worker {
+  const int n; const double* xs; const int* pos; const bool use_cv; double* out;
+  SeasScanWorker(int n_, const double* xs_, const int* pos_, bool use_cv_, double* out_)
+    : n(n_), xs(xs_), pos(pos_), use_cv(use_cv_), out(out_) {}
+  void operator()(std::size_t begin, std::size_t end){
+    std::vector<SeasComponent> comp;
+    for(std::size_t mm = begin; mm < end; ++mm) out[mm] = seas_score((int)mm + 1, n, xs, pos, use_cv, comp);
+  }
+};
 
 
 // --- small utilities (no plotting here) ---
@@ -71,33 +123,10 @@ Rcpp::List NNS_seas_cpp(NumericVector variable,
   int max_m = std::min(half_n, n / MIN_COMPONENT_LENGTH);
   if (max_period.isNotNull()) max_m = std::max(1, std::min(max_m, as<int>(max_period)));
 
-  const int buf = half_n + 1;
-  std::vector<int> rank(buf), len(buf);
-  std::vector<double> sum(buf), acc(buf), first(buf), last(buf);
-  auto score = [&](int m){
-    const double inv_m = 1.0 / (double)m;
-    for(int j=0;j<m;++j){ rank[j] = 0; len[j] = (n-1-j)/m + 1; sum[j] = 0.0; acc[j] = 0.0; }
-    for(int t=0;t<n;++t){
-      const int i = ord[t];
-      int j = i - m * (int)((double)i * inv_m);   // i mod m without a division
-      if (j >= m) j -= m; else if (j < 0) j += m;
-      const double v = x[i];
-      if (rank[j] == 0) first[j] = v;
-      last[j] = v;
-      // The weights sum to 0, so measuring from the component minimum avoids cancelling a large level.
-      acc[j] += (2.0 * rank[j] + 1.0 - len[j]) * (v - first[j]);
-      sum[j] += v;
-      ++rank[j];
-    }
-    double wsum = 0.0;
-    for(int j=0;j<m;++j){
-      const double k = (double)len[j];
-      // a constant component (smallest value = largest) has dispersion 0
-      const double g = (len[j] < 2 || first[j] == last[j]) ? 0.0 : std::max(0.0, 2.0 * acc[j] / (k * (k - 1.0)));
-      wsum += k * (use_cv ? (g == 0.0 ? 0.0 : g / std::fabs(sum[j] / k)) : g);
-    }
-    return wsum / (double)n;
-  };
+  std::vector<double> xs(n);
+  for(int t=0;t<n;++t) xs[t] = x[ord[t]];
+  std::vector<SeasComponent> comp;
+  auto score = [&](int m){ return seas_score(m, n, xs.data(), ord.data(), use_cv, comp); };
   // The series itself is the single component of lag 1.
   const double var_cov = score(1);
 
@@ -109,8 +138,14 @@ Rcpp::List NNS_seas_cpp(NumericVector variable,
     if (m > max_m && m <= half_n){ double c = score(m); if (c < var_cov) return c; }
     return var_cov;
   };
+  // The scan visits n values per lag; above a few million visits the lags are
+  // scored in parallel, in chunks of about 2e7 visits.
+  std::vector<double> scan(max_m);
+  SeasScanWorker worker(n, xs.data(), ord.data(), use_cv, scan.data());
+  if ((double)max_m * (double)n < 4e6) worker(0, max_m);
+  else RcppParallel::parallelFor(0, max_m, worker, std::max(1, (int)(2e7 / n)));
   for(int m=1;m<=max_m;++m){
-    double cv_m = score(m);
+    double cv_m = scan[m - 1];
     if (cv_m < var_cov){
       periods_vec.push_back(m);
       cvmean_vec.push_back(cv_m);

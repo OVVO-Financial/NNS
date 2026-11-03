@@ -171,25 +171,39 @@ NNS.ARMA <- function(variable,
   Regression.Estimates_means <- list()
   
   # Shrunk estimates leave the fitted line, so steps past the lag need the recursive refit below.
-  if (method == "lin" && !shrink && is.numeric(seasonal.factor) && length(seasonal.factor) == 1) {
-    for(k in lag) {
-      lag.idx <- which(k == lag)
+  # With several lags, the loop below feeds each step's combined forecast back
+  # into the series, but a lag's component series only reaches it at steps
+  # beyond that lag. When every lag is at least h (and within the series), each
+  # lag's forecasts are its own fitted line, as with one lag, and combining them
+  # step by step gives the loop's result.
+  direct.lags <- length(lag) > 1 && all(lag >= h) && all(lag <= length(variable))
+  if (method == "lin" && !shrink && is.numeric(seasonal.factor) &&
+      (length(seasonal.factor) == 1 || direct.lags)) {
+    unweighted <- vector("list", length(lag))
+    for(lag.idx in seq_along(lag)) {
       GV.lin <- generate.lin.vectors(variable, lag[lag.idx], h)
       
       # Generate linear regression estimates for each lag
       Lin.Regression.Estimates <- lapply(1:min(h, lag[lag.idx]), function(i) {
-        last.xs <- tail(GV.lin$Component.index[[i]], 1)
         lin.reg <- fast_lm(GV.lin$Component.index[[i]], GV.lin$Component.series[[i]])
         coefs <- lin.reg$coef
         
         return(as.numeric(coefs[1] + coefs[2] * unlist(GV.lin$forecast.values[[i]])))
       })
       
-      Lin.Reg.Estimates[[lag.idx]] <- unlist(Lin.Regression.Estimates)[order(unlist(GV.lin$forecast.index))] * Weights[lag.idx]
+      unweighted[[lag.idx]] <- unlist(Lin.Regression.Estimates)[order(unlist(GV.lin$forecast.index))]
+      Lin.Reg.Estimates[[lag.idx]] <- unweighted[[lag.idx]] * Weights[lag.idx]
     }
     
-    # Calculate weighted sum of regression estimates for each lag
-    Lin.estimates <- Reduce(`+`, Lin.Reg.Estimates)
+    # Weighted sum over the lags at each step. rowSums() adds the lags in the
+    # loop's order and precision (sum() of the weighted per-lag estimates).
+    if (length(lag) == 1) {
+      Lin.estimates <- Lin.Reg.Estimates[[1]]
+    } else {
+      Lin.estimates <- rowSums(do.call(cbind, Lin.Reg.Estimates))
+      # pred.int reads the per-lag estimates of the loop's last step.
+      Lin.Regression.Estimates <- vapply(unweighted, function(e) e[h], numeric(1))
+    }
     
     if(!negative.values) Lin.estimates <- pmax(0, Lin.estimates)
     

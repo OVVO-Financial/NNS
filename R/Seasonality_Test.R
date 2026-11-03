@@ -187,31 +187,30 @@ NNS.seas <- function(variable,
 # Returns NULL if a component has fewer than 3 observations.
 .nns_seas_delete_one <- function(x, m, use_cv) {
   n <- length(x)
-  members <- split(seq_len(n), (seq_len(n) - 1L) %% m)
-  k <- lengths(members)
+  grp <- (seq_len(n) - 1L) %% m
+  k <- tabulate(grp + 1L, m)
   if (any(k < 3L)) return(NULL)
-  full <- numeric(m)
-  dropped <- vector("list", m)
-  for (j in seq_len(m)) {
-    z <- x[members[[j]]]
-    o <- order(z)
-    s <- z[o]
-    kj <- k[j]
-    i <- seq_len(kj)
-    cs <- cumsum(s)
-    total <- cs[kj]
-    row <- s * (2 * i - kj) + total - 2 * cs
-    g <- sum(row) / (kj * (kj - 1))
-    full[j] <- if (use_cv) { if (g == 0) 0 else g / abs(total / kj) } else g
-    g_del <- (sum(row) - 2 * row) / ((kj - 1) * (kj - 2))
-    d_del <- if (use_cv) g_del / abs((total - s) / (kj - 1)) else g_del
-    d_del[!is.finite(d_del) | g_del == 0] <- 0
-    dropped[[j]] <- d_del[order(o)]
-  }
+  # One stable sort by (component, value) orders every component at once,
+  # instead of a loop over the m components; the arithmetic per component is
+  # unchanged.
+  o <- order(grp, x)
+  s <- x[o]
+  g1 <- grp[o] + 1L
+  kk <- k[g1]
+  i <- seq_len(n) - c(0L, cumsum(tabulate(g1, m)))[g1]
+  cs <- unlist(lapply(split(s, g1), cumsum), use.names = FALSE)
+  total <- cs[cumsum(k)]
+  tot <- total[g1]
+  row <- s * (2 * i - kk) + tot - 2 * cs
+  srow <- vapply(split(row, g1), sum, numeric(1L))
+  g <- srow / (k * (k - 1))
+  full <- if (use_cv) ifelse(g == 0, 0, g / abs(total / k)) else g
+  g_del <- (srow[g1] - 2 * row) / ((kk - 1) * (kk - 2))
+  d_del <- if (use_cv) g_del / abs((tot - s) / (kk - 1)) else g_del
+  d_del[!is.finite(d_del) | g_del == 0] <- 0
   weighted <- sum(k * full)
   out <- numeric(n)
-  for (j in seq_len(m))
-    out[members[[j]]] <- (weighted - k[j] * full[j] + (k[j] - 1) * dropped[[j]]) / (n - 1)
+  out[o] <- (weighted - kk * full[g1] + (kk - 1) * d_del) / (n - 1)
   out
 }
 
@@ -240,15 +239,16 @@ NNS.seas <- function(variable,
   db <- .nns_seas_delete_one(x, b, use_cv)
   if (is.null(db)) return(keep)
   n <- length(x)
-  ok <- vapply(cand, function(r) {
-    dp <- .nns_seas_delete_one(x, P[r], use_cv)
-    if (is.null(dp)) return(FALSE)
+  # The smallest qualifying period is reported, so test from the smallest up.
+  r <- NA_integer_
+  for (cr in cand[order(P[cand])]) {
+    dp <- .nns_seas_delete_one(x, P[cr], use_cv)
+    if (is.null(dp)) next
     diff <- dp - db
     se <- sqrt((n - 1) / n * sum((diff - mean(diff))^2))
-    is.finite(se) && S[r] <= S[1L] + z * se
-  }, logical(1L))
-  if (!any(ok)) return(keep)
-  r <- cand[ok][which.min(P[cand[ok]])]
+    if (is.finite(se) && S[cr] <= S[1L] + z * se) { r <- cr; break }
+  }
+  if (is.na(r)) return(keep)
   M <- M[c(r, setdiff(seq_len(nrow(M)), r)), , drop = FALSE]
   rownames(M) <- NULL
   list(all.periods = M, period = P[r])
