@@ -76,6 +76,7 @@ jobs:
             --cap-add=SYS_PTRACE \
             -e UBSAN_OPTIONS="print_stacktrace=1:halt_on_error=0" \
             -e RGL_USE_NULL=true \
+            -e NOT_CRAN=true \
             -v "${GITHUB_WORKSPACE}:/data" -w /data \
             rocker/r-devel-ubsan-clang bash -lc '
               set -euo pipefail
@@ -95,21 +96,56 @@ jobs:
               echo "::endgroup::"
 
               echo "::group::Install R package dependencies"
-              RD -q -e "install.packages(c(\"remotes\", \"rcmdcheck\", \"Rfast\", \"rgl\", \"recipes\"), repos=\"https://cloud.r-project.org\", Ncpus=2)"
+              RD -q -e "install.packages(\"remotes\", repos=\"https://cloud.r-project.org\", Ncpus=2)"
               RD -q -e "remotes::install_deps(dependencies = TRUE, repos=\"https://cloud.r-project.org\")"
               echo "::endgroup::"
 
-              echo "::group::Run R CMD check with UBSAN"
-              RD CMD check --no-manual --ignore-vignettes --no-build-vignettes . > ubsan_check.out 2> ubsan_check.err || true
-              cat ubsan_check.err
+              # tools/ is excluded from the source package by .Rbuildignore.
+              # Build metadata (including Author) before checking the tarball.
+              mkdir -p tools/ubsan-check
+              cd tools/ubsan-check
+              package_tarball=$(RD --slave -e "d <- read.dcf(\"../../DESCRIPTION\"); cat(paste0(d[1,\"Package\"], \"_\", d[1,\"Version\"], \".tar.gz\"))")
+              echo "::group::Build source tarball"
+              build_status=0
+              RD CMD build --no-manual --no-build-vignettes ../.. > ubsan_build.out 2> ubsan_build.err || build_status=$?
+              cat ubsan_build.out ubsan_build.err
               echo "::endgroup::"
+              if [ "$build_status" -ne 0 ]; then
+                exit "$build_status"
+              fi
+
+              echo "::group::Run R CMD check with UBSAN"
+              check_status=0
+              RD CMD check --no-manual --ignore-vignettes --no-build-vignettes "$package_tarball" > ubsan_check.out 2> ubsan_check.err || check_status=$?
+              cat ubsan_check.out ubsan_check.err
+              echo "::endgroup::"
+              exit "$check_status"
             '
 
       - name: Check for UBSAN errors
+        if: always()
         run: |
-          if grep -iE "(runtime error|sanitizer)" ubsan_check.err; then
-            echo "::error::UBSAN detected runtime errors."
+          set -euo pipefail
+          log_dir=tools/ubsan-check
+          if [ ! -d "$log_dir" ]; then
+            echo "::error::The UBSAN build/check produced no log directory."
             exit 1
+          fi
+          mapfile -d '' -t logs < <(find "$log_dir" -type f \( \
+            -name '*.out' -o -name '*.err' -o -name '*.log' -o \
+            -name '*.Rout' -o -name '*.Rout.fail' \) -print0)
+          if [ "${#logs[@]}" -eq 0 ]; then
+            echo "::error::The UBSAN build/check produced no diagnostic logs."
+            exit 1
+          fi
+          if grep -nEi 'runtime error:|UndefinedBehaviorSanitizer|AddressSanitizer|LeakSanitizer|MemorySanitizer|ThreadSanitizer' "${logs[@]}"; then
+            echo "::error::Sanitizer diagnostics found in build/check logs."
+            exit 1
+          else
+            scan_status=$?
+            if [ "$scan_status" -ne 1 ]; then
+              exit "$scan_status"
+            fi
           fi
 
       - name: Upload UBSAN logs
@@ -118,6 +154,8 @@ jobs:
         with:
           name: ubsan-logs
           path: |
-            ubsan_check.out
-            ubsan_check.err
-            *.Rcheck/
+            tools/ubsan-check/ubsan_build.out
+            tools/ubsan-check/ubsan_build.err
+            tools/ubsan-check/ubsan_check.out
+            tools/ubsan-check/ubsan_check.err
+            tools/ubsan-check/*.Rcheck/

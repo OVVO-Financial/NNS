@@ -31,7 +31,7 @@ NNS.VAR(
 
 \item{tau}{positive integer [ > 0]; 1 (default) Number of lagged observations to consider for the time-series data.  A single integer uses lags \code{1:tau} for every variable.  A vector with one entry per variable uses that single lag for each respective variable, and a list with one lag vector per variable (or one lag vector shared by every variable) uses multiple lags per variable.  The smallest lag of each variable is also the \code{modulo} for its \link{NNS.seas} seasonal-period search.}
 
-\item{dim.red.method}{options: ("cor", "NNS.dep", "NNS.caus", "all") method for reducing regressors via \link{NNS.stack}.  \code{(dim.red.method = "cor")} (default) uses standard linear correlation for dimension reduction in the lagged variable matrix.  \code{(dim.red.method = "NNS.dep")} uses \link{NNS.dep} for nonlinear dependence weights, while \code{(dim.red.method = "NNS.caus")} uses \link{NNS.caus} for causal weights.  \code{(dim.red.method = "all")} averages all methods for further feature engineering.}
+\item{dim.red.method}{options: ("cor", "NNS.dep", "NNS.caus", "all") method for screening lagged regressors with \link{NNS.reg} before the multivariate \link{NNS.stack} fit. \code{dim.red.method = "cor"} (default) uses signed Spearman rank-correlation coefficients, screened by magnitude. \code{"NNS.dep"} uses nonlinear dependence weights, and \code{"NNS.caus"} uses directional association weights. \code{"all"} averages the Spearman, dependence, directional-association, and unit-weight coefficients. The coefficient cutoff is selected by scoring \code{NNS.reg} validation forecasts.}
 
 \item{naive.weights}{logical; \code{TRUE} (default) Equal weights applied to univariate and multivariate outputs in ensemble.  \code{FALSE} will apply weights based on the number of relevant variables detected.}
 
@@ -52,7 +52,7 @@ NNS.VAR(
 Returns the following matrices of forecasted variables:
 \itemize{
  \item{\code{"interpolated_and_extrapolated"}} Returns a \code{data.frame} of the linear interpolated and \link{NNS.ARMA} extrapolated values to replace \code{NA} values in the original \code{variables} argument.  This is required for working with variables containing different frequencies, e.g. where \code{NA} would be reported for intra-quarterly data when indexed with monthly periods.
- \item{\code{"relevant_variables"}} Returns, for each variable, the lagged regressors selected by the \link{NNS.stack} dimension reduction, ranked by absolute coefficient.  These are exactly the regressors the \code{"multivariate"} estimate is built from.
+ \item{\code{"relevant_variables"}} Returns, for each variable, the lagged regressors retained after the \link{NNS.reg} coefficient-cutoff validation search. These are the only regressors used in the \code{"multivariate"} estimate.
 
  \item{\code{"univariate"}} Returns the univariate \link{NNS.ARMA} forecasts.
 

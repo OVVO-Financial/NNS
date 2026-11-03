@@ -256,10 +256,10 @@ Once the lagged panel has been created, not all lagged predictors are equally in
 
 `NNS.VAR` therefore applies a dimension-reduction step before forming the multivariate forecast. The user can choose among four relevance schemes:
 
-- `"cor"`: absolute Spearman correlation,
+- `"cor"`: signed Spearman rank-correlation coefficients, screened by magnitude,
 - `"NNS.dep"`: nonlinear dependence weights,
-- `"NNS.caus"`: directional causation weights,
-- `"all"`: the average of the three relevance matrices.
+- `"NNS.caus"`: directional association weights,
+- `"all"`: the average of the Spearman, dependence, directional-association, and unit-weight coefficients.
 
 This is a substantive departure from classical VAR, where the usual practice is to include all lags up to the chosen order unless restrictions are imposed manually.
 
@@ -271,31 +271,31 @@ The implementation answers this in two steps.
 
 ### Step 1: compute relevance scores
 
-For a target variable \(Y\) and lagged predictors \(Z_1,\dots,Z_m\), a score \(r_\ell\) is computed for each predictor.
+For a target variable \(Y\) and lagged predictors \(Z_1,\dots,Z_m\), a coefficient \(w_\ell\) is computed for each predictor using the selected method. Screening uses its magnitude \(r_\ell=|w_\ell|\), while the synthetic index retains its sign.
 
-Depending on `dim.red.method`, these are:
+For `dim.red.method = "cor"`, the screening score is
 
 \[
 r_\ell = |\rho_S(Y,Z_\ell)|,
 \]
 
-or the nonlinear dependence weight from `NNS.dep`, or the directional causation weight from `NNS.caus`, or their average.
+For the other methods, the score is the magnitude of the nonlinear dependence coefficient, the directional association coefficient, or the four-component average described above.
 
-### Step 2: apply a threshold
+### Step 2: tune and apply a threshold before fitting Stack
 
-These relevance scores are then compared to the threshold selected by the preceding `NNS.stack` dimension-reduction step. A lagged predictor survives only if its score exceeds that threshold.
+The relevance helper fits `NNS.reg(type = "REG")` at each candidate coefficient cutoff and scores its validation forecasts using `obj.fn`. It selects the cutoff with the best objective. Under the default `validation = "pipeline"`, the candidate grid and fitted coefficients come from the training prefix, and the validation predictors are generated from that same forecast origin. `NNS.stack` is called only after this screening has selected the predictor columns.
 
-So the selection rule is
+Outside the fallback case below, the selection rule is
 
 \[
 Z_\ell \text{ is retained}
 \quad \Longleftrightarrow \quad
-r_\ell > \theta,
+r_\ell > 0 \quad\text{and}\quad r_\ell \ge \theta,
 \]
 
-where \(\theta\) is the learned dimension-reduction threshold.
+where \(\theta\) is the cutoff selected by the direct `NNS.reg` validation search. Equality with a positive cutoff retains the coefficient; zero coefficients do not enter the selected index.
 
-If no lag exceeds the threshold, the implementation falls back to the full lagged predictor set rather than discarding the multivariate structure entirely.
+If thresholding removes every coefficient, the regression restores the unthresholded coefficients. If those are all zero, unit coefficients retain the full predictor set. The selected columns are then passed to `NNS.stack(method = 1, stack = FALSE)` for multivariate tuning and forecasting.
 
 This deserves emphasis. The reduction step is not just “screening by method name.” It is a concrete thresholding rule applied to lag-specific relevance scores.
 
@@ -676,7 +676,7 @@ The main results are:
 - The lag structure is flexible: `tau` may be a scalar, vector, or list.
 - Mixed-frequency inputs are handled through interpolation and extrapolation before constructing the lagged system.
 - Dimension reduction may be based on correlation, nonlinear dependence, directional causation, or their average.
-- A lagged predictor survives the reduction step only when its relevance score exceeds the learned threshold from the `NNS.stack` screening routine.
+- Relevance cutoffs are selected by a direct `NNS.reg` validation search; the surviving predictor columns are then passed to `NNS.stack` for multivariate tuning and forecasting.
 - The ensemble forecast is either equally weighted or weighted according to the share of retained predictors that are own-lags versus cross-variable lags.
 - In classification-style forecasting tasks with skewed targets, NNS ensemble workflows can combine minority up-sampling and majority down-sampling across ensemble members to reduce imbalance bias.
 - The output `relevant_variables` provides a structural map of the learned dynamic system.
