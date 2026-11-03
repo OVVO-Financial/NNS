@@ -76,7 +76,10 @@ NNS.caus(
   `"both"` shuffle the values, an independence null for cross-sections.
   `"auto"` uses `"shift"` when the lag is positive (including
   `tau = "ts"`) and `"y"` otherwise. The lag of `tau = "ts"` is resolved
-  once on the observed series and kept for every permutation.
+  once on the observed series and kept for every permutation. For a
+  matrix `x` each choice applies to every pair, with column `i` as `x`
+  and column `j` as `y`; `"auto"` shuffles every column for
+  cross-sections.
 
 - seed:
 
