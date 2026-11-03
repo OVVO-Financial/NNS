@@ -55,7 +55,10 @@ NNS.copula(
 Returns a multivariate dependence value \[0,1\]. Each co-partial moment
 is compared with its value under independence, the product of the
 marginal partial moments at `target`, so independent variables give a
-value near 0 for any target and marginal distributions.
+value near 0 for any target and marginal distributions. At a target with
+every variable's observations on one side of it, each co-partial moment
+equals its independence value whatever the dependence, so the value is
+0.
 
 ## References
 
