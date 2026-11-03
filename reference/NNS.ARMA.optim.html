@@ -90,7 +90,7 @@
 
 <dt id="arg-negative-values">negative.values<a class="anchor" aria-label="anchor" href="#arg-negative-values"></a></dt>
 <dd><p>logical; <code>FALSE</code> (default) If the variable can be negative, set to
-<code>(negative.values = TRUE)</code>.  It will automatically select <code>(negative.values = TRUE)</code> if the minimum value of the <code>variable</code> is negative.</p></dd>
+<code>(negative.values = TRUE)</code>.  It will automatically select <code>(negative.values = TRUE)</code> if the training data <code>variable[1 : training.set]</code> has a negative value, and for the out-of-sample forecast if <code>variable</code> does.</p></dd>
 
 
 <dt id="arg-obj-fn">obj.fn<a class="anchor" aria-label="anchor" href="#arg-obj-fn"></a></dt>

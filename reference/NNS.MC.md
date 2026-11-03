@@ -34,7 +34,8 @@ NNS.MC(
 
 - reps:
 
-  numeric; number of replicates to generate, `30` default.
+  numeric; number of replicates to generate for each `rho` value, `30`
+  default. The defaults give 201 `rho` values and 6030 replicates.
 
 - lower_rho:
 
@@ -54,7 +55,8 @@ NNS.MC(
 - exp:
 
   numeric; `1` default will exponentially weight maximum rho value if
-  `exp > 1`. Shrinks values towards `upper_rho`.
+  `exp > 1`. Shrinks values towards `upper_rho`, keeping them within
+  `[lower_rho, upper_rho]`.
 
 - type:
 

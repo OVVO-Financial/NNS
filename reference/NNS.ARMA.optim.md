@@ -66,8 +66,9 @@ mean((predicted - actual)^2)/.denom
 
   logical; `FALSE` (default) If the variable can be negative, set to
   `(negative.values = TRUE)`. It will automatically select
-  `(negative.values = TRUE)` if the minimum value of the `variable` is
-  negative.
+  `(negative.values = TRUE)` if the training data
+  `variable[1 : training.set]` has a negative value, and for the
+  out-of-sample forecast if `variable` does.
 
 - obj.fn:
 

@@ -61,7 +61,7 @@
 
 
 <dt id="arg-p-value">p.value<a class="anchor" aria-label="anchor" href="#arg-p-value"></a></dt>
-<dd><p>logical; <code>FALSE</code> (default) If <code>TRUE</code> (bivariate only), compares the results against 100 random permutations of <code>y</code>: the Dependence p-value is the upper-tail permutation p-value <code>(1 + #(null &gt;= observed)) / (1 + 100)</code>, the Correlation p-value is the smaller of the two one-sided tail frequencies, and the 95 percent intervals of the permutation null are returned (and plotted when <code>print.map = TRUE</code>).</p></dd>
+<dd><p>logical; <code>FALSE</code> (default) If <code>TRUE</code> (bivariate only), compares the results against 100 random permutations of <code>y</code>: the Dependence p-value is the upper-tail permutation p-value <code>(1 + #(null &gt;= observed)) / (1 + 100)</code>, the Correlation p-value is the two-sided permutation p-value <code>min(1, 2 * min(1 + #(null &lt;= observed), 1 + #(null &gt;= observed)) / (1 + 100))</code>, and the 95 percent intervals of the permutation null are returned (and plotted when <code>print.map = TRUE</code>).</p></dd>
 
 
 <dt id="arg-print-map">print.map<a class="anchor" aria-label="anchor" href="#arg-print-map"></a></dt>

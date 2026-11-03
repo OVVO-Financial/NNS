@@ -67,7 +67,7 @@
 
 
 <dt id="arg-reps">reps<a class="anchor" aria-label="anchor" href="#arg-reps"></a></dt>
-<dd><p>numeric; number of replicates to generate, <code>30</code> default.</p></dd>
+<dd><p>numeric; number of replicates to generate for each <code>rho</code> value, <code>30</code> default.  The defaults give 201 <code>rho</code> values and 6030 replicates.</p></dd>
 
 
 <dt id="arg-lower-rho">lower_rho<a class="anchor" aria-label="anchor" href="#arg-lower-rho"></a></dt>
@@ -83,7 +83,7 @@
 
 
 <dt id="arg-exp">exp<a class="anchor" aria-label="anchor" href="#arg-exp"></a></dt>
-<dd><p>numeric; <code>1</code> default will exponentially weight maximum rho value if <code>exp &gt; 1</code>.  Shrinks values towards <code>upper_rho</code>.</p></dd>
+<dd><p>numeric; <code>1</code> default will exponentially weight maximum rho value if <code>exp &gt; 1</code>.  Shrinks values towards <code>upper_rho</code>, keeping them within <code>[lower_rho, upper_rho]</code>.</p></dd>
 
 
 <dt id="arg-type">type<a class="anchor" aria-label="anchor" href="#arg-type"></a></dt>

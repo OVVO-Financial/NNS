@@ -209,7 +209,7 @@ NNS.dep(x, y, p.value = TRUE, print.map = TRUE)
     ## [1] 0.1897929
     ## 
     ## $`Correlation p.value`
-    ## [1] 0.04
+    ## [1] 0.0990099
     ## 
     ## $`Correlation 95% CIs`
     ##       2.5%      97.5% 

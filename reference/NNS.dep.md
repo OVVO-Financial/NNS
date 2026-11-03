@@ -34,9 +34,10 @@ NNS.dep(x, y = NULL, asym = FALSE, p.value = FALSE, print.map = FALSE)
   results against 100 random permutations of `y`: the Dependence p-value
   is the upper-tail permutation p-value
   `(1 + #(null >= observed)) / (1 + 100)`, the Correlation p-value is
-  the smaller of the two one-sided tail frequencies, and the 95 percent
-  intervals of the permutation null are returned (and plotted when
-  `print.map = TRUE`).
+  the two-sided permutation p-value
+  `min(1, 2 * min(1 + #(null <= observed), 1 + #(null >= observed)) / (1 + 100))`,
+  and the 95 percent intervals of the permutation null are returned (and
+  plotted when `print.map = TRUE`).
 
 - print.map:
 

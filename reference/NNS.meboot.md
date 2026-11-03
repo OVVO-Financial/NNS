@@ -196,7 +196,9 @@ The `rho` dependence alignment is calibrated on each individual
 `replicate`: every replicate's *detrended residuals* are mixed so that
 their dependence on the original series' detrended residuals matches
 `rho`, in the metric implied by `type`; the trend is added back
-afterwards. For a trending series the replicate levels therefore stay
+afterwards. If the detrended residuals are all exactly zero (a constant
+or exactly linear series) there is nothing to align and `rho` has no
+effect. For a trending series the replicate levels therefore stay
 strongly correlated with the original even at `rho = -1` (e.g.
 AirPassengers: mean Spearman 0.81 at `rho = -1`). Assess a result in
 that **same** metric – a `"NNSdep"` target with

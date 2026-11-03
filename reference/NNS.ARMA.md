@@ -85,7 +85,8 @@ NNS.ARMA(
 
   logical; `FALSE` (default) If the variable can be negative, set to
   `(negative.values = TRUE)`. If there are negative values within the
-  variable, `negative.values` will automatically be detected.
+  training data `variable[1 : training.set]`, `negative.values` will
+  automatically be detected.
 
 - method:
 
