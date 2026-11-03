@@ -279,8 +279,7 @@ static void smooth_counts_tri7(const std::vector<int>& counts, std::vector<doubl
   smooth.assign(n, 0.0);
   if (n == 0) return;
   
-  // Mirror at edges (symmetric extension). The clamp only binds for n <= 3
-  // bins, whose smoothed values are unused (the peak scan needs n >= 7).
+  // Mirror at edges (symmetric extension); the clamp only binds for n <= 3 bins.
   auto at = [&](int idx)->int{
     if (idx < 0)   idx = -idx;                     // reflect: -1 -> 1, -2 -> 2, ...
     if (idx >= n)  idx = 2*n - 2 - idx;            // reflect: n -> n-2, n+1 -> n-3, ...
@@ -362,42 +361,118 @@ SEXP NNS_mode_cpp(SEXP xSEXP, bool discrete, bool multi) {
   quartiles_like_R_code(xnum, q1, q2, q3);
   double width = (q3 - q1) * std::pow((double)l, -0.5);
   if (!(width > 0.0) || !R_finite(width)) width = range / 128.0;
-  
+
+  // ----- Discrete-valued data (#114) -----
+  // When every gap between consecutive distinct values exceeds the bin width,
+  // the histogram only spaces the distinct values out with empty bins, and
+  // smoothing it moves the peaks off the values. The modes are then read from
+  // the values' own frequencies: a run of consecutive distinct values with
+  // equal counts is a mode when the runs beside it have lower counts (or it
+  // reaches an end), so every mode is a data value and the end values count.
+  {
+    std::vector<double> vals;
+    std::vector<int> cnt;
+    for (int i = 0; i < l;) {
+      int j = i + 1;
+      while (j < l && xnum[j] == xnum[i]) ++j;
+      vals.push_back(xnum[i]);
+      cnt.push_back(j - i);
+      i = j;
+    }
+    const int k = (int)vals.size();
+    bool coarse = k >= 2;
+    for (int i = 1; coarse && i < k; ++i) if (!(vals[i] - vals[i - 1] > width)) coarse = false;
+    if (coarse) {
+      std::vector<int> modes;
+      for (int i = 0; i < k;) {
+        int j = i + 1;
+        while (j < k && cnt[j] == cnt[i]) ++j;
+        const bool left_ok = (i == 0) || cnt[i - 1] < cnt[i];
+        const bool right_ok = (j == k) || cnt[j] < cnt[i];
+        if (left_ok && right_ok) for (int t = i; t < j; ++t) modes.push_back(t);
+        i = j;
+      }
+      if (multi) {
+        NumericVector out((int)modes.size());
+        for (int t = 0; t < (int)modes.size(); ++t) out[t] = vals[modes[t]];
+        return out;
+      }
+      // The most frequent mode; equally frequent ones go to the value nearest
+      // the gravity of the data, then the lower value (modes ascend).
+      int top = 0;
+      for (int t : modes) top = std::max(top, cnt[t]);
+      int n_top = 0, only = -1;
+      for (int t : modes) if (cnt[t] == top) { ++n_top; only = t; }
+      if (n_top == 1) return Rf_ScalarReal(vals[only]);
+      const double g = gravity_value(xnum, false);
+      double best_c = NA_REAL, best_d = R_PosInf;
+      for (int t : modes) {
+        if (cnt[t] != top) continue;
+        const double dist = std::fabs(vals[t] - g);
+        if (dist < best_d) { best_d = dist; best_c = vals[t]; }
+      }
+      return Rf_ScalarReal(best_c);
+    }
+  }
+
   // Histogram
-  std::vector<double> z_names;   // representative x for each bin (center/name)
+  std::vector<double> z_names;   // left edge of each bin
   std::vector<int> counts;       // histogram counts
-  if (width <= 0.0 || !R_finite(width)) width = range / 128.0;
   simple_bin_counts(xnum, width, xnum.front(), z_names, counts);
   const int lz = (int)counts.size();
   if (lz == 0) return Rf_ScalarReal(NA_REAL);
-  
+
+  // xnum is sorted, so the observations of bins lo..hi are the contiguous
+  // slice [start[lo], start[hi + 1]). A peak is centred on the mean of the
+  // observations in its window rather than on the bin names, which sit up to
+  // a bin below the data (#114); a window holding one value returns it.
+  std::vector<int> start(lz + 1, 0);
+  for (int b = 0; b < lz; ++b) start[b + 1] = start[b] + counts[b];
+  auto obs_centre = [&](int lo, int hi) -> double {
+    const int a = start[lo], e = start[hi + 1];
+    if (e <= a) return z_names[lo];
+    if (xnum[a] == xnum[e - 1]) return xnum[a];
+    long double s = 0.0L;
+    for (int t = a; t < e; ++t) s += (long double)xnum[t];
+    return (double)(s / (long double)(e - a));
+  };
+
   // For fallback paths
   int maxc = 0; for (int c : counts) if (c > maxc) maxc = c;
-  
-  // ----- Peak detection on SMOOTHED counts (edge-aware 1..3 & concavity) -----
+
+  // ----- Peak detection on SMOOTHED counts (concavity) -----
   std::vector<double> cs; smooth_counts_tri7(counts, cs);
-  
+
   // Optional margin above side maxima (in smoothed counts)
   const double MARGIN = 0.0;
-  
+
   std::vector<int> peak_idx; peak_idx.reserve(lz);
-  // Require full neighborhoods for offsets 1..3
-  for (int i = 3; i <= lz - 4; ++i) {
-    double ci = cs[i];
+  // A peak beats the neighbours at offsets 1..3 that exist. Within three bins
+  // of either end, where that neighbourhood is cut short, a peak must also be
+  // the tallest bin of the smoothed histogram: a density highest at its
+  // minimum (an exponential, say) has its mode there, while an isolated
+  // extreme observation does not.
+  const double cs_max = (lz > 0) ? *std::max_element(cs.begin(), cs.end()) : 0.0;
+  for (int i = 0; i < lz && lz >= 7; ++i) {
+    const double ci = cs[i];
     if (ci <= 0.0) continue;
-    
-    // Max of neighbors at offsets 1..3 on each side (smoothed series)
-    double Ls = std::max(std::max(cs[i-1], cs[i-2]), cs[i-3]);
-    double Rs = std::max(std::max(cs[i+1], cs[i+2]), cs[i+3]);
+    if ((i < 3 || i > lz - 4) && ci < cs_max) continue;
+
+    double Ls = R_NegInf, Rs = R_NegInf;
+    for (int d = 1; d <= 3; ++d) {
+      if (i - d >= 0) Ls = std::max(Ls, cs[i - d]);
+      if (i + d < lz) Rs = std::max(Rs, cs[i + d]);
+    }
     if (!(ci > Ls + MARGIN && ci > Rs + MARGIN)) continue;
-    
-    // Negative curvature gate (concavity)
-    double curv = cs[i-1] - 2.0*cs[i] + cs[i+1];
-    if (!(curv < 0.0)) continue;
-    
+
+    // Negative curvature gate (concavity), reflected at the ends
+    const double left = (i > 0) ? cs[i - 1] : ((i + 1 < lz) ? cs[i + 1] : ci);
+    const double right = (i + 1 < lz) ? cs[i + 1] : ((i > 0) ? cs[i - 1] : ci);
+    if (!(left - 2.0 * ci + right < 0.0)) continue;
+
     peak_idx.push_back(i);
   }
-  
+
   // Non-maximum suppression on smoothed heights: keep peaks >= 4 bins apart
   if (!peak_idx.empty()) {
     // Equal heights keep bin order, so the kept peaks don't depend on the sort implementation.
@@ -409,25 +484,15 @@ SEXP NNS_mode_cpp(SEXP xSEXP, bool discrete, bool multi) {
       for (int jdx : kept) if (std::abs(idx - jdx) <= 3) { too_close = true; break; }
       if (!too_close) kept.push_back(idx);
     }
-    
+
     if (!kept.empty()) {
-      // Per-peak weighted center over ±3 bins using ORIGINAL counts
+      // Per-peak centre: the observations within +-3 bins
       NumericVector centers((int)kept.size());
       for (int t = 0; t < (int)kept.size(); ++t) {
-        int zc = kept[t];
-        int lo = std::max(0, zc - 3);
-        int hi = std::min(lz - 1, zc + 3);
-        long double num = 0.0L, den = 0.0L;
-        for (int j = lo; j <= hi; ++j) {
-          if (std::abs(j - zc) <= 3) {
-            num += (long double)z_names[j] * (long double)counts[j];
-            den += (long double)counts[j];
-          }
-        }
-        double m = (den > 0.0L) ? (double)(num / den) : z_names[zc];
-        centers[t] = m;
+        const int zc = kept[t];
+        centers[t] = obs_centre(std::max(0, zc - 3), std::min(lz - 1, zc + 3));
       }
-      
+
       if (multi) {
         NumericVector out = clone(centers);
         std::sort(out.begin(), out.end());
@@ -450,14 +515,14 @@ SEXP NNS_mode_cpp(SEXP xSEXP, bool discrete, bool multi) {
       }
     }
   }
-  
+
   // Fallback: if multiple global-max bins exist
   int ties = 0; for (int c : counts) if (c == maxc) ++ties;
   if (ties > 1) {
     if (multi) {
       NumericVector out(ties);
       int pos = 0;
-      for (int i = 0; i < lz; ++i) if (counts[i] == maxc) out[pos++] = z_names[i];
+      for (int i = 0; i < lz; ++i) if (counts[i] == maxc) out[pos++] = obs_centre(i, i);
       std::sort(out.begin(), out.end());
       return out;
     } else {
@@ -467,24 +532,15 @@ SEXP NNS_mode_cpp(SEXP xSEXP, bool discrete, bool multi) {
       double best_c = NA_REAL, best_d = R_PosInf;
       for (int i = 0; i < lz; ++i) {
         if (counts[i] != maxc) continue;
-        const double dist = std::fabs(z_names[i] - g);
-        if (dist < best_d || (dist == best_d && z_names[i] < best_c)) { best_d = dist; best_c = z_names[i]; }
+        const double c = obs_centre(i, i);
+        const double dist = std::fabs(c - g);
+        if (dist < best_d || (dist == best_d && c < best_c)) { best_d = dist; best_c = c; }
       }
       return Rf_ScalarReal(best_c);
     }
   }
-  
-  // Final fallback: single winning bin -> weighted center around ±1
+
+  // Final fallback: single winning bin -> centre of the observations within +-1 bin
   int zc = 0; for (int i = 0; i < lz; ++i) if (counts[i] == maxc) { zc = i; break; }
-  {
-    int lo = std::max(0, zc - 1);
-    int hi = std::min(lz - 1, zc + 1);
-    long double num = 0.0L, den = 0.0L;
-    for (int j = lo; j <= hi; ++j) {
-      num += (long double)z_names[j] * (long double)counts[j];
-      den += (long double)counts[j];
-    }
-    double finalv = (den > 0.0L) ? (double)(num / den) : z_names[zc];
-    return Rf_ScalarReal(finalv);
-  }
+  return Rf_ScalarReal(obs_centre(std::max(0, zc - 1), std::min(lz - 1, zc + 1)));
 }

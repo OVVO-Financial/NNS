@@ -6,6 +6,7 @@
 #' @param discrete logical; \code{FALSE} (default) for continuous distributions, \code{TRUE} for discrete distributions.
 #' @param multi logical; \code{TRUE} (default) returns multiple mode values.  \code{FALSE} returns the highest peak; among equally high peaks, the one nearest \link{NNS.gravity} of the data (then the lower value), so the result is always one of the modes.
 #' @return Returns the mode of the distribution: a numeric vector of all modes when \code{multi = TRUE} (default), otherwise a single numeric value.
+#' @details The continuous mode finds the peaks of a smoothed histogram with bin width IQR / sqrt(n), peaks in the first and last bins included, and centres each peak on the mean of the observations within three bins of it, so a peak on a single value returns that value.  When every gap between consecutive distinct values is wider than a bin, the data are treated as discrete-valued: the modes are the values more frequent than their neighbouring values, a run of equally frequent values counting together.  \code{discrete = TRUE} instead rounds to integers and returns the most frequent integers.
 #' @author Fred Viole, OVVO Financial Systems
 #' @examples
 #' \dontrun{

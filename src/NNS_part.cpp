@@ -37,6 +37,11 @@ struct Agg{
   inline double mode_disc_single(const NumericVector& v) const{
     return as<double>(NNS_mode_cpp(v, true, false));
   }
+  // Regression cells take the continuous mode: the discrete one rounds to
+  // integers, which collapses data on a finer scale.
+  inline double mode_cont_single(const NumericVector& v) const{
+    return as<double>(NNS_mode_cpp(v, false, false));
+  }
   inline double gravity_cont(const NumericVector& v, bool discrete = false) const{
     return as<double>(NNS_gravity_cpp(v, discrete));
   }
@@ -44,7 +49,7 @@ struct Agg{
   inline double for_x(const NumericVector& v) const {
     if(noise == "mean") return mean_no_na(v);
     if(noise == "median") return median_no_na(v);
-    if(noise == "mode") return mode_disc_single(v);
+    if(noise == "mode") return mode_cont_single(v);
     if(noise == "mode_class") return gravity_cont(v, false);
     return gravity_cont(v, false);
   }
@@ -52,7 +57,7 @@ struct Agg{
   inline double for_y(const NumericVector& v) const {
     if(noise == "mean") return mean_no_na(v);
     if(noise == "median") return median_no_na(v);
-    if(noise == "mode") return mode_disc_single(v);
+    if(noise == "mode") return mode_cont_single(v);
     if(noise == "mode_class") return mode_disc_single(v);
     return gravity_cont(v, false);
   }
