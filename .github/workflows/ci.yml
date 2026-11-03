@@ -92,7 +92,7 @@ jobs:
               DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
                 cmake libgsl-dev libcurl4-openssl-dev libssl-dev libxml2-dev \
                 libjpeg-dev libpng-dev libtiff5-dev libfreetype6-dev \
-                libharfbuzz-dev libfribidi-dev
+                libharfbuzz-dev libfribidi-dev libuv1-dev
               echo "::endgroup::"
 
               echo "::group::Install R package dependencies"
