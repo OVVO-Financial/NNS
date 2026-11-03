@@ -63,14 +63,14 @@ The joint events across all four quadrants defined by benchmarks \((t_X, t_Y)\) 
 \]
 
 \[
-\mathrm{DLPM}_{0,0}(t_X,t_Y) = P(X \le t_X,\; Y > t_Y),
+\mathrm{DUPM}_{0,0}(t_X,t_Y) = P(X \le t_X,\; Y > t_Y),
 \]
 
 \[
-\mathrm{DUPM}_{0,0}(t_X,t_Y) = P(X > t_X,\; Y \le t_Y).
+\mathrm{DLPM}_{0,0}(t_X,t_Y) = P(X > t_X,\; Y \le t_Y).
 \]
 
-The concordant moments, CoLPM and CoUPM, capture joint movement in the same directional region. The **divergent moments**, DLPM and DUPM, capture the two cross-quadrant regions where \(X\) and \(Y\) move in opposite directions relative to their benchmarks — directly parallel to the divergent co-partial moment structure developed in Chapter 10. All four are degree-zero specializations of the general co-partial moment framework.
+The concordant moments, CoLPM and CoUPM, capture joint movement in the same directional region. The **divergent moments**, DUPM and DLPM, capture the two cross-quadrant regions where \(X\) and \(Y\) move in opposite directions relative to their benchmarks — directly parallel to the divergent co-partial moment structure developed in Chapter 10. All four are degree-zero specializations of the general co-partial moment framework.
 
 ---
 
@@ -80,16 +80,16 @@ Benchmarks \((t_X, t_Y)\) partition the joint distribution into four mutually ex
 
 |                  | \(Y \le t_Y\)        | \(Y > t_Y\)          |
 |------------------|----------------------|----------------------|
-| \(X \le t_X\)    | CoLPM\(_{0,0}\)      | DLPM\(_{0,0}\)       |
-| \(X > t_X\)      | DUPM\(_{0,0}\)       | CoUPM\(_{0,0}\)      |
+| \(X \le t_X\)    | CoLPM\(_{0,0}\)      | DUPM\(_{0,0}\)       |
+| \(X > t_X\)      | DLPM\(_{0,0}\)       | CoUPM\(_{0,0}\)      |
 
 Because these four regions partition the joint distribution completely,
 
 \[
 \mathrm{CoLPM}_{0,0}
 + \mathrm{CoUPM}_{0,0}
-+ \mathrm{DLPM}_{0,0}
 + \mathrm{DUPM}_{0,0}
++ \mathrm{DLPM}_{0,0}
 = 1.
 \]
 
@@ -107,8 +107,8 @@ In NNS R-package notation:
 
 where the four terms correspond respectively to
 \(P(X>t_X,\,Y>t_Y)\),
-\(P(X>t_X,\,Y\le t_Y)\),
-\(P(X\le t_X,\,Y>t_Y)\), and
+\(P(X\le t_X,\,Y>t_Y)\),
+\(P(X>t_X,\,Y\le t_Y)\), and
 \(P(X\le t_X,\,Y\le t_Y)\).
 Conditional probabilities are simply **relative weights of these regions after conditioning on one of the marginals**.
 
@@ -140,10 +140,21 @@ P(X > t_X \mid Y > t_Y)
 
 \[
 P(Y > t_Y \mid X \le t_X)
-= \frac{\mathrm{DLPM}_{0,0}(t_X,t_Y)}{L_0(t_X;\,X)}, \qquad
+= \frac{\mathrm{DUPM}_{0,0}(t_X,t_Y)}{L_0(t_X;\,X)}, \qquad
 P(Y \le t_Y \mid X > t_X)
-= \frac{\mathrm{DUPM}_{0,0}(t_X,t_Y)}{U_0(t_X;\,X)}.
+= \frac{\mathrm{DLPM}_{0,0}(t_X,t_Y)}{U_0(t_X;\,X)}.
 \]
+
+The reverse conditional probabilities use the same quadrant numerators:
+
+\[
+P(X \le t_X \mid Y > t_Y)
+= \frac{\mathrm{DUPM}_{0,0}(t_X,t_Y)}{U_0(t_Y;\,Y)}, \qquad
+P(X > t_X \mid Y \le t_Y)
+= \frac{\mathrm{DLPM}_{0,0}(t_X,t_Y)}{L_0(t_Y;\,Y)}.
+\]
+
+Every conditional ratio requires a positive denominator.
 
 Each formula follows from the same logic: the joint probability of the relevant quadrant divided by the marginal probability of the conditioning event. Together, these eight expressions **complete the four-quadrant conditional probability picture** — every conditional probability involving thresholds on \(X\) and \(Y\) is a ratio of a degree-zero co-partial moment to a marginal degree-zero partial moment.
 
@@ -321,7 +332,7 @@ satisfy \(w^{--} + w^{++} + w^{+-} + w^{-+} = 1\) with all weights non-negative 
 
 The degree-zero co-lower partial moment is already complete: \(CoLPM_{0,0}(a,b) = P(X\le a, Y\le b)\) is the joint CDF, which determines the joint law (rectangle probabilities follow from its four corner values). The hinge surface is a second complete representation, and the following result shows how it recovers the joint CDF.
 
-**Theorem** (Distributional Recovery). Assume \((X, Y)\) is integrable and differentiation under the expectation is valid (e.g., by dominated convergence). Then at all continuity points of the joint CDF \(F_{X,Y}\),
+**Theorem** (Distributional Recovery). Assume the hinge surface is finite for every finite benchmark pair, for example \(E[(1+|X|)(1+|Y|)] < \infty\), and differentiation under the expectation is valid (e.g., by dominated convergence). Then at all continuity points of the joint CDF \(F_{X,Y}\),
 
 \[
 \frac{\partial^2 H}{\partial t_X\,\partial t_Y}(t_X, t_Y) = F_{X,Y}(t_X, t_Y).
@@ -361,10 +372,10 @@ See [Discrete and Continuous Bayes](https://github.com/OVVO-Financial/NNS/blob/N
 This result establishes a natural hierarchy:
 
 - **Degree 0**: Indicator-level probability partition — the four-quadrant decomposition of Sections 13.3–13.6.
-- **Degree 1**: Continuous hinge partition of unity, from which the joint CDF is recovered by differentiation: a smooth complete representation alongside the degree-zero joint CDF itself.
+- **Degree 1**: Continuous hinge partition of unity, from which the joint CDF is recovered by differentiation: a continuous complete representation alongside the degree-zero joint CDF itself.
 - **Higher degrees**: Tail-emphasized continuous partitions that place increasing weight on extreme deviations from the benchmark. These are valuable for risk analysis in benchmark-relative tail analysis, but do not increase representational completeness beyond what degrees zero and one already provide. Once the full joint law is recovered, higher degrees refine which parts of the distribution are emphasized, not what is represented.
 
-Thus degree zero already captures the full joint law, and degree one captures it again in a continuous, differentiable form.
+Thus degree zero already captures the full joint law, and degree one captures it again through a continuous hinge surface, with derivative recovery where the stated regularity conditions hold.
 
 ---
 
@@ -397,7 +408,7 @@ Conditional probability and Bayes' theorem arise naturally and completely from t
 - **All eight conditional probabilities** from the four-quadrant partition are ratios of a degree-zero co-partial moment to a marginal partial moment.
 - **Bayes' theorem follows directly from co-partial moment identities**, holds symmetrically in both the lower and upper tails, and requires no distributional assumptions.
 - **Bayesian updating corresponds to renormalizing the four-quadrant probability partition** after conditioning on one marginal.
-- **Degree-one co-partial moments are distributional generators**: the mixed second derivative of the hinge surface recovers the joint CDF at all continuity points, and the mixed fourth derivative recovers the joint density when it exists. Degree zero, the joint CDF, is already complete; degree one is a smooth complete representation.
+- **Degree-one co-partial moments are distributional generators**: the mixed second derivative of the hinge surface recovers the joint CDF at all continuity points, and the mixed fourth derivative recovers the joint density when it exists. Degree zero, the joint CDF, is already complete; degree one is a continuous complete representation with the stated derivative qualifications.
 - **Partial moments are law-invariant**: they depend only on the induced distribution of \(X\), making them identical across Bayesian and frequentist pipelines whenever those pipelines agree on the distribution of outcomes.
 
 The next chapter extends these conditional-probability tools to directional causation — asking not merely how probability mass is distributed across variables, but which variable is doing the driving.

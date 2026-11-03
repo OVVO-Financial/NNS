@@ -14,7 +14,7 @@ LPM.VaR(percentile, degree, x)
 \item{x}{a numeric vector.}
 }
 \value{
-Returns the point below which \code{percentile} of the observations (\code{degree = 0}) or of the deviation area (\code{degree > 0}) lies.
+Returns the type-7 empirical quantile (\code{degree = 0}), whose strict or inclusive sample tail fraction may differ from \code{percentile} because of interpolation or ties, or the threshold with \code{percentile} of the directional deviation area below it (\code{degree > 0}).
 }
 \description{
 Generates a value at risk (VaR) quantile based on the Lower Partial Moment ratio.

@@ -201,9 +201,9 @@ $$
 \hat{F}_X(\bar{x}) = \frac{1}{n}\sum_{i=1}^n \mathbf{1}_{\{x_i \le \bar{x}\}},
 $$
 
-moves in steps of $1/n$ and scatters from sample to sample. What it estimates is $P(X \le \mu)$. For a continuous symmetric distribution that probability is 0.5 and $\hat{F}_X(\bar{x})$ estimates it without bias, but a single sample gives a value near 0.5 rather than at it (0.44 in the example below). For an asymmetric distribution the target is not 0.5 at all: for an exponential, $P(X \le \mu) = 1 - e^{-1} \approx 0.632$.
+moves in steps of $1/n$ and scatters from sample to sample. It is a plug-in estimate of $P(X \le \mu)$. For independent samples of size at least two from a continuous distribution symmetric about its finite mean, its expectation is 0.5 by reflection symmetry; individual samples fluctuate (0.44 in the example below). For an asymmetric distribution the target need not be 0.5: for an exponential, $P(X \le \mu) = 1 - e^{-1} \approx 0.632$.
 
-This is not a minor technicality. Any comparison procedure that evaluates a group's discrete CDF at a shared benchmark inherits this bias: the two CDFs will appear to differ even when the groups are identical, simply because of discretization noise.
+At a shared benchmark, two empirical CDFs can differ through sampling variability even when the underlying distributions agree. This variability must be separated from the choice of target: event frequency, mean agreement, and deviation-area agreement are different questions.
 
 #### The Degree-One Partial Moment Ratio: a Share of Deviation Area
 
@@ -221,7 +221,7 @@ LPM_1(t, X) = \frac{1}{n} \sum_{i=1}^n \max(0,\, t - x_i),
 UPM_1(t, X) = \frac{1}{n} \sum_{i=1}^n \max(0,\, x_i - t).
 $$
 
-Rather than counting the fraction of observations below $t$, this ratio measures the fraction of the **total area of deviations** that lies below $t$. Each observation is weighted by its distance from $t$, so this is a severity-weighted share, not the probability $P(X \le t)$: for an exponential sample, the point with 5% of the deviation area below it has about a quarter of the observations below it. That point is the 5% expectile (Newey and Powell, 1987): the degree-one ratio is the inverse of the expectile function, as the degree-zero ratio is the inverse of the quantile function. What the degree-one ratio offers instead is continuity in $t$, where the empirical CDF jumps by $1/n$, and the distribution-free anchor derived next. Probability statements, such as quantiles, coverage and the frequency of exceeding a threshold, belong to degree 0.
+Rather than counting the fraction of observations below $t$, this ratio measures the fraction of the **total area of deviations** that lies below $t$. Each observation is weighted by its distance from $t$, so this is a severity-weighted share, not the probability $P(X \le t)$: for an exponential sample, the point with 5% of the deviation area below it has about a quarter of the observations below it. That point is the 5% expectile (Newey and Powell, 1987): the degree-one ratio is the inverse of the expectile function, as the degree-zero ratio is the inverse of the quantile function. What the degree-one ratio offers instead is continuity in $t$, where the empirical CDF jumps by $1/n$, and the distribution-free anchor derived next. Probability statements about the original variable, such as event frequencies and ordinary quantiles, use degree 0. For a nondegenerate integrable variable, the univariate $F_1$ is itself continuous, increasing, and has limits 0 and 1, so it is a valid induced CDF. Its induced law differs from the original law; continuity does not erase this distinction.
 
 In NNS, this is computed via `LPM.ratio(degree = 1, target, variable)`.
 
@@ -251,7 +251,7 @@ $$
 
 Therefore $LPM_1(\bar{x}, X) = UPM_1(\bar{x}, X)$, which gives $F_1(\bar{x}; X) = 0.5$ exactly. $\square$
 
-This result holds for **every distribution, every non-constant sample, and without any parametric assumptions**. It is a property of the area-based share, not a correction of the empirical CDF: the empirical CDF at the mean estimates $P(X \le \mu)$, which is 0.5 only for symmetric distributions, while the degree-one ratio is 0.5 at the mean by construction. The same identity gives $LPM_1(t, X) - UPM_1(t, X) = t - \bar{x}$ at every benchmark, so
+This result holds for **every distribution, every non-constant sample, and without any parametric assumptions**. It is a property of the area-based share, not a correction of the empirical CDF: the empirical CDF at the mean estimates $P(X \le \mu)$, which is 0.5 for a continuous distribution symmetric about its mean, but not in general, while the degree-one ratio is 0.5 at the mean by construction. The same identity gives $LPM_1(t, X) - UPM_1(t, X) = t - \bar{x}$ at every benchmark, so
 
 $$
 F_1(t; X) - \frac{1}{2} = \frac{t - \bar{x}}{2\,\big(LPM_1(t, X) + UPM_1(t, X)\big)}:
@@ -259,7 +259,7 @@ $$
 
 at any benchmark, the degree-one ratio's distance from 0.5 is the distance from the sample mean, scaled by the deviation area.
 
-The same argument extends to the population: $F_1(\mu_X; X) = 0.5$ exactly for the population mean $\mu_X$, for any distribution with finite mean.
+The same argument extends to the population: $F_1(\mu_X; X) = 0.5$ exactly for the population mean $\mu_X$, for any nondegenerate distribution with finite absolute first moment. At a constant sample's only value both directional areas vanish; the package uses its documented step convention rather than the ratio $0/0$.
 
 #### Empirical Demonstration
 
@@ -353,7 +353,7 @@ This property has direct consequences for the comparison methods developed in th
 
 When two samples $X$ and $Y$ are evaluated at a shared benchmark such as the grand mean $\bar{z}$, the identity above makes $F_1(\bar{z}; X) - 0.5$ the distance from $\bar{z}$ to the group mean $\bar{x}$, in units of that group's deviation area, whatever the shape of the distribution. Under the null hypothesis of identical population means, both $F_1(\bar{z}; X)$ and $F_1(\bar{z}; Y)$ scatter around 0.5 with sampling noise, and departures from 0.5 measure how far each group mean sits from the grand statistic.
 
-The discrete CDF has no such anchor. Its value at the mean estimates $P(X \le \mu)$, which is 0.5 only for symmetric distributions, so at degree 0 a departure from 0.5 mixes skewness with separation: two identical exponential groups both sit near 0.632, not 0.5.
+The discrete CDF has no such anchor. Its value at the mean estimates $P(X \le \mu)$, which is 0.5 for a continuous distribution symmetric about its mean, but not in general, so at degree 0 a departure from 0.5 mixes skewness with separation: two identical exponential groups both sit near 0.632, not 0.5.
 
 The NNS ANOVA procedure in Section 15.4.2 is built directly on this foundation.
 
@@ -516,7 +516,7 @@ $$
 F_1(t; X) = \frac{LPM_1(t, X)}{LPM_1(t, X) + UPM_1(t, X)},
 $$
 
-and that $F_1(\bar{x}; X) = 0.5$ exactly for the sample mean, for any distribution and any sample size.
+and that $F_1(\bar{x}; X) = 0.5$ exactly at the sample mean for every non-constant sample.
 
 This **mean-target property** provides a distribution-free anchor for comparing means across samples: under the null that two groups share a common population mean, both groups' degree-one CDFs evaluated at the grand mean scatter around 0.5, and a departure from 0.5 measures the distance between the group mean and the grand mean in units of that group's deviation area (Section 15.1.8). Because the anchor does not depend on the shape of either distribution, a skewed group is not read as a shifted one, as it would be by comparing the empirical CDF with 0.5.
 
