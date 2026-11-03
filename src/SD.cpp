@@ -344,7 +344,7 @@ CharacterVector NNS_SD_efficient_set_parallel_cpp(NumericMatrix X, int degree, s
   int n = X.ncol(); if (!n) return CharacterVector();
   
   CharacterVector cn = colnames(X);
-  if (cn.size()!=n){ cn = CharacterVector(n); for(int j=0;j<n;++j) cn[j] = "X_"+std::to_string(j+1); colnames(X)=cn; }
+  if (cn.size()!=n){ cn = CharacterVector(n); for(int j=0;j<n;++j) cn[j] = "X_"+std::to_string(j+1); }
   
   // global max for ordering key
   double tmax = R_NegInf; for (R_xlen_t k=0;k<X.size();++k) if (!NumericVector::is_na(X[k]) && X[k]>tmax) tmax = X[k];
