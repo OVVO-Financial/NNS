@@ -30,6 +30,8 @@ The split depth, stopping rules, finite occupancy, and maximization across level
 
 The degree-0 cell reference uses the hypergeometric distribution, with a normal approximation for cell sizes above 400. The degree-1 reference enumerates distinct arrangements only when at most 720 are required (all arrangements for up to six distinct values); larger cells use an approximation. These are properties of the cell calibration, separate from the 100 whole-sample permutations used by \code{p.value = TRUE}.
 
+Power depends on the alternative. On noisy linear relationships in small samples, rank-based, distance-correlation or Hoeffding tests can reject more often than the \code{p.value} permutation test of \code{NNS.dep}; on non-monotone or heteroscedastic shapes such as a circle or \code{y = x * e}, the \code{NNS.dep} test can reject far more often.
+
 Whole-sample shuffling assumes exchangeability of observations under the null. It is not an automatic test for serially dependent or clustered observations. The returned fields named \code{95\% CIs} are central intervals of the permutation null, not confidence intervals for a population dependence parameter. Inclusive-tail counts with the plus-one correction avoid zero Monte Carlo p-values; ties make the test conservative.
 }
 \note{
