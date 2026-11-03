@@ -60,7 +60,8 @@ NNS.seas(
 - detrend:
 
   logical; `TRUE` (default) removes the variable's linear trend, keeping
-  its mean, before the lags are scored.
+  its mean, before the lags are scored; an exactly linear variable is
+  then constant and has no seasonal period.
 
 - max.period:
 

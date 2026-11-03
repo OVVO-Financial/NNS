@@ -67,15 +67,16 @@ NNS.caus(
 - permute:
 
   one of "auto" (default), "y", "x", "both" or "shift"; how the null
-  distribution is built. `"shift"` circularly shifts `y` by a random
-  offset at least `max(tau + 1, n / 10)` steps from alignment, so each
-  series keeps its own dynamics and only their alignment is broken: a
-  nonparametric counterpart to conditioning on the effect's own past.
-  `"y"`, `"x"` and `"both"` shuffle the values, an independence null for
-  cross-sections. `"auto"` uses `"shift"` when the lag is positive
-  (including `tau = "ts"`) and `"y"` otherwise. The lag of `tau = "ts"`
-  is resolved once on the observed series and kept for every
-  permutation.
+  distribution is built. `"shift"` circularly shifts `y` by random
+  distinct offsets at least `max(tau + 1, n / 10)` steps from alignment,
+  so each series keeps its own dynamics and only their alignment is
+  broken: a nonparametric counterpart to conditioning on the effect's
+  own past. When at most `nperm` offsets are admissible, each is used
+  once and the reported `nperm` is their number. `"y"`, `"x"` and
+  `"both"` shuffle the values, an independence null for cross-sections.
+  `"auto"` uses `"shift"` when the lag is positive (including
+  `tau = "ts"`) and `"y"` otherwise. The lag of `tau = "ts"` is resolved
+  once on the observed series and kept for every permutation.
 
 - seed:
 
