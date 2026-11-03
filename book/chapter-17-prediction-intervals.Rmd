@@ -159,7 +159,7 @@ When \(d=1\), the threshold instead solves
 \[
 t_\alpha^{(1)}=\inf\left\{t:\frac{L_1(t;X)}{L_1(t;X)+U_1(t;X)}\ge \alpha\right\}.
 \]
-This no longer counts all observations equally. Larger deviations below the benchmark contribute more heavily to the lower-tail mass.
+This no longer counts all observations equally. Larger deviations below the benchmark contribute more heavily to the lower-tail mass. The threshold is the \(\alpha\)-expectile of \(X\) (Newey and Powell, 1987): \(L_1/(L_1+U_1)=\alpha\) is the same equation as \(\alpha\,E[(X-t)_+]=(1-\alpha)\,E[(t-X)_+]\). Expectiles are coherent and elicitable risk measures, but they are not quantiles, so they carry no frequency guarantee.
 
 Similarly, when \(d=2\),
 \[
@@ -222,15 +222,17 @@ The distribution of bootstrapped correlations is visibly asymmetric — there is
 
 ## Degree-Zero Partial Moment Intervals
 
-The degree-zero LPM quantile is the percentile bootstrap interval up to the interpolation rule. The discrete CDF assigns equal weight to each bootstrap replicate; `LPM.VaR` interpolates linearly between order statistics while `boot.ci` interpolates on the normal-quantile scale, so the endpoints agree closely but not exactly (0.4688 and 0.9632 here, against 0.4609 and 0.9620 from `boot.ci`):
+The degree-zero LPM quantile is the percentile bootstrap interval up to the interpolation rule. The discrete CDF assigns equal weight to each bootstrap replicate; `LPM.VaR` interpolates linearly between order statistics while `boot.ci` interpolates on the normal-quantile scale, so the endpoints agree closely but not exactly (0.4684 and 0.9615 here, against 0.4609 and 0.9620 from `boot.ci`):
 
 ```r
 # Discrete lower and upper CI: the percentile method, up to interpolation
 LPM.VaR(percentile = 0.025, degree = 0, x = boot_out$t)
-## [1] 0.4688333
+##     2.5% 
+## 0.468375
 
 UPM.VaR(percentile = 0.025, degree = 0, x = boot_out$t)
-## [1] 0.9632222
+##    97.5% 
+## 0.961525
 ```
 
 ## Degree-One Partial Moment Intervals
@@ -240,10 +242,10 @@ The degree-one quantile weights replicates by their distance from the boundary, 
 ```r
 # Area-calibrated band: 2.5% of the deviation area in each tail
 LPM.VaR(percentile = 0.025, degree = 1, x = boot_out$t)
-## [1] 0.5612749
+## [1] 0.5612616
 
 UPM.VaR(percentile = 0.025, degree = 1, x = boot_out$t)
-## [1] 0.8263255
+## [1] 0.913772
 ```
 
 The bootstrap comparison in Python (the 15-observation `law` dataset is inlined; the resampling loop replaces `boot`):
@@ -270,7 +272,7 @@ lpm_var(0.025, 0, boot_t), upm_var(0.025, 0, boot_t)
 lpm_var(0.025, 1, boot_t), upm_var(0.025, 1, boot_t)
 ```
 
-The degree-one band $(0.561,\, 0.826)$ is tighter and more symmetric than the percentile interval $(0.461,\, 0.963)$, and its upper bound is comfortably below 1.0. The tightening comes from the change of measure: the degree-one bounds leave 2.5% of the replicates' area, not 2.5% of the replicates, in each tail, so the band holds about 80% of the bootstrap replicates rather than 95% (see the next section). It describes where the replicates' deviation area concentrates; it is not a bias-corrected 95% confidence interval.
+The degree-one band $(0.561,\, 0.914)$ is tighter than the percentile interval $(0.461,\, 0.962)$, and its upper bound is below 1.0. The tightening comes from the change of measure: the degree-one bounds leave 2.5% of the replicates' area, not 2.5% of the replicates, in each tail, so the band holds about 80% of the bootstrap replicates rather than 95% (see the next section). It describes where the replicates' deviation area concentrates; it is not a bias-corrected 95% confidence interval.
 
 Classical bootstrap corrections (BCa, studentized) adjust the percentile interval for bias and skewness through acceleration constants or additional resampling passes, and keep its 95% coverage target. The degree-one band does not attempt that correction: it changes what is measured, from a share of replicates to a share of their deviation area. Use the degree-zero (percentile) interval, or BCa, when the goal is 95% confidence, and the degree-one band to describe where the replicates' deviation area lies.
 
@@ -316,9 +318,11 @@ x <- c(-2, -1, 0, 1, 2, 3, 5, 7, 9, 10)
 
 # Degree 0: classical empirical quantiles
 LPM.VaR(percentile = 0.05, degree = 0, x = x)
-## [1] -1.55
+##    5% 
+## -1.55
 UPM.VaR(percentile = 0.05, degree = 0, x = x)
-## [1] 9.55
+##  95% 
+## 9.55
 
 # Degree 1: area-based thresholds
 LPM.VaR(percentile = 0.05, degree = 1, x = x)

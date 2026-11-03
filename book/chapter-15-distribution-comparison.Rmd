@@ -221,7 +221,7 @@ LPM_1(t, X) = \frac{1}{n} \sum_{i=1}^n \max(0,\, t - x_i),
 UPM_1(t, X) = \frac{1}{n} \sum_{i=1}^n \max(0,\, x_i - t).
 $$
 
-Rather than counting the fraction of observations below $t$, this ratio measures the fraction of the **total area of deviations** that lies below $t$. Each observation is weighted by its distance from $t$, so this is a severity-weighted share, not the probability $P(X \le t)$: for an exponential sample, the point with 5% of the deviation area below it has about a quarter of the observations below it. What the degree-one ratio offers instead is continuity in $t$, where the empirical CDF jumps by $1/n$, and the distribution-free anchor derived next. Probability statements, such as quantiles, coverage and the frequency of exceeding a threshold, belong to degree 0.
+Rather than counting the fraction of observations below $t$, this ratio measures the fraction of the **total area of deviations** that lies below $t$. Each observation is weighted by its distance from $t$, so this is a severity-weighted share, not the probability $P(X \le t)$: for an exponential sample, the point with 5% of the deviation area below it has about a quarter of the observations below it. That point is the 5% expectile (Newey and Powell, 1987): the degree-one ratio is the inverse of the expectile function, as the degree-zero ratio is the inverse of the quantile function. What the degree-one ratio offers instead is continuity in $t$, where the empirical CDF jumps by $1/n$, and the distribution-free anchor derived next. Probability statements, such as quantiles, coverage and the frequency of exceeding a threshold, belong to degree 0.
 
 In NNS, this is computed via `LPM.ratio(degree = 1, target, variable)`.
 
