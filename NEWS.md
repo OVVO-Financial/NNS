@@ -36,6 +36,17 @@
   local support and explicit boundary differences. Unsupported multivariate
   `NNS.CDF(type = "hazard")` requests now fail instead of returning CDF/survival
   as if it were density/survival.
+* Stack's multivariate component keeps the same coordinates in every fold, so
+  a predictor that is constant in one fold no longer stops the search. A
+  declared factor level with no training rows is a valid test value, a single
+  test row with a factor predictor is accepted, and categorical `NNS.reg`
+  honours an explicit `n.best`.
+* Nominal classification reuses each fold's cells and sorted distances for
+  every neighbour count and skips fitted classes in point-only calls. It is
+  still slower than the former class-code regression: for three classes, two
+  predictors and `folds = 2`, `NNS.stack` takes 1.3 s and `NNS.boost` 1.3 s at
+  n = 1000 (0.9 s and 0.12 s before), and 5.8 s and 8.0 s at n = 5000
+  (2.6 s and 1.2 s before).
 * Gravity retains its location blend with corrected quartiles and observed bin
   centers. Mode retains distinct continuous and class behavior. Changes to
   these defaults can affect regression, optimization, and forecasts.

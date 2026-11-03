@@ -32,9 +32,12 @@
 }
 
 .nns_class_base <- function(X, probabilities, point.est, order, n.best,
-                            dist, ncores, categorical = FALSE) {
+                            dist, ncores, categorical = FALSE,
+                            need.fitted = TRUE, k.path = NULL) {
   X <- as.matrix(X)
   p <- ncol(X)
+  x.min <- apply(X, 2, min)
+  x.max <- apply(X, 2, max)
   exact.coordinate <- vapply(seq_len(p), function(j) {
     categorical || identical(order, "max") || length(unique(X[, j])) <= 2L
   }, logical(1))
@@ -68,9 +71,18 @@
     if (identical(order, "max") || categorical) 1L else
       max(1L, floor((1 - mean(strength)) * sqrt(nrow(X))))
   k <- max(1L, min(as.integer(k), nrow(centres)))
-  predict <- function(points) {
+  neighbours <- function(kk) {
+    kk <- if (identical(kk, "all")) nrow(centres) else as.integer(kk)
+    max(1L, min(kk, nrow(centres)))
+  }
+  # One probability matrix per neighbour count in ks. Each point's distances
+  # are computed and sorted once and reused for every count.
+  predict <- function(points, ks = k) {
     if (is.null(points)) return(NULL)
     points <- as.matrix(points)
+    ks <- vapply(ks, neighbours, integer(1))
+    # Counts above the number of cells all select every cell.
+    unique.ks <- unique(ks)
     if (p == 1L && !categorical) {
       o <- order(centres[, 1])
       ans <- vapply(seq_len(ncol(shares)), function(j) {
@@ -78,30 +90,44 @@
           stats::approx(centres[o, 1], shares[o, j], xout = points[, 1],
                         rule = 2, ties = mean)$y
       }, numeric(nrow(points)))
-    } else {
-      # Equal-distance cells share their rank weight, including a tie at k.
+      ans <- matrix(ans, ncol = ncol(shares))
+      colnames(ans) <- colnames(shares)
+      return(rep(list(.nns_class_normalize(ans, prior)), length(ks)))
+    }
+    out <- lapply(unique.ks, function(kk) {
+      matrix(0, nrow(points), ncol(shares), dimnames = list(NULL, colnames(shares)))
+    })
+    rank.terms <- vector("list", nrow(centres))
+    for (i in seq_len(nrow(points))) {
+      d <- .nns_mreg_distance_vector(centres, points[i, ], dist, x.min, x.max)
       # Exact matches retain their empirical class frequencies.
-      ans <- t(vapply(seq_len(nrow(points)), function(i) {
-        d <- .nns_mreg_distance_vector(centres, points[i, ], dist,
-                                       apply(X, 2, min), apply(X, 2, max))
-        exact <- which(d == 0)
-        if (length(exact)) return(colMeans(shares[exact, , drop = FALSE]))
-        cutoff <- sort(d, partial = k)[k]
-        selected <- which(d <= cutoff)
-        selected <- selected[order(d[selected])]
-        weights <- .nns_mreg_ensemble_weights(d[selected])
-        for (v in unique(d[selected])) {
-          tied <- which(d[selected] == v)
+      exact <- which(d == 0)
+      if (length(exact)) {
+        v <- colMeans(shares[exact, , drop = FALSE])
+        for (a in seq_along(unique.ks)) out[[a]][i, ] <- v
+        next
+      }
+      # The k nearest cells, with every cell tied at the k-th distance.
+      # Equal-distance cells share their rank weight.
+      o <- order(d)
+      ds <- d[o]
+      for (a in seq_along(unique.ks)) {
+        m <- sum(ds <= ds[unique.ks[a]])
+        near <- ds[seq_len(m)]
+        if (m > 1L && is.null(rank.terms[[m]])) rank.terms[[m]] <- .nns_mreg_rank_weights(m)
+        weights <- .nns_mreg_ensemble_weights(near, if (m > 1L) rank.terms[[m]])
+        for (v in unique(near[duplicated(near)])) {
+          tied <- which(near == v)
           weights[tied] <- mean(weights[tied])
         }
-        as.numeric(crossprod(weights, shares[selected, , drop = FALSE]))
-      }, numeric(ncol(shares))))
+        out[[a]][i, ] <- as.numeric(crossprod(weights, shares[o[seq_len(m)], , drop = FALSE]))
+      }
     }
-    ans <- matrix(ans, ncol = ncol(shares))
-    colnames(ans) <- colnames(shares)
-    .nns_class_normalize(ans, prior)
+    lapply(out, .nns_class_normalize, prior = prior)[match(ks, unique.ks)]
   }
-  list(fitted = predict(X), predicted = predict(point.est),
+  list(fitted = if (need.fitted) predict(X)[[1L]] else NULL,
+       predicted = if (is.null(k.path)) predict(point.est)[[1L]] else NULL,
+       predicted.path = if (is.null(k.path)) NULL else predict(point.est, k.path),
        centres = centres, shares = shares, ids = ids, boundaries = boundaries,
        k = k, strength = strength)
 }
@@ -135,11 +161,13 @@
       fit <- .nns_class_base(matrix(reduced$x.star, ncol = 1),
                              cbind(1 - indicators[, j], indicators[, j]),
                              if (is.null(Q)) NULL else matrix(reduced$point.star, ncol = 1),
-                             order, n.best, dist, ncores)
-      list(fitted = fit$fitted[, 2], predicted = if (is.null(Q)) NULL else fit$predicted[, 2],
+                             order, n.best, dist, ncores, need.fitted = !point.only)
+      list(fitted = if (point.only) NULL else fit$fitted[, 2],
+           predicted = if (is.null(Q)) NULL else fit$predicted[, 2],
            equation = reduced$equation)
     })
-    fitted.prob <- .nns_class_normalize(do.call(cbind, lapply(models, `[[`, "fitted")), colMeans(indicators))
+    fitted.prob <- if (point.only) NULL else
+      .nns_class_normalize(do.call(cbind, lapply(models, `[[`, "fitted")), colMeans(indicators))
     point.prob <- if (is.null(Q)) NULL else
       .nns_class_normalize(do.call(cbind, lapply(models, `[[`, "predicted")), colMeans(indicators))
     equations <- setNames(lapply(models, `[[`, "equation"), labels)
@@ -147,20 +175,25 @@
     ids <- seq_len(nrow(X))
     k <- NA_integer_
   } else {
-    fit <- .nns_class_base(X, indicators, Q, order, n.best, dist, ncores, categorical)
+    fit <- .nns_class_base(X, indicators, Q, order, n.best, dist, ncores, categorical,
+                           need.fitted = !point.only)
     fitted.prob <- fit$fitted; point.prob <- fit$predicted
     centres <- fit$centres; shares <- fit$shares
     boundaries <- fit$boundaries; ids <- fit$ids; k <- fit$k
   }
-  colnames(fitted.prob) <- labels
   if (!is.null(point.prob)) colnames(point.prob) <- labels
-  fitted.pred <- .nns_class_select(fitted.prob, values, tie.order)
   point.pred <- .nns_class_select(point.prob, values, tie.order)
-  fitted <- as.data.frame(X)
-  fitted$y <- task$y; fitted$y.hat <- fitted.pred
-  fitted$NNS.ID <- ids; fitted$error <- as.numeric(fitted.pred != task$y)
-  accuracy <- mean(fitted.pred == task$y)
-  if (plot && ncol(X) == 1L) {
+  # Fitted classes are not computed for point-only calls, which return none.
+  fitted <- fitted.pred <- accuracy <- NULL
+  if (!point.only) {
+    colnames(fitted.prob) <- labels
+    fitted.pred <- .nns_class_select(fitted.prob, values, tie.order)
+    fitted <- as.data.frame(X)
+    fitted$y <- task$y; fitted$y.hat <- fitted.pred
+    fitted$NNS.ID <- ids; fitted$error <- as.numeric(fitted.pred != task$y)
+    accuracy <- mean(fitted.pred == task$y)
+  }
+  if (plot && !point.only && ncol(X) == 1L) {
     graphics::plot(X[, 1], task$y, xlab = colnames(X)[1], ylab = "Class", pch = 1)
     graphics::points(X[, 1], fitted.pred, col = "red", pch = 20)
     if (!is.null(Q)) graphics::points(Q[, 1], point.pred, col = "green", pch = 18)

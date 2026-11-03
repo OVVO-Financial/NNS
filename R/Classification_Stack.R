@@ -4,7 +4,7 @@
                                 dim.red.method, order, dist, ncores,
                                 optimize.threshold, pred.int, score, objective,
                                 balance.indices, numeric.response, status,
-                                numeric.design) {
+                                numeric.design, tau = NULL) {
   values <- sort(unique(y))
   tie.order <- match(unique(y), values)
   labels <- as.character(class.values)
@@ -41,9 +41,8 @@
     take <- tied[which.min(abs(thresholds[tied] - .5))]
     list(score = loss[take], threshold = thresholds[take])
   }
-  fit <- function(train, response, test, component, candidate, select.count = NULL) {
+  design <- function(train, response, test, component, select.count = NULL) {
     encoded <- encode(train, test)
-    task <- list(y = response, class.values = values, class.levels = labels)
     if (component == 1L && stack && !is.null(select.count) && select.count < ncol(encoded$x)) {
       ind <- outer(response, values, "==") * 1
       importance <- vapply(seq_len(ncol(encoded$x)), function(j) {
@@ -54,13 +53,53 @@
       encoded$x <- encoded$x[, keep, drop = FALSE]
       encoded$point.est <- encoded$point.est[, keep, drop = FALSE]
     }
+    encoded
+  }
+  fit <- function(train, response, test, component, candidate, select.count = NULL) {
+    encoded <- design(train, response, test, component, select.count)
+    task <- list(y = response, class.values = values, class.levels = labels)
     .nns_reg_classify(encoded, task, order,
                       if (component == 1L) candidate else NULL, dist, ncores,
-                      if (component == 2L) dim.red.method else NULL,
+                      if (component == 2L) dim.red.method else NULL, tau = tau,
                       dim.count = if (component == 2L) candidate else NULL,
                       point.only = TRUE)
   }
+  # The method 1 cells, class shares and distances do not depend on the
+  # neighbour count, so each fold builds them once for every candidate. The
+  # probabilities equal separate fits at each count.
+  fit.path <- function(train, response, test, candidates, select.count = NULL) {
+    encoded <- design(train, response, test, 1L, select.count)
+    categorical <- all(vapply(encoded$metadata, `[[`, logical(1), "categorical"))
+    .nns_class_base(encoded$x, outer(response, values, "==") * 1, encoded$point.est,
+                    order, NULL, dist, ncores, categorical,
+                    need.fitted = FALSE, k.path = candidates)$predicted.path
+  }
+  record <- function(total, count, candidate) {
+    valid <- count > 0
+    probability <- matrix(NA_real_, n, K)
+    probability[valid, ] <- total[valid, , drop = FALSE] / count[valid]
+    assessment <- evaluate(probability[valid, , drop = FALSE], y[valid])
+    c(assessment, list(candidate = candidate, probability = probability, valid = valid))
+  }
   tune <- function(component, candidates, select.count = NULL) {
+    if (component == 1L) {
+      totals <- lapply(candidates, function(candidate) matrix(0, n, K))
+      count <- integer(n)
+      for (b in seq_along(splits)) {
+        s <- splits[[b]]; tr <- s$train[balanced[[b]]]; va <- s$validation
+        path <- fit.path(x[tr, , drop = FALSE], y[tr], x[va, , drop = FALSE],
+                         candidates, select.count)
+        for (a in seq_along(candidates))
+          totals[[a]][va, ] <- totals[[a]][va, , drop = FALSE] + path[[a]]
+        count[va] <- count[va] + 1L
+      }
+      records <- lapply(seq_along(candidates), function(a) {
+        record(totals[[a]], count, candidates[[a]])
+      })
+      losses <- vapply(records, `[[`, numeric(1), "score")
+      best <- if (objective == "min") which.min(losses) else which.max(losses)
+      return(records[[best]])
+    }
     records <- lapply(candidates, function(candidate) {
       total <- matrix(0, n, K); count <- integer(n)
       for (b in seq_along(splits)) {
@@ -70,11 +109,7 @@
         total[va, ] <- total[va, , drop = FALSE] + as.matrix(fitted$Point.probabilities)
         count[va] <- count[va] + 1L
       }
-      valid <- count > 0
-      probability <- matrix(NA_real_, n, K)
-      probability[valid, ] <- total[valid, , drop = FALSE] / count[valid]
-      assessment <- evaluate(probability[valid, , drop = FALSE], y[valid])
-      c(assessment, list(candidate = candidate, probability = probability, valid = valid))
+      record(total, count, candidate)
     })
     losses <- vapply(records, `[[`, numeric(1), "score")
     best <- if (objective == "min") which.min(losses) else which.max(losses)

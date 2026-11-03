@@ -8,10 +8,13 @@ NNS.distance.path.bulk <- function(rpm, Xtest, kmax, class = NULL, ncores = 1L) 
   rpm   <- as.data.frame(rpm)
   stopifnot("y.hat" %in% names(rpm))
   Xrpm  <- rpm[, setdiff(names(rpm), "y.hat"), drop = FALSE]
+  # as.data.frame() names unnamed columns V1, V2, ...; only names the caller
+  # supplied identify columns, so an unnamed matrix is matched by position.
+  test.named <- !is.null(colnames(Xtest))
   Xtest <- as.data.frame(Xtest)
   
   # Align by names if available
-  if (!is.null(colnames(Xrpm)) && !is.null(colnames(Xtest))) {
+  if (!is.null(colnames(Xrpm)) && test.named) {
     cmn <- intersect(colnames(Xrpm), colnames(Xtest))
     if (length(cmn) == 0L) {
       stop("No common feature columns between RPM and Xtest.")
@@ -48,6 +51,7 @@ NNS.distance.path.single.bulk <- function(rpm, Xtest, k, class = NULL, ncores = 
   stopifnot("y.hat" %in% names(rpm))
   Xrpm <- rpm[, setdiff(names(rpm), "y.hat"), drop = FALSE]
   
+  test.named <- !is.null(if (is.null(dim(Xtest))) names(Xtest) else colnames(Xtest))
   if (is.null(dim(Xtest))) {
     Xtest <- as.data.frame(t(Xtest))
   } else {
@@ -55,7 +59,7 @@ NNS.distance.path.single.bulk <- function(rpm, Xtest, k, class = NULL, ncores = 
   }
   
   # Align by names if available, matching NNS.distance.path.bulk.
-  if (!is.null(colnames(Xrpm)) && !is.null(colnames(Xtest))) {
+  if (!is.null(colnames(Xrpm)) && test.named) {
     cmn <- intersect(colnames(Xrpm), colnames(Xtest))
     if (length(cmn) == 0L) {
       stop("No common feature columns between RPM and Xtest.")

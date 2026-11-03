@@ -27,11 +27,11 @@
 #' @return Returns a vector of fitted values for the dependent variable test set for all models.
 #' \itemize{
 #' \item{\code{"NNS.reg.n.best"}} returns the optimum \code{"n.best"} parameter for the \link{NNS.reg} multivariate regression; \code{NA} for a single predictor, whose univariate \link{NNS.reg} fit has no \code{n.best} to tune (use \code{cbind(x, x)} to search one).  \code{"SSE.reg"} returns the SSE for the \link{NNS.reg} multivariate regression.
-#' \item{\code{"OBJfn.reg"}} returns the \code{obj.fn} for the \link{NNS.reg} regression.
+#' \item{\code{"OBJfn.reg"}} returns the best \code{obj.fn} value of the \link{NNS.reg} regression's tuning on the out-of-fold predictions; it is selection-optimized, not an estimate of out-of-sample performance.
 #' \item{\code{"NNS.dim.red.threshold"}} returns the optimum \code{"threshold"} from the \link{NNS.reg} dimension reduction regression.
 #' \item{\code{"NNS.dim.red.variables"}} returns the names of the predictors carried by the final dimension reduction regression, ranked by absolute coefficient.  With \code{(stack = TRUE)} these are also the only predictors used by the \link{NNS.reg} multivariate regression, so they are exactly the variables behind \code{"stack"}.  \code{NULL} when \code{method} does not include 2.
 #' \item{\code{"NNS.dim.red.coefficients"}} returns the named final dimension reduction coefficients for every encoded predictor column (zero for predictors not selected).  \code{NULL} when \code{method} does not include 2.
-#' \item{\code{"OBJfn.dim.red"}} returns the \code{obj.fn} for the \link{NNS.reg} dimension reduction regression.
+#' \item{\code{"OBJfn.dim.red"}} returns the best \code{obj.fn} value of the \link{NNS.reg} dimension reduction regression's tuning on the out-of-fold predictions; it is selection-optimized, not an estimate of out-of-sample performance.
 #' \item{\code{"probability.threshold"}} returns the optimum probability threshold for classification, else 0.5 when set to \code{FALSE}.
 #' \item{\code{"reg"}} returns \link{NNS.reg} output.
 #' \item{\code{"reg.pred.int"}} returns the prediction intervals for the regression output.
@@ -45,7 +45,7 @@
 #' @references Viole, F. (2016) "Classification Using NNS Clustering Analysis"  \doi{10.2139/ssrn.2864711}
 #'
 #' @details
-#' Classification tunes and combines class-probability vectors from the NNS predictor cells, preserving nominal label identity. \code{probabilities}, \code{reg.probabilities}, and \code{dim.red.probabilities} return the final probability matrices. Binary threshold selection and class balancing are performed within the training folds; the default classification objective is accuracy. Custom objectives receive original numeric or logical response values, and factor/character codes as identified by \code{class.levels}. Relabelling is invariant for label-invariant objectives such as accuracy; a custom loss assigning different costs to classes can deliberately change the result.
+#' Classification tunes and combines class-probability vectors from the NNS predictor cells, preserving nominal label identity. \code{probabilities}, \code{reg.probabilities}, and \code{dim.red.probabilities} return the final probability matrices. Class balancing resamples the training rows of each fold. The neighbour count, the dimension count, the blend weight and the binary probability threshold are chosen by optimizing \code{obj.fn} on the pooled out-of-fold predictions; the default classification objective is accuracy. \code{OBJfn.reg} and \code{OBJfn.dim.red} are the best scores of that search on the same predictions, so they are selection-optimized and overstate held-out performance; assess the final model on an independent test set. Custom objectives receive original numeric or logical response values, and factor/character codes as identified by \code{class.levels}. Relabelling is invariant for label-invariant objectives such as accuracy; a custom loss assigning different costs to classes can deliberately change the result.
 #' 
 #' Named numeric dimension-reduction coefficients are matched to encoded predictor names in both regression and classification. Factor columns use \code{predictor__level} names; unnamed vectors follow encoded column order. Classification dimension reduction uses one signed index per class indicator. Its reported coefficients are a list of class-specific equations. The tuned dimension count is returned as \code{NNS.dim.red.count}; \code{NNS.dim.red.threshold} is NA because there is no single coefficient cutoff shared by all class indices. The field \code{NNS.dim.red.variables} is the union of their active encoded columns. These equations describe the synthetic indices, not a complete saved prediction model: reconstruction also requires training-fitted scaling, the predictor cells, their class frequencies, and the selected smoothing controls. With \code{stack = TRUE}, the multivariate classification component retains the selected number of actual encoded coordinates ranked by maximum class-indicator dependence. \code{Prediction.set} contains classes attaining the requested estimated probability mass. Binary interval fields contain the range of this set for compatibility; multiclass interval fields are NULL. The sets do not assert calibrated coverage.
 #' 
@@ -61,10 +61,12 @@
 #' }
 #'
 #' @examples
-#'  ## Using 'iris' dataset where test set [IVs.test] is 'iris' rows 141:150.
+#'  ## Using 'iris' dataset with a stratified test set of ten rows per species
+#'  ## (rows 141:150 alone are all virginica).
 #'  \dontrun{
-#'  NNS.stack(iris[1:140, 1:4], iris[1:140, 5], IVs.test = iris[141:150, 1:4], type = "CLASS", 
-#'  balance = TRUE)
+#'  test.set <- c(41:50, 91:100, 141:150)
+#'  NNS.stack(iris[-test.set, 1:4], iris[-test.set, 5], IVs.test = iris[test.set, 1:4],
+#'  type = "CLASS", balance = TRUE)
 #'
 #'  ## Using 'iris' dataset to determine [n.best] and [threshold] with no test set.
 #'  NNS.stack(iris[ , 1:4], iris[ , 5], type = "CLASS")
@@ -211,8 +213,11 @@ NNS.stack <- function(IVs.train,
       } else if (is.factor(tr) || is.character(tr)) {
         tr_chr <- as.character(tr)
         te_chr <- as.character(te)
-        # Sorted levels, as factor() and NNS.boost use, so row order does not matter.
-        lev <- if (is.ordered(tr)) levels(tr) else sort(unique(tr_chr))
+        # Sorted levels, as factor() and NNS.boost use, so row order does not
+        # matter. A factor's declared levels remain valid test values even when
+        # the training rows do not contain every level.
+        lev <- if (is.ordered(tr)) levels(tr) else
+          if (is.factor(tr)) sort(levels(tr)) else sort(unique(tr_chr))
         unseen <- setdiff(unique(te_chr), lev)
         if (length(unseen)) {
           stop(sprintf(
@@ -630,8 +635,10 @@ NNS.stack <- function(IVs.train,
         te_block <- vapply(lev, function(level) {
           as.numeric(te_chr == level)
         }, numeric(length(te_chr)))
-        if (is.null(dim(tr_block))) tr_block <- matrix(tr_block, ncol = 1L)
-        if (is.null(dim(te_block))) te_block <- matrix(te_block, ncol = 1L)
+        # vapply() drops to a vector for one row or one level; keep rows as
+        # observations either way (a single test row has one row per level).
+        if (is.null(dim(tr_block))) tr_block <- matrix(tr_block, nrow = length(tr_chr))
+        if (is.null(dim(te_block))) te_block <- matrix(te_block, nrow = length(te_chr))
         block_names <- paste0(nm, "__", make.names(lev, unique = TRUE))
         colnames(tr_block) <- block_names
         colnames(te_block) <- block_names
@@ -835,7 +842,8 @@ NNS.stack <- function(IVs.train,
     return(.nns_stack_classify(x, y, z, class_values, splits, method, stack,
       dim.red.method, order, dist, ncores, optimize.threshold, pred.int,
       .score, objective, .balance_indices,
-      response_was_numeric || response_was_logical, status, .numeric_design))
+      response_was_numeric || response_was_logical, status, .numeric_design,
+      tau = if (is.null(ts.test)) NULL else "ts"))
   }
   
   .coefficient_vector <- function(X, response) {
@@ -920,6 +928,19 @@ NNS.stack <- function(IVs.train,
       out[active] <- 1
     }
     out
+  }
+  
+  # Method 1 keeps the actual coordinates ranked first by the dimension
+  # reduction coefficients. The rank, not a nonzero fold coefficient, selects
+  # them: a predictor that is constant in one fold has a zero coefficient
+  # there, and dropping it would give that fold a different (univariate)
+  # model from the other folds and from the final fit. A constant column
+  # adds nothing to the NNS distance, whose coordinates are range-scaled.
+  .active_columns <- function(coef, count) {
+    coef <- as.numeric(coef)
+    count <- max(1L, min(as.integer(count), length(coef)))
+    ord <- order(abs(coef), decreasing = TRUE, na.last = NA, method = "radix")
+    sort(ord[seq_len(min(count, length(ord)))])
   }
   
   .project_xstar <- function(train_design, test_design, coef) {
@@ -1210,8 +1231,7 @@ NNS.stack <- function(IVs.train,
     
     if (stack && 2L %in% method) {
       coef_fold <- .coefficient_vector(fold_design$train, y.cv[train_idx])
-      active_coef <- .active_coefficients(coef_fold, dim_best_count)
-      selected <- which(abs(active_coef) > 0)
+      selected <- .active_columns(coef_fold, dim_best_count)
       list(train = fold_design$train[, selected, drop = FALSE],
            test = fold_design$test[, selected, drop = FALSE])
     } else {
@@ -1648,7 +1668,7 @@ NNS.stack <- function(IVs.train,
   
   .method1_full_design <- function() {
     if (stack && 2L %in% method) {
-      selected <- which(abs(dim_full_coef) > 0)
+      selected <- .active_columns(dim_full_coef_original, dim_best_count)
       list(train = full_design$train[, selected, drop = FALSE],
            test = full_design$test[, selected, drop = FALSE])
     } else {

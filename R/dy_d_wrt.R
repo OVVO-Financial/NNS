@@ -127,7 +127,8 @@ dy.d_ <- function(x, y, wrt, eval.points = "obs", mixed = FALSE, messages = TRUE
   }
   marginal <- is.null(dim(eval.points)) || ncol(eval.points) == 1L
   if (marginal) {
-    points <- as.numeric(eval.points)
+    # A one-column matrix or data frame holds values of the wrt regressor.
+    points <- as.numeric(unlist(eval.points, use.names = FALSE))
     count <- min(nrow(x), max(21L, floor(10000 / max(1L, length(points)))))
     other <- x[.nns_spread_rows(nrow(x), count), , drop = FALSE]
     contexts <- lapply(points, function(value) {

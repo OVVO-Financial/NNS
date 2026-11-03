@@ -14,34 +14,43 @@
   if (s <= 0) rep(1 / length(w), length(w)) else w / s
 }
 
-.nns_mreg_ensemble_weights <- function(distances) {
+# The rank-based terms of the ensemble depend only on the neighbour count, so
+# callers weighting many points can compute them once per count.
+.nns_mreg_rank_weights <- function(k) {
+  ranks <- seq_len(k)
+  rank.sd <- stats::sd(ranks)
+  list(
+    uniform = rep(1 / k, k),
+    exponential = .nns_mreg_normalize_weights(stats::dexp(ranks, rate = 1 / k)),
+    lognormal = if (is.finite(rank.sd) && rank.sd > 0) {
+      rev(.nns_mreg_normalize_weights(abs(stats::dlnorm(ranks, 0, rank.sd, log = TRUE))))
+    } else rep(0, k),
+    power = .nns_mreg_normalize_weights(ranks^(-2))
+  )
+}
+
+.nns_mreg_ensemble_weights <- function(distances, rank = NULL) {
   k <- length(distances)
   if (k == 1L) return(1)
+  if (is.null(rank)) rank <- .nns_mreg_rank_weights(k)
   
-  ranks <- seq_len(k)
-  uniform <- rep(1 / k, k)
   student <- .nns_mreg_normalize_weights(stats::dt(distances, df = k))
   inverse <- .nns_mreg_normalize_weights(1 / pmax(distances, 1e-12))
-  exponential <- .nns_mreg_normalize_weights(stats::dexp(ranks, rate = 1 / k))
   
-  rank.sd <- stats::sd(ranks)
-  lognormal <- if (is.finite(rank.sd) && rank.sd > 0) {
-    rev(.nns_mreg_normalize_weights(abs(stats::dlnorm(ranks, 0, rank.sd, log = TRUE))))
-  } else rep(0, k)
-  
-  power <- .nns_mreg_normalize_weights(ranks^(-2))
-  distance.sd <- stats::sd(distances)
+  # sd() is sqrt(var()), so one variance serves both distance kernels.
+  distance.var <- stats::var(distances)
+  distance.sd <- sqrt(distance.var)
   normal <- if (is.finite(distance.sd) && distance.sd > 0) {
     .nns_mreg_normalize_weights(stats::dnorm(distances, 0, distance.sd))
   } else rep(0, k)
   
-  distance.var <- stats::var(distances)
   rbf <- if (is.finite(distance.var) && distance.var > 0) {
     .nns_mreg_normalize_weights(exp(-distances / (2 * distance.var)))
   } else rep(0, k)
   
   .nns_mreg_normalize_weights(
-    uniform + student + inverse + exponential + lognormal + power + normal + rbf
+    rank$uniform + student + inverse + rank$exponential + rank$lognormal +
+      rank$power + normal + rbf
   )
 }
 
@@ -404,7 +413,9 @@ NNS.M.reg <- function(X_n, Y, factor.2.dummy = TRUE, order = NULL,
   rpm <- prepared$RPM
   if (!nrow(rpm)) stop("NNS.M.reg produced an empty RPM.", call. = FALSE)
   
-  if (categorical || (is.null(n.best) && identical(order, "max"))) {
+  # Exact observed cells (maximum order, or purely categorical predictors)
+  # use one neighbour unless the caller supplies n.best.
+  if (is.null(n.best) && (categorical || identical(order, "max"))) {
     k <- 1L
   } else if (is.null(n.best)) {
     k <- .nns_mreg_default_nbest(X, y, nrow(rpm))

@@ -75,11 +75,11 @@ NNS.stack(
 Returns a vector of fitted values for the dependent variable test set for all models.
 \itemize{
 \item{\code{"NNS.reg.n.best"}} returns the optimum \code{"n.best"} parameter for the \link{NNS.reg} multivariate regression; \code{NA} for a single predictor, whose univariate \link{NNS.reg} fit has no \code{n.best} to tune (use \code{cbind(x, x)} to search one).  \code{"SSE.reg"} returns the SSE for the \link{NNS.reg} multivariate regression.
-\item{\code{"OBJfn.reg"}} returns the \code{obj.fn} for the \link{NNS.reg} regression.
+\item{\code{"OBJfn.reg"}} returns the best \code{obj.fn} value of the \link{NNS.reg} regression's tuning on the out-of-fold predictions; it is selection-optimized, not an estimate of out-of-sample performance.
 \item{\code{"NNS.dim.red.threshold"}} returns the optimum \code{"threshold"} from the \link{NNS.reg} dimension reduction regression.
 \item{\code{"NNS.dim.red.variables"}} returns the names of the predictors carried by the final dimension reduction regression, ranked by absolute coefficient.  With \code{(stack = TRUE)} these are also the only predictors used by the \link{NNS.reg} multivariate regression, so they are exactly the variables behind \code{"stack"}.  \code{NULL} when \code{method} does not include 2.
 \item{\code{"NNS.dim.red.coefficients"}} returns the named final dimension reduction coefficients for every encoded predictor column (zero for predictors not selected).  \code{NULL} when \code{method} does not include 2.
-\item{\code{"OBJfn.dim.red"}} returns the \code{obj.fn} for the \link{NNS.reg} dimension reduction regression.
+\item{\code{"OBJfn.dim.red"}} returns the best \code{obj.fn} value of the \link{NNS.reg} dimension reduction regression's tuning on the out-of-fold predictions; it is selection-optimized, not an estimate of out-of-sample performance.
 \item{\code{"probability.threshold"}} returns the optimum probability threshold for classification, else 0.5 when set to \code{FALSE}.
 \item{\code{"reg"}} returns \link{NNS.reg} output.
 \item{\code{"reg.pred.int"}} returns the prediction intervals for the regression output.
@@ -93,7 +93,7 @@ Returns a vector of fitted values for the dependent variable test set for all mo
 Prediction model using the predictions of the NNS base models \link{NNS.reg} as features (i.e. meta-features) for the stacked model.
 }
 \details{
-Classification tunes and combines class-probability vectors from the NNS predictor cells, preserving nominal label identity. \code{probabilities}, \code{reg.probabilities}, and \code{dim.red.probabilities} return the final probability matrices. Binary threshold selection and class balancing are performed within the training folds; the default classification objective is accuracy. Custom objectives receive original numeric or logical response values, and factor/character codes as identified by \code{class.levels}. Relabelling is invariant for label-invariant objectives such as accuracy; a custom loss assigning different costs to classes can deliberately change the result.
+Classification tunes and combines class-probability vectors from the NNS predictor cells, preserving nominal label identity. \code{probabilities}, \code{reg.probabilities}, and \code{dim.red.probabilities} return the final probability matrices. Class balancing resamples the training rows of each fold. The neighbour count, the dimension count, the blend weight and the binary probability threshold are chosen by optimizing \code{obj.fn} on the pooled out-of-fold predictions; the default classification objective is accuracy. \code{OBJfn.reg} and \code{OBJfn.dim.red} are the best scores of that search on the same predictions, so they are selection-optimized and overstate held-out performance; assess the final model on an independent test set. Custom objectives receive original numeric or logical response values, and factor/character codes as identified by \code{class.levels}. Relabelling is invariant for label-invariant objectives such as accuracy; a custom loss assigning different costs to classes can deliberately change the result.
 
 Named numeric dimension-reduction coefficients are matched to encoded predictor names in both regression and classification. Factor columns use \code{predictor__level} names; unnamed vectors follow encoded column order. Classification dimension reduction uses one signed index per class indicator. Its reported coefficients are a list of class-specific equations. The tuned dimension count is returned as \code{NNS.dim.red.count}; \code{NNS.dim.red.threshold} is NA because there is no single coefficient cutoff shared by all class indices. The field \code{NNS.dim.red.variables} is the union of their active encoded columns. These equations describe the synthetic indices, not a complete saved prediction model: reconstruction also requires training-fitted scaling, the predictor cells, their class frequencies, and the selected smoothing controls. With \code{stack = TRUE}, the multivariate classification component retains the selected number of actual encoded coordinates ranked by maximum class-indicator dependence. \code{Prediction.set} contains classes attaining the requested estimated probability mass. Binary interval fields contain the range of this set for compatibility; multiclass interval fields are NULL. The sets do not assert calibrated coverage.
 
@@ -109,10 +109,12 @@ For regression, all dimension-reduction coefficients, normalizations, and candid
 }
 }
 \examples{
- ## Using 'iris' dataset where test set [IVs.test] is 'iris' rows 141:150.
+ ## Using 'iris' dataset with a stratified test set of ten rows per species
+ ## (rows 141:150 alone are all virginica).
  \dontrun{
- NNS.stack(iris[1:140, 1:4], iris[1:140, 5], IVs.test = iris[141:150, 1:4], type = "CLASS", 
- balance = TRUE)
+ test.set <- c(41:50, 91:100, 141:150)
+ NNS.stack(iris[-test.set, 1:4], iris[-test.set, 5], IVs.test = iris[test.set, 1:4],
+ type = "CLASS", balance = TRUE)
 
  ## Using 'iris' dataset to determine [n.best] and [threshold] with no test set.
  NNS.stack(iris[ , 1:4], iris[ , 5], type = "CLASS")
