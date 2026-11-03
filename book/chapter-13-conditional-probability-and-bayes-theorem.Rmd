@@ -319,7 +319,7 @@ satisfy \(w^{--} + w^{++} + w^{+-} + w^{-+} = 1\) with all weights non-negative 
 
 ## Distributional recovery
 
-The hinge surface carries more information than its degree-zero counterpart. The following result shows that \(H\) is a complete representation of the joint law.
+The degree-zero co-lower partial moment is already complete: \(CoLPM_{0,0}(a,b) = P(X\le a, Y\le b)\) is the joint CDF, which determines the joint law (rectangle probabilities follow from its four corner values). The hinge surface is a second complete representation, and the following result shows how it recovers the joint CDF.
 
 **Theorem** (Distributional Recovery). Assume \((X, Y)\) is integrable and differentiation under the expectation is valid (e.g., by dominated convergence). Then at all continuity points of the joint CDF \(F_{X,Y}\),
 
@@ -361,10 +361,10 @@ See [Discrete and Continuous Bayes](https://github.com/OVVO-Financial/NNS/blob/N
 This result establishes a natural hierarchy:
 
 - **Degree 0**: Indicator-level probability partition — the four-quadrant decomposition of Sections 13.3–13.6.
-- **Degree 1**: Continuous hinge partition of unity and complete distributional recovery — the minimal degree at which partial moments become full distributional generators.
-- **Higher degrees**: Tail-emphasized continuous partitions that place increasing weight on extreme deviations from the benchmark. These are valuable for risk analysis in benchmark-relative tail analysis, but do not increase representational completeness beyond what degree one already provides. Once the full joint law is recovered, higher degrees refine which parts of the distribution are emphasized, not what is represented.
+- **Degree 1**: Continuous hinge partition of unity, from which the joint CDF is recovered by differentiation: a smooth complete representation alongside the degree-zero joint CDF itself.
+- **Higher degrees**: Tail-emphasized continuous partitions that place increasing weight on extreme deviations from the benchmark. These are valuable for risk analysis in benchmark-relative tail analysis, but do not increase representational completeness beyond what degrees zero and one already provide. Once the full joint law is recovered, higher degrees refine which parts of the distribution are emphasized, not what is represented.
 
-Thus **degree one is the completeness threshold**: the minimal order at which the full joint law is captured.
+Thus degree zero already captures the full joint law, and degree one captures it again in a continuous, differentiable form.
 
 ---
 
@@ -397,7 +397,7 @@ Conditional probability and Bayes' theorem arise naturally and completely from t
 - **All eight conditional probabilities** from the four-quadrant partition are ratios of a degree-zero co-partial moment to a marginal partial moment.
 - **Bayes' theorem follows directly from co-partial moment identities**, holds symmetrically in both the lower and upper tails, and requires no distributional assumptions.
 - **Bayesian updating corresponds to renormalizing the four-quadrant probability partition** after conditioning on one marginal.
-- **Degree-one co-partial moments are distributional generators**: the mixed second derivative of the hinge surface recovers the joint CDF at all continuity points, and the mixed fourth derivative recovers the joint density when it exists. Degree one is the completeness threshold.
+- **Degree-one co-partial moments are distributional generators**: the mixed second derivative of the hinge surface recovers the joint CDF at all continuity points, and the mixed fourth derivative recovers the joint density when it exists. Degree zero, the joint CDF, is already complete; degree one is a smooth complete representation.
 - **Partial moments are law-invariant**: they depend only on the induced distribution of \(X\), making them identical across Bayesian and frequentist pipelines whenever those pipelines agree on the distribution of outcomes.
 
 The next chapter extends these conditional-probability tools to directional causation — asking not merely how probability mass is distributed across variables, but which variable is doing the driving.

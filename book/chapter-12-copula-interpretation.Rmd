@@ -210,13 +210,13 @@ y <- xy[,2]
 z <- expand.grid(x,y)
 ```
 
-Plot the **Co-Lower Partial Moment surface** relative to benchmark \(t_X=t_Y=0\):
+Plot the **Co-Lower Partial Moment surface** over the grid of benchmark pairs \((t_X, t_Y)\):
 
 ```r
 rgl::plot3d(
   z[,1],
   z[,2],
-  Co.LPM(0,z[,1],z[,2],z[,1],z[,2]),
+  Co.LPM(0,x,y,z[,1],z[,2]),
   col="red"
 )
 ```
@@ -225,9 +225,9 @@ rgl::plot3d(
 ![Figure 12.1. Co-LPM surface in original \((x,y)\) space (red), visualizing joint downside structure before copula transformation.](images/ch12_raw_copula.png)
 </center>
 
-In the call `Co.LPM(0, z[,1], z[,2], z[,1], z[,2])`, the argument order is `(degree, x, y, target.x, target.y)`. Setting `degree = 0` produces the probability-level co-lower partial moment, and reusing `z[,1]`/`z[,2]` as both variables and targets evaluates the surface over the full grid of benchmark pairs. The visualization uses `rgl::plot3d`, which produces an interactive three-dimensional plot.
+In the call `Co.LPM(0, x, y, z[,1], z[,2])`, the argument order is `(degree, x, y, target.x, target.y)`. Setting `degree = 0` produces the probability-level co-lower partial moment. The paired observations supply the data and the grid `z` supplies only the benchmark pairs, so the surface is the empirical joint CDF of \((X, Y)\). Passing the grid as the data would pair every \(x\) with every \(y\) and plot the independence surface \(F_X F_Y\) whatever the dependence: at the medians it gives 0.25, against 0.36 for these data. The visualization uses `rgl::plot3d`, which produces an interactive three-dimensional plot.
 
-This surface represents the magnitude of **joint downside deviations** in the original variable space.
+At degree 0 this surface is a probability: the share of observations jointly at or below each benchmark pair, in the original variable space.
 
 Next transform the variables into probability space:
 
@@ -244,7 +244,7 @@ Plotting the same directional statistic in probability space gives
 rgl::plot3d(
   z[,1],
   z[,2],
-  Co.LPM(0,z[,1],z[,2],z[,1],z[,2]),
+  Co.LPM(0,u_x,u_y,z[,1],z[,2]),
   col="blue"
 )
 ```
@@ -295,7 +295,7 @@ gx, gy = np.meshgrid(x, y, indexing="ij")
 z1, z2 = gx.ravel(), gy.ravel()
 
 # Co-LPM surface in original (x, y) space
-surface_raw = co_lpm(0, z1, z2, z1, z2)
+surface_raw = co_lpm(0, x, y, z1, z2)
 
 # Transform the marginals into probability space
 u_x = lpm_ratio(0, x, x)
@@ -305,7 +305,7 @@ gux, guy = np.meshgrid(u_x, u_y, indexing="ij")
 u1, u2 = gux.ravel(), guy.ravel()
 
 # Same directional statistic on the copula domain [0, 1]^2
-surface_copula = co_lpm(0, u1, u2, u1, u2)
+surface_copula = co_lpm(0, u_x, u_y, u1, u2)
 
 # Direct multivariate dependence summary
 z3 = rng.normal(size=x.size)

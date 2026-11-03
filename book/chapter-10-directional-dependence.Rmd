@@ -172,7 +172,7 @@ Real datasets rarely exhibit such perfect alignment, and in practice the diverge
 
 ## Dependence Versus Correlation
 
-Covariance aggregates directional components:
+With the benchmarks at the means, \(t_X=\mu_X\) and \(t_Y=\mu_Y\), covariance aggregates the degree-one directional components:
 
 \[
 Cov(X,Y)
@@ -185,6 +185,8 @@ DLPM_{1,1}
 -
 DUPM_{1,1}.
 \]
+
+For general benchmarks the same sum is \(E[(X-t_X)(Y-t_Y)] = Cov(X,Y) + (\mu_X-t_X)(\mu_Y-t_Y)\). With \(X\) and \(Y\) independent on \(\{9, 11\}\) and both benchmarks at 0, the sum is 100 while the covariance is 0.
 
 Correlation further standardizes covariance.
 
@@ -370,7 +372,7 @@ CoLPM_{1,1},CoLPM_{2,2},CoLPM_{3,3},\dots
 CoUPM_{1,1},CoUPM_{2,2},CoUPM_{3,3},\dots
 \]
 
-These sequences describe how dependence changes across the distribution.
+These sequences describe how dependence changes across the distribution, but only relative to what the margins alone produce. Under independence the co-moments factorise, \(CoLPM_{d,d}(t_X,t_Y) = L_d(t_X;X)\,L_d(t_Y;Y)\) and \(CoUPM_{d,d}(t_X,t_Y) = U_d(t_X;X)\,U_d(t_Y;Y)\), so skewed margins alone make the two sequences diverge: for two independent negated Exp(1) variables at their means, \(CoLPM_{d,d}/CoUPM_{d,d}\) is 1, 7.8 and 113 at degrees 1, 2 and 3. A profile is therefore read against these independence products.
 
 Example:
 
@@ -380,7 +382,7 @@ Example:
 | 2 | 3.9 | 1.4 |
 | 3 | 8.5 | 1.8 |
 
-Moderate deviations appear symmetric, but higher orders reveal increasing **downside dependence**.
+Moderate deviations appear symmetric, while higher orders put more weight on the lower co-moment. Where the independence products of the margins grow the same way, this is marginal skew; only the excess over them is increasing **downside dependence**.
 
 Directional profiles therefore show **how dependence evolves from ordinary fluctuations to extreme events**.
 

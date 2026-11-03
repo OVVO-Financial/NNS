@@ -43,7 +43,7 @@ Granger causality captures a genuine and important insight: the causal role of \
 
 The parametric Granger approach carries four limitations that are familiar from earlier chapters.
 
-**Linear specification.** The causal relationship between variables is constrained to be linear. Nonlinear effects, including the simple case where \(X\) drives \(Y = X^2\), are invisible to the regression coefficients even when the causal relationship is strong and unambiguous.
+**Linear specification.** The causal relationship between variables is constrained to be linear. Nonlinear effects can be invisible to the regression coefficients even when the causal relationship is strong and unambiguous: when a symmetric, zero-centred \(X\) drives \(Y = X^2\), the two are uncorrelated and the linear lag coefficient is zero. (A linear test misses less when the driver is not centred: for \(X\) uniform on \([0,1]\), \(X^2\) has correlation 0.97 with \(X\).)
 
 **Symmetric aggregation.** Regression models aggregate deviations symmetrically around the mean. Asymmetric causal effects — where large upward movements in \(X\) drive movements in \(Y\) but small movements do not — are absorbed into the residual.
 
@@ -67,7 +67,7 @@ Before developing the method, it is useful to state what a causation measure sho
 
 These axioms motivate a measure built from two components: a **conditional probability** that captures how strongly the position of one variable constrains the distribution of the other, and an **asymmetric dependence** measure that captures whether that constraint is stronger in one direction than the other. Neither component alone satisfies all three axioms; together they do.
 
-One qualification applies to Axiom 2. When \(f\) is invertible, \(X = f^{-1}(Y)\) is just as much a function of \(Y\), so contemporaneous data register influence equally in both directions and the net index is neutral. Time order, through a lag \(\tau > 0\), is what identifies the direction in that case. A non-invertible \(f\), such as \(Y = X^2\), is directional even without a lag.
+One qualification applies to Axiom 2. When \(f\) is invertible, \(X = f^{-1}(Y)\) is just as much a function of \(Y\), so contemporaneous data register influence equally in both directions and the net index is neutral. Time order, through a lag \(\tau > 0\), is what identifies the direction in that case. A non-invertible \(f\), such as \(Y = X^2\), produces an asymmetric association even without a lag, but that asymmetry belongs to the joint distribution, not to the causal arrow: \(X \sim N(0,1)\) with \(Y = X^2\), and \(Y \sim \chi^2_1\) with \(X = S\sqrt{Y}\) for an independent random sign \(S\), have the same joint law, so no statistic of \((X, Y)\) can tell them apart, and `NNS.caus(x, y, tau = 0)` reads \(X \to Y\) for both. Without a lag the index measures directional association.
 
 ---
 

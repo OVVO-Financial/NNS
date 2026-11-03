@@ -102,7 +102,7 @@ Two variables may exhibit strong dependence through nonlinear patterns:
 - asymmetric reactions to shocks
 - conditional dependence structures that cancel under linear aggregation
 
-For example, if \(Y = X^2\) and \(X\) is symmetric around zero, then \(Corr(X,Y) = 0\) despite perfect deterministic dependence. Correlation does not merely understate the relationship—it misses it entirely.
+For example, if \(Y = X^2\) and \(X\) is symmetric around zero with a finite fourth moment (and not concentrated on two points \(\pm c\), where \(X^2\) is constant), then \(Corr(X,Y) = 0\) despite perfect deterministic dependence. Correlation does not merely understate the relationship—it misses it entirely.
 
 The problem again arises from aggregation.
 
