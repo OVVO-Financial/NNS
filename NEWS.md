@@ -58,11 +58,13 @@
   single shrunk lag refits recursively. Long-horizon runtime and path bands can
   therefore differ from earlier releases.
 * The optimizer's objective describes its returned internal validation forecast.
-  The default bias policy estimates a shift on an earlier validation portion and
-  accepts it on a later portion; `bias.correction = "legacy"` reproduces the old
-  same-window policy and `"none"` disables it. Base-model tuning still requires
-  independent outer evaluation. Raw/corrected forecasts and bias metadata are
-  available for assessment.
+  `NNS.ARMA.optim` no longer adds the gravity bias shift by default
+  (`bias.correction = "none"`). On rolling-origin forecasts of nine series the
+  shift made held-out MASE worse on eight, whether it was accepted on the same
+  validation window (the old rule, `"legacy"`) or estimated on the first half
+  and accepted on the second (`"split"`). Both remain available. Base-model
+  tuning still requires independent outer evaluation. Raw/corrected forecasts
+  and bias metadata are available for assessment.
 * VAR keeps its two-stage forecast design and uses prefix-generated predictors
   for chronological validation by default. `validation = "observed"` is the
   compatibility option. Known contemporaneous outcomes and imputed future

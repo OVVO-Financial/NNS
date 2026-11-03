@@ -28,7 +28,8 @@ test_that("ARMA.optim out-of-sample bands sit on the clamped forecasts", {
   x <- rep(1, 80)
   o <- NNS.ARMA.optim(x, h = 6, training.set = 64, seasonal.factor = c(2, 4),
                       obj.fn = expression(mean((predicted - actual)^2)),
-                      ncores = 1, print.trace = FALSE, plot = FALSE)
+                      ncores = 1, print.trace = FALSE, plot = FALSE,
+                      bias.correction = "split")
   expect_true(o$bias.validation$accepted)
   expect_true(any(o$results == 0))
   expect_true(all(o$upper.pred.int >= o$results))

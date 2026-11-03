@@ -25,7 +25,7 @@ test_that("an accepted split-window correction is included in the returned score
     NNS.ARMA = function(variable, h, ...) rep(200, h),
     .package = "NNS"
   )
-  o <- run_optim()
+  o <- run_optim(bias.correction = "split")
   actual <- AirPassengers[106:132]
   expect_true(o$bias.validation$accepted)
   expect_true(o$bias.shift != 0)

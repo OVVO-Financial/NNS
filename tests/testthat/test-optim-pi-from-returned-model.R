@@ -10,7 +10,8 @@ run_optim <- function(...) NNS.ARMA.optim(..., ncores = 1, print.trace = FALSE)
 
 test_that("errors and bias.shift come from the returned shrink model", {
   x <- two_cycles()
-  o <- run_optim(x, training.set = 128, seasonal.factor = c(7, 12), obj.fn = mse)
+  o <- run_optim(x, training.set = 128, seasonal.factor = c(7, 12), obj.fn = mse,
+                 bias.correction = "split")
   p <- NNS.ARMA(x, training.set = 128, h = 32, seasonal.factor = c(7, 12), method = "lin",
                 weights = c(0.5, 0.5), shrink = TRUE, plot = FALSE)
   expect_true(o$shrink)
@@ -58,7 +59,8 @@ test_that("a nonnegative series takes residuals from the clamped forecasts it re
   v <- rep(1, 80)
   o <- NNS.ARMA.optim(v, seasonal.factor = c(2, 4), training.set = 64, negative.values = FALSE,
                       obj.fn = expression(mean(predicted)), objective = "min",
-                      print.trace = FALSE, ncores = 1, plot = FALSE)
+                      print.trace = FALSE, ncores = 1, plot = FALSE,
+                      bias.correction = "split")
   expect_true(any(o$results == 0))
   res <- tail(v, 16) - o$results
   expect_equal(o$upper.pred.int, pmax(0, o$results + UPM.VaR(.025, 0, res)))

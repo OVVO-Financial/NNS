@@ -24,7 +24,7 @@ NNS.ARMA.optim(
   pred.int = 0.95,
   print.trace = TRUE,
   plot = FALSE,
-  bias.correction = c("split", "none", "legacy")
+  bias.correction = c("none", "split", "legacy")
 )
 }
 \arguments{
@@ -56,7 +56,7 @@ The default is the mean squared error divided by the degree-1 co-movement of \co
 
 \item{plot}{logical; \code{FALSE} (default)}
 
-\item{bias.correction}{\code{"split"} (default) estimates the gravity residual shift on the first half of the internal validation window and accepts it only if it improves the objective on the later half. At least four validation observations are required. \code{"none"} disables the shift; \code{"legacy"} estimates and accepts it on the same complete window.}
+\item{bias.correction}{\code{"none"} (default) returns the selected model's forecasts without an additive shift. \code{"split"} estimates a gravity bias from the first half of the validation errors and accepts it only if the objective improves on the later half; at least four validation observations are required. \code{"legacy"} reproduces same-window estimation and acceptance. On rolling-origin forecasts of nine series (AirPassengers, UKgas, LakeHuron, a random walk, sunspot.month, nottem, USAccDeaths, co2 and Nile; six expanding origins, h = 12), the uncorrected forecasts had the lower mean MASE on eight of the nine series under both correction policies. Model selection still uses the validation window, so these diagnostics are not independent out-of-sample performance estimates.}
 }
 \value{
 Returns a list containing:
@@ -81,7 +81,7 @@ Returns a list containing:
 Wrapper function for optimizing any combination of a given \code{seasonal.factor} vector in \link{NNS.ARMA}.  The objective function \code{obj.fn} on a validation window (the last \code{length(variable) - training.set} observations) is used to determine the optimum across all \link{NNS.ARMA} methods.
 }
 \note{
-The split bias decision separates shift estimation from acceptance. Base model selection still uses the internal validation window, so these tuning scores are not an independent evaluation of the whole forecasting procedure. Evaluate the complete procedure at fresh chronological origins.
+By default no bias shift is added. With \code{bias.correction = "split"} the shift is estimated on the first half of the validation window and accepted on the second. Base model selection still uses the internal validation window, so these tuning scores are not an independent evaluation of the whole forecasting procedure. Evaluate the complete procedure at fresh chronological origins.
 
 \itemize{
 \item{} Typically, \code{(training.set = 0.8 * length(variable))} is used for optimization.  Smaller samples could use \code{(training.set = 0.9 * length(variable))} (or larger) in order to preserve information.

@@ -107,3 +107,12 @@ test_that("bulk distance wrappers match an unnamed matrix by position", {
   expect_equal(NNS:::NNS.distance.path.bulk(rpm, q, 3),
                NNS:::NNS.distance.path.bulk(rpm, setNames(as.data.frame(q), c("X1", "X2")), 3))
 })
+
+test_that("NNS.ARMA.optim adds no bias shift by default", {
+  expect_identical(eval(formals(NNS.ARMA.optim)$bias.correction)[1], "none")
+  fit <- NNS.ARMA.optim(as.numeric(AirPassengers[1:96]), h = 12,
+    seasonal.factor = c(6, 12), print.trace = FALSE, ncores = 1, pred.int = NULL)
+  expect_identical(fit$bias.shift, 0)
+  expect_identical(fit$bias.validation$policy, "none")
+  expect_equal(fit$results, fit$raw.results)
+})
