@@ -16,7 +16,7 @@ test_that("errors and bias.shift come from the returned shrink model", {
   expect_true(o$shrink)
   expect_equal(o$errors, p - tail(x, 32))
   expect_equal(o$bias.shift, -NNS.gravity(o$errors))
-  expect_equal(o$bias.shift, -0.08088602, tolerance = 1e-6)
+  expect_equal(o$bias.shift, -0.2842948, tolerance = 1e-6)
   expect_equal(o$results, p + o$bias.shift)
 })
 
@@ -37,8 +37,8 @@ test_that("the interval adds the LPM and UPM VaR of actual - results", {
   r <- tail(x, 32) - o$results
   expect_equal(o$lower.pred.int, o$results + LPM.VaR(0.025, 0, r))
   expect_equal(o$upper.pred.int, o$results + UPM.VaR(0.025, 0, r))
-  expect_equal(mean(o$upper.pred.int - o$results), 4.336331, tolerance = 1e-6)
-  expect_equal(mean(o$results - o$lower.pred.int), 5.216974, tolerance = 1e-6)
+  expect_equal(mean(o$upper.pred.int - o$results), 4.539740, tolerance = 1e-6)
+  expect_equal(mean(o$results - o$lower.pred.int), 5.013565, tolerance = 1e-6)
 })
 
 test_that("the out-of-sample interval uses the validation residuals", {

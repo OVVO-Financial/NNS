@@ -139,6 +139,15 @@ static void simple_bin_counts(const std::vector<double>& xs, double width, doubl
 
 // ---------- NNS.gravity ----------
 
+// R's default quantile (type 7) of sorted xs: position 1 + (n - 1) p.
+static inline double quantile_type7(const std::vector<double>& xs, double p) {
+  const int n = (int)xs.size();
+  const double h = (n - 1) * p;
+  const int lo = (int)std::floor(h);
+  const int hi = std::min(lo + 1, n - 1);
+  return xs[lo] + (h - lo) * (xs[hi] - xs[lo]);
+}
+
 // Core gravity computation operating on a vector of finite values.
 // Shared by NNS_gravity_cpp and the NNS.reg regression-point builder.  The
 // result depends only on the set of values (x is sorted internally), so input
@@ -163,8 +172,12 @@ double gravity_value(std::vector<double> x, bool discrete) {
   double range = std::fabs(x.back() - x.front());
   if (range == 0.0) return x.front();
 
-  double q1, q2, q3;
-  quartiles_like_R_code(x, q1, q2, q3);
+  // The usual median and quartiles (#117): the floor-position order
+  // statistics used before took the lower middle value for even n, so
+  // gravity sat below the centre of symmetric data.
+  const double q1 = quantile_type7(x, 0.25);
+  const double q2 = quantile_type7(x, 0.50);
+  const double q3 = quantile_type7(x, 0.75);
 
   double width = (q3 - q1) * std::pow((double)l, -0.5);
   if (!(width > 0.0) || !R_finite(width)) width = range / 128.0;
@@ -187,9 +200,16 @@ double gravity_value(std::vector<double> x, bool discrete) {
     hi = std::min(lz - 1, zc + 1);
   }
 
-  long double num = 0.0L, den = 0.0L;
-  for (int i = lo; i <= hi; ++i) { num += (long double)z_names[i] * (long double)counts[i]; den += (long double)counts[i]; }
-  double m = (den > 0.0L) ? (double)(num / den) : z_names[ (lo+hi)/2 ];
+  // The mode term is the mean of the observations in those bins (#117): the
+  // bins' left edges, used before, sat half a bin below the data. x is
+  // sorted, so the observations of bins lo..hi are a contiguous slice.
+  int a = 0;
+  for (int i = 0; i < lo; ++i) a += counts[i];
+  int e = a;
+  for (int i = lo; i <= hi; ++i) e += counts[i];
+  long double num = 0.0L;
+  for (int t = a; t < e; ++t) num += (long double)x[t];
+  double m = (e > a) ? (double)(num / (long double)(e - a)) : z_names[ (lo+hi)/2 ];
 
   double mu = mean_vec(x);
   double mid = 0.25 * ( q2 + m + mu + 0.5*(q1 + q3) );

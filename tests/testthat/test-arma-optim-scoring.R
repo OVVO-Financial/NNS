@@ -49,7 +49,7 @@ test_that("equal weights are selected when they score better", {
 })
 
 test_that("the out-of-sample forecast applies nns.regress to the full series", {
-  x <- random_walk(8)
+  x <- random_walk(10)
   o <- run_optim(x, h = 20, training.set = 80, seasonal.factor = c(1, 2, 4, 6, 12), obj.fn = mse)
   smoothed <- NNS.reg(1:100, x, plot = FALSE, smooth = TRUE)$Fitted.xy$y.hat
   p <- NNS.ARMA(smoothed, h = 20, seasonal.factor = o$periods, method = o$method,
@@ -83,7 +83,7 @@ test_that("nns.regress is not selected by a smooth that saw the validation windo
 })
 
 test_that("validation results with nns.regress use a smooth of the training window", {
-  x <- random_walk(8)
+  x <- random_walk(10)
   o <- run_optim(x, training.set = 80, seasonal.factor = c(1, 2, 4, 6, 12), obj.fn = mse)
   smoothed <- NNS.reg(1:80, x[1:80], plot = FALSE, smooth = TRUE)$Fitted.xy$y.hat
   p <- NNS.ARMA(smoothed, training.set = 80, h = 20, seasonal.factor = o$periods,

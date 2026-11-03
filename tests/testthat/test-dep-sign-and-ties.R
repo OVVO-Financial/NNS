@@ -80,8 +80,9 @@ test_that("symmetric NNS.dep on tied data ignores argument and row order", {
 
 test_that("the local dependence NNS.reg's default order reads is unchanged on tied data", {
   set.seed(388); n <- sample(10:80, 1); x <- sample(0:5, n, TRUE); y <- sample(0:5, n, TRUE)
-  expect_equal(NNS:::.nns_dep_local(x, y), 0.0541613480206442, tolerance = 1e-12)
-  expect_identical(NNS:::.nns_reg_default_order(x, y), 1L)
+  # Pinned again after #117 corrected the gravity splits (0.054, order 1 before).
+  expect_equal(NNS:::.nns_dep_local(x, y), 0.281843356364165, tolerance = 1e-12)
+  expect_identical(NNS:::.nns_reg_default_order(x, y), 2L)
   expect_equal(NNS.reg(x, y, point.est = 4, plot = FALSE, residual.plot = FALSE)$Point.est,
-               1.2920454396936896, tolerance = 1e-12)
+               2.4009920634920636, tolerance = 1e-12)
 })
