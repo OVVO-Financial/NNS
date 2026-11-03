@@ -17,7 +17,7 @@
 #' @param print.trace logical; \code{TRUE} (default) Prints current iteration information.  Suggested as backup in case of error, best parameters to that point still known and copyable!
 #' @param ncores integer; value specifying the number of cores to be used in the parallelized  procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.
 #' @param plot logical; \code{FALSE} (default)
-#' @param bias.correction \code{"none"} (default) returns the selected model's forecasts without an additive shift. \code{"split"} estimates a gravity bias from the first half of the validation errors and accepts it only if the objective improves on the later half; at least four validation observations are required. \code{"legacy"} reproduces same-window estimation and acceptance. On rolling-origin forecasts of nine series (AirPassengers, UKgas, LakeHuron, a random walk, sunspot.month, nottem, USAccDeaths, co2 and Nile; six expanding origins, h = 12), the uncorrected forecasts had the lower mean MASE on eight of the nine series under both correction policies. Model selection still uses the validation window, so these diagnostics are not independent out-of-sample performance estimates.
+#' @param bias.correction \code{"none"} (default) returns the selected model's forecasts without an additive shift. \code{"split"} estimates a gravity bias from the first half of the validation errors and accepts it only if the objective improves on the later half; at least four validation observations are required. On rolling-origin forecasts of nine series (AirPassengers, UKgas, LakeHuron, a random walk, sunspot.month, nottem, USAccDeaths, co2 and Nile; six expanding origins, h = 12), the uncorrected forecasts had the lower mean MASE on eight of the nine series, both against \code{"split"} and against estimating and accepting the shift on the same window, a rule that is no longer offered. Model selection still uses the validation window, so these diagnostics are not independent out-of-sample performance estimates.
 #'
 #' @return Returns a list containing:
 #' \itemize{
@@ -86,7 +86,7 @@ NNS.ARMA.optim <- function(variable,
                            pred.int = 0.95,
                            print.trace = TRUE,
                            plot = FALSE,
-                           bias.correction = c("none", "split", "legacy")){
+                           bias.correction = c("none", "split")){
   
   if(any(class(variable)%in%c("tbl","data.table"))) variable <- as.vector(unlist(variable))
   
@@ -556,7 +556,6 @@ NNS.ARMA.optim <- function(variable,
   candidate <- applied <- 0
   before <- after <- NA_real_
   status <- if (policy == "none") "disabled" else "insufficient_validation"
-  if (policy == "legacy") estimate <- test <- seq_len(n)
   if (policy == "split" && n >= 4L) {
     estimate <- seq_len(n %/% 2L)
     test <- seq.int(length(estimate) + 1L, n)

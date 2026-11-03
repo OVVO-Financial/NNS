@@ -59,7 +59,7 @@ It does not assert universal statistical calibration or a new benchmark win.
 | #131 | **Resolved.** VAR validation reconstructs prefix completion, first-stage forecasts, predicted contemporaneous/later-lag features, and relevance selection at a chronological origin. Only observed holdout targets are scored. All forecasting fits explicitly use numeric regression, including two-valued responses. Final fitting uses full available history. `validation = "observed"` remains an explicit compatibility option. |
 | #136 | **Resolved as a documented scenario/inference distinction.** Residual expansion has its own switch. Forced-mean dispersion is identified as an iid reference; zero rank correlation does not establish independence, and interior mixing need not preserve margins or seasonal structure. No universal serial-dependence sampling calibration is claimed. |
 | #137 | **Resolved through corrected sources and explicit historical errata.** Examples use refitted sampling uncertainty, reserved forecast outcomes, indicator classification, correctly described permutation references, and matched statistical targets. Unsupported rankings and numerical tables are withdrawn. Revised PDF companions identify limitations and do not invent replacement benchmark results. The `NNS.norm` demonstrations in vignettes 01 and 04 use positive-mean columns, the `NNS.boost` and `NNS.stack` help examples and vignette 08 use a stratified iris test set (rows 141:150 alone are all virginica), and vignette 08 describes `NNS.boost` as feature screening followed by one stacked fit. |
-| #142 | **Resolved: no shift by default.** `bias.correction = "none"` is the default. Neither acceptance rule made the shift carry over to held-out forecasts: on rolling-origin forecasts of nine series (six expanding origins, h = 12; AirPassengers, UKgas, LakeHuron, a random walk, sunspot.month from 1974, nottem, USAccDeaths, co2 and Nile) the uncorrected forecasts had the lower mean MASE on eight, against both `"split"` (estimate on the first half of the validation window, accept on the second) and `"legacy"` (estimate and accept on the same window). Both remain options, and the returned raw/corrected forecasts and validation metadata expose the policy. Whole-model performance still requires independent outer evaluation. |
+| #142 | **Resolved: no shift by default.** `bias.correction = "none"` is the default. Neither acceptance rule made the shift carry over to held-out forecasts: on rolling-origin forecasts of nine series (six expanding origins, h = 12; AirPassengers, UKgas, LakeHuron, a random walk, sunspot.month from 1974, nottem, USAccDeaths, co2 and Nile) the uncorrected forecasts had the lower mean MASE on eight, against both `"split"` (estimate on the first half of the validation window, accept on the second) and the former rule (estimate and accept on the same window). `"split"` remains an option; the same-window rule is removed. The returned raw/corrected forecasts and validation metadata expose the policy. Whole-model performance still requires independent outer evaluation. |
 | #144 | **Resolved by scope and null clarification, with #141/#143 numerical fixes.** Directional lag association is not structural causal identification or own-history conditioning. Finite partition resolution, fixed-target copula blind spots, circular-shift assumptions, and exact/Monte Carlo permutation budgets are documented. |
 | #145 | **Resolved by the supported-interface decision.** Multivariate `type = "hazard"` rejects the undefined estimator instead of reporting CDF/survival as density/survival. Cumulative hazard retains its stated transform. Derivative documentation identifies noisy second differences and the observation-weighted meaning of `"overall"`; it does not silently switch to a different weighting target. |
 
@@ -74,7 +74,8 @@ It does not assert universal statistical calibration or a new benchmark win.
   threshold is not meaningful for that model and is `NA`.
 - `NNS.reg` and `NNS.stack` accept `type = "REG"` for explicit numeric regression, including two-valued responses.
 - `NNS.ARMA.optim` defaults to `bias.correction = "none"`, so it no longer
-  adds a bias shift; `"split"` and `"legacy"` remain available. `NNS.VAR`
+  adds a bias shift; `"split"` remains available, and the former same-window
+  rule is removed. `NNS.VAR`
   defaults to `validation = "pipeline"`, whose validation uses no later data;
   on rolling-origin forecasts of ten panels it matched `"observed"` (mean
   scaled ensemble error 1.433 for both), so it is not an accuracy claim. Their
@@ -141,10 +142,15 @@ Changes made after the review of the completion branch:
   (chapter 10); partitions split at gravity, not the mean (`NNS.dep` help,
   chapter 14); and `OBJfn.*` values are selection-optimized scores.
 
-Not changed: balancing duplicates rows, and fine-cell multivariate fits
-collapse duplicate rows into one regression point whose prediction weight does
-not count them, so balancing has little effect there; `NNS.boost` also fits its
-final stack with `balance = FALSE`. Carrying case counts into the weights is a
-change to the estimator and is left for a separate decision. `NNS.copula`
-still returns 1 when every observation is concordant about the means, which
-produces occasional spikes in short rolling windows (#144).
+Decisions:
+
+- The multivariate estimator is not changed to weight regression points by
+  their case counts. Balancing duplicates rows, and in fine-cell multivariate
+  fits duplicate rows share one regression point, so balancing has little
+  effect there; `NNS.boost` fits its final stack with `balance = FALSE`.
+- `NNS.copula` returns 1 when every observation is concordant. That is perfect
+  concordance, the measure's maximum, and the correct value; short windows
+  reach it more often only because a few observations can all be concordant
+  (#144).
+- The same-window bias rule is removed rather than kept as a compatibility
+  option.

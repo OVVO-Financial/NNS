@@ -109,7 +109,10 @@ test_that("bulk distance wrappers match an unnamed matrix by position", {
 })
 
 test_that("NNS.ARMA.optim adds no bias shift by default", {
-  expect_identical(eval(formals(NNS.ARMA.optim)$bias.correction)[1], "none")
+  expect_identical(eval(formals(NNS.ARMA.optim)$bias.correction), c("none", "split"))
+  # The same-window rule (estimate and accept on one window) is not offered.
+  expect_error(NNS.ARMA.optim(as.numeric(AirPassengers[1:96]), h = 12, seasonal.factor = 12,
+    print.trace = FALSE, ncores = 1, pred.int = NULL, bias.correction = "legacy"))
   fit <- NNS.ARMA.optim(as.numeric(AirPassengers[1:96]), h = 12,
     seasonal.factor = c(6, 12), print.trace = FALSE, ncores = 1, pred.int = NULL)
   expect_identical(fit$bias.shift, 0)

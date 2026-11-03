@@ -59,10 +59,12 @@
   therefore differ from earlier releases.
 * The optimizer's objective describes its returned internal validation forecast.
   `NNS.ARMA.optim` no longer adds the gravity bias shift by default
-  (`bias.correction = "none"`). On rolling-origin forecasts of nine series the
-  shift made held-out MASE worse on eight, whether it was accepted on the same
-  validation window (the old rule, `"legacy"`) or estimated on the first half
-  and accepted on the second (`"split"`). Both remain available. Base-model
+  (`bias.correction = "none"`). The former rule estimated the shift on the
+  validation window and accepted it whenever it improved the objective on that
+  same window; it is removed. On rolling-origin forecasts of nine series the
+  shift made held-out MASE worse on eight, under the former rule and under
+  `bias.correction = "split"`, which estimates it on the first half of the
+  window and accepts it on the second and remains an option. Base-model
   tuning still requires independent outer evaluation. Raw/corrected forecasts
   and bias metadata are available for assessment.
 * VAR keeps its two-stage forecast design and uses prefix-generated predictors

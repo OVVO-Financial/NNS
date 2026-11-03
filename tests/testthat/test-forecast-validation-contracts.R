@@ -23,10 +23,6 @@ test_that("short validation windows do not claim separate bias validation", {
                                   "min", TRUE, "split")
   expect_equal(x$applied.shift, 0)
   expect_equal(x$status, "insufficient_validation")
-  legacy <- NNS:::.nns_arma_bias_choice(4:6, 1:3, expression(mean((predicted - actual)^2)),
-                                       "min", TRUE, "legacy")
-  expect_equal(legacy$applied.shift, -3)
-  expect_equal(legacy$estimate.rows, legacy$acceptance.rows)
 })
 
 test_that("absolute seasonality scoring is invariant to interval-scale offsets", {

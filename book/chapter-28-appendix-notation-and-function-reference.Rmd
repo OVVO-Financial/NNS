@@ -146,7 +146,7 @@ own targets rather than an automatic conditional-mean claim.
 | Function | Current choice | Interpretation |
 |---|---|---|
 | `NNS.reg`, `NNS.stack` | `type = "REG"` | Explicit numeric regression, including two-valued responses; predictions are not restricted to class labels. |
-| `NNS.ARMA.optim` | `bias.correction = "none"` (default), `"split"`, or `"legacy"` | No shift by default; split estimates the shift earlier and accepts it later within internal validation. Outer evaluation is still needed. |
+| `NNS.ARMA.optim` | `bias.correction = "none"` (default) or `"split"` | No shift by default; split estimates the shift earlier and accepts it later within internal validation. Outer evaluation is still needed. |
 | `NNS.VAR` | `validation = "pipeline"` or `"observed"` | Pipeline predicts the held-out feature rows from the earlier origin; observed is the conditional-regression compatibility mode. |
 | `NNS.seas` | `dispersion = "auto"` or `"absolute"` | Auto preserves the historical sign-based CV/Gini choice; absolute supports translation-invariant interval-scale comparisons. |
 | `NNS.meboot` | `expand.sd` and `expand.residual.sd` | Level and residual expansion are separate; `force.clt` uses an iid mean-scale reference. |

@@ -71,14 +71,3 @@ test_that("a nonnegative series takes residuals from the clamped forecasts it re
                       pmax(0, o$results + LPM.VaR(.025, 0, unclamped)) - o$lower.pred.int))), 0.01)
 })
 
-
-test_that("legacy correction explicitly retains the complete-window gravity rule", {
-  x <- two_cycles()
-  o <- run_optim(x, training.set = 128, seasonal.factor = c(7, 12),
-                 obj.fn = mse, bias.correction = "legacy")
-  expect_equal(o$bias.validation$estimate.rows, seq_len(32))
-  expect_equal(o$bias.validation$acceptance.rows, seq_len(32))
-  expect_true(o$bias.validation$accepted)
-  expect_equal(o$bias.shift, -NNS.gravity(o$errors))
-  expect_equal(o$results, o$raw.results + o$bias.shift)
-})
