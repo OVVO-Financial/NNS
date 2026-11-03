@@ -23,7 +23,7 @@ NNS.MC(
 \arguments{
 \item{x}{vector of data.}
 
-\item{reps}{numeric; number of replicates to generate, \code{30} default.}
+\item{reps}{numeric; number of replicates to generate for each \code{rho} value, \code{30} default.  The defaults give 201 \code{rho} values and 6030 replicates.}
 
 \item{lower_rho}{numeric \code{[-1,1]}; \code{-1} default will set the \code{from} argument in \code{seq(from, to, by)}.}
 
@@ -31,7 +31,7 @@ NNS.MC(
 
 \item{by}{numeric; \code{.01} default will set the \code{by} argument in \code{seq(-1, 1, step)}.}
 
-\item{exp}{numeric; \code{1} default will exponentially weight maximum rho value if \code{exp > 1}.  Shrinks values towards \code{upper_rho}.}
+\item{exp}{numeric; \code{1} default will exponentially weight maximum rho value if \code{exp > 1}.  Shrinks values towards \code{upper_rho}, keeping them within \code{[lower_rho, upper_rho]}.}
 
 \item{type}{options("spearman", "pearson", "NNScor", "NNSdep"); \code{type = "spearman"}(default) dependence metric desired.}
 
