@@ -79,11 +79,31 @@ CRAN release: 2026-10-30
   second and remains an option. Base-model tuning still requires
   independent outer evaluation. Raw/corrected forecasts and bias
   metadata are available for assessment.
+- `NNS.ARMA.optim` and the nonlinear `NNS.ARMA` methods run faster. The
+  nonlinear step’s weighted rise and run were means of a vector about
+  k^3/3 long for k regression points; they are now computed in closed
+  form, which agrees with the former value to rounding. The optimizer
+  computes each validation forecast once, partitions no longer build
+  their data frames through R, and small partial-moment kernels run on
+  the calling thread; these leave results bit-identical. On a synthetic
+  monthly series of 8000 observations the optimizer took 13 s, against
+  126 s in 13.3 and 210 s before this change; the AirPassengers example
+  takes 0.10 s, against 0.30 s and 0.39 s.
 - VAR keeps its two-stage forecast design and uses prefix-generated
   predictors for chronological validation by default.
   `validation = "observed"` is the compatibility option. Known
   contemporaneous outcomes and imputed future targets are not used as
   deployment-validation inputs or ground truth.
+- `NNS.seas` reports the fundamental period as `best.period`: the
+  smallest period that divides the lowest-scoring lag (or nearly divides
+  it, for a non-integer period) and scores within two jackknife standard
+  errors of it, from paired delete-one differences. The lowest score
+  often fell on a multiple of the true period; a monthly sine with noise
+  now returns 12 instead of 36 to 108, and `NNS.ARMA`’s automatic lag
+  follows. The period is listed first in `all.periods` and `periods`.
+  `NNS.ARMA` does not run the permutation test; pass
+  `NNS.seas(x, p.value = TRUE)$best.period` as `seasonal.factor` for a
+  significance-filtered lag.
 - Seasonality adds absolute dispersion for interval-scale data while
   retaining the historical automatic CV/Gini default. Selected
   predictive periods need not be fundamental physical periods;

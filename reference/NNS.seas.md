@@ -19,6 +19,14 @@ chance, so treat the result as candidate periods and validate them, for
 example with
 [NNS.ARMA.optim](https://OVVO-Financial.github.io/NNS/reference/NNS.ARMA.optim.md),
 or set `p.value = TRUE`. A result of 1 signifies no seasonality present.
+A multiple of the true period scores as well in expectation, and its
+shorter components make its score noisier, so the lowest score often
+falls on a multiple. `best.period` is therefore the fundamental period:
+the smallest period that divides the lowest-scoring lag, or nearly
+divides it for a non-integer period, and whose score exceeds the lowest
+by at most two jackknife standard errors of their difference, from
+paired delete-one scores. It is listed first in `all.periods` and
+`periods`, followed by the other periods in order of score.
 
 ## Usage
 
@@ -74,34 +82,58 @@ NNS.seas(
   logical; `FALSE` (default). If `TRUE`, each period's dispersion ratio
   is compared with the best ratio over all lags in `nperm` shuffled
   copies of the (detrended) variable, which remove the original temporal
-  ordering. `all.periods` gains a `p.value` column, and `periods` and
-  `best.period` keep only the periods with `p.value <= 0.05` (`1` if
-  none); each copy contributes its best lag, accounting for multiple
-  lags under an exchangeable null. Serially dependent nonseasonal series
-  need not satisfy that null. Uses the random number generator.
-
-- dispersion:
-
-  "auto" retains existing relative/absolute scoring. "absolute" centers
-  the data first and compares Gini dispersion without a level
-  denominator; use for interval-scale data such as temperature.
+  ordering.
+  [NNS.ARMA](https://OVVO-Financial.github.io/NNS/reference/NNS.ARMA.md)'s
+  automatic lag selection does not run this test; for a
+  significance-filtered lag, pass
+  `NNS.seas(variable, p.value = TRUE)$best.period` (or `$periods`) to
+  its `seasonal.factor`. `all.periods` gains a `p.value` column, and
+  `periods` and `best.period` keep only the periods with
+  `p.value <= 0.05` (`1` if none); each copy contributes its best lag,
+  accounting for scanning multiple lags under an exchangeable null. A
+  serially dependent nonseasonal series need not satisfy that null. Uses
+  the random number generator.
 
 - nperm:
 
   integer; 100 (default) number of shuffled copies when
   `p.value = TRUE`.
 
+- dispersion:
+
+  `"auto"` (default) retains relative CV scoring on one-sided data and
+  absolute Gini dispersion otherwise. `"absolute"` always compares Gini
+  dispersions, by centering the series first; use this
+  translation-invariant option for interval-scale data such as
+  temperature.
+
 ## Value
 
 Returns a matrix of all periods exhibiting less coefficient of variation
-than the variable with `"all.periods"`; and the single period exhibiting
-the least coefficient of variation versus the variable with
-`"best.period"`; as well as a vector of `"periods"` for easy call into
+than the variable with `"all.periods"`; and the fundamental period with
+`"best.period"` (see Description); as well as a vector of `"periods"`
+for easy call into
 [NNS.ARMA.optim](https://OVVO-Financial.github.io/NNS/reference/NNS.ARMA.optim.md).
 If no seasonality is detected, `all.periods` holds a single row with
 `Period = 1` and a coefficient of variation equal to the variable's
 (`Period = 0` for fewer than 5 observations). The coefficients of
 variation are those of the detrended variable when `detrend = TRUE`.
+
+## Note
+
+The historical column names `Coefficient.of.Variation` and
+`Variable.Coefficient.of.Variation` are retained in absolute mode; their
+values then contain absolute Gini dispersions.
+
+`best.period` need not be the lowest-scoring lag:
+`with(all.periods, Period[which.min(Coefficient.of.Variation)])` returns
+that lag. The jackknife behind the two-standard-error rule treats
+observations as exchangeable and does not adjust for serial dependence.
+The minimum five observations per component is a reliability default;
+`modulo` can supply longer domain-informed candidates. Shuffling removes
+serial dependence as well as seasonality, so the optional permutation
+comparison is not calibrated against every dependent nonseasonal
+process.
 
 ## References
 
@@ -112,19 +144,6 @@ Using Partial Moments" (ISBN: 1490523995, 2nd edition:
 ## Author
 
 Fred Viole, OVVO Financial Systems
-
-## Note
-
-The historical column names `Coefficient.of.Variation` and
-`Variable.Coefficient.of.Variation` are retained in absolute mode; their
-values then contain absolute Gini dispersions.
-
-best.period is a predictive lag, not a guarantee of the smallest
-fundamental period. Multiples can score well. The five-observation
-default limits long-lag instability; modulo supplies longer
-domain-informed candidates. Shuffled-data p-values require an
-exchangeable null and are not a general test of no seasonality under
-arbitrary serial dependence.
 
 ## Examples
 

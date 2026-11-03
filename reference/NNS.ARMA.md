@@ -45,7 +45,12 @@ NNS.ARMA(
 - seasonal.factor:
 
   logical or integer(s); `TRUE` (default) Automatically selects the best
-  seasonal lag from the seasonality test. To use weighted average of all
+  seasonal lag from the seasonality test,
+  [NNS.seas](https://OVVO-Financial.github.io/NNS/reference/NNS.seas.md)'s
+  `best.period` without its permutation test. For a
+  significance-filtered lag, run `NNS.seas(variable, p.value = TRUE)`
+  first and pass its `best.period` (or `periods`) here; `best.period` is
+  1 when no period is significant. To use weighted average of all
   seasonal lags set to `(seasonal.factor = FALSE)`. Otherwise, directly
   input known frequency integer lag to use, i.e.
   `(seasonal.factor = 12)` for monthly data. Multiple frequency integers
