@@ -35,7 +35,8 @@ D.LPM(degree_lpm, degree_upm, x, y, target_x, target_y)
 - target_y:
 
   numeric vector; thresholds for y. There is no default: pass `NULL` to
-  use `mean(y)`.
+  use `mean(y)`. `target_x` and `target_y` must be non-empty and the
+  same length, or one of them length 1.
 
 ## Value
 
