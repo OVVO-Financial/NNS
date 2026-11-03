@@ -45,7 +45,7 @@
 #' 
 #' @note Vectorized \code{rho} and \code{drift} parameters will not vectorize both simultaneously.  Also, do not specify \code{target_drift = NULL}.
 #'
-#' @note The \code{rho} dependence alignment is calibrated on each individual \code{replicate}: every replicate's \emph{detrended residuals} are mixed so that their dependence on the original series' detrended residuals matches \code{rho}, in the metric implied by \code{type}; the trend is added back afterwards.  For a trending series the replicate levels therefore stay strongly correlated with the original even at \code{rho = -1} (e.g. AirPassengers: mean Spearman 0.81 at \code{rho = -1}).  Assess a result in that \strong{same} metric -- a \code{"NNSdep"} target with \link{NNS.dep}\code{$Dependence} (unsigned) and a \code{"spearman"}/\code{"pearson"} target with rank/linear correlation -- because a signed correlation taken on an unsigned \code{"NNSdep"} target is not comparable to \code{rho} (it can even read negative while the dependence target is met).  Separately, the \code{ensemble} is the per-observation mean of the replicates -- a central summary, not a single series carrying the target dependence -- so a rank or linear correlation computed directly on the \code{ensemble} tends to read higher than the per-replicate \code{rho} (averaging amplifies the shared order).  Verify \code{rho} on the \code{replicates}, in the metric implied by \code{type}, rather than on the \code{ensemble}.
+#' @note The \code{rho} dependence alignment is calibrated on each individual \code{replicate}: every replicate's \emph{detrended residuals} are mixed so that their dependence on the original series' detrended residuals matches \code{rho}, in the metric implied by \code{type}; the trend is added back afterwards. If the detrended residuals are all exactly zero (a constant or exactly linear series) there is nothing to align and \code{rho} has no effect.  For a trending series the replicate levels therefore stay strongly correlated with the original even at \code{rho = -1} (e.g. AirPassengers: mean Spearman 0.81 at \code{rho = -1}).  Assess a result in that \strong{same} metric -- a \code{"NNSdep"} target with \link{NNS.dep}\code{$Dependence} (unsigned) and a \code{"spearman"}/\code{"pearson"} target with rank/linear correlation -- because a signed correlation taken on an unsigned \code{"NNSdep"} target is not comparable to \code{rho} (it can even read negative while the dependence target is met).  Separately, the \code{ensemble} is the per-observation mean of the replicates -- a central summary, not a single series carrying the target dependence -- so a rank or linear correlation computed directly on the \code{ensemble} tends to read higher than the per-replicate \code{rho} (averaging amplifies the shared order).  Verify \code{rho} on the \code{replicates}, in the metric implied by \code{type}, rather than on the \code{ensemble}.
 #'
 #' @references
 #' \itemize{
@@ -124,6 +124,8 @@ NNS.meboot <- function(x,
   orig_intercept <- orig_lm$coef[1]
   orig_drift     <- orig_lm$coef[2]
   orig_res       <- orig_lm$residuals
+  # All-zero residuals have no ranks for a rho target and no spread to rescale
+  zero_res       <- all(orig_res == 0)
   
   # Choose reconstruction slope (t = 1:n); a changed slope pivots about mean(x) so the level is kept
   if (!is.null(target_drift) || !is.null(target_drift_scale)) drift <- TRUE
@@ -201,7 +203,7 @@ NNS.meboot <- function(x,
   #   * a closed-form correlation (centered dot product / norms) with the target
   #     precomputed once, so no length-n vector is re-allocated per evaluation.
   # The two ports thus use the same algorithm (results still differ by RNG).
-  if (!is.null(rho)) {
+  if (!is.null(rho) && !zero_res) {
     rho_vec <- if (length(rho) == 1L) rep(rho, reps) else rep_len(rho, reps)
 
     # Ranks of original residuals for aligned vs anti-aligned extremes. Average
@@ -261,7 +263,7 @@ NNS.meboot <- function(x,
   res_mat <- NNS.meboot.expand.sd(x = orig_res, ensemble = res_mat, ...) 
   
   # Optional ME-density scale adjustment on residuals, where the ME density lives
-  if (scl.adjustment){
+  if (scl.adjustment && !zero_res){
     zz <- c(xmin, z, xmax)
     v  <- diff(zz^2) / 12
     xb <- mean(orig_res)
@@ -292,7 +294,7 @@ NNS.meboot <- function(x,
   # Optional CLT enforcement
   if (force.clt && reps > 1) {
     clt_ref <- if (same_slope) x else baseline + orig_res
-    ensemble <- force.clt(x = clt_ref, ensemble = ensemble)
+    if (stats::sd(clt_ref) > 0) ensemble <- force.clt(x = clt_ref, ensemble = ensemble)
   }
   
   # Enforce min / max if provided. pmax/pmin recycle the scalar bound across the
