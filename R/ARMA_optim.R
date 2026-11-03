@@ -132,6 +132,23 @@ NNS.ARMA.optim <- function(variable,
   oldw <- getOption("warn")
   options(warn = -1)
   
+  # Validation forecasts depend only on these arguments, and the search and the
+  # final selection ask for some of the same ones (the selected model again, the
+  # equal-weight candidate again). NNS.ARMA draws no random numbers here, so
+  # each is computed once.
+  validation.cache <- new.env(parent = emptyenv())
+  validation.forecast <- function(sf, method, weights = NULL, shrink = FALSE) {
+    key <- paste(method, shrink, paste(sprintf("%a", as.numeric(sf)), collapse = ","),
+                 if (is.null(weights)) "" else paste(sprintf("%a", as.numeric(weights)), collapse = ","),
+                 sep = "|")
+    if (!is.null(hit <- validation.cache[[key]])) return(hit)
+    out <- NNS.ARMA(variable, training.set = training.set, h = h_eval, seasonal.factor = sf,
+                    method = method, plot = FALSE, negative.values = negative.values,
+                    weights = weights, shrink = shrink)
+    assign(key, out, envir = validation.cache)
+    out
+  }
+  
   seasonal.combs <- nns.estimates <- vector(mode = "list")
   
   previous.seasonals <- previous.estimates <- overall.estimates <- overall.seasonals <- vector(mode = "list")
@@ -228,15 +245,7 @@ NNS.ARMA.optim <- function(variable,
         } else {
           lapply(1:ncol(seasonal.combs[[i]]), function(k) {
             actual <- tail(variable, h_eval)
-            predicted <- NNS.ARMA(
-              variable,
-              training.set = training.set,
-              h = h_eval,
-              seasonal.factor = seasonal.combs[[i]][, k],
-              method = "lin",
-              plot = FALSE,
-              negative.values = negative.values
-            )
+            predicted <- validation.forecast(seasonal.combs[[i]][, k], "lin")
             eval(obj.fn)
           })
         }
@@ -249,9 +258,7 @@ NNS.ARMA.optim <- function(variable,
         # Exhaustive search: score every candidate seasonal set with the method itself.
         nns.estimates.indiv <- unlist(lapply(1:ncol(seasonal.combs[[i]]), function(k) {
           actual <- tail(variable, h_eval)
-          predicted <- NNS.ARMA(variable, training.set = training.set, h = h_eval,
-                                seasonal.factor = seasonal.combs[[i]][, k], method = j,
-                                plot = FALSE, negative.values = negative.values)
+          predicted <- validation.forecast(seasonal.combs[[i]][, k], j)
           eval(obj.fn)
         }))
       }
@@ -260,7 +267,7 @@ NNS.ARMA.optim <- function(variable,
         # Find the min (obj.fn) for a given seasonals sequence
         actual <- tail(variable, h_eval)
         
-        predicted <- NNS.ARMA(variable, training.set = training.set, h = h_eval, seasonal.factor = unlist(overall.seasonals[[1]]), method = j, plot = FALSE, negative.values = negative.values)
+        predicted <- validation.forecast(unlist(overall.seasonals[[1]]), j)
         nonlin.predicted <- predicted
         
         nns.estimates.indiv <- eval(obj.fn)
@@ -272,7 +279,7 @@ NNS.ARMA.optim <- function(variable,
         
         # Score the returned model: method = "both" averages lin and nonlin inside
         # the recursion, unlike the mean of two separate forecasts.
-        predicted <- both.predicted <- NNS.ARMA(variable, training.set = training.set, h = h_eval, seasonal.factor = unlist(overall.seasonals[[1]]), method = "both", plot = FALSE, negative.values = negative.values)
+        predicted <- both.predicted <- validation.forecast(unlist(overall.seasonals[[1]]), "both")
         
         nns.estimates.indiv <- eval(obj.fn)
       }
@@ -362,12 +369,12 @@ NNS.ARMA.optim <- function(variable,
     nns.periods <- unlist(overall.seasonals[[which.min(unlist(overall.estimates))]])
     if(lin.only) nns.method <- "lin" else nns.method <- c("lin","nonlin","both")[which.min(unlist(overall.estimates))]
     nns.SSE <- min(unlist(overall.estimates))
-    predicted <- NNS.ARMA(variable, training.set = training.set, h = h_eval, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, weights = NULL)
+    predicted <- validation.forecast(nns.periods, nns.method)
     
     if(length(nns.periods) > 1){
       # Candidate: equal weights across the selected periods.
       predicted.null <- predicted
-      predicted <- NNS.ARMA(variable, training.set = training.set, h = h_eval, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, weights = rep(1/length(nns.periods), length(nns.periods)))
+      predicted <- validation.forecast(nns.periods, nns.method, weights = rep(1/length(nns.periods), length(nns.periods)))
       weight.SSE <- eval(obj.fn)
       if(is.na(weight.SSE)) weight.SSE <- Inf
       predicted <- predicted.null
@@ -375,19 +382,19 @@ NNS.ARMA.optim <- function(variable,
       if(weight.SSE < nns.SSE){
         nns.weights <- rep((1/length(nns.periods)),length(nns.periods))
         nns.SSE <- weight.SSE
-        predicted <- NNS.ARMA(variable, training.set = training.set, h = h_eval, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, weights = nns.weights)
+        predicted <- validation.forecast(nns.periods, nns.method, weights = nns.weights)
       } else nns.weights <- NULL
     } else nns.weights <- NULL
   } else {
     nns.periods <- unlist(overall.seasonals[[which.max(unlist(overall.estimates))]])
     if(lin.only) nns.method <- "lin" else nns.method <- c("lin","nonlin","both")[which.max(unlist(overall.estimates))]
     nns.SSE <- max(unlist(overall.estimates))
-    predicted <- NNS.ARMA(variable, training.set = training.set, h = h_eval, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, weights = NULL)
+    predicted <- validation.forecast(nns.periods, nns.method)
     
     if(length(nns.periods) > 1){
       # Candidate: equal weights across the selected periods.
       predicted.null <- predicted
-      predicted <- NNS.ARMA(variable, training.set = training.set, h = h_eval, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, weights = rep(1/length(nns.periods), length(nns.periods)))
+      predicted <- validation.forecast(nns.periods, nns.method, weights = rep(1/length(nns.periods), length(nns.periods)))
       weight.SSE <- eval(obj.fn)
       if(is.na(weight.SSE)) weight.SSE <- -Inf
       predicted <- predicted.null
@@ -395,7 +402,7 @@ NNS.ARMA.optim <- function(variable,
       if(weight.SSE > nns.SSE){
         nns.weights <- rep((1/length(nns.periods)),length(nns.periods))
         nns.SSE <- weight.SSE
-        predicted <- NNS.ARMA(variable, training.set = training.set, h = h_eval, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, weights = nns.weights)
+        predicted <- validation.forecast(nns.periods, nns.method, weights = nns.weights)
       } else nns.weights <- NULL
     } else nns.weights <- NULL
   }
@@ -403,7 +410,7 @@ NNS.ARMA.optim <- function(variable,
   final.predicted <- predicted
   best.SSE <- nns.SSE
  
-  predicted <- NNS.ARMA(variable, training.set = training.set, h = h_eval, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, weights = nns.weights, shrink = TRUE)
+  predicted <- validation.forecast(nns.periods, nns.method, weights = nns.weights, shrink = TRUE)
   
   if(objective == "min"){
     if(eval(obj.fn) < nns.SSE){

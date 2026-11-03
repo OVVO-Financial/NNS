@@ -7,7 +7,7 @@
 #' @param training.set numeric; \code{NULL} (default) Sets the number of variable observations
 #'
 #'  \code{(variable[1 : training.set])} to monitor performance of forecast over in-sample range.
-#' @param seasonal.factor logical or integer(s); \code{TRUE} (default) Automatically selects the best seasonal lag from the seasonality test.  To use weighted average of all seasonal lags set to \code{(seasonal.factor = FALSE)}.  Otherwise, directly input known frequency integer lag to use, i.e. \code{(seasonal.factor = 12)} for monthly data.  Multiple frequency integers can also be used, i.e. \code{(seasonal.factor = c(12, 24, 36))}
+#' @param seasonal.factor logical or integer(s); \code{TRUE} (default) Automatically selects the best seasonal lag from the seasonality test, \link{NNS.seas}'s \code{best.period} without its permutation test.  For a significance-filtered lag, run \code{NNS.seas(variable, p.value = TRUE)} first and pass its \code{best.period} (or \code{periods}) here; \code{best.period} is 1 when no period is significant.  To use weighted average of all seasonal lags set to \code{(seasonal.factor = FALSE)}.  Otherwise, directly input known frequency integer lag to use, i.e. \code{(seasonal.factor = 12)} for monthly data.  Multiple frequency integers can also be used, i.e. \code{(seasonal.factor = c(12, 24, 36))}
 #' @param modulo integer(s); NULL (default) Adds the multiples of \code{modulo} on either side of each detected period (period 7 with \code{modulo = 5} gives 5 and 10).
 #' @param mod.only logical; \code{TRUE} (default) Limits the number of seasonal periods returned to the specified \code{modulo}.
 #' @param weights numeric or \code{"equal"}; \code{NULL} (default) sets the weights of the \code{seasonal.factor} vector when specified as integers.  If \code{(weights = NULL)} each \code{seasonal.factor} is weighted on its \link{NNS.seas} result and number of observations it contains, else an \code{"equal"} weight is used.  Numeric weights must have one value per seasonal lag and are treated as relative weights (rescaled to sum to 1).  With \code{(dynamic = TRUE)} the lags are re-selected at every step, so only \code{NULL} or \code{"equal"} weights are accepted.
@@ -235,17 +235,21 @@ NNS.ARMA <- function(variable,
           
           reg.points <- NNS.reg(x, y, type = "REG", return.values = FALSE, plot = FALSE, multivariate.call = TRUE)
           
-          reg.points <- reg.points[complete.cases(reg.points), ]
-          
           rpx <- reg.points$x; rpy <- reg.points$y
+          ok <- !(is.na(rpx) | is.na(rpy))
+          rpx <- rpx[ok]; rpy <- rpy[ok]
           xs <- rpx[length(rpx)] - rpx
           ys <- rpy[length(rpy)] - rpy
           
           xs <- xs[-length(xs)]
           ys <- ys[-length(ys)]
           
-          run <- mean(rep(xs, (1:length(xs))^2))
-          rise <- mean(rep(ys, (1:length(ys))^2))
+          # Squared-index weighted means of the run and rise, mean(rep(xs, w)) with
+          # w = (1:k)^2, without building the sum(w) ~ k^3/3 long vector: that cost
+          # grew cubically with the number of regression points on long series.
+          w <- (1:length(xs))^2
+          run <- sum(w * xs) / sum(w)
+          rise <- sum(w * ys) / sum(w)
           
           last.y + (rise / run)
         })

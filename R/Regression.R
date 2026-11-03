@@ -236,6 +236,19 @@
 .nns_reg_encode_predictors <- function(x, point.est = NULL,
                                        factor.2.dummy = TRUE) {
   factor.2.dummy <- .nns_reg_scalar_logical(factor.2.dummy, "factor.2.dummy")
+  # A plain numeric vector is the single numeric predictor "x", as
+  # data.frame(x = x) below names it; building that data frame was most of the
+  # encoding time for short series.
+  if (is.null(point.est) && is.numeric(x) && is.null(dim(x)) &&
+      is.null(oldClass(x)) && length(x) && all(is.finite(x))) {
+    return(list(
+      x = matrix(as.numeric(x), ncol = 1L, dimnames = list(NULL, "x")),
+      point.est = NULL,
+      raw.names = "x",
+      encoded.names = "x",
+      metadata = list(list(name = "x", categorical = FALSE, levels = NULL))
+    ))
+  }
   train <- .nns_reg_as_frame(x)
   points <- .nns_reg_prepare_points(point.est, names(train))
   
@@ -398,49 +411,55 @@
   
   if (identical(order, "max")) {
     split.y <- split(y, x)
-    xs <- as.numeric(names(split.y))
-    ys <- vapply(split.y, reducer, numeric(1L))
-    rp <- data.frame(x = xs, y = ys)
-    actual.order <- as.integer(length(xs))
+    rx <- as.numeric(names(split.y))
+    ry <- unname(vapply(split.y, reducer, numeric(1L)))
+    actual.order <- as.integer(length(rx))
   } else {
     ord <- if (is.null(order)) .nns_reg_default_order(x, y) else order
     nr <- if (is.class) "mode_class" else noise.reduction
     part <- NNS.part(x, y, type = "XONLY", order = ord, obs.req = 0,
                      min.obs.stop = TRUE, noise.reduction = nr)
     actual.order <- as.integer(part$order)
-    rp <- as.data.frame(part$regression.points[, c("x", "y"), drop = FALSE])
+    rx <- part$regression.points$x
+    ry <- part$regression.points$y
   }
-  
-  rp <- rp[is.finite(rp$x) & is.finite(rp$y), , drop = FALSE]
-  if (!nrow(rp)) stop("NNS regression produced no finite regression points.", call. = FALSE)
-  rp <- rp[order(rp$x, method = "radix"), , drop = FALSE]
-  
-  if (anyDuplicated(rp$x)) {
-    groups <- split(rp$y, rp$x)
-    rp <- data.frame(
-      x = as.numeric(names(groups)),
-      y = vapply(groups, reducer, numeric(1L))
-    )
-    rp <- rp[order(rp$x, method = "radix"), , drop = FALSE]
+
+  # The points are kept as two plain vectors: data frame subsetting and rbind()
+  # cost more than the partition itself on short series, and NNS.ARMA calls
+  # this once per lag and forecast step.
+  keep <- is.finite(rx) & is.finite(ry)
+  rx <- rx[keep]
+  ry <- ry[keep]
+  if (!length(rx)) stop("NNS regression produced no finite regression points.", call. = FALSE)
+  o <- order(rx, method = "radix")
+  rx <- rx[o]
+  ry <- ry[o]
+  # Equal x values (after the character rounding split() applies) share one
+  # reduced point.
+  merge.ties <- function() {
+    groups <- split(ry, rx)
+    rx <<- as.numeric(names(groups))
+    ry <<- unname(vapply(groups, reducer, numeric(1L)))
+    o <- order(rx, method = "radix")
+    rx <<- rx[o]
+    ry <<- ry[o]
   }
-  
+  if (anyDuplicated(rx)) merge.ties()
+
   # Always include training boundaries using the same response reducer.
   xmin <- min(x)
   xmax <- max(x)
   ymin <- reducer(y[x == xmin])
   ymax <- reducer(y[x == xmax])
-  rp <- rbind(rp, data.frame(x = c(xmin, xmax), y = c(ymin, ymax)))
-  rp <- rp[order(rp$x, method = "radix"), , drop = FALSE]
-  if (anyDuplicated(rp$x)) {
-    groups <- split(rp$y, rp$x)
-    rp <- data.frame(
-      x = as.numeric(names(groups)),
-      y = vapply(groups, reducer, numeric(1L))
-    )
-    rp <- rp[order(rp$x, method = "radix"), , drop = FALSE]
-  }
-  rownames(rp) <- NULL
-  
+  rx <- c(rx, xmin, xmax)
+  ry <- c(ry, ymin, ymax)
+  o <- order(rx, method = "radix")
+  rx <- rx[o]
+  ry <- ry[o]
+  if (anyDuplicated(rx)) merge.ties()
+
+  rp <- structure(list(x = unname(rx), y = unname(ry)),
+                  row.names = c(NA_integer_, -length(rx)), class = "data.frame")
   # Preserve the order actually completed by NNS.part(), which can differ from
   # the requested order when stopping rules apply.  Plot titles must report
   # this realized order rather than the placeholder "auto".
