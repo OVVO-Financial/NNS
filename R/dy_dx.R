@@ -66,9 +66,7 @@ dy.dx <- function(x, y, eval.point = NULL){
     deriv.points <- vector(mode = "list", length(h_s))
     grads <- vector(mode = "numeric", length(h_s))
   
-    for(h in h_s){
-      index <- which(h == h_s)
-
+    for(index in seq_along(h_s)){
       h_step <- x.spacing * h_s[index]
 
       eval.point.min <- pmax(min(x), original.eval.point.min - h_step)
