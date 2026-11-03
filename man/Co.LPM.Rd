@@ -15,7 +15,7 @@ Co.LPM(degree_lpm, x, y, target_x, target_y, degree_y = NULL)
 
 \item{target_x}{numeric vector; thresholds for x. There is no default: pass \code{NULL} to use \code{mean(x)}.}
 
-\item{target_y}{numeric vector; thresholds for y. There is no default: pass \code{NULL} to use \code{mean(y)}.}
+\item{target_y}{numeric vector; thresholds for y. There is no default: pass \code{NULL} to use \code{mean(y)}. \code{target_x} and \code{target_y} must be non-empty and the same length, or one of them length 1.}
 
 \item{degree_y}{numeric; optional degree for y. If omitted, `degree_lpm` is
 used for both x and y.}

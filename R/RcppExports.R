@@ -270,7 +270,7 @@ CoUPM_RCPP <- function(degree_upm, x, y, target_x, target_y, degree_y) {
 #' @param x numeric vector of observations.
 #' @param y numeric vector of the same length as x.
 #' @param target_x numeric vector; thresholds for x. There is no default: pass \code{NULL} to use \code{mean(x)}.
-#' @param target_y numeric vector; thresholds for y. There is no default: pass \code{NULL} to use \code{mean(y)}.
+#' @param target_y numeric vector; thresholds for y. There is no default: pass \code{NULL} to use \code{mean(y)}. \code{target_x} and \code{target_y} must be non-empty and the same length, or one of them length 1.
 #' @return Numeric vector of divergent LPM values.
 #' @author Fred Viole, OVVO Financial Systems
 #' @references
@@ -294,7 +294,7 @@ D.LPM <- function(degree_lpm, degree_upm, x, y, target_x, target_y) {
 #' @param x numeric vector of observations.
 #' @param y numeric vector of the same length as x.
 #' @param target_x numeric vector; thresholds for x. There is no default: pass \code{NULL} to use \code{mean(x)}.
-#' @param target_y numeric vector; thresholds for y. There is no default: pass \code{NULL} to use \code{mean(y)}.
+#' @param target_y numeric vector; thresholds for y. There is no default: pass \code{NULL} to use \code{mean(y)}. \code{target_x} and \code{target_y} must be non-empty and the same length, or one of them length 1.
 #' @return Numeric vector of divergent UPM values.
 #' @author Fred Viole, OVVO Financial Systems
 #' @references
