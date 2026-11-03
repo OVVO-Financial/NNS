@@ -390,7 +390,25 @@ Directional profiles therefore show **how dependence evolves from ordinary fluct
 
 ## Finite-Resolution Dependence Summaries
 
-`NNS.dep` combines directional frequency and area information across a finite set of recursive partition levels. This is a useful summary of the structure resolved by those partitions, not a complete representation of the joint law.
+`NNS.dep` combines directional frequency and area information across a finite set of recursive partition levels. This is a useful summary of the structure resolved by those partitions, not a complete representation of the joint law. Chapter 14 builds its directional statistic from the same cell measure, so the full definition is given here.
+
+**Partitions.** Three recursive partitions of the $n$ observations are built with `NNS.part` at `noise.reduction = "off"`, which splits each cell at the gravity of its observations (Chapter 7) rather than at its mean: the partition on $x$ alone, whose cells are intervals of $x$ and carry $y$ as a function of $x$; the partition on $y$ alone; and the joint quadrant partition of $(x, y)$, which splits each cell on both coordinates and carries relations such as a circle or $y = x\varepsilon$. Splitting runs to depth $\lceil \log_2 n \rceil$, and a cell with at most $\max(8, n/8)$ observations is not split further. Level $l$ of a partition is its set of cells after $l$ rounds of splitting, so the levels are nested.
+
+**Cell dependence.** In a cell $c$ with $m$ observations, deviations are taken about the cell means, $d_x = x - \bar x_c$ and $d_y = y - \bar y_c$. Two concordance terms measure the degree-0 and degree-1 co-partial moments of the cell:
+
+$$
+T_0 = |2p_0 - 1|, \qquad T_1 = \frac{\left|\sum d_x d_y\right|}{\sum |d_x d_y|},
+$$
+
+where $p_0$ is the share of the cell's points in the co-lower or co-upper orthant (frequency, degree 0) and $T_1$ is the corresponding share of co-moment area (degree 1). The divergent shares are $1 - p_0$ and $1 - p_1$, so they add nothing. Each term is centred at its expectation under random pairing of the cell's $x$ and $y$ values and rescaled so that a perfectly concordant or discordant cell still scores 1,
+
+$$
+T^{*} = \frac{T - E_0[T]}{1 - E_0[T]}, \qquad d_c = \frac{T_0^{*} + T_1^{*}}{2},
+$$
+
+where $d_c$ is negative when the cell is less concordant than chance. $E_0[T_0]$ is hypergeometric (with a normal approximation above 400 points); $E_0[T_1]$ enumerates the distinct arrangements when there are at most 720 of them (every cell of up to six points) and otherwise uses the permutation variance of $\sum d_x d_y$. A cell in which the conditioning variable is constant scores whether the other variable is also constant there (1 or 0), measured against the chance of that under the permutation null; in the joint partition such a cell scores 0.
+
+**Levels and selection.** The dependence of a level is the cell-size-weighted average $D_l = \sum_c (m_c / n)\, d_c$, and its correlation is $\sum_c (m_c / n)\, s_c d_c$, where $s_c$ is the sign of $\sum d_x d_y$ in the cell (the sign of the overall covariance for a cell that is constant in the conditioning variable). `NNS.dep(x, y, asym = TRUE)` reports the largest $D_l$ over the levels of the partition on $x$; with `asym = FALSE` the largest over the levels of all three partitions. Dependence is floored at 0, and Correlation is the signed average at the selected level, kept within $[-\text{Dependence}, \text{Dependence}]$. Chapter 14's $\rho_{X \to Y}$ uses the same cells on lagged copula pairs but averages $D_l$ over the levels of the partition on the candidate cause instead of taking the largest.
 
 A numerical value of 1 corresponds to maximal contrast under the statistic's cellwise calibration. It is not guaranteed for every noiseless function: a coarse cell can contain several branches or oscillations of \(Y=f(X)\), so considerable response variation remains inside that cell. Finer partitions can resolve more structure, but also change sampling variation and the effect of selecting the strongest level. Conversely, a score near zero does not establish independence against every possible relationship.
 

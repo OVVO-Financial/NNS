@@ -270,7 +270,7 @@ Kernel estimators average nearby observations using weights determined by a band
 
 ### k-nearest-neighbor regression
 
-Standard kNN regression predicts by averaging the $k$ observed responses whose predictor values lie closest to the query point. It searches over the raw observation cloud of size $n$. The multivariate NNS regression is superficially similar but mechanistically different: it searches over a compressed set of **regression points** — local conditional means derived from per-regressor partitions — rather than over raw observations. The search space is smaller, and each candidate neighbor has already been denoised through local averaging. This distinction is the foundation of the NNS multivariate architecture and is developed in full in the following section.
+Standard kNN regression predicts by averaging the $k$ observed responses whose predictor values lie closest to the query point. It searches over the raw observation cloud of size $n$. The multivariate NNS regression is superficially similar but mechanistically different: it searches over **regression points** — the mean response of each occupied joint cell of the per-regressor partitions — rather than over raw observations. When cells hold several observations, the search space is smaller and each candidate averages their responses. When every observation occupies its own cell, as in sparse or finely partitioned designs or with `order = "max"`, the regression points are the observations themselves and there is neither compression nor averaging: on a $2^4$ factorial grid of 16 design points the regression point matrix has 16 rows holding the 16 raw responses. This distinction is the foundation of the NNS multivariate architecture and is developed in full in the following section.
 
 ---
 
@@ -330,7 +330,7 @@ In the NNS multivariate framework:
 
 1. **The search space is compressed.** The regression point matrix (RPM) has $M \le n$ rows, one per occupied joint cell; compression is substantial only when cells contain multiple observations. Each row is a local conditional mean, not a raw observation.
 
-2. **Each candidate neighbor is denoised.** Because each regression point averages over a cluster of observations, the effective noise level of each candidate is reduced relative to a raw observation. The nearest-neighbor distance calculation is performed over a geometry that is already smoother than the raw data.
+2. **A candidate averages its cell.** A regression point that summarizes $m$ observations carries the noise of an $m$-observation mean rather than of one response, so candidates in well-occupied cells are smoother than raw observations. A singleton cell is a raw observation, so this averaging happens only where cells are occupied by several observations.
 
 3. **The partition depth per regressor is signal-adaptive.** When `order = NULL`, each regressor receives a partition depth proportional to its directional dependence with the response (measured by `NNS.dep`). Regressors with weak predictive content receive shallow partitions and contribute few regression points. Regressors with strong predictive content receive deeper partitions. The search space is therefore automatically concentrated on the dimensions most relevant to prediction.
 
@@ -360,7 +360,7 @@ fit["Point.est"]                       # predicted values for new observations
 
 The number of neighbors used in the final averaging step is itself dependence-sensitive. When estimated dependence between predictors and the response is high, the local regression surface is more coherent and fewer neighbors suffice for a stable prediction. When dependence is lower, broader averaging over more neighbors improves stability.
 
-Localization is therefore adjusted not only by partition geometry, but also by the estimated strength of the multivariate signal. The multivariate NNS regression is thus a **response-anchored regression-point nearest-neighbor estimator**: partitioning creates a denoised, compressed geometry of local conditional means, and nearest-neighbor search over that geometry — with dependence-adaptive neighbor count — supplies the final prediction.
+Localization is therefore adjusted not only by partition geometry, but also by the estimated strength of the multivariate signal. The multivariate NNS regression is thus a **response-anchored regression-point nearest-neighbor estimator**: partitioning summarizes the occupied cells by their local conditional means — compressing and averaging where cells hold several observations — and nearest-neighbor search over those points, with a dependence-adaptive neighbor count, supplies the final prediction.
 
 ### Structural comparison with standard kNN
 
@@ -369,7 +369,7 @@ The difference from standard kNN can be stated precisely:
 | Property | Standard kNN | Multivariate NNS |
 |---|---|---|
 | Search space | $n$ raw observations | $M \le n$ occupied-cell summaries |
-| Candidate quality | Individual observations, full noise | Local conditional means, partially denoised |
+| Candidate quality | Individual observations, full noise | Cell means; averaged only where a cell holds several observations |
 | Search space growth in $d$ | Fixed at $n$; neighbor distance grows | $M \le \min(n, \prod_j K_j)$ |
 | Neighbor count | Fixed $k$ | Dependence-adaptive |
 | Partition basis | None | Per-regressor against response |

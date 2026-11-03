@@ -70,10 +70,11 @@ cop
 # rgl::plot3d(z[,1], z[,2], Co.LPM(0, z[,1], z[,2], z[,1], z[,2]), col = "blue")
 
 ## -----------------------------------------------------------------------------
-A <- rnorm(100, mean = 0, sd = 1)
-B <- rnorm(100, mean = 0, sd = 5)
+# NNS.norm scales by ratios of column means, so the columns need positive means.
+A <- rnorm(100, mean = 5, sd = 1)
+B <- rnorm(100, mean = 20, sd = 5)
 C <- rnorm(100, mean = 10, sd = 1)
-D <- rnorm(100, mean = 10, sd = 10)
+D <- rnorm(100, mean = 50, sd = 10)
 
 X <- data.frame(A, B, C, D)
 

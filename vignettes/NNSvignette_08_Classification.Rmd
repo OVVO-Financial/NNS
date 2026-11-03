@@ -48,7 +48,7 @@ NNS.reg(iris[,1:4], iris[,5], residual.plot = FALSE, ncores = 1)$rhs.partitions
 
 # `NNS.boost()`
 
-Through resampling of the training set and letting each iterated set of data speak for themselves (while paying extra attention to the residuals throughout), we can test various regressor combinations in these dynamic decision trees...only keeping those combinations that add predictive value. From there we simply aggregate the predictions.
+**`NNS.boost`** screens feature subsets. Each learner trial fits **`NNS.reg`** on a random subset of the regressors and scores it on a held-out split. Subsets that clear a learned objective threshold are re-tested on new holdouts in the epoch stage, and each feature is counted every time a subset containing it passes again. The features are then replicated in proportion to those counts and a single **`NNS.stack`** (method 1) is fitted on that design. It is not an ensemble of voting or averaged learners, and it does not reweight residuals.
 
 **`NNS.boost`** will automatically search for an accuracy `threshold` from the training set, reporting iterations remaining and level obtained in the console. A plot of the frequency of the learning accuracy on the training set is also provided.
 
@@ -56,7 +56,7 @@ Once a `threshold` is obtained, **`NNS.boost`** will test various feature combin
 
 Let's have a look and see how it works. We hold out four observations from each iris species, using 138 observations for training and 12 for testing. The split is stratified and reproducible; the last ten rows alone would contain only virginica. For brevity, we set `epochs = 10, learner.trials = 10, folds = 1`.
 
-**NOTE: Base category of response variable should be 1, not 0 for classification problems when using `NNS.boost(..., type = "CLASS")`**.
+**NOTE:** class labels can be factor levels or any distinct numbers. Numeric and logical responses are returned on their own values; factor and character responses are returned as codes, which `class.levels` maps back to the labels.
 
 ```{r NNSBOOST,fig.align = "center", fig.height = 8,fig.width=6.5, eval=FALSE}
 set.seed(20261103)
@@ -80,11 +80,11 @@ superiority or robustness to increasing dimension.
 
 # Cross-Validation Classification Using `NNS.stack()`
 
-The **`NNS.stack()`** routine cross-validates for a given objective function the `n.best` parameter in the multivariate **`NNS.reg`** function as well as the `threshold` parameter in the dimension reduction **`NNS.reg`** version. **`NNS.stack`** can be used for classification via **`NNS.stack(..., type = "CLASS", ...)`**.
+The **`NNS.stack()`** routine cross-validates, for a given objective function, the neighbour count `n.best` of the multivariate **`NNS.reg`** fit and the number of predictors in the dimension reduction **`NNS.reg`** version, then blends the two. For classification (**`NNS.stack(..., type = "CLASS", ...)`**) it tunes and blends class-probability vectors. The `OBJfn` values it returns are the best scores of that search on the out-of-fold predictions, so they overstate held-out performance; the held-out test set below is the assessment.
 
 For brevity, we set `folds = 1`.
 
-**NOTE: Base category of response variable should be 1, not 0 for classification problems when using `NNS.stack(..., type = "CLASS")`**.
+**NOTE:** class labels can be factor levels or any distinct numbers. Numeric and logical responses are returned on their own values; factor and character responses are returned as codes, which `class.levels` maps back to the labels.
 
 ```{r NNSstack,fig.align = "center", fig.height = 8,fig.width=6.5, message=FALSE, eval= FALSE}
 b = NNS.stack(IVs.train = iris[-test.set, 1:4], 

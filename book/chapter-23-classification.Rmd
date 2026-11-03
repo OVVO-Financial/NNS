@@ -414,9 +414,9 @@ while often improving predictive accuracy.
 A practical classification workflow in NNS therefore proceeds in two layers.
 
 1. The partition-based learner defines local benchmark-relative class neighborhoods.
-2. The ensemble wrapper aggregates those local decisions across resamples or model combinations.
+2. A wrapper either screens feature subsets (`NNS.boost`) or tunes and blends the class-probability learners (`NNS.stack`) on held-out predictions.
 
-Schematically, this is implemented by calling `NNS.boost(..., type = "CLASS")` for boosted classification or `NNS.stack(..., type = "CLASS")` for stacked classification. The first improves stability through repeated resampling and aggregation; the second combines candidate classifiers through an optimized second-stage rule.
+Schematically, this is implemented by calling `NNS.boost(..., type = "CLASS")` for boosted classification or `NNS.stack(..., type = "CLASS")` for stacked classification. The first keeps the features whose subsets repeatedly pass a held-out objective and fits one stacked learner on them, replicating each feature by its frequency; it does not vote or average across classifiers. The second tunes the neighbor count and the dimension-reduction count on out-of-fold class probabilities and blends the two components. Both select on the same held-out predictions they report, so their objective values are not performance estimates; an untouched test set is needed for that.
 
 The corresponding Python workflow below uses labels `1/2` as an example. Consult the installed Python wrapper version for its output schema; the R probability fields described above are defined by the implementation in this repository:
 

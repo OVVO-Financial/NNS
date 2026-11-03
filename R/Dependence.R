@@ -10,7 +10,7 @@
 #' @return Returns the bi-variate \code{"Correlation"} and \code{"Dependence"} or correlation / dependence matrix for matrix input.
 #'
 #' @details
-#' Dependence is a finite-resolution summary of the recursive mean-split partitions of \link{NNS.part}. At each cell, degree-0 (frequency) and degree-1 (area) concordance around the cell means are measured relative to a within-cell permutation reference and rescaled. Their cell-size-weighted averages are evaluated across partition levels. The reported Dependence is the strongest level, floored at zero; Correlation is a signed summary at that selected level and is bounded by Dependence in absolute value. With \code{asym = FALSE}, partitions on x, on y, and on joint quadrants are considered. With \code{asym = TRUE}, only partitions on x are considered, so the direction describes the resolution supplied by the conditioning variable rather than a causal effect.
+#' Dependence is a finite-resolution summary of the recursive partitions of \link{NNS.part}, which split each cell at the gravity of its observations (\code{noise.reduction = "off"}), not at its mean. At each cell, degree-0 (frequency) and degree-1 (area) concordance around the cell means are measured relative to a within-cell permutation reference and rescaled. Their cell-size-weighted averages are evaluated across partition levels. The reported Dependence is the strongest level, floored at zero; Correlation is a signed summary at that selected level and is bounded by Dependence in absolute value. With \code{asym = FALSE}, partitions on x, on y, and on joint quadrants are considered. With \code{asym = TRUE}, only partitions on x are considered, so the direction describes the resolution supplied by the conditioning variable rather than a causal effect.
 #'
 #' The split depth, stopping rules, finite occupancy, and maximization across levels affect the score. A zero score does not prove independence, a noiseless nonlinear function need not score one, and finite independent samples can produce positive scores. The permutation calculation repeats the same selection rule, providing a reference for the selected statistic rather than removing every finite-sample effect from the score itself.
 #'
@@ -145,7 +145,7 @@ NNS.dep <- function(x,
   l   <- length(x)
   obs <- max(8L, as.integer(l / 8L))
 
-  # Three partitions feed the measure: the recursive mean split on x (y as a
+  # Three partitions feed the measure: the recursive gravity split on x (y as a
   # function of x), on y, and the joint quadrants of (x, y). asym = TRUE only
   # needs the first. NNS_dep_pair_cpp reads every level of each partition from
   # the prefix-coded cell labels.

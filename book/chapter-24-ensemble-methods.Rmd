@@ -139,13 +139,11 @@ This is the first important NNS-specific departure from classical textbook boost
 
 **the algorithm is not reweighting observations sequentially in the AdaBoost sense; it is screening and aggregating feature-defined directional learners.**
 
-### Weighted feature sampling in the epoch loop
+### Re-testing survivors in the epoch loop
 
-After the threshold-learning stage, `NNS.boost` constructs a **feature pool weighted by survival frequency**: each feature index is repeated in proportion to how often it appeared across the learner-trial sets that passed the threshold. In each epoch, two random decisions are made jointly — a feature count $k \in \{1, \ldots, n\}$ is drawn uniformly, and then $k$ distinct indices are sampled from this weighted pool without replacement. Features that recurred often in successful learner trials are therefore overrepresented in the draw, but any combination of any size can still appear.
+The epoch loop draws no new feature combinations. It re-tests the learner-trial subsets that passed the threshold (the survivors) on new validation splits. The epochs are assigned to survivors on a balanced schedule — each survivor is re-tested about `epochs / survivors` times, in random order — so exposure alone cannot make a feature look important. With six survivors and twenty epochs, for example, the survivors are re-tested 4, 4, 3, 3, 3 and 3 times. Each epoch uses a fresh random holdout for cross-sectional data, or one of a set of expanding-window chronological holdouts when `ts.test` is set.
 
-This is structurally analogous to the random-subspace mechanism in random forests, but with a crucial difference: the sampling probabilities are not uniform. They are earned. A feature earns higher sampling weight by having appeared in learner-trial subsets that cleared the validation threshold. The epoch loop is thus not random exploration of feature space — it is **weighted exploration biased toward stability**, with the bias itself learned from the threshold stage.
-
-An epoch's feature set is retained only if its validation objective clears the same threshold. The surviving sets feed the frequency table that drives the final synthetic predictor construction described below.
+An epoch's subset is kept only if its validation objective clears the same threshold again. A feature's frequency is therefore the number of passing re-tests of the subsets that contain it: a stability count across holdouts, not a sampling weight. Those frequencies drive the final predictor design described below.
 
 ### User-specified objectives
 
@@ -487,13 +485,13 @@ Its main contributions are sixfold.
 
 **First**, it explained **feature-subset screening based on predictive performance**. Rather than combining all sampled learners indiscriminately, `NNS.boost` retains those feature-defined learners whose validation performance passes a learned threshold.
 
-**Second**, it described the **weighted epoch sampling mechanism**. After the threshold-learning stage, feature indices are pooled with weights proportional to their survival frequency, and each epoch draws from this weighted pool. The epoch loop is therefore not uniform random exploration but structured search biased toward stable features — a performance-earned analog of the random-subspace method.
+**Second**, it described the **epoch re-test stage**. The subsets that passed the threshold are re-tested on new holdouts on a balanced schedule, and a feature's final frequency counts the passing re-tests of the subsets that contain it — a measure of stability across holdouts rather than a sampling weight.
 
 **Third**, it introduced the **cross-validated optimization of $k$** in `NNS.stack`. Because multivariate NNS regression predicts through nearest-neighbor search over a compressed regression-point matrix — not through a piecewise-linear surface — the number of neighbors $k$ is a structural hyperparameter that directly controls the localization scale of prediction. `NNS.stack` optimizes $k$ fold by fold as part of its cross-validation loop, selecting the neighbor count that best generalizes on held-out data. This is one of the clearest ways `NNS.stack` goes beyond generic stacking: it actively discovers the right spatial scale for the underlying prediction mechanism.
 
 **Fourth**, it developed **dimension-reduction stacking with multiple dependence metrics**. Synthetic predictors may be constructed using linear correlation, nonlinear dependence, directional causation, equal weighting, or an average across all methods, and method 1 (regression-point nearest-neighbor) and method 2 (synthetic-index univariate regression) can be combined within the same stacked model.
 
-**Fifth**, it showed that NNS stacking is a form of **distance-aware meta-learning**. The ensemble can combine predictions using Euclidean, Manhattan, dynamic time warping, or factor-based geometry, and the chosen distance metric applies to the regression-point neighbor search.
+**Fifth**, it showed that NNS stacking is a form of **distance-aware meta-learning**. The neighbor search can use the blended NNS distance (the default), Euclidean, Manhattan, or factor-based geometry; the chosen metric applies to the regression-point neighbor search. Dynamic time warping is not an available `dist` option.
 
 **Sixth**, it emphasized **cross-validation as the practical control of complexity** in nonparametric ensemble learning. Cross-validation simultaneously optimizes feature selection, neighbor count, and classification thresholds — not merely estimating out-of-sample error, but actively determining the structural configuration of the learner.
 

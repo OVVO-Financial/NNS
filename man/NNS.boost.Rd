@@ -86,15 +86,17 @@ Ensemble method for classification using the NNS multivariate regression \link{N
 }
 }
 \examples{
- ## Using 'iris' dataset where test set [IVs.test] is 'iris' rows 141:150.
+ ## Using 'iris' dataset with a stratified test set of ten rows per species
+ ## (rows 141:150 alone are all virginica).
  \dontrun{
- a <- NNS.boost(iris[1:140, 1:4], iris[1:140, 5],
- IVs.test = iris[141:150, 1:4],
+ test.set <- c(41:50, 91:100, 141:150)
+ a <- NNS.boost(iris[-test.set, 1:4], iris[-test.set, 5],
+ IVs.test = iris[test.set, 1:4],
  epochs = 100, learner.trials = 100,
  type = "CLASS", depth = NULL, balance = TRUE)
 
  ## Test accuracy
- mean(a$results == as.numeric(iris[141:150, 5]))
+ mean(a$results == as.numeric(iris[test.set, 5]))
 
  ## Recover the labels
  a$class.levels[a$results]

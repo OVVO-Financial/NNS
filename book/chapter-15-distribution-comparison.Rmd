@@ -520,7 +520,7 @@ and that $F_1(\bar{x}; X) = 0.5$ exactly at the sample mean for every non-consta
 
 This **mean-target property** provides a distribution-free anchor for comparing means across samples: under the null that two groups share a common population mean, both groups' degree-one CDFs evaluated at the grand mean scatter around 0.5, and a departure from 0.5 measures the distance between the group mean and the grand mean in units of that group's deviation area (Section 15.1.8). Because the anchor does not depend on the shape of either distribution, a skewed group is not read as a shifted one, as it would be by comparing the empirical CDF with 0.5.
 
-The degree-one CDF also exhibits greater smoothness than the empirical step function, particularly in small samples, because it encodes area-based mass rather than point counts. This smoothness reduces noise sensitivity and improves stability across repeated samples.
+The degree-one CDF is also continuous in $t$, unlike the empirical step function, because it encodes area-based mass rather than point counts. That smoothness is not robustness: deviations enter in proportion to their size, so a single extreme observation shifts the degree-one CDF at every $t$, while it changes the degree-zero CDF by one count. Chapter 17 gives a numerical example for the tail thresholds.
 
 #### Grand Mean and the NNS Certainty Statistic
 
