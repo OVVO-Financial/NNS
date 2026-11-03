@@ -181,9 +181,9 @@ By examining $\Delta(t)$ across a range of benchmarks, analysts obtain a **direc
 
 ---
 
-### The Discrete–Continuous CDF Distinction and Bias Elimination
+### The Discrete–Continuous CDF Distinction
 
-Before developing operational comparison procedures, it is essential to confront a source of **systematic bias** embedded in the standard empirical CDF that has significant consequences for distribution comparison.
+Before developing operational comparison procedures, it helps to separate two answers to the question "how much of the distribution lies below a benchmark?": a share of observations and a share of deviation area. They agree only in special cases, and the difference matters for distribution comparison.
 
 #### The Empirical CDF as a Discrete Measure
 
@@ -195,20 +195,19 @@ $$
 
 where $\mathbf{1}_{\{\cdot\}}$ is the indicator function. This is a **discrete** probability measure: it assigns probability mass only at observed data points and is a step function everywhere else. Even with one million observations, it remains a step function — it is never truly continuous.
 
-A direct consequence of this discreteness is systematic bias in probability estimation at the sample mean. For a symmetric distribution, exactly 50% of the population lies below the mean. Yet for any finite sample,
+A direct consequence of this discreteness is that its value at the sample mean,
 
 $$
-\hat{F}_X(\bar{x}) = \frac{1}{n}\sum_{i=1}^n \mathbf{1}_{\{x_i \le \bar{x}\}} 
-e 0.5
+\hat{F}_X(\bar{x}) = \frac{1}{n}\sum_{i=1}^n \mathbf{1}_{\{x_i \le \bar{x}\}},
 $$
 
-in general, because the sample mean typically falls between two observed values. This quantity oscillates around 0.5 and only converges asymptotically — it will never equal 0.5 for any particular finite draw.
+moves in steps of $1/n$ and scatters from sample to sample. What it estimates is $P(X \le \mu)$. For a continuous symmetric distribution that probability is 0.5 and $\hat{F}_X(\bar{x})$ estimates it without bias, but a single sample gives a value near 0.5 rather than at it (0.44 in the example below). For an asymmetric distribution the target is not 0.5 at all: for an exponential, $P(X \le \mu) = 1 - e^{-1} \approx 0.632$.
 
 This is not a minor technicality. Any comparison procedure that evaluates a group's discrete CDF at a shared benchmark inherits this bias: the two CDFs will appear to differ even when the groups are identical, simply because of discretization noise.
 
-#### The Degree-One Partial Moment as a Continuous Probability
+#### The Degree-One Partial Moment Ratio: a Share of Deviation Area
 
-The directional framework resolves this bias by replacing the discrete indicator with **area-based probability mass** using the degree-one lower partial moment ratio:
+The directional framework offers a second measure, which replaces the discrete indicator with **area-based mass** in the degree-one lower partial moment ratio:
 
 $$
 F_1(t; X) = \frac{LPM_1(t, X)}{LPM_1(t, X) + UPM_1(t, X)},
@@ -222,21 +221,15 @@ LPM_1(t, X) = \frac{1}{n} \sum_{i=1}^n \max(0,\, t - x_i),
 UPM_1(t, X) = \frac{1}{n} \sum_{i=1}^n \max(0,\, x_i - t).
 $$
 
-Rather than counting the fraction of observations below $t$, this ratio measures the fraction of the **total area of deviations** that lies below $t$. It corresponds to the continuous PDF probability
-
-$$
-P(X \le t) = \frac{\int_{-\infty}^t f(x)\,dx}{\int_{-\infty}^\infty f(x)\,dx},
-$$
-
-capturing the area between discrete bins that the step-function CDF ignores. This is the essential connection to the derivative relationship $f(x) = dF(x)/dx$: the degree-one ratio encodes the continuous probability density information that the degree-zero CDF discards.
+Rather than counting the fraction of observations below $t$, this ratio measures the fraction of the **total area of deviations** that lies below $t$. Each observation is weighted by its distance from $t$, so this is a severity-weighted share, not the probability $P(X \le t)$: for an exponential sample, the point with 5% of the deviation area below it has about a quarter of the observations below it. What the degree-one ratio offers instead is continuity in $t$, where the empirical CDF jumps by $1/n$, and the distribution-free anchor derived next. Probability statements, such as quantiles, coverage and the frequency of exceeding a threshold, belong to degree 0.
 
 In NNS, this is computed via `LPM.ratio(degree = 1, target, variable)`.
 
-#### The Mean-Target Property: Exact Bias Elimination
+#### The Mean-Target Property
 
 A fundamental property follows from the algebraic structure of the degree-one ratio.
 
-**Theorem.** For any random variable $X$ with finite mean $\mu_X$, and for any sample $x_1, \dots, x_n$,
+**Theorem.** For any random variable $X$ with finite mean $\mu_X$, and for any sample $x_1, \dots, x_n$ that is not constant,
 
 $$
 F_1(\bar{x};\, X) = 0.5
@@ -258,7 +251,13 @@ $$
 
 Therefore $LPM_1(\bar{x}, X) = UPM_1(\bar{x}, X)$, which gives $F_1(\bar{x}; X) = 0.5$ exactly. $\square$
 
-This result holds for **every distribution, every sample size, and without any parametric assumptions**. The discrete CDF only approaches this value asymptotically; the degree-one ratio achieves it exactly from the very first observation.
+This result holds for **every distribution, every non-constant sample, and without any parametric assumptions**. It is a property of the area-based share, not a correction of the empirical CDF: the empirical CDF at the mean estimates $P(X \le \mu)$, which is 0.5 only for symmetric distributions, while the degree-one ratio is 0.5 at the mean by construction. The same identity gives $LPM_1(t, X) - UPM_1(t, X) = t - \bar{x}$ at every benchmark, so
+
+$$
+F_1(t; X) - \frac{1}{2} = \frac{t - \bar{x}}{2\,\big(LPM_1(t, X) + UPM_1(t, X)\big)}:
+$$
+
+at any benchmark, the degree-one ratio's distance from 0.5 is the distance from the sample mean, scaled by the deviation area.
 
 The same argument extends to the population: $F_1(\mu_X; X) = 0.5$ exactly for the population mean $\mu_X$, for any distribution with finite mean.
 
@@ -272,29 +271,29 @@ library(NNS)
 set.seed(12345)
 x <- rnorm(100, mean = 5, sd = 1)
 
-# Discrete CDF at the mean — biased
+# Share of observations at or below the mean
 LPM.ratio(0, mean(x), x)
 ## [1] 0.44
 
-# Continuous (area-based) probability at the mean — unbiased
+# Share of deviation area below the mean: 0.5 by construction
 LPM.ratio(1, mean(x), x)
 ## [1] 0.5
 ```
 
-With 100 observations, the discrete CDF places only 44% of mass below the sample mean. The degree-one ratio returns exactly 0.5. Increasing to 500 observations closes the gap but never eliminates it for the discrete version:
+With 100 observations, 44% of this normal sample lies at or below its mean, against 50% in the population; the share scatters around 0.5 from sample to sample. The degree-one ratio returns exactly 0.5. With 500 observations the scatter is smaller:
 
 ```r
 set.seed(12345)
 x2 <- rnorm(500, mean = 5, sd = 1)
 
-LPM.ratio(0, mean(x2), x2)   # discrete — still biased
+LPM.ratio(0, mean(x2), x2)   # share of observations
 ## [1] 0.496
 
-LPM.ratio(1, mean(x2), x2)   # continuous — exact
+LPM.ratio(1, mean(x2), x2)   # share of deviation area
 ## [1] 0.5
 ```
 
-Tracking both measures sequentially across every observation confirms that the degree-zero ratio oscillates around 0.5 and converges only in the limit, while the degree-one ratio is pinned at exactly 0.5 throughout:
+Tracking both measures sequentially across every observation of a normal sample shows the degree-zero ratio scattering around 0.5 and settling only as $n$ grows, while the degree-one ratio is pinned at exactly 0.5 throughout:
 
 ```r
 set.seed(12345)
@@ -309,11 +308,11 @@ for (i in seq_along(x)) {
 }
 
 plot(lpm0, col = "red",  type = "l", lwd = 2,
-     ylim = c(0, 1), ylab = "P(X ≤ mean)", xlab = "n")
+     ylim = c(0, 1), ylab = "ratio at the sample mean", xlab = "n")
 lines(lpm1, col = "blue", lwd = 2)
 abline(h = 0.5, lty = 2)
 legend("topright", legend = c("LPM degree 0 (discrete)",
-                               "LPM degree 1 (continuous)"),
+                               "LPM degree 1 (area)"),
        col = c("red", "blue"), lwd = 2, bty = "n")
 ```
 
@@ -321,7 +320,7 @@ legend("topright", legend = c("LPM degree 0 (discrete)",
 ![Figure 15.1. Degree-0 versus degree-1 LPM ratio convergence at the sample mean: degree-0 wanders while degree-1 remains pinned at 0.5.](images/ch15_lpm0_lpm1_diff.png)
 </center>
 
-The red line wanders; the blue line is flat at 0.5 for every $n \ge 1$.
+The red line wanders; the blue line is flat at 0.5 from $n = 2$ on. (A single observation has no deviation area on either side, and `LPM.ratio` then returns 1, as degree zero does.)
 
 The full demonstration in Python:
 
@@ -332,15 +331,15 @@ from nns import lpm_ratio
 rng = np.random.default_rng(12345)
 x = rng.normal(loc=5, scale=1, size=100)
 
-# Discrete CDF at the mean — biased
+# Share of observations at or below the mean
 lpm_ratio(0, float(np.mean(x)), x)
 
-# Continuous (area-based) probability at the mean — unbiased
+# Share of deviation area below the mean: 0.5 by construction
 lpm_ratio(1, float(np.mean(x)), x)
 
 x2 = rng.normal(loc=5, scale=1, size=500)
-lpm_ratio(0, float(np.mean(x2)), x2)   # discrete — still biased
-lpm_ratio(1, float(np.mean(x2)), x2)   # continuous — exact
+lpm_ratio(0, float(np.mean(x2)), x2)   # share of observations
+lpm_ratio(1, float(np.mean(x2)), x2)   # share of deviation area
 
 # Sequential tracking across every observation
 x = rng.normal(size=500)
@@ -352,9 +351,9 @@ lpm1 = np.array([lpm_ratio(1, float(np.mean(x[:i])), x[:i]) for i in range(1, x.
 
 This property has direct consequences for the comparison methods developed in the remainder of this chapter.
 
-When two samples $X$ and $Y$ are evaluated at a shared benchmark — such as the grand mean $\bar{z}$ — under the null hypothesis of identical population means, both $F_1(\bar{z}; X)$ and $F_1(\bar{z}; Y)$ should return 0.5. Deviations from 0.5 then provide unambiguous evidence that the group means diverge from the grand statistic.
+When two samples $X$ and $Y$ are evaluated at a shared benchmark such as the grand mean $\bar{z}$, the identity above makes $F_1(\bar{z}; X) - 0.5$ the distance from $\bar{z}$ to the group mean $\bar{x}$, in units of that group's deviation area, whatever the shape of the distribution. Under the null hypothesis of identical population means, both $F_1(\bar{z}; X)$ and $F_1(\bar{z}; Y)$ scatter around 0.5 with sampling noise, and departures from 0.5 measure how far each group mean sits from the grand statistic.
 
-Using the discrete CDF instead, both evaluations would generically differ from 0.5 even under the null, producing spurious evidence of separation. The degree-one ratio eliminates this source of false signal entirely.
+The discrete CDF has no such anchor. Its value at the mean estimates $P(X \le \mu)$, which is 0.5 only for symmetric distributions, so at degree 0 a departure from 0.5 mixes skewness with separation: two identical exponential groups both sit near 0.632, not 0.5.
 
 The NNS ANOVA procedure in Section 15.4.2 is built directly on this foundation.
 
@@ -465,7 +464,7 @@ Third, compare degree-two lower partial moments when larger deviations deserve d
 
 This layered comparison is useful across domains. In forecasting, it distinguishes models that miss a target equally often but differ in the magnitude of their misses. In operations, it distinguishes supply systems that stock out with similar frequency but very different shortage depth. In reliability, it distinguishes designs whose failure margins are crossed with similar probability but different severity once crossed.
 
-This section also clarifies why the degree-one continuous probability representation matters. Chapter 14 established that the degree-one partial-moment ratio removes the discrete-CDF bias at the mean in finite samples. That same area-based logic provides a smoother and more interpretable path from event counting to severity-weighted comparison.
+This section also clarifies why the degree-one area representation matters. Section 15.1.8 showed that the degree-one partial-moment ratio is continuous in the benchmark and anchored at 0.5 at the mean of every non-constant sample. That same area-based logic provides a smoother path from event counting to severity-weighted comparison.
 
 
 ### Example
@@ -519,9 +518,9 @@ $$
 
 and that $F_1(\bar{x}; X) = 0.5$ exactly for the sample mean, for any distribution and any sample size.
 
-This **mean-target property** provides a distribution-free anchor for comparing means across samples: under the null that two groups share a common population mean, both groups' degree-one CDFs evaluated at the grand mean will return 0.5. Any deviation signals distributional separation. Because the degree-one ratio eliminates finite-sample discretization bias (Section 15.1.8), this signal is clean — not contaminated by the systematic oscillation present in the discrete CDF.
+This **mean-target property** provides a distribution-free anchor for comparing means across samples: under the null that two groups share a common population mean, both groups' degree-one CDFs evaluated at the grand mean scatter around 0.5, and a departure from 0.5 measures the distance between the group mean and the grand mean in units of that group's deviation area (Section 15.1.8). Because the anchor does not depend on the shape of either distribution, a skewed group is not read as a shifted one, as it would be by comparing the empirical CDF with 0.5.
 
-The degree-one CDF also exhibits greater smoothness than the empirical step function, particularly in small samples, because it encodes area-based probability mass rather than point counts. This smoothness reduces noise sensitivity and improves stability across repeated samples.
+The degree-one CDF also exhibits greater smoothness than the empirical step function, particularly in small samples, because it encodes area-based mass rather than point counts. This smoothness reduces noise sensitivity and improves stability across repeated samples.
 
 #### Grand Mean and the NNS Certainty Statistic
 
@@ -817,7 +816,7 @@ $$
 
 These equivalences mean that **stochastic dominance tests are partial moment comparisons** evaluated across the full support of the data. The NNS framework implements all three levels directly through empirical partial moment estimates.
 
-This is also the bridge to Chapter 17: the degree-one quantile objects used for bias-corrected prediction intervals (`LPM.VaR(..., degree = 1, ...)`, `UPM.VaR(..., degree = 1, ...)`) are generated from the same degree-one lower/upper partial moment geometry used here for SSD and TSD diagnostics. Put differently, interval construction and dominance testing are not separate methods — they are two uses of the same directional probability representation.
+This is also the bridge to Chapter 17: the degree-one quantile objects used for magnitude-calibrated bands (`LPM.VaR(..., degree = 1, ...)`, `UPM.VaR(..., degree = 1, ...)`) are generated from the same degree-one lower/upper partial moment geometry used here for SSD and TSD diagnostics. Put differently, interval construction and dominance testing are not separate methods — they are two uses of the same directional representation.
 
 #### Empirical Stochastic Dominance Tests
 
@@ -988,7 +987,7 @@ Classical distribution comparison is usually framed as a sequence of tests that 
 
 At the most direct level, two distributions can be compared through probabilities such as $P(X > Y)$ and the tie-adjusted stochastic superiority measure $P^* = P(X' > Y') + \tfrac{1}{2}P(X' = Y')$. This provides a pairwise effect size with an immediate interpretation: how often does one distribution generate larger outcomes than the other?
 
-At the distributional-agreement level, the degree-one continuous CDF removes the finite-sample bias of the empirical CDF at the mean, with $F_1(\bar{x}; X) = 0.5$ exactly. That property makes NNS ANOVA a distribution-free and bias-free comparison procedure. Rather than depending on parametric assumptions, it evaluates agreement through benchmark-relative CDF deviations and reports an interpretable certainty statistic together with effect sizes and robust confidence intervals.
+At the distributional-agreement level, the degree-one ratio is anchored at 0.5 at the mean of every non-constant sample, $F_1(\bar{x}; X) = 0.5$ exactly, whatever the shape of the distribution. That anchor makes NNS ANOVA a distribution-free comparison procedure. Rather than depending on parametric assumptions, it evaluates agreement through benchmark-relative CDF deviations and reports an interpretable certainty statistic together with effect sizes and robust confidence intervals.
 
 At the strongest level, stochastic dominance extends directional comparison from pairwise exceedance to full preference ordering over the support. First-, second-, and third-order dominance can all be written as partial-moment inequalities, which shows that dominance analysis, efficient sets, and dominance clustering are all natural extensions of the same directional probability representation.
 

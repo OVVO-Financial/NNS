@@ -75,7 +75,7 @@ The R name is the canonical reference used throughout the book; the Python name 
 | Symbol | Definition / role | R function |
 |---|---|---|
 | $F^{(0)}(t)$ | Degree-zero empirical CDF (step measure) | `ecdf(x)(t)` or `LPM.ratio(0, t, x)` |
-| $F^{(1)}(t)$ | Degree-one continuous CDF-style ratio | `LPM.ratio(1, t, x)` |
+| $F^{(1)}(t)$ | Degree-one area ratio: the share of deviation area below $t$, not $P(X \le t)$ | `LPM.ratio(1, t, x)` |
 | $p = P(X' > Y')$ | Directional exceedance probability for pairwise comparison | estimated by cross-sample indicator averages |
 | $\text{Certainty}_{\text{ANOVA}}$ | NNS ANOVA agreement certainty from CDF benchmark deviations ($1$ = strongest agreement) | `NNS.ANOVA(...)` |
 | FSD / SSD / TSD | First-, second-, third-order stochastic dominance | `NNS.FSD(...)`, `NNS.SSD(...)`, `NNS.TSD(...)` |

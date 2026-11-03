@@ -188,9 +188,9 @@ DPM_nD <- function(data, target, degree = 0.0, norm = TRUE) {
 #' This function generates an empirical CDF using partial moment ratios \link{LPM.ratio}, and resulting survival, hazard and cumulative hazard functions.
 #'
 #' @param variable a numeric vector or data.frame of >= 2 variables for joint CDF.
-#' @param degree numeric; \code{(degree = 0)} (default) is frequency, \code{(degree = 1)} is area.
+#' @param degree numeric; \code{(degree = 0)} (default) is frequency, the empirical distribution of \code{variable}; \code{(degree = 1)} is area, the share of deviation area below each point, which is not \eqn{P(X \le t)}.
 #' @param target numeric; \code{NULL} (default) Must lie within support of each variable (one value per column for multivariate \code{variable}).
-#' @param type options("CDF", "survival", "hazard", "cumulative hazard"); \code{"CDF"} (default) Selects type of function to return.  For multivariate \code{variable} the joint survival is \eqn{P(X_1 > t_1, \ldots, X_d > t_d)} at \code{degree = 0}, by inclusion-exclusion over the column subsets for \eqn{d \le 3} and as the share of observations above \eqn{t} in every column for larger \eqn{d}, and the joint upper partial moment \link{Co.UPM_nD} at \code{degree > 0}, normalised like the CDF.  The hazard and cumulative hazard are built from it, and need \code{degree = 0} for multivariate \code{variable}.  At \code{degree > 0} with two or more columns, each target's co-partial moment is normalised by its own total, so the "CDF" and "survival" values are generalised co-partial-moment ratios, not a joint distribution function: they can assign a negative probability to a rectangle.  At \code{degree = 0}, and in one dimension at any degree, they are proper distribution functions.
+#' @param type options("CDF", "survival", "hazard", "cumulative hazard"); \code{"CDF"} (default) Selects type of function to return.  For multivariate \code{variable} the joint survival is \eqn{P(X_1 > t_1, \ldots, X_d > t_d)} at \code{degree = 0}, by inclusion-exclusion over the column subsets for \eqn{d \le 3} and as the share of observations above \eqn{t} in every column for larger \eqn{d}, and the joint upper partial moment \link{Co.UPM_nD} at \code{degree > 0}, normalised like the CDF.  The hazard and cumulative hazard are built from it, and need \code{degree = 0} for multivariate \code{variable}.  At \code{degree > 0} with two or more columns, each target's co-partial moment is normalised by its own total, so the "CDF" and "survival" values are generalised co-partial-moment ratios, not a joint distribution function: they can assign a negative probability to a rectangle.  At \code{degree = 0}, and in one dimension at any degree, they are proper distribution functions; at \code{degree > 0} that is the distribution of deviation area, not of \code{variable}.
 #' @param plot logical; plots CDF.
 #' @return Returns:
 #' \itemize{
@@ -211,7 +211,7 @@ DPM_nD <- function(data, target, degree = 0.0, norm = TRUE) {
 #' ## Empirical CDF (degree = 0)
 #' NNS.CDF(x)
 #'
-#' ## Continuous CDF (degree = 1)
+#' ## Area-weighted CDF (degree = 1): the share of deviation area below each point
 #' NNS.CDF(x, 1)
 #'
 #' ## Joint CDF
