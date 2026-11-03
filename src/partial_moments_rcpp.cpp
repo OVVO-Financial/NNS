@@ -40,6 +40,17 @@ static inline void stop_if_not_finite(const NumericVector &v, const char *what) 
   }
 }
 
+// Runs before parallelFor: the workers index targets modulo their length and cannot raise R errors.
+static inline void check_co_lengths(const NumericVector &x, const NumericVector &y,
+                                    const NumericVector &target_x, const NumericVector &target_y) {
+  if (x.size() != y.size()) Rcpp::stop("`x` and `y` must have the same length.");
+  if (x.size() == 0) Rcpp::stop("`x` and `y` must not be empty.");
+  const R_xlen_t ntx = target_x.size(), nty = target_y.size();
+  if (ntx == 0 || nty == 0) Rcpp::stop("`target_x` and `target_y` must not be empty.");
+  if (ntx != nty && ntx != 1 && nty != 1)
+    Rcpp::stop("`target_x` and `target_y` must have the same length, or one of them length 1.");
+}
+
 // For degree > 0 the ratio is 0/0 when every observation equals the target;
 // use the degree -> 0 limit (LPM 1, UPM 0, the ECDF convention x <= target).
 static inline NumericVector fill_degenerate_ratio(NumericVector out,
@@ -293,6 +304,7 @@ NumericVector CoLPM_RCPP(
      target_y_vec = NumericVector(1);
      target_y_vec[0] = mean(y_vec);
    }
+   check_co_lengths(x_vec, y_vec, target_x_vec, target_y_vec);
    stop_if_not_finite(x_vec, "x");
    stop_if_not_finite(y_vec, "y");
    stop_if_not_finite(target_x_vec, "target_x");
@@ -334,6 +346,7 @@ NumericVector CoUPM_RCPP(
      target_y_vec = NumericVector(1);
      target_y_vec[0] = mean(y_vec);
    }
+   check_co_lengths(x_vec, y_vec, target_x_vec, target_y_vec);
    stop_if_not_finite(x_vec, "x");
    stop_if_not_finite(y_vec, "y");
    stop_if_not_finite(target_x_vec, "target_x");
@@ -352,7 +365,7 @@ NumericVector CoUPM_RCPP(
 //' @param x numeric vector of observations.
 //' @param y numeric vector of the same length as x.
 //' @param target_x numeric vector; thresholds for x. There is no default: pass \code{NULL} to use \code{mean(x)}.
-//' @param target_y numeric vector; thresholds for y. There is no default: pass \code{NULL} to use \code{mean(y)}.
+//' @param target_y numeric vector; thresholds for y. There is no default: pass \code{NULL} to use \code{mean(y)}. \code{target_x} and \code{target_y} must be non-empty and the same length, or one of them length 1.
 //' @return Numeric vector of divergent LPM values.
 //' @author Fred Viole, OVVO Financial Systems
 //' @references
@@ -393,6 +406,7 @@ NumericVector CoUPM_RCPP(
      target_y_vec = NumericVector(1);
      target_y_vec[0] = mean(y_vec);
    }
+   check_co_lengths(x_vec, y_vec, target_x_vec, target_y_vec);
    stop_if_not_finite(x_vec, "x");
    stop_if_not_finite(y_vec, "y");
    stop_if_not_finite(target_x_vec, "target_x");
@@ -411,7 +425,7 @@ NumericVector CoUPM_RCPP(
 //' @param x numeric vector of observations.
 //' @param y numeric vector of the same length as x.
 //' @param target_x numeric vector; thresholds for x. There is no default: pass \code{NULL} to use \code{mean(x)}.
-//' @param target_y numeric vector; thresholds for y. There is no default: pass \code{NULL} to use \code{mean(y)}.
+//' @param target_y numeric vector; thresholds for y. There is no default: pass \code{NULL} to use \code{mean(y)}. \code{target_x} and \code{target_y} must be non-empty and the same length, or one of them length 1.
 //' @return Numeric vector of divergent UPM values.
 //' @author Fred Viole, OVVO Financial Systems
 //' @references
@@ -452,6 +466,7 @@ NumericVector CoUPM_RCPP(
      target_y_vec = NumericVector(1);
      target_y_vec[0] = mean(y_vec);
    }
+   check_co_lengths(x_vec, y_vec, target_x_vec, target_y_vec);
    stop_if_not_finite(x_vec, "x");
    stop_if_not_finite(y_vec, "y");
    stop_if_not_finite(target_x_vec, "target_x");

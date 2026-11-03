@@ -17,3 +17,27 @@ test_that("co-moments apply each degree to its own variable when one is fraction
     }
   }
 })
+
+test_that("co-moments reject unequal lengths, empty input and recycled targets", {
+  set.seed(1)
+  x <- rnorm(100); y <- rnorm(99)
+  fns <- list(
+    function(x, y, tx, ty) Co.LPM(1, x, y, tx, ty),
+    function(x, y, tx, ty) Co.UPM(1, x, y, tx, ty),
+    function(x, y, tx, ty) D.LPM(1, 1, x, y, tx, ty),
+    function(x, y, tx, ty) D.UPM(1, 1, x, y, tx, ty)
+  )
+  for (f in fns) {
+    expect_error(f(x, y, 0, 0), "same length")
+    expect_error(f(x, y, NULL, NULL), "same length")
+    expect_error(f(x, y, seq(-1, 1, length.out = 200), 0), "same length")
+    expect_error(f(numeric(0), numeric(0), 0, 0), "must not be empty")
+    expect_error(f(numeric(0), numeric(0), NULL, NULL), "must not be empty")
+    expect_error(f(1:5, 1:5, numeric(0), 0), "must not be empty")
+    expect_error(f(1:5, 1:5, 0, numeric(0)), "must not be empty")
+    expect_error(f(1:5, 1:5, numeric(0), numeric(0)), "must not be empty")
+    expect_error(f(x, x, c(0, 1, 2), c(0, 1)), "length 1")
+    expect_equal(f(x, x, c(-1, 0, 1), 0.5),
+                 c(f(x, x, -1, 0.5), f(x, x, 0, 0.5), f(x, x, 1, 0.5)))
+  }
+})

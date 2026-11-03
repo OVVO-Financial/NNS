@@ -543,8 +543,6 @@ double CoUPM_C(
   size_t n_x = x.size(), n_y = y.size();
   size_t max_size = (n_x>n_y ? n_x : n_y);
   size_t min_size = (n_x<n_y ? n_x : n_y);
-  if (n_x != n_y)
-    Rcpp::warning("x vector length != y vector length");
   if (min_size<=0)
     return 0;
   
@@ -584,8 +582,6 @@ double CoLPM_C(
   size_t n_x=x.size(), n_y=y.size();
   size_t max_size=(n_x>n_y?n_x:n_y);
   size_t min_size=(n_x<n_y?n_x:n_y);
-  if (n_x!=n_y)
-    Rcpp::warning("x vector length != y vector length");
   if (min_size<=0)
     return 0;
   double out=0;
@@ -624,8 +620,6 @@ double DLPM_C(
   size_t n_x=x.size(), n_y=y.size();
   size_t max_size=(n_x>n_y?n_x:n_y);
   size_t min_size=(n_x<n_y?n_x:n_y);
-  if (n_x!=n_y)
-    Rcpp::warning("x vector length != y vector length");
   if (min_size<=0)
     return 0;
   double out=0;
@@ -665,8 +659,6 @@ double DUPM_C(
   size_t n_x=x.size(), n_y=y.size();
   size_t max_size=(n_x>n_y?n_x:n_y);
   size_t min_size=(n_x<n_y?n_x:n_y);
-  if (n_x!=n_y)
-    Rcpp::warning("x vector length != y vector length");
   if (min_size<=0)
     return 0;
   double out=0;
