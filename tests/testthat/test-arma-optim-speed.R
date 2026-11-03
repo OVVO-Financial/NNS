@@ -120,3 +120,9 @@ test_that("regression points match the data frame construction", {
     expect_false(is.null(attr(got, "nns.order")))
   }
 })
+
+test_that("linear.approximation defaults to TRUE", {
+  # FALSE scores every candidate set with the nonlinear methods; the default
+  # passes the linear search's selection to the nonlinear comparison.
+  expect_identical(eval(formals(NNS.ARMA.optim)$linear.approximation), TRUE)
+})
