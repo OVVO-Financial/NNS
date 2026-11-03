@@ -1,23 +1,24 @@
 # NNS.seas reports the fundamental period (#129): a multiple of the true period
 # scores as well in expectation, and the lowest score often fell on a multiple.
 
-test_that("the jackknife variance matches a direct delete-one computation", {
+test_that("delete-one scores match a direct recomputation", {
   set.seed(5)
   x <- 10 + rexp(57)
   direct <- function(x, m, use_cv) {
-    comp <- split(x, (seq_along(x) - 1L) %% m)
-    gmd <- function(z) { k <- length(z); sum(abs(outer(z, z, "-"))) / (k * (k - 1)) }
-    v <- vapply(comp, function(z) {
-      k <- length(z)
-      d <- vapply(seq_len(k), function(i) {
-        g <- gmd(z[-i]); if (use_cv) g / abs(mean(z[-i])) else g
+    grp <- (seq_along(x) - 1L) %% m
+    score <- function(keep) {
+      comp <- split(x[keep], grp[keep])
+      d <- vapply(comp, function(z) {
+        k <- length(z); g <- sum(abs(outer(z, z, "-"))) / (k * (k - 1))
+        if (use_cv) g / abs(mean(z)) else g
       }, numeric(1))
-      (k - 1) / k * sum((d - mean(d))^2)
-    }, numeric(1))
-    sum((lengths(comp) / length(x))^2 * v)
+      sum(lengths(comp) * d) / sum(keep)
+    }
+    vapply(seq_along(x), function(i) score(seq_along(x) != i), numeric(1))
   }
   for (m in c(3L, 7L)) for (cv in c(TRUE, FALSE))
-    expect_equal(NNS:::.nns_seas_score_var(x, m, cv), direct(x, m, cv))
+    expect_equal(NNS:::.nns_seas_delete_one(x, m, cv), direct(x, m, cv))
+  expect_null(NNS:::.nns_seas_delete_one(x, 20L, TRUE))   # components of 2 or 3: too short
 })
 
 test_that("a monthly cycle is reported at 12, not at a multiple", {

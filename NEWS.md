@@ -73,7 +73,8 @@
   targets are not used as deployment-validation inputs or ground truth.
 * `NNS.seas` reports the fundamental period as `best.period`: the smallest
   period that divides the lowest-scoring lag (or nearly divides it, for a
-  non-integer period) and scores within two jackknife standard errors of it.
+  non-integer period) and scores within two jackknife standard errors of it,
+  from paired delete-one differences.
   The lowest score often fell on a multiple of the true period; a monthly sine
   with noise now returns 12 instead of 36 to 108, and `NNS.ARMA`'s automatic
   lag follows. The period is listed first in `all.periods` and `periods`.

@@ -1,6 +1,6 @@
 #' NNS Seasonality Test
 #'
-#' Seasonality test based on the coefficient of variation for the variable and lagged component series.  A linear trend is removed first (\code{detrend = TRUE}), keeping the mean of the variable, so that a trend does not mask the period.  For each lag \code{m}, the variable is split into its \code{m} component series \code{variable[seq(j, n, m)]}, \code{j = 1, ..., m}, and lag \code{m} is reported when the length-weighted mean of the component coefficients of variation is below the coefficient of variation of the variable.  Dispersion is the Gini mean difference, the degree-1 lower plus upper partial moment about each observation in turn, which is unbiased for any distribution at any component length.  The coefficient of variation is used when the (detrended) variable stays on one side of zero; otherwise dispersions are compared directly.  Lags are scanned up to \code{max.period}, by default \code{n / 5}, so every component series has at least 5 observations.  Periods added through \code{modulo} are kept up to \code{n / 2}.  On a series without seasonality about half of the lags pass by chance, so treat the result as candidate periods and validate them, for example with \link{NNS.ARMA.optim}, or set \code{p.value = TRUE}.  A result of 1 signifies no seasonality present.  A multiple of the true period scores as well in expectation, and its shorter components make its score noisier, so the lowest score often falls on a multiple. \code{best.period} is therefore the fundamental period: the smallest period that divides the lowest-scoring lag, or nearly divides it for a non-integer period, and whose score exceeds the lowest by at most two jackknife standard errors of their difference. It is listed first in \code{all.periods} and \code{periods}, followed by the other periods in order of score.
+#' Seasonality test based on the coefficient of variation for the variable and lagged component series.  A linear trend is removed first (\code{detrend = TRUE}), keeping the mean of the variable, so that a trend does not mask the period.  For each lag \code{m}, the variable is split into its \code{m} component series \code{variable[seq(j, n, m)]}, \code{j = 1, ..., m}, and lag \code{m} is reported when the length-weighted mean of the component coefficients of variation is below the coefficient of variation of the variable.  Dispersion is the Gini mean difference, the degree-1 lower plus upper partial moment about each observation in turn, which is unbiased for any distribution at any component length.  The coefficient of variation is used when the (detrended) variable stays on one side of zero; otherwise dispersions are compared directly.  Lags are scanned up to \code{max.period}, by default \code{n / 5}, so every component series has at least 5 observations.  Periods added through \code{modulo} are kept up to \code{n / 2}.  On a series without seasonality about half of the lags pass by chance, so treat the result as candidate periods and validate them, for example with \link{NNS.ARMA.optim}, or set \code{p.value = TRUE}.  A result of 1 signifies no seasonality present.  A multiple of the true period scores as well in expectation, and its shorter components make its score noisier, so the lowest score often falls on a multiple. \code{best.period} is therefore the fundamental period: the smallest period that divides the lowest-scoring lag, or nearly divides it for a non-integer period, and whose score exceeds the lowest by at most two jackknife standard errors of their difference, from paired delete-one scores. It is listed first in \code{all.periods} and \code{periods}, followed by the other periods in order of score.
 #'
 #' @param variable a numeric vector.
 #' @param modulo integer(s); NULL (default) Adds the multiples of \code{modulo} on either side of each detected period (period 7 with \code{modulo = 5} gives 5 and 10).
@@ -14,7 +14,7 @@
 #' @return Returns a matrix of all periods exhibiting less coefficient of variation than the variable with \code{"all.periods"}; and the fundamental period with \code{"best.period"} (see Description); as well as a vector of \code{"periods"} for easy call into \link{NNS.ARMA.optim}.  If no seasonality is detected, \code{all.periods} holds a single row with \code{Period = 1} and a coefficient of variation equal to the variable's (\code{Period = 0} for fewer than 5 observations).  The coefficients of variation are those of the detrended variable when \code{detrend = TRUE}.
 #' @note The historical column names \code{Coefficient.of.Variation} and \code{Variable.Coefficient.of.Variation} are retained in absolute mode; their values then contain absolute Gini dispersions.
 #'
-#' @note \code{best.period} need not be the lowest-scoring lag: \code{with(all.periods, Period[which.min(Coefficient.of.Variation)])} returns that lag. The two-standard-error rule treats the component series as independent and does not adjust for serial dependence. The minimum five observations per component is a reliability default; \code{modulo} can supply longer domain-informed candidates. Shuffling removes serial dependence as well as seasonality, so the optional permutation comparison is not calibrated against every dependent nonseasonal process.
+#' @note \code{best.period} need not be the lowest-scoring lag: \code{with(all.periods, Period[which.min(Coefficient.of.Variation)])} returns that lag. The jackknife behind the two-standard-error rule treats observations as exchangeable and does not adjust for serial dependence. The minimum five observations per component is a reliability default; \code{modulo} can supply longer domain-informed candidates. Shuffling removes serial dependence as well as seasonality, so the optional permutation comparison is not calibrated against every dependent nonseasonal process.
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995, 2nd edition: \url{https://ovvo-financial.github.io/NNS/book/})
 #' @examples
@@ -177,33 +177,47 @@ NNS.seas <- function(variable,
 }
 
 
-# Jackknife variance of a lag's score: the length-weighted mean over the lag's
-# component series of the Gini mean difference, divided by the component mean
-# on one-sided data, as scored in NNS_seas_cpp. Components are treated as
-# independent. Each component's delete-one values come from its sorted row sums
+# Delete-one scores of a lag: the length-weighted mean over the lag's component
+# series of the Gini mean difference, divided by the component mean on one-sided
+# data, as scored in NNS_seas_cpp, recomputed without each observation in turn.
+# Removing observation i changes only its own component (length k -> k - 1) and
+# the total length (n -> n - 1); component membership is unchanged. Each
+# component's delete-one values come from its sorted row sums
 # sum_j |s_i - s_j| = s_i (2 i - k) + total - 2 cumsum_i in O(k log k).
-.nns_seas_score_var <- function(x, m, use_cv) {
+# Returns NULL if a component has fewer than 3 observations.
+.nns_seas_delete_one <- function(x, m, use_cv) {
   n <- length(x)
-  comp <- split(x, (seq_len(n) - 1L) %% m)
-  v <- vapply(comp, function(z) {
-    k <- length(z)
-    if (k < 3L) return(NA_real_)
-    s <- sort(z)
-    i <- seq_len(k)
+  members <- split(seq_len(n), (seq_len(n) - 1L) %% m)
+  k <- lengths(members)
+  if (any(k < 3L)) return(NULL)
+  full <- numeric(m)
+  dropped <- vector("list", m)
+  for (j in seq_len(m)) {
+    z <- x[members[[j]]]
+    o <- order(z)
+    s <- z[o]
+    kj <- k[j]
+    i <- seq_len(kj)
     cs <- cumsum(s)
-    total <- cs[k]
-    row <- s * (2 * i - k) + total - 2 * cs
-    g_del <- (sum(row) - 2 * row) / ((k - 1) * (k - 2))
-    d_del <- if (use_cv) g_del / abs((total - s) / (k - 1)) else g_del
-    d_del[!is.finite(d_del)] <- 0
-    (k - 1) / k * sum((d_del - mean(d_del))^2)
-  }, numeric(1L))
-  sum((lengths(comp) / n)^2 * v)
+    total <- cs[kj]
+    row <- s * (2 * i - kj) + total - 2 * cs
+    g <- sum(row) / (kj * (kj - 1))
+    full[j] <- if (use_cv) { if (g == 0) 0 else g / abs(total / kj) } else g
+    g_del <- (sum(row) - 2 * row) / ((kj - 1) * (kj - 2))
+    d_del <- if (use_cv) g_del / abs((total - s) / (kj - 1)) else g_del
+    d_del[!is.finite(d_del) | g_del == 0] <- 0
+    dropped[[j]] <- d_del[order(o)]
+  }
+  weighted <- sum(k * full)
+  out <- numeric(n)
+  for (j in seq_len(m))
+    out[members[[j]]] <- (weighted - k[j] * full[j] + (k[j] - 1) * dropped[[j]]) / (n - 1)
+  out
 }
 
 # Fundamental period (#129): the smallest period that divides the lowest-
-# scoring lag b, or nearly divides it, and whose score is within z standard
-# errors of b's. A multiple of the true period has the same expected score, so
+# scoring lag b, or nearly divides it, and whose score exceeds b's by at most z
+# jackknife standard errors of the difference. A multiple of the true period has the same expected score, so
 # the minimum over many noisy, near-equal scores tends to fall on a multiple.
 .nns_seas_fundamental <- function(x, all.periods, z = 2) {
   M <- all.periods
@@ -221,11 +235,17 @@ NNS.seas <- function(variable,
   cand <- which(P >= 2L & P < b & k >= 2L &
                   (b %% P == 0L | (abs(b - k * P) <= (k + 1) / 2 & k + 1 < P)))
   if (!length(cand)) return(keep)
-  vb <- .nns_seas_score_var(x, b, use_cv)
-  if (!is.finite(vb)) return(keep)
+  # The two scores reuse every observation, so the standard error of their
+  # difference comes from paired delete-one differences.
+  db <- .nns_seas_delete_one(x, b, use_cv)
+  if (is.null(db)) return(keep)
+  n <- length(x)
   ok <- vapply(cand, function(r) {
-    vp <- .nns_seas_score_var(x, P[r], use_cv)
-    is.finite(vp) && S[r] <= S[1L] + z * sqrt(vb + vp)
+    dp <- .nns_seas_delete_one(x, P[r], use_cv)
+    if (is.null(dp)) return(FALSE)
+    diff <- dp - db
+    se <- sqrt((n - 1) / n * sum((diff - mean(diff))^2))
+    is.finite(se) && S[r] <= S[1L] + z * se
   }, logical(1L))
   if (!any(ok)) return(keep)
   r <- cand[ok][which.min(P[cand[ok]])]
