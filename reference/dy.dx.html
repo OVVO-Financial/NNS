@@ -65,6 +65,11 @@
     <p>Returns a <code>data.frame</code> of eval.point along with both 1st and 2nd derivative.</p>
     </div>
     <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p><code>eval.point = "overall"</code> returns the mean of the <code>gradient</code> column of <code>NNS.reg(x, y)$Fitted.xy</code>. Each observation receives the slope of the unsmoothed regression segment that contains it, so the result is an observation-weighted average of segment slopes, not an average of smoothed derivatives. Very short segments between nearly coincident regression points can have extreme slopes; <code>mean(dy.dx(x, y, eval.point = x)$first.derivative)</code> averages the smoothed pointwise estimates instead.</p>
+<p>Numeric evaluation points use central differences of smoothed <a href="NNS.reg.html">NNS.reg</a> estimates over five steps from 2 to <code>floor(sqrt(n))</code> typical spacings of <code>x</code>, clipped to the observed range. <code>second.derivative</code> is a second difference of those estimates, and second differences amplify noise: for <code>y = x^2</code> plus noise with an R-squared near 0.99 and n = 400, estimates of the true value 2 at three interior points had a root mean squared error of about 5, and about one in five had the wrong sign. Treat it as a descriptive diagnostic on noisy data.</p>
+    </div>
+    <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p>Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995, 2nd edition: <a href="https://ovvo-financial.github.io/NNS/book/" class="external-link">https://ovvo-financial.github.io/NNS/book/</a>)</p>
 <p>Vinod, H. and Viole, F. (2017) "Nonparametric Regression Using Clusters"  <a href="https://doi.org/10.1007/s10614-017-9713-5" class="external-link">doi:10.1007/s10614-017-9713-5</a></p>

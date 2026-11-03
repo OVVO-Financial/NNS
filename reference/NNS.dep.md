@@ -81,6 +81,12 @@ arrangements for up to six distinct values); larger cells use an
 approximation. These are properties of the cell calibration, separate
 from the 100 whole-sample permutations used by `p.value = TRUE`.
 
+Power depends on the alternative. On noisy linear relationships in small
+samples, rank-based, distance-correlation or Hoeffding tests can reject
+more often than the `p.value` permutation test of `NNS.dep`; on
+non-monotone or heteroscedastic shapes such as a circle or `y = x * e`,
+the `NNS.dep` test can reject far more often.
+
 Whole-sample shuffling assumes exchangeability of observations under the
 null. It is not an automatic test for serially dependent or clustered
 observations. The returned fields named `95% CIs` are central intervals
