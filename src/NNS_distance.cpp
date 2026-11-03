@@ -144,7 +144,8 @@ SEXP NNS_distance_cpp(NumericMatrix X,
   
   std::vector<double> exw(ll, 0.0);
   for (int i = 0; i < ll; ++i){
-    double dens = ::Rf_dexp((double)(i+1), 1.0/(double)ll, 0);
+    // Rf_dexp takes the scale, so this is rate = 1/ll
+    double dens = ::Rf_dexp((double)(i+1), (double)ll, 0);
     exw[i] = std::isfinite(dens) ? dens : 0.0;
   }
   double exsum = std::accumulate(exw.begin(), exw.end(), 0.0);
@@ -466,7 +467,7 @@ NumericMatrix NNS_distance_path_parallel_cpp(NumericMatrix RPM,
     uniW[k].assign(k, 1.0 / (double)k);
     
     std::vector<double> ex(k);
-    for (int r = 1; r <= k; ++r) ex[r-1] = ::Rf_dexp((double)r, 1.0 / (double)k, 0);
+    for (int r = 1; r <= k; ++r) ex[r-1] = ::Rf_dexp((double)r, (double)k, 0);
     double exs = std::accumulate(ex.begin(), ex.end(), 0.0);
     if (exs > 0) for (double &v: ex) v /= exs; else std::fill(ex.begin(), ex.end(), 0.0);
     expW[k] = std::move(ex);
@@ -671,7 +672,7 @@ NumericVector NNS_distance_path_single_parallel_cpp(NumericMatrix RPM,
   std::vector<double> uniW(k, 1.0 / (double)k);
   
   std::vector<double> expW(k);
-  for (int r = 1; r <= k; ++r) expW[r - 1] = ::Rf_dexp((double)r, 1.0 / (double)k, 0);
+  for (int r = 1; r <= k; ++r) expW[r - 1] = ::Rf_dexp((double)r, (double)k, 0);
   double exs = std::accumulate(expW.begin(), expW.end(), 0.0);
   if (exs > 0.0) for (double &v : expW) v /= exs;
   else std::fill(expW.begin(), expW.end(), 0.0);
