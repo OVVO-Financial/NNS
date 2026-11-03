@@ -421,7 +421,7 @@ NNS.ARMA.optim <- function(variable,
   
   
   # Smooth the training window only, so the validation score never sees the validation data.
-  regressed_training <- NNS.reg(1:training.set, variable[1:training.set], plot = FALSE, smooth = TRUE)$Fitted.xy$y.hat
+  regressed_training <- NNS.reg(1:training.set, variable[1:training.set], type = "REG", plot = FALSE, smooth = TRUE)$Fitted.xy$y.hat
   
   predicted <- NNS.ARMA(regressed_training, training.set = training.set, h = h_eval, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, weights = nns.weights, shrink = TRUE)
   
@@ -469,7 +469,7 @@ NNS.ARMA.optim <- function(variable,
     model.results <- final.predicted
   } else {
     if(is.null(h)) h <- h_oos
-    final.variable <- if(nns.regress) NNS.reg(1:n, OV, plot = FALSE, smooth = TRUE)$Fitted.xy$y.hat else OV
+    final.variable <- if(nns.regress) NNS.reg(1:n, OV, type = "REG", plot = FALSE, smooth = TRUE)$Fitted.xy$y.hat else OV
     raw.results <- NNS.ARMA(final.variable, h = h_oos, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = results.negative.values, weights = nns.weights, shrink = nns.shrink)
     model.results <- raw.results - bias
   }

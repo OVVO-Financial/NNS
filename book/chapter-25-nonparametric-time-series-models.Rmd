@@ -421,11 +421,13 @@ A brief clarification of the mean-based option is useful. In some component seri
 ```r
 # Univariate nonlinear ARMA: a sine of period 2 * pi * 8 (about 50) in noise
 set.seed(123)
-z <- as.numeric(scale(sin(1:480/8) + rnorm(480, sd=.35)))
+raw_series <- sin(seq_len(480) / 8) + rnorm(480, sd = .35)
 
-# Select candidate periods using only the optimizer's training prefix.
+# Estimate scaling and select periods using only the training prefix.
+validation_origin <- floor(.8 * length(raw_series))
+training <- raw_series[seq_len(validation_origin)]
+z <- (raw_series - mean(training)) / sd(training)
 # z crosses zero, so component dispersions are compared directly.
-validation_origin <- floor(.8 * length(z))
 seasonal_period <- NNS.seas(z[seq_len(validation_origin)], plot = FALSE)
 head(seasonal_period$all.periods)
 
@@ -442,11 +444,12 @@ from nns import nns_seas, nns_arma_optim
 
 # Univariate nonlinear ARMA
 rng = np.random.default_rng()
-z = np.sin(np.arange(1, 481) / 8) + rng.normal(scale=0.35, size=480)
-z = (z - z.mean()) / z.std(ddof=1)
+raw_series = np.sin(np.arange(1, 481) / 8) + rng.normal(scale=0.35, size=480)
 
-# Select candidate periods from the training prefix
-validation_origin = int(.8 * len(z))
+# Estimate scaling and select periods from the training prefix
+validation_origin = int(.8 * len(raw_series))
+training = raw_series[:validation_origin]
+z = (raw_series - training.mean()) / training.std(ddof=1)
 seasonal_period = nns_seas(z[:validation_origin], plot=False)
 seasonal_period["all.periods"]
 
@@ -456,8 +459,20 @@ nns_arma_optim(z, h=48, training_set=validation_origin,
 ```
 
 
+The figure below was regenerated with the current seasonality, recursion, and
+validation rules. The complete executable R source is
+`book/scripts/ch25_sine_example.R`. From the repository root, run
+`Rscript book/scripts/ch25_sine_example.R book/images/ch25_uni_ts.png` to
+regenerate the result and figure; omitting the output path prints the result only.
+The script also records `sessionInfo()`. The period scan and all preprocessing
+use the training prefix; a whole-series standardization would use later values.
+For this zero-crossing series, the historical coefficient-of-variation column
+names contain Gini dispersions. Standardizing the prefix's standard deviation
+to one does not make its Gini dispersion one. The optimizer's score is internal
+validation, not an independent final test.
+
 <center>
-![Figure 25.1. A univariate NNS forecast with fitted trajectory and forecast bands; the example above uses `NNS.ARMA.optim(..., h = 48)`.](images/ch25_uni_ts.png)
+![Figure 25.1. Current sine-series example, with scaling and period selection fitted at the internal validation origin. Dashed predictions cover the internal validation suffix; the solid extension is the 48-step forecast. The shaded residual-quantile bands require a separate future-coverage assessment.](images/ch25_uni_ts.png)
 </center>
 
 

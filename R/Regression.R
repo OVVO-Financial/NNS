@@ -23,12 +23,15 @@
 .nns_reg_type <- function(type, y) {
   if (!is.null(type)) {
     if (!is.character(type) || length(type) != 1L || is.na(type)) {
-      stop("[type] must be NULL, 'CLASS', or 'XONLY'.", call. = FALSE)
+      stop("[type] must be NULL, 'REG', 'CLASS', or 'XONLY'.", call. = FALSE)
     }
     type <- tolower(type)
-    if (!type %in% c("class", "xonly")) {
-      stop("[type] must be NULL, 'CLASS', or 'XONLY'.", call. = FALSE)
+    if (!type %in% c("reg", "class", "xonly")) {
+      stop("[type] must be NULL, 'REG', 'CLASS', or 'XONLY'.", call. = FALSE)
     }
+  }
+  if (identical(type, "reg") && !is.numeric(y)) {
+    stop("[type = 'REG'] requires a numeric response.", call. = FALSE)
   }
   
   auto.class <- is.factor(y) || is.character(y) || is.logical(y) ||
@@ -58,7 +61,7 @@
   }
   
   list(
-    type = if (is.class) "class" else if (is.xonly) "xonly" else NULL,
+    type = if (is.class) "class" else if (is.xonly) "xonly" else type,
     is.class = is.class,
     is.xonly = is.xonly,
     y = y.numeric,
@@ -551,6 +554,14 @@
       stop(sprintf("A numeric [dim.red.method] must contain exactly %d finite coefficients.", p),
            call. = FALSE)
     }
+    if (!is.null(names(dim.red.method))) {
+      if (anyDuplicated(names(dim.red.method)) ||
+          !setequal(names(dim.red.method), colnames(x))) {
+        stop(paste0("Named numeric [dim.red.method] coefficients must exactly ",
+                    "match the encoded design columns."), call. = FALSE)
+      }
+      dim.red.method <- dim.red.method[colnames(x)]
+    }
     method <- "numeric"
   }
   
@@ -671,9 +682,9 @@
 #' @param y a numeric or factor vector with compatible dimensions to \code{x}.
 #' @param factor.2.dummy logical; \code{TRUE} (default) Automatically augments variable matrix with numerical dummy variables based on the levels of factors.
 #' @param order integer; Controls the number of partial moment quadrant means.  Users are encouraged to try different \code{(order = ...)} integer settings with \code{(noise.reduction = "off")}.  \code{(order = "max")} retains distinct predictor locations. A perfect training fit requires compatible responses at tied locations and interpolation at those locations; duplicate predictors with different responses cannot all be interpolated.
-#' @param dim.red.method options: ("cor", "NNS.dep", "NNS.caus", "all", "equal", \code{numeric vector}, NULL) method for determining synthetic X* coefficients (per Dana and Dawes (2004)).  Selection of a method automatically engages the dimension reduction regression.  The default is \code{NULL} for full multivariate regression.  \code{(dim.red.method = "NNS.dep")} uses \link{NNS.dep} for nonlinear dependence weights, while \code{(dim.red.method = "NNS.caus")} uses \link{NNS.caus} for directional association weights.  \code{(dim.red.method = "cor")} uses Spearman rank correlation for weights.  \code{(dim.red.method = "all")} averages all methods for further feature engineering.  \code{(dim.red.method = "equal")} uses unit weights.  Alternatively, user can specify a numeric vector of coefficients.
+#' @param dim.red.method options: ("cor", "NNS.dep", "NNS.caus", "all", "equal", \code{numeric vector}, NULL) method for determining synthetic X* coefficients (per Dana and Dawes (2004)).  Selection of a method automatically engages the dimension reduction regression.  The default is \code{NULL} for full multivariate regression.  \code{(dim.red.method = "NNS.dep")} uses \link{NNS.dep} for nonlinear dependence weights, while \code{(dim.red.method = "NNS.caus")} uses \link{NNS.caus} for directional association weights.  \code{(dim.red.method = "cor")} uses Spearman rank correlation for weights.  \code{(dim.red.method = "all")} averages all methods for further feature engineering.  \code{(dim.red.method = "equal")} uses unit weights.  Alternatively, user can specify a numeric vector of coefficients. Named vectors must exactly match the encoded predictor columns and are matched by name; unnamed vectors follow encoded column order.
 #' @param tau options("ts", NULL); \code{NULL}(default) To be used in conjunction with \code{(dim.red.method = "NNS.caus")} or \code{(dim.red.method = "all")}.  If the regression is using time-series data, set \code{(tau = "ts")} to use the time-series lag convention.
-#' @param type \code{NULL} (default).  To perform a classification, set to \code{(type = "CLASS")}.  Like a logistic regression, it is not necessary for target variable of two classes e.g. [0, 1]: a numeric response with exactly the values 0 and 1, or a factor, character or logical response, is classified automatically.  \code{(type = "XONLY")} is valid only for a single predictor: it keeps the default x-only partition but turns off the automatic classification.
+#' @param type \code{NULL} (default).  To perform a classification, set to \code{(type = "CLASS")}.  Like a logistic regression, it is not necessary for target variable of two classes e.g. [0, 1]: a numeric response with exactly the values 0 and 1, or a factor, character or logical response, is classified automatically.  Use \code{type = "REG"} to fit a numeric response as regression, including a two-valued response, with one or more predictors. \code{(type = "XONLY")} is the single-predictor regression alias and keeps the default x-only partition.
 #' @param point.est a numeric or factor vector with compatible dimensions to \code{x}.  Returns the fitted value \code{y.hat} for any value of \code{x}.  Columns are matched to \code{x} by name when the two share the same predictor names, and positionally when they share no names at all (as in \code{cbind(test.x_1, test.x_2)} against \code{cbind(x_1, x_2)}).  Names that only partly overlap the training predictors are ambiguous and return an error.
 #' @param location Sets the legend location within the plot, per the \code{x} and \code{y} co-ordinates used in base graphics \link{legend}.
 #' @param return.values logical; \code{TRUE} (default), set to \code{FALSE} in order to only display a regression plot and call values as needed.
@@ -734,7 +745,7 @@
 #' 
 #' The default partition order combines a finite-partition dependence score with the average of the duplicated-predictor copula score under both response orientations. This complexity heuristic is invariant to reflecting the response; the underlying directional dependence and copula definitions are unchanged. A supplied order bypasses this heuristic.
 #' 
-#' Univariate regression linearly interpolates the selected regression points and extends the first or last segment beyond their range (unless a smoothing spline is requested). Endpoint slopes can be unstable with sparse or noisy boundary points. Multivariate distance weighting is a weighted average of regression-point responses, so it does not automatically continue a trend outside the training support. Neither construction supplies a general extrapolation guarantee. Purely categorical predictors use exact observed joint cells; unobserved joint combinations use the selected distance rule.
+#' Univariate regression linearly interpolates the selected regression points and extends the first or last segment beyond their range (unless a smoothing spline is requested). Endpoint slopes can be unstable with sparse or noisy boundary points. Multivariate distance weighting is a weighted average of regression-point responses, so it does not automatically continue a trend outside the training support. Neither construction supplies a general extrapolation guarantee. Purely categorical predictors use exact observed joint cells; unobserved joint combinations use the selected distance rule. A coordinate with exactly two observed values retains both terminal cells, including a dummy column in a mixed design. Other finite-order numeric coordinates retain interval cells; \code{order = "max"} uses exact joint support.
 #' 
 #' Classification forms an indicator for each observed class, retains the empirical class frequencies in each predictor cell, and interpolates or distance-weights those probability vectors. Class labels never enter numeric interpolation. \code{Point.probabilities}, \code{Fitted.probabilities}, and \code{RPM.probabilities} expose the corresponding vectors. Tied class decisions follow first appearance in the training response. Factor and character responses retain numeric output codes with \code{class.levels}; numeric responses retain their supplied values. For dimension reduction, one signed NNS index is fitted per class indicator, and the resulting probabilities are normalized across classes; \code{equation} is then a list indexed by class. \code{confidence.interval} returns \code{Prediction.set}, the smallest leading set of classes attaining the requested estimated probability mass. These are descriptive probability sets, not calibrated coverage guarantees; nominal classes have no numeric prediction interval.
 #'
@@ -875,7 +886,7 @@ NNS.reg <- function(x, y,
       factor.2.dummy = FALSE,
       order = order,
       n.best = n.best,
-      type = if (task$is.class) "class" else NULL,
+      type = "REG",
       point.est = encoded$point.est,
       point.only = point.only,
       plot = plot,

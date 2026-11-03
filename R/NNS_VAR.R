@@ -333,14 +333,14 @@ NNS.VAR <- function(variables,
       # machinery has >1 column; strip cbind's auto-generated column names so the
       # duplicate labels do not trip NNS.stack's unique-predictor-name guard.
       multi <- NNS.stack(unname(cbind(selected_variable[,1], selected_variable[,1])), selected_variable[,2],
-                         order = NULL, ncores = 1, status = FALSE, folds = 5,
+                         order = NULL, type = "REG", ncores = 1, status = FALSE, folds = 5,
                          IVs.test = unname(cbind(missing_index, missing_index)), method = 1)$stack
       variable_interpolation[missing_index] <- as.numeric(multi)
       
     } else {
       # interior NA(s) only: fit on index, but fill ONLY the missing indices (no global smoothing)
       fitted_missing <- NNS.reg(selected_variable[,1], selected_variable[,2],
-                                order = "max", ncores = 1,
+                                order = "max", type = "REG", ncores = 1,
                                 point.est = missing_index, plot = FALSE, point.only = TRUE)$Point.est
       if (length(missing_index)) variable_interpolation[missing_index] <- as.numeric(fitted_missing)
     }
@@ -487,7 +487,7 @@ NNS.VAR <- function(variables,
         selected_fold$IVs.test <- selected_fold$IVs.test[, rel_vars, drop = FALSE]
       }
       NNS.stack(IVs.train = IV[, rel_vars, drop = FALSE],
-                DV.train = DV,
+                DV.train = DV, type = "REG",
                 IVs.test = IV.test[, rel_vars, drop = FALSE],
                 ts.test = ts,
                 folds = 1,
@@ -636,7 +636,7 @@ NNS.VAR <- function(variables,
     if (dim.red.method == "cor") {
       suppressWarnings(cor(data.matrix(cbind(y, x)), method = "spearman"))[-1, 1]
     } else {
-      suppressWarnings(NNS.reg(x, y, dim.red.method = dim.red.method, plot = FALSE, residual.plot = FALSE,
+      suppressWarnings(NNS.reg(x, y, type = "REG", dim.red.method = dim.red.method, plot = FALSE, residual.plot = FALSE,
                                order = NULL, ncores = 1, point.only = TRUE)$equation$Coefficient[1:n])
     }
   }
@@ -653,7 +653,7 @@ NNS.VAR <- function(variables,
   if (n == 2) var.cutoffs <- unique(c(var.cutoffs, 0))
   
   nns.ord <- sapply(var.cutoffs, function(threshold) {
-    predicted <- suppressWarnings(NNS.reg(CV.IVs.train, CV.DV.train, point.est = CV.IVs.test,
+    predicted <- suppressWarnings(NNS.reg(CV.IVs.train, CV.DV.train, type = "REG", point.est = CV.IVs.test,
                                           dim.red.method = dim.red.method, threshold = threshold,
                                           plot = FALSE, residual.plot = FALSE, order = NULL,
                                           ncores = 1, point.only = TRUE)$Point.est)
@@ -667,7 +667,7 @@ NNS.VAR <- function(variables,
   # the fitted relevance coefficients used in the next tuning stage.
   selection_IVs <- if (is.null(.validation)) IVs.train else CV.IVs.train
   selection_DV <- if (is.null(.validation)) DV.train else CV.DV.train
-  coef <- suppressWarnings(NNS.reg(selection_IVs, selection_DV, dim.red.method = dim.red.method,
+  coef <- suppressWarnings(NNS.reg(selection_IVs, selection_DV, type = "REG", dim.red.method = dim.red.method,
                                    threshold = threshold, plot = FALSE, residual.plot = FALSE,
                                    order = NULL, ncores = 1, point.only = TRUE)$equation$Coefficient[1:n])
   relevant_vars <- which(coef != 0)

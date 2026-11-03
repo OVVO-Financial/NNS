@@ -233,7 +233,7 @@ NNS.ARMA <- function(variable,
           
           last.y <- y[length(y)]
           
-          reg.points <- NNS.reg(x, y, return.values = FALSE, plot = FALSE, multivariate.call = TRUE)
+          reg.points <- NNS.reg(x, y, type = "REG", return.values = FALSE, plot = FALSE, multivariate.call = TRUE)
           
           reg.points <- reg.points[complete.cases(reg.points), ]
           

@@ -511,6 +511,6 @@ If the user is so motivated, detailed arguments further examples are provided wi
 
 -   [Nonlinear Nonparametric Statistics: Using Partial Moments](https://ovvo-financial.github.io/NNS/book/)
 
--   [Nonlinear Scaling Normalization with NNS](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Normalization.pdf)
+-   [Nonlinear Scaling Normalization with NNS](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Normalization.pdf) (archived PDF; see the [current corrections and editable companion](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/example-corrections.md) for the normalization qualifications).
 
 -   [Distributional Equivalence in GBM: Outcome Transformation for Efficient Risk-Neutral Pricing](https://doi.org/10.2139/ssrn.5742907)

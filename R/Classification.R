@@ -35,11 +35,14 @@
                             dist, ncores, categorical = FALSE) {
   X <- as.matrix(X)
   p <- ncol(X)
+  exact.coordinate <- vapply(seq_len(p), function(j) {
+    categorical || identical(order, "max") || length(unique(X[, j])) <= 2L
+  }, logical(1))
   strength <- vapply(seq_len(p), function(j) {
     .nns_class_strength(X[, j], probabilities)
   }, numeric(1))
   boundaries <- lapply(seq_len(p), function(j) {
-    if (identical(order, "max") || categorical) return(sort(unique(X[, j])))
+    if (exact.coordinate[j]) return(sort(unique(X[, j])))
     depth <- if (is.null(order)) {
       d <- max(1L, as.integer(floor(strength[j] * 10 + .5)))
       if (nrow(X) < 100L) d <- max(1L, as.integer(floor(d / 2)))
@@ -49,7 +52,9 @@
                                    noise.reduction = "mean", is.class = FALSE)
   })
   id.parts <- lapply(seq_len(p), function(j) {
-    if (identical(order, "max") || categorical) match(X[, j], boundaries[[j]]) else
+    # A two-valued coordinate already has two terminal cells. Treating those
+    # coordinates as interval endpoints would merge both into the same cell.
+    if (exact.coordinate[j]) match(X[, j], boundaries[[j]]) else
       findInterval(X[, j], boundaries[[j]], rightmost.closed = TRUE)
   })
   ids <- do.call(paste, c(id.parts, sep = "."))

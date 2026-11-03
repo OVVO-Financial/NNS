@@ -162,6 +162,9 @@
 .nns_mreg_partition_matrix <- function(X, y, order, noise.reduction, is.class) {
   p <- ncol(X)
   boundaries <- vector("list", p)
+  binary.coordinate <- vapply(seq_len(p), function(j) {
+    length(unique(X[, j])) == 2L
+  }, logical(1))
 
   # Exact duplicate predictor columns share one partition calculation.
   reps <- if (isTRUE(getOption("NNS.native.mreg", TRUE))) {
@@ -180,9 +183,9 @@
       next
     }
 
-    if (identical(order, "max")) {
-      # Maximum order is the observed coordinate support itself.  No recursive
-      # partitioning is required.
+    if (identical(order, "max") || binary.coordinate[j]) {
+      # Maximum order and binary coordinates supply their observed support
+      # directly. No recursive partitioning is required.
       boundaries[[j]] <- sort(unique(X[, j]))
     } else {
       boundaries[[j]] <- .nns_reg_partition_points_fast(
@@ -201,23 +204,20 @@
   }))
   colnames(rhs) <- colnames(X)
 
-  # order = "max" is not an interval-boundary problem.  Each distinct observed
-  # coordinate is a regression-point coordinate, so use its exact rank.  This
-  # preserves a separate ID for the maximum value rather than folding it into
-  # the preceding interval via rightmost.closed = TRUE.
-  id.parts <- if (identical(order, "max")) {
-    lapply(seq_len(p), function(j) {
+  # Maximum order uses exact support IDs. A binary coordinate also exhausts
+  # its support after one split, so its two atoms must remain separate. Other
+  # finite-order boundaries retain their ordinary rightmost-closed cells.
+  id.parts <- lapply(seq_len(p), function(j) {
+    if (identical(order, "max") || binary.coordinate[j]) {
       match(X[, j], boundaries[[j]])
-    })
-  } else {
-    lapply(seq_len(p), function(j) {
+    } else {
       findInterval(
         X[, j], boundaries[[j]],
         left.open = FALSE,
         rightmost.closed = TRUE
       )
-    })
-  }
+    }
+  })
 
   ids <- do.call(paste, c(as.data.frame(id.parts), sep = "."))
   list(rhs = rhs, ids = ids, boundaries = boundaries)
@@ -367,11 +367,11 @@ NNS.M.reg <- function(X_n, Y, factor.2.dummy = TRUE, order = NULL,
   ncores <- .nns_mreg_validate_cores(ncores)
   
   if (!is.null(type) && (!is.character(type) || length(type) != 1L ||
-                         is.na(type) || tolower(type) != "class")) {
-    stop("NNS.M.reg [type] must be NULL or 'CLASS'.", call. = FALSE)
+                         is.na(type) || !tolower(type) %in% c("class", "reg"))) {
+    stop("NNS.M.reg [type] must be NULL, 'REG', or 'CLASS'.", call. = FALSE)
   }
   Y <- .nns_reg_response_vector(Y)
-  task <- .nns_reg_type(if (is.null(type)) NULL else "CLASS", Y)
+  task <- .nns_reg_type(type, Y)
   is.class <- task$is.class
   
   encoded <- .nns_reg_encode_predictors(X_n, point.est, factor.2.dummy)

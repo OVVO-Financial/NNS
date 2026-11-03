@@ -73,6 +73,30 @@ Permutation quantiles are null reference intervals under exchangeability, not
 population-dependence confidence intervals. Serial and clustered sampling need
 an appropriate null and resampling design.
 
+## Historical independent three-variable example
+
+Page 9 of *Nonlinear Correlation and Dependence Using NNS* prints
+`0.09571785` for the following seeded example. That historical value is stale;
+the current implementation returns approximately `0.19784524`. The executable
+chunk below recomputes the result from the installed version rather than
+carrying the PDF's output forward.
+
+```{r independent-three-variable-copula}
+set.seed(123)
+x <- rnorm(1000)
+y <- rnorm(1000)
+z <- rnorm(1000)
+NNS.copula(cbind(x, y, z), plot = FALSE)
+```
+
+The three simulated variables are independent by construction. A nonzero
+finite-sample score does not contradict that construction, and it is not a
+p-value. The PDF's population reference of $2(1/2)^3=1/4$ concerns the combined
+all-below and all-above **event mass** for independent continuous variables at
+their marginal medians. It is not the expected degree-one copula score or a
+universal independence threshold. Mean benchmarks have this median property
+for the symmetric normal populations here, not for every distribution.
+
 # Positive scaling and association
 
 Companion to *Normalization*. Multiplication by positive constants preserves

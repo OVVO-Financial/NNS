@@ -91,10 +91,10 @@ test_that("NNS.stack scores the multivariate ALL candidate with NNS.reg(n.best =
   for (s in frame$splits) {
     design <- frame$.method1_design_for_split(s$train, s$validation)
     fit <- NNS.reg(design$train, frame$y_fit_all[s$train], point.est = design$test,
-                   n.best = "all", order = frame$order, dist = frame$dist, type = NULL,
+                   n.best = "all", order = frame$order, dist = frame$dist, type = "REG",
                    factor.2.dummy = FALSE, plot = FALSE, residual.plot = FALSE,
                    ncores = 1, point.only = TRUE)
-    oof[s$validation] <- fit$Point.est - frame$response_offset
+    oof[s$validation] <- fit$Point.est
   }
   expect_equal(frame$candidate_raws$all, oof, tolerance = 1e-12)
   expect_equal(unname(frame$candidate_scores["all"]), sum((oof - y)^2), tolerance = 1e-12)
@@ -111,10 +111,10 @@ test_that("NNS.stack scores the univariate ALL candidate with the deployed NNS.r
   for (s in frame$splits) {
     design <- frame$.method1_design_for_split(s$train, s$validation)
     fit <- NNS.reg(design$train[[1L]], frame$y_fit_all[s$train], point.est = design$test[[1L]],
-                   n.best = "all", order = frame$order, dist = frame$dist, type = NULL,
+                   n.best = "all", order = frame$order, dist = frame$dist, type = "REG",
                    factor.2.dummy = FALSE, plot = FALSE, residual.plot = FALSE,
                    ncores = 1, point.only = TRUE)
-    oof[s$validation] <- fit$Point.est - frame$response_offset
+    oof[s$validation] <- fit$Point.est
   }
   expect_equal(frame$candidate_raws$all, oof, tolerance = 1e-12)
   expect_equal(unname(frame$candidate_scores["all"]), sum((oof - y)^2), tolerance = 1e-12)

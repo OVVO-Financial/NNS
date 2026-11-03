@@ -299,7 +299,7 @@ NNS.CDF <- function(variable,
           hi <- min(n, findInterval(x[i], x) + 1L)
         }
         (F[hi]-F[lo])/(x[hi]-x[lo])},numeric(1))
-      fit <- NNS.reg(x, pmax(proxy,1e-10), order=NULL, n.best=1, point.est=target, plot=FALSE)
+      fit <- NNS.reg(x, pmax(proxy,1e-10), type="REG", order=NULL, n.best=1, point.est=target, plot=FALSE)
       DT[[2]] <- pmin(pmax(fit$Fitted$y.hat / pmax(1-F,1e-10),0),1e6)
     }
     if (type=="cumulative hazard") DT[[2]] <- pmax(-log(pmax(1-pval,1e-10)),0)

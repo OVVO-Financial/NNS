@@ -1,15 +1,9 @@
 ## ----setup, include=FALSE, message=FALSE--------------------------------------
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, error = FALSE, cache = FALSE)
 library(NNS)
 options(mc.cores = 1)
 RcppParallel::setThreadOptions(numThreads = 1)
 Sys.setenv("OMP_THREAD_LIMIT" = 1)
-
-
-## ----setup2, message=FALSE, warning = FALSE-----------------------------------
-library(NNS)
-require(knitr)
-require(rgl)
 
 
 ## ----linear,fig.width=5,fig.height=3,fig.align = "center", warning=FALSE------
@@ -24,16 +18,16 @@ nns_lin = NNS.ARMA(AirPassengers,
 sqrt(mean((nns_lin - tail(AirPassengers, 44)) ^ 2))
 
 
-## ----nonlinear,fig.width=5,fig.height=3,fig.align = "center", eval = FALSE----
-## nns_nonlin = NNS.ARMA(AirPassengers,
-##                h = 44,
-##                training.set = 100,
-##                method = "nonlin",
-##                plot = FALSE,
-##                seasonal.factor = 12,
-##                seasonal.plot = FALSE)
-##
-## sqrt(mean((nns_nonlin - tail(AirPassengers, 44)) ^ 2))
+## ----nonlinear,fig.width=5,fig.height=3,fig.align = "center"------------------
+nns_nonlin = NNS.ARMA(AirPassengers,
+               h = 44,
+               training.set = 100,
+               method = "nonlin",
+               plot = TRUE,
+               seasonal.factor = 12,
+               seasonal.plot = FALSE)
+
+sqrt(mean((nns_nonlin - tail(AirPassengers, 44)) ^ 2))
 
 
 ## ----seasonal-test, eval=TRUE-------------------------------------------------
@@ -63,21 +57,35 @@ sqrt(mean((selected - tail(AirPassengers, 44))^2))
 NNS.seas(training, modulo = 12, plot = FALSE)
 
 
-## ----best optim, eval=FALSE---------------------------------------------------
-## nns.optimal = NNS.ARMA.optim(training,
-##                              training.set = 80, h = 44,
-##                              seasonal.factor = seq(12, 60, 6),
-##                              obj.fn = expression( sqrt(mean((predicted - actual)^2)) ),
-##                              objective = "min",
-##                              pred.int = .95, plot = TRUE)
-##
-## nns.optimal
+## ----optimizer, fig.width=6,fig.height=4,fig.align="center"-------------------
+optimizer_periods <- c(12L, 18L, 24L)
+nns.optimal <- NNS.ARMA.optim(training,
+                              training.set = inner_n, h = 44,
+                              seasonal.factor = optimizer_periods,
+                              obj.fn = expression(sqrt(mean((predicted - actual)^2))),
+                              objective = "min",
+                              ncores = 1, print.trace = FALSE,
+                              pred.int = .95, plot = TRUE)
+
+nns.optimal
 
 
-## ----extension,results='hide',fig.width=5,fig.height=3,fig.align = "center", eval=FALSE----
-## NNS.ARMA.optim(AirPassengers,
-##                 seasonal.factor = seq(12, 60, 6),
-##                 obj.fn = expression( sqrt(mean((predicted - actual)^2)) ),
-##                 objective = "min",
-##                 pred.int = .95, h = 50, plot = TRUE)
+## ----optimizer-test-score-----------------------------------------------------
+c(internal_validation_RMSE = nns.optimal$obj.fn,
+  raw_reserved_test_RMSE = sqrt(mean((nns.optimal$raw.results - tail(AirPassengers, 44))^2)),
+  corrected_reserved_test_RMSE = sqrt(mean((nns.optimal$results - tail(AirPassengers, 44))^2)))
+
+
+## ----extension,fig.width=6,fig.height=4,fig.align="center"--------------------
+extended <- NNS.ARMA.optim(AirPassengers,
+                            seasonal.factor = seq(12, 36, 6),
+                            obj.fn = expression(sqrt(mean((predicted - actual)^2))),
+                            objective = "min",
+                            ncores = 1, print.trace = FALSE,
+                            pred.int = .95, h = 50, plot = TRUE)
+
+head(data.frame(horizon = seq_along(extended$results),
+                forecast = extended$results,
+                lower = extended$lower.pred.int,
+                upper = extended$upper.pred.int))
 

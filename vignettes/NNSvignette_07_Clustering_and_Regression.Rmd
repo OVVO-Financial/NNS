@@ -21,7 +21,6 @@ Sys.setenv("OMP_THREAD_LIMIT" = 1)
 ```{r setup2, message=FALSE, warning=FALSE}
 library(NNS)
 require(knitr)
-require(rgl)
 ```
 
 
@@ -31,7 +30,7 @@ Below are some examples demonstrating unsupervised learning with NNS clustering 
 ## NNS Partitioning <span style="color:red">`NNS.part()`</span>
 **`NNS.part`** is both a partitional and hierarchical clustering method.  `NNS` iteratively partitions the joint distribution into partial moment quadrants, and then assigns a quadrant identification (1:4) at each partition.
 
-**`NNS.part`** returns a `data.frame` of observations along with their final quadrant identification.  It also returns the regression points, which are the quadrant means used in **`NNS.reg`**.
+**`NNS.part`** returns a `data.frame` of observations along with their final quadrant identification.  It also returns regression points that summarize observations within occupied cells. Their location follows the chosen reduction rule; these points support the subsequent **`NNS.reg`** fit.
 ```{r linear}
 x = seq(-5, 5, .05); y = x ^ 3
 
@@ -40,7 +39,7 @@ for(i in 1 : 4){NNS.part(x, y, order = i, Voronoi = TRUE, obs.req = 0)}
 
 
 ### X-only Partitioning
-**`NNS.part`** offers a partitioning based on $x$ values only **`NNS.part(x, y, type = "XONLY", ...)`**, using the entire bandwidth in its regression point derivation, and shares the same limit condition as partitioning via both $x$ and $y$ values.
+**`NNS.part`** offers a partitioning based on $x$ values only **`NNS.part(x, y, type = "XONLY", ...)`**, using the response observations within each predictor cell to form regression points. Consistency requires suitable shrinking cells and growing cell occupancy; a fixed order or occupancy cutoff alone does not establish those conditions.
 ```{r x part,results='hide'}
 for(i in 1 : 4){NNS.part(x, y, order = i, type = "XONLY", Voronoi = TRUE)}
 ```
@@ -52,13 +51,13 @@ NNS.part(x,y,order = 4, type = "XONLY")
 
 ## Clusters Used in Regression
 The right column of plots shows the corresponding regression (plus endpoints and central point) for the order of `NNS` partitioning.
-```{r depreg},results='hide'}
+```{r depreg,results='hide'}
 for(i in 1 : 3){NNS.part(x, y, order = i, obs.req = 0, Voronoi = TRUE, type = "XONLY") ; NNS.reg(x, y, order = i, ncores = 1)}
 ```
 
 
 # NNS Regression `NNS.reg()`
-**`NNS.reg`** can fit any $f(x)$, for both uni- and multivariate cases.  **`NNS.reg`** returns a self-evident list of values provided below.
+**`NNS.reg`** estimates nonlinear relationships in univariate and multivariate settings using partition summaries and interpolation or distance weighting. Its fit depends on the observed support, selected resolution, and reduction rule. The examples below show its main outputs. Set `type = "REG"` when a numeric response should be treated as regression even if its values could trigger automatic classification.
 
 ## Univariate:
 ```{r nonlinear,fig.width=5,fig.height=3,fig.align = "center"}
@@ -79,45 +78,53 @@ NNS.reg(z, g, order = "max", plot = FALSE, ncores = 1)
 
 
 ## NNS Dimension Reduction Regression
-**`NNS.reg`** also provides a dimension reduction regression by including a parameter **`NNS.reg(x, y, dim.red.method = "cor", ...)`**.  Reducing all regressors to a single dimension using the returned equation **`NNS.reg(..., dim.red.method = "cor", ...)$equation`**.
-```{r nonlinear_class,fig.width=5,fig.height=3,fig.align = "center", message = FALSE}
-NNS.reg(iris[ , 1 : 4], iris[ , 5], dim.red.method = "cor", location = "topleft", ncores = 1)$equation
+`dim.red.method = "cor"` builds a signed synthetic predictor from the selected correlations. For a continuous response, `$equation` reports its coefficients and denominator. The response is fitted as a nonlinear function of that index; the index itself is not a linear prediction equation for the response.
+
+```{r dimension_reduction,fig.width=5,fig.height=3,fig.align="center"}
+regression_x <- iris[, 2:4]
+regression_y <- iris$Sepal.Length
+reduced <- NNS.reg(regression_x, regression_y, dim.red.method = "cor",
+                   plot = FALSE, ncores = 1)
+reduced$equation
 ```
 
-```{r nonlinear_class2,fig.width=5,fig.height=3,fig.align = "center", message = FALSE, echo=FALSE}
-a = NNS.reg(iris[ , 1 : 4], iris[ , 5], dim.red.method = "cor", location = "topleft", ncores = 1, plot = FALSE)$equation
-```
-Thus, our model for this regression would be:
-$$Species = \frac{`r round(a$Coefficient[1],3)`*Sepal.Length `r round(a$Coefficient[2],3)`*Sepal.Width +`r round(a$Coefficient[3],3)`*Petal.Length +`r round(a$Coefficient[4],3)`*Petal.Width}{4} $$
-
+With retained coefficients $c_j$, the index is
+$X^\star = \sum_j c_j X_j / \sum_j \mathbf{1}\{|c_j| > 0\}$,
+and the regression estimates a function $\hat y = g(X^\star)$.
 
 ### Threshold
-**`NNS.reg(x, y, dim.red.method = "cor", threshold = ...)`** offers a method of reducing regressors further by controlling the absolute value of required correlation.
-```{r nonlinear class threshold,fig.width=5,fig.height=3,fig.align = "center"}
-NNS.reg(iris[ , 1 : 4], iris[ , 5], dim.red.method = "cor", threshold = .75, location = "topleft", ncores = 1)$equation
+
+`threshold` retains coefficients whose absolute association meets the cutoff. This controls which coordinates contribute to the synthetic index; it does not establish a significance level.
+
+```{r dimension_reduction_threshold,fig.width=5,fig.height=3,fig.align="center"}
+reduced_threshold <- NNS.reg(regression_x, regression_y,
+                            dim.red.method = "cor", threshold = .75,
+                            point.est = regression_x[1:10, ],
+                            plot = FALSE, ncores = 1)
+reduced_threshold$equation
+reduced_threshold$Point.est
 ```
-
-```{r nonlinear class threshold 2,fig.width=5,fig.height=3,fig.align = "center", echo=FALSE}
-a = NNS.reg(iris[ , 1 : 4], iris[ , 5], dim.red.method = "cor", threshold = .75, location = "topleft", ncores = 1, plot = FALSE)$equation
-```
-
-Thus, our model for this further reduced dimension regression would be:
-$$Species = \frac{\: `r round(a$Coefficient[1],3)`*Sepal.Length + `r round(a$Coefficient[2],3)`*Sepal.Width +`r round(a$Coefficient[3],3)`*Petal.Length +`r round(a$Coefficient[4],3)`*Petal.Width}{3} $$
-
-and the `point.est = (...)` operates in the same manner as the full regression above, again called with **`NNS.reg(...)$Point.est`**.
-```{r final,fig.width=5,fig.height=3,fig.align = "center"}
-NNS.reg(iris[ , 1 : 4], iris[ , 5], dim.red.method = "cor", threshold = .75, point.est = iris[1 : 10, 1 : 4], location = "topleft", ncores = 1)$Point.est
-```
-
 
 # Classification
-For a classification problem, we simply set **`NNS.reg(x, y, type = "CLASS", ...)`**.
 
-**NOTE: Base category of response variable should be 1, not 0 for classification problems.**
+Set `type = "CLASS"` for nominal classes. Factor, character, logical, and numeric `0/1` responses are classified automatically. Numeric class values need not start at one. Factor and character predictions retain numeric codes with the mapping returned in `$class.levels`.
 
-```{r class,fig.width=5,fig.height=3,fig.align = "center", message=FALSE}
-NNS.reg(iris[ , 1 : 4], iris[ , 5], type = "CLASS", point.est = iris[1 : 10, 1 : 4], location = "topleft", ncores = 1)$Point.est
+```{r class,fig.width=5,fig.height=3,fig.align="center",message=FALSE}
+classification <- NNS.reg(iris[, 1:4], iris$Species, type = "CLASS",
+                          point.est = iris[1:10, 1:4], plot = FALSE, ncores = 1)
+classification$class.levels[classification$Point.est]
+classification$Point.probabilities
 ```
+
+With dimension reduction, classification uses one signed index per class indicator. Its `$equation` is therefore a named list, with one equation per class. Class probabilities are combined before labels are chosen; the numeric labels are never interpolation coordinates.
+
+```{r classification_indices}
+class_reduced <- NNS.reg(iris[, 1:4], iris$Species, dim.red.method = "cor",
+                         plot = FALSE, ncores = 1)
+class_reduced$equation
+```
+
+These examples demonstrate fitted outputs at training observations. Independent classification accuracy requires heldout observations, as shown in the classification vignette.
 
 
 # Cross-Validation `NNS.stack()`
@@ -127,87 +134,35 @@ The **`NNS.stack`** routine cross-validates for a given objective function the `
 
 or continuous dependent variables:
 
-**`NNS.stack(..., type = NULL, ...)`**.
+**`NNS.stack(..., type = "REG", ...)`**.
 
 Any objective function `obj.fn` can be called using `expression()` with the terms `predicted` and `actual`, even from external packages such as `Metrics`.
 
 **`NNS.stack(..., obj.fn = expression(Metrics::mape(actual, predicted)), objective = "min")`**.
 
 
-```{r stack,fig.width=5,fig.height=3,fig.align = "center", message=FALSE, eval=FALSE}
-NNS.stack(IVs.train = iris[ , 1 : 4], 
-          DV.train = iris[ , 5], 
-          IVs.test = iris[1 : 10, 1 : 4],
-          dim.red.method = "cor",
-          obj.fn = expression( mean(round(predicted) == actual) ),
-          objective = "max", type = "CLASS", 
-          folds = 1, ncores = 1)
+```{r stack,fig.width=5,fig.height=3,fig.align="center",message=FALSE}
+set.seed(123)
+stack_fit <- NNS.stack(IVs.train = iris[, 1:4],
+                       DV.train = iris$Species,
+                       IVs.test = iris[1:10, 1:4],
+                       dim.red.method = "cor",
+                       obj.fn = expression(mean(predicted == actual)),
+                       objective = "max", type = "CLASS",
+                       folds = 1, ncores = 1, status = FALSE)
+stack_fit[c("OBJfn.reg", "OBJfn.dim.red", "NNS.reg.n.best",
+            "NNS.dim.red.count", "weights", "class.levels")]
+stack_fit$class.levels[stack_fit$stack]
 ```
 
-```{r stackevalres, eval = FALSE}
-Method 2 fold 1/1: generating 4 cumulative projections
-Method 2 fold 1/1: evaluating 4 unique candidates
-Method 2 fold 1/1 complete
-Current dimension count = 1 | OOF eval(obj.fn) = 0.944444 | Iterations remaining = 3
-Current dimension count = 2 | OOF eval(obj.fn) = 0.972222 | Iterations remaining = 2
-Current dimension count = 3 | OOF eval(obj.fn) = 0.944444 | Iterations remaining = 1
-Current dimension count = 4 | OOF eval(obj.fn) = 0.916667 | Iterations remaining = 0
-Method 1 fold 1/1: preparing fold design
-Method 1 fold 1/1: building partitions
-RPM rows = 29; validation rows = 36
-  small candidates = 1...12
-  early stopping at k = 4
-  limit candidate = all (k = 29), score = 0.333333
-Best Method 1 candidate: k = 2, score = 0.972222
-Generating final estimates
-$OBJfn.reg
-        2 
-0.9722222 
-
-$NNS.reg.n.best
-[1] 2
-
-$probability.threshold
-[1] 0.48
-
-$OBJfn.dim.red
-[1] 0.9722222
-
-$NNS.dim.red.threshold
-[1] 0.9354305
-
-$reg
- [1] 1 1 1 1 1 1 1 1 1 1
-
-$reg.pred.int
-NULL
-
-$dim.red
- [1] 1 1 1 1 1 1 1 1 1 1
-
-$dim.red.pred.int
-NULL
-
-$stack
- [1] 1 1 1 1 1 1 1 1 1 1
-
-$pred.int
-NULL
-
-$weights
-    reg dim.red 
-    0.5     0.5 
-
-$class.levels
-[1] "setosa"     "versicolor" "virginica" 
-```
+The displayed objectives describe internal tuning folds. The final predictions above are at supplied training rows and are not an independent test score. For nominal models, the selected dimension count is reported directly; a single scalar coefficient threshold cannot summarize the class-specific equations.
 
 # Increasing Dimensions
-Given multicollinearity is not an issue for nonparametric regressions as it is for OLS, in the case of an ill-fit univariate model a better option may be to increase the dimensionality of regressors with a copy of itself and cross-validate the number of clusters `n.best` via:
+A duplicated predictor changes its weight in the multivariate geometry and can be used to compare that prediction path with univariate interpolation. It adds no information. Choose this representation and the neighbor count `n.best` using heldout performance:
 
 **`NNS.stack(IVs.train = cbind(x, x), DV.train = y, method = 1, ...)`**.
 
-```{r stack2, message = FALSE,fig.width=5,fig.height=3,fig.align = "center",results='hide', eval = FALSE}
+```{r stack2, message = FALSE,fig.width=5,fig.height=3,fig.align = "center",results='hide'}
 set.seed(123)
 x = rnorm(100); y = rnorm(100)
 
@@ -216,20 +171,15 @@ nns.params = NNS.stack(IVs.train = cbind(x, x),
                         method = 1, ncores = 1)
 ```
 
-```{r stack2optim, echo = FALSE}
-set.seed(123)
-x = rnorm(100); y = rnorm(100)
-
-nns.params = list()
-nns.params$NNS.reg.n.best = 100
-```
-
 ```{r stack2res, fig.width=5,fig.height=3,fig.align = "center",results='hide'}
-NNS.reg(cbind(x, x), y, 
-        n.best = nns.params$NNS.reg.n.best,
-        point.est = cbind(x, x), 
-        residual.plot = TRUE,  
-        ncores = 1, confidence.interval = .95)
+duplicated_fit <- NNS.reg(cbind(x, x), y,
+                          n.best = nns.params$NNS.reg.n.best,
+                          point.est = cbind(x, x), plot = FALSE,
+                          residual.plot = FALSE, ncores = 1,
+                          confidence.interval = .95)
+plot(x, y, pch = 19, col = "grey60", main = "Tuned multivariate prediction path")
+o <- order(x)
+lines(x[o], duplicated_fit$Point.est[o], col = "steelblue", lwd = 2)
 ```
 
 
@@ -253,7 +203,7 @@ For multivariate predictors, the same form applies directly — supply the full 
 
 ## Univariate Imputation
 
-```{r uniimpute, eval=FALSE}
+```{r uniimpute, fig.width=7, fig.height=5}
 set.seed(123)
 
 # Univariate predictor with nonlinear signal
@@ -268,7 +218,7 @@ y_mis[miss] <- NA
 
 # ---- Increasing dimensions trick ----
 # Duplicate x so the distance operates in a 2D space: cbind(x, x).
-# This sharpens nearest-neighbor selection even in a nominally univariate setting.
+# This chooses the multivariate neighbor path; duplication adds no information.
 x2_train <- cbind(x[!miss], x[!miss])
 x2_miss  <- cbind(x[miss],  x[miss])
 
@@ -277,7 +227,7 @@ y_hat_uni <- NNS::NNS.reg(
   x         = x2_train,             # predictors (duplicated x)
   y         = y[!miss],             # observed responses
   point.est = x2_miss,              # rows to impute
-  order     = "max",                # dependence-maximizing order
+  order     = "max",                # maximum requested partition order
   n.best    = 1,                    # 1-NN donor
   plot      = FALSE
 )$Point.est
@@ -299,12 +249,9 @@ legend("topleft",
        bty    = "n")
 ```
 
-<center>
-
-![](images/uni_impute.png){width="600" height="600"}
 
 ## Multivariate Imputation
-```{r multiimpute, eval=FALSE}
+```{r multiimpute, fig.width=7, fig.height=5}
 set.seed(123)
 
 # Multivariate predictors with nonlinear & interaction structure
@@ -333,7 +280,7 @@ y_hat_mv <- NNS::NNS.reg(
   x         = X_obs,     # all observed predictors
   y         = y_obs,     # observed responses
   point.est = X_mis,     # rows to impute
-  order     = "max",     # dependence-maximizing order
+  order     = "max",     # maximum requested partition order
   n.best    = 1,         # 1-NN donor
   plot      = FALSE
 )$Point.est
@@ -360,17 +307,12 @@ legend("topleft",
        bty    = "n")
 ```
 
-<center>
-
-![](images/multi_impute.png){width="600" height="600"}
 
 ## A Note on Uncertainty Propagation
 
-A common concern with local imputation methods is whether imputation uncertainty propagates correctly into downstream inference. `NNS` addresses this through bootstrap multiple imputation: resampling complete cases across `m` iterations generates between-imputation variance that flows through standard Rubin's rules pooling identically to any classical procedure.
+A completed data set does not by itself represent imputation uncertainty. Bootstrap model refits can produce multiple completed data sets, but valid pooled inference also depends on the missingness assumptions, estimand, imputation design, and sampling calibration. Applying Rubin's pooling formula alone does not establish those conditions. A smaller pooled standard error is not, by itself, evidence of more accurate uncertainty.
 
-Empirically, `NNS` bootstrap MI outperforms MICE with predictive mean matching on nonlinear data — producing a pooled estimate closer to the true parameter with a smaller pooled SE. The advantage comes not from compressing uncertainty but from a more accurate imputation model, which reduces between-imputation variance driven by model error rather than genuine data uncertainty.
-
-See [NNS Multiple Imputation vs MICE](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/NNS_MI_vs_MICE.md) for the full reproducible comparison.
+[NNS Multiple Imputation vs MICE](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/NNS_MI_vs_MICE.md) supplies an illustrative simulation. A general comparison requires repeated samples and assessment of bias, interval coverage, and the missingness mechanism.
 
 
 # References

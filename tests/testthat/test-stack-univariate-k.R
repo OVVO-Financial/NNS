@@ -22,9 +22,9 @@ test_that("NNS.stack OBJfn.reg for a single predictor scores the deployed NNS.re
     wt, y, method = 1, seed = 1, ncores = 1, status = FALSE
   ))
   univariate_fit <- function(train_x, train_y, test_x) {
-    NNS.reg(train_x, train_y, point.est = test_x, order = frame$order, type = NULL,
+    NNS.reg(train_x, train_y, point.est = test_x, order = frame$order, type = "REG",
             factor.2.dummy = FALSE, plot = FALSE, residual.plot = FALSE,
-            ncores = 1)$Point.est - frame$response_offset
+            ncores = 1)$Point.est
   }
   oof <- rep(NA_real_, length(y))
   for (sp in frame$splits) {

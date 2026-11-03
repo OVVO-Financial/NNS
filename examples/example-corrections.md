@@ -16,12 +16,34 @@ and evidence.
 | Five-way ranking | Normalized degree-one UPMs are shares of above-target deviation severity. They are not probabilities of winning a race. Sampling winners using those same shares merely reproduces the supplied weights; it does not validate their event-frequency interpretation. |
 | Partitional estimation | For `rnorm(n) + runif(n)`, mean noise is 0.5. The conditional mean is `f(x) + 0.5`, or use `runif(n) - 0.5` to target `f(x)`. Compare all fitted methods on a common held-out set; random-forest OOB error and NNS training error are different assessments. |
 | Dependence permutation output | Shuffled-statistic quantiles are a null reference distribution under exchangeability, not a confidence interval for population dependence. Specify dependence-preserving resampling for serial or clustered data. |
+| Independent 3-D copula output | Page 9 of `Nonlinear_Correlation_and_Dependence_Using_NNS.pdf` prints `0.09571785` for `set.seed(123); x <- rnorm(1000); y <- rnorm(1000); z <- rnorm(1000); NNS.copula(cbind(x,y,z))`. The reviewed implementation returns `0.197845241162`; the revised companion recomputes it. This descriptive finite-sample score is not a p-value or an independence threshold. The population event mass `2 * (1/2)^3` at independent marginal medians is a different quantity. |
 | Copula sampling | Degree-zero marginal transforms or an explicitly randomized probability transform at atoms target frequency. Positive-degree inverses change the marginal law; their directional geometry does not imply preservation of the original marginal distribution. |
 | Iris classification | Rows 141:150 are all virginica. Vignette08 now uses a seeded stratified split, removes historical perfect-accuracy output, and makes class decoding explicit. |
 | Derivative summaries | Quantiles across fitted derivatives describe heterogeneity over evaluation locations. Sampling uncertainty requires resampling and refitting with a design appropriate to the observations. Smoothness and admissible local steps still matter. |
 | Normalization | Positive constant multiplication of columns preserves Pearson correlation; a negative multiplier reverses its sign. Changing portfolio weights is a separate operation. Check scaling-factor signs before interpreting transformed associations. |
 | Forecast period selection | Periods selected using a test window make that window validation. Vignette09 now selects periods within the training prefix, reserves the final observations for testing, and computes current outputs rather than printing stale values. |
 | Noisy differentiation | Adding frozen real noise to a complex-valued evaluation leaves the imaginary part unchanged. Tiny complex-step error in that construction is not evidence of generic noise robustness. A reproducible noise generator, complex-input contract, and repeated evaluation protocol are required. |
+
+## Historical HTML output regeneration
+
+Issue #72 remains open for the six archived HTML pages below. The documentation
+workflow copies their existing content and adds a visible historical-output
+notice to the **staged copies**; it does not rerun their analyses. The original
+HTML files remain unchanged. Neither a successful site build nor the revised
+PDF companions should be read as regeneration of these outputs.
+
+- [ ] [Macroeconomic causal analysis](Causal_Inference_Amongst_Macroeconomic_Variables_Using_NNS.html): regenerate the `NNS.VAR` output with the current validation policy and state the directional-association target.
+- [ ] [Archived overview](NNSvignette_Overview.html): replace affected `NNS.VAR`, `NNS.ARMA`, `NNS.CDF`, derivative, seasonality, and copula output with current executable examples, or retire the duplicates in favor of the canonical numbered vignettes.
+- [ ] [Sunspots](Sunspots_example.html): regenerate seasonal selection and forecasting output with periods chosen before the evaluation horizon.
+- [ ] [VAR example](VAR_example.html): regenerate the full multivariate forecast pipeline and label internal-validation versus later-test scores.
+- [ ] [Prophet comparison](prophet_NNS_comparison.html): rerun both methods with the same data, forecast origins, horizon, and tuning budget before reporting comparative scores.
+- [ ] [Tides](tides.html): regenerate seasonality and forecasting output with its data version and temporal validation split recorded.
+
+For each page, add editable source, data provenance, package versions, and a
+repeatable build command. Retain only the current results or explicitly withdraw
+unsupported historical comparisons. The exact book text corrections, the
+independent three-variable copula erratum, and current executable vignette
+sources are addressed separately; they do not close this remaining checklist.
 
 ## Published PDF source status
 

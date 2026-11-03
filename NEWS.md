@@ -1,4 +1,4 @@
-# NNS (development version)
+# NNS 13.3 (development changes)
 
 ## Statistical targets and interpretation
 
@@ -17,10 +17,16 @@
 
 ## Regression, classification, and derivatives
 
+* `NNS.reg` and `NNS.stack` accept `type = "REG"` to select numeric
+  regression explicitly. Forecasting, derivative, and hazard-smoothing helpers
+  use this contract even when a response has only two values; they retain
+  fractional predictions on the original scale.
 * Nominal classification retains class probabilities in predictor cells and
   combines those probabilities before choosing labels. Numeric class labels are
   not interpolation coordinates. Probability outputs and descriptive prediction
   sets expose the target; factor/character output codes use `class.levels`.
+* Binary numeric coordinates retain distinct terminal cells in both R and
+  native regression paths, including dummy columns in mixed predictor designs.
 * Stack's multivariate component searches selected predictor coordinates; its
   dimension-reduction component separately uses the synthetic index. Complexity
   selection uses both response orientations without changing the underlying

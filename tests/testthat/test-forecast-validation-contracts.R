@@ -154,19 +154,75 @@ test_that("VAR relevance coefficients never fit heldout rows in pipeline validat
 
 
 test_that("numeric two-level VAR targets remain forecast regressions", {
+  captured <- new.env()
+  captured$frames <- list()
+  suppressMessages(trace(".nns_var_relevant", where = asNamespace("NNS"),
+    print = FALSE, exit = bquote(assign("frames",
+      c(get("frames", envir = .(captured)), list(environment())),
+      envir = .(captured)))))
+  withr::defer(suppressMessages(untrace(".nns_var_relevant",
+                                      where = asNamespace("NNS"))))
   local_mocked_bindings(
     NNS.ARMA.optim = function(variable, h, ...) {
       list(results = rep(mean(variable), h))
     },
     .package = "NNS"
   )
-  for (levels in list(c(0, 1), c(-5, 5))) {
+  prediction.reference <- list()
+  for (levels in list(c(0, 1), c(-5, 5))) for (method in c("cor", "NNS.dep")) {
+    captured$frames <- list()
     t <- seq_len(40)
     x <- cbind(a = rep(levels, 20), b = sin(t / 5))
     out <- NNS.VAR(x, h = 2, tau = 1, ncores = 1, status = FALSE,
+                   dim.red.method = method,
                    obj.fn = expression(mean((predicted - actual)^2)))
     expect_identical(dim(out$ensemble), c(2L, 2L))
     expect_true(all(is.finite(as.matrix(out$ensemble))))
     expect_equal(unname(out$validation$observed.targets), c(8L, 8L))
+    # Relevance must extract real regression coefficients, not NULL from a
+    # list of nominal class equations and then silently retain every column.
+    fr <- captured$frames[[1L]]
+    expect_length(fr$coef, 3L)
+    expect_true(all(is.finite(fr$coef)))
+    if (method == "NNS.dep") {
+      expect_equal(fr$coef, c(0, 1, 0), tolerance = 1e-12)
+      expect_equal(na.omit(out$relevant_variables$a), "a_tau_1",
+                   ignore_attr = TRUE)
+      # The first lag is observed at the origin; the seven later lags are
+      # prefix-mean forecasts. Their midpoint errors yield 7/8 * range^2/4.
+      expect_equal(fr$nns.ord, diff(levels)^2 * 7 / 32, tolerance = 1e-12)
+      expect_equal(out$multivariate$a, c(levels[1], mean(levels)),
+                   tolerance = 1e-10)
+    } else {
+      expected <- apply(fr$CV.IVs.train, 2, stats::cor, y = fr$CV.DV.train,
+                         method = "spearman")
+      expect_equal(fr$coef, unname(expected), tolerance = 1e-12)
+      expect_equal(na.omit(out$relevant_variables$a), c("b_tau_0", "a_tau_1"),
+                   ignore_attr = TRUE)
+      expect_gt(fr$nns.ord / diff(levels)^2, .21)
+      expect_lt(fr$nns.ord / diff(levels)^2, .25)
+      expect_true(all(out$multivariate$a > min(levels) &
+                        out$multivariate$a < max(levels)))
+      expect_lt(out$multivariate$a[1], mean(levels))
+    }
+    if (identical(levels, c(0, 1))) prediction.reference[[method]] <- out$multivariate$a else
+      expect_equal(out$multivariate$a,
+                   levels[1] + diff(levels) * prediction.reference[[method]],
+                   tolerance = 1e-10)
+  }
+})
+
+test_that("ARMA nonlinear fits and optimizer smoothing retain numeric responses", {
+  for (levels in list(c(0, 1), c(-5, 5))) {
+    y <- rep(levels, 15)
+    fit <- NNS.ARMA(y, h = 2, seasonal.factor = 3, method = "nonlin",
+                    plot = FALSE, negative.values = TRUE)
+    expect_equal(fit, levels[1] + diff(levels) * c(10 / 9, -1 / 9),
+                 tolerance = 1e-10)
+    optimized <- NNS.ARMA.optim(y, h = 2, seasonal.factor = 3,
+      negative.values = TRUE, ncores = 1, plot = FALSE, print.trace = FALSE,
+      obj.fn = expression(mean((predicted - actual)^2)), bias.correction = "none")
+    expect_equal(optimized$results,
+                 levels[1] + diff(levels) * c(7 / 12, 5 / 12), tolerance = 1e-10)
   }
 })

@@ -69,3 +69,58 @@ test_that("both stack components canonicalize unordered predictor levels", {
   target <- factor(rep(c("B", "A", "C"), 30))
   expect_equal(run(x, target), run(reordered, target))
 })
+
+test_that("two-valued numeric coordinates retain distinct class cells", {
+  x <- rep(c(0, 1), 20)
+  y <- factor(ifelse(x == 0, "zero", "one"))
+  fit <- NNS.reg(x, y, point.est = c(0, .5, 1), plot = FALSE)
+  expect_equal(nrow(fit$RPM), 2L)
+  expect_equal(fit$Prediction.Accuracy, 1)
+  expect_equal(unname(unclass(fit$Point.probabilities)),
+               rbind(c(0, 1), c(.5, .5), c(1, 0)))
+  mixed <- data.frame(group = factor(x), continuous = rep(1:20, each = 2))
+  cells <- NNS.reg(mixed, y, point.est = mixed[1:2, ], n.best = 1,
+                   plot = FALSE, ncores = 1)
+  expect_equal(cells$class.levels[cells$Point.est], c("zero", "one"))
+  expect_true(all(apply(cells$RPM.probabilities, 1, max) == 1))
+})
+
+test_that("named dimension weights align in regression and nominal classification", {
+  set.seed(12)
+  x <- data.frame(a = rep(c(-1, 1), 20), b = rnorm(40))
+  labels <- factor(ifelse(x$a > 0, "A", "B"))
+  for (response in list(labels, seq_len(nrow(x)) / 10)) {
+    fit <- function(w) NNS.reg(x, response, point.est = x[1:4, ],
+      dim.red.method = w, plot = FALSE)
+    a <- fit(c(a = 1, b = 0)); b <- fit(c(b = 0, a = 1))
+    expect_equal(a$equation, b$equation)
+    expect_equal(a$Point.est, b$Point.est)
+    expect_equal(a$Point.probabilities, b$Point.probabilities)
+    expect_error(fit(c(a = 1, unknown = 0)), "exactly match")
+  }
+  fit <- function(w) NNS.stack(x, labels, x[1:4, ], dim.red.method = w,
+    method = c(1, 2), folds = 2, ncores = 1, seed = 1, status = FALSE)
+  expect_equal(fit(c(a = 1, b = 0)), fit(c(b = 0, a = 1)))
+  expect_error(fit(c(a = 1, unknown = 0)), "exactly match")
+})
+
+test_that("nominal Stack shares the factor coefficient names and fold columns", {
+  x <- data.frame(group = factor(rep(c("a", "b"), 20)),
+                  value = rep(1:20, each = 2))
+  y <- factor(ifelse(x$group == "a", "L", "R"))
+  fit <- function(w) NNS.stack(x, y, x[1:4, ], dim.red.method = w,
+    method = 2, folds = 2, ncores = 1, seed = 9, status = FALSE)
+  weights <- c(group__a = 1, group__b = -1, value = 0)
+  a <- fit(weights); b <- fit(rev(weights))
+  expect_equal(a, b)
+  expect_equal(a$class.levels[a$stack], as.character(y[1:4]))
+  expect_equal(a$NNS.dim.red.coefficients[[1]]$Variable,
+               c(names(weights), "DENOMINATOR"))
+  # A level present only in one validation row keeps its design column even
+  # when absent from that fold's fitted observations.
+  x$group <- as.character(x$group); x$group[1] <- "rare"
+  x$group <- factor(x$group)
+  rare <- NNS.stack(x, y, x[1:4, ], method = c(1, 2), folds = 2,
+                    ncores = 1, seed = 9, status = FALSE)
+  expect_equal(rowSums(rare$probabilities), rep(1, 4))
+})

@@ -3,12 +3,22 @@
 .nns_stack_classify <- function(x, y, z, class.values, splits, method, stack,
                                 dim.red.method, order, dist, ncores,
                                 optimize.threshold, pred.int, score, objective,
-                                balance.indices, numeric.response, status) {
+                                balance.indices, numeric.response, status,
+                                numeric.design) {
   values <- sort(unique(y))
   tie.order <- match(unique(y), values)
   labels <- as.character(class.values)
   n <- length(y); K <- length(values)
-  full <- .nns_reg_encode_predictors(x, z, TRUE)
+  encode <- function(train, test) {
+    # Keep Stack's predictor names and factor columns in every fold. Scaling
+    # remains in the NNS geometry and dimension-reduction routines below.
+    design <- numeric.design(train, test, scale = FALSE)
+    list(x = as.matrix(design$train), point.est = as.matrix(design$test),
+         metadata = lapply(train, function(column) {
+           list(categorical = is.factor(column) || is.logical(column))
+         }))
+  }
+  full <- encode(x, z)
   p <- ncol(full$x)
   balanced <- lapply(splits, function(s) balance.indices(y[s$train]))
   final.rows <- balance.indices(y)
@@ -32,7 +42,7 @@
     list(score = loss[take], threshold = thresholds[take])
   }
   fit <- function(train, response, test, component, candidate, select.count = NULL) {
-    encoded <- .nns_reg_encode_predictors(train, test, TRUE)
+    encoded <- encode(train, test)
     task <- list(y = response, class.values = values, class.levels = labels)
     if (component == 1L && stack && !is.null(select.count) && select.count < ncol(encoded$x)) {
       ind <- outer(response, values, "==") * 1

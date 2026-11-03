@@ -28,7 +28,7 @@ test_that("forecast validation uses only the supplied prefix and generated predi
   expect_equal(a$frame$x.cv[41:43, ], validation$IVs.test)
   # The final fit still receives all original training rows.
   expect_equal(b$frame$x, changed)
-  expect_equal(b$frame$y_fit_all, yy + b$frame$response_offset)
+  expect_equal(b$frame$y_fit_all, yy)
   expect_false(isTRUE(all.equal(a$result$stack, b$result$stack)))
 })
 
