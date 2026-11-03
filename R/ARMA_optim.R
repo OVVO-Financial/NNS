@@ -8,7 +8,7 @@
 #' @param seasonal.factor integers; Multiple frequency integers considered for \link{NNS.ARMA} model, i.e. \code{(seasonal.factor = c(12, 24, 36))}.
 #' @param lin.only logical; \code{FALSE} (default) For fast optimization of the linear regression method.  More robust than \code{lin.only = TRUE}.
 #' @param negative.values logical; \code{FALSE} (default) If the variable can be negative, set to
-#' \code{(negative.values = TRUE)}.  It will automatically select \code{(negative.values = TRUE)} if the minimum value of the \code{variable} is negative.
+#' \code{(negative.values = TRUE)}.  It will automatically select \code{(negative.values = TRUE)} if the training data \code{variable[1 : training.set]} has a negative value, and for the out-of-sample forecast if \code{variable} does.
 #' @param obj.fn expression;
 #' The default is the mean squared error divided by the degree-1 co-movement of \code{predicted} and \code{actual}, \code{mean((predicted - actual)^2) / (Co.LPM(1, predicted, actual, mean(predicted), mean(actual)) + Co.UPM(1, predicted, actual, mean(predicted), mean(actual)))} (\code{Inf} when the co-movement is 0), to be minimized.  Any \code{expression(...)} using the specific terms \code{predicted} and \code{actual} can be used.
 #' @param objective options: ("min", "max") \code{"min"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.
@@ -95,8 +95,6 @@ NNS.ARMA.optim <- function(variable,
   variable <- as.numeric(variable)
   OV <- variable
   
-  if(min(variable) < 0) negative.values <- TRUE
-  
   if(!is.null(h) && h > 0) h_oos <- h else {
     h <- NULL
     h_oos <- NULL
@@ -111,6 +109,10 @@ NNS.ARMA.optim <- function(variable,
   
   if(training.set <= .5 * n) stop("Please provide a larger [training.set] value (integer) or a smaller [h].")
   if(training.set == n) stop("Please provide a [training.set] value (integer) less than the length of the variable.")
+  
+  # Validation forecasts see only the training window; out-of-sample results are fitted on the whole series.
+  if(min(variable[1 : training.set]) < 0) negative.values <- TRUE
+  results.negative.values <- negative.values || (!is.null(h_oos) && min(variable) < 0)
   
   denominator <- min(4, max(3, ifelse((training.set/100)%%1 < .5, floor(training.set/100), ceiling(training.set/100))))
   
@@ -464,18 +466,20 @@ NNS.ARMA.optim <- function(variable,
   } else {
     if(is.null(h)) h <- h_oos
     final.variable <- if(nns.regress) NNS.reg(1:n, OV, plot = FALSE, smooth = TRUE)$Fitted.xy$y.hat else OV
-    model.results <- NNS.ARMA(final.variable, h = h_oos, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = negative.values, weights = nns.weights, shrink = nns.shrink) - bias
+    model.results <- NNS.ARMA(final.variable, h = h_oos, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = results.negative.values, weights = nns.weights, shrink = nns.shrink) - bias
   }
   
   
   # The bands sit on the forecasts the function returns, so clamp those first.
-  if(!negative.values) model.results <- pmax(0, model.results)
+  if(!results.negative.values) model.results <- pmax(0, model.results)
   lower_PIs <- model.results + LPM.VaR((1-pred.int)/2, 0, residuals)
   upper_PIs <- model.results + UPM.VaR((1-pred.int)/2, 0, residuals)
 
-  if(!negative.values){
+  if(!results.negative.values){
     lower_PIs <- pmax(0, lower_PIs)
     upper_PIs <- pmax(0, upper_PIs)
+  }
+  if(!negative.values){
     lower_PIs_is <- pmax(0, lower_PIs_is)
     upper_PIs_is <- pmax(0, upper_PIs_is)
   }
