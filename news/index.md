@@ -89,6 +89,15 @@ CRAN release: 2026-10-30
   monthly series of 8000 observations the optimizer took 13 s, against
   126 s in 13.3 and 210 s before this change; the AirPassengers example
   takes 0.10 s, against 0.30 s and 0.39 s.
+- Long series forecast faster with the same results. When every lag is
+  at least `h`, no forecast reaches a lag’s component series, so
+  `NNS.ARMA`’s linear method forecasts several lags directly, as it did
+  one lag, and combines them step by step as before; `NNS.ARMA.optim`’s
+  linear search makes these calls. `NNS.seas` scores its lags on several
+  threads, and its fundamental-period jackknife sorts all components at
+  once. The tides example (222,000 six-minute observations, 200
+  candidate periods) took 11 min on one core with 13.0 and 13 min before
+  this change; it now takes 1.0 min, or 0.7 min with the default cores.
 - VAR keeps its two-stage forecast design and uses prefix-generated
   predictors for chronological validation by default.
   `validation = "observed"` is the compatibility option. Known
