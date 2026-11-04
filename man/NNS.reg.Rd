@@ -60,7 +60,7 @@ NNS.reg(
 
 \item{threshold}{numeric [0, 1]; \code{(threshold = 0)} (default) Sets the threshold for dimension reduction of independent variables when \code{(dim.red.method)} is not \code{NULL}.}
 
-\item{n.best}{integer; \code{NULL} (default) Sets the number of nearest regression points to use in weighting for multivariate regression at \code{floor((1 - D) * sqrt(nrow(x)))} (at least 1, at most the number of regression points), where D averages the copula summaries with response y and -y so the smoothing choice is unchanged by response reflection.  \code{(n.best = "all")} will select and weight all generated regression points.  Analogous to \code{k} in a
+\item{n.best}{integer; \code{NULL} (default) Sets the number of nearest regression points to use in weighting for multivariate regression at \code{floor((1 - D) * sqrt(R))}, where R is the number of regression points (at least 1), and D averages the copula summaries with response y and -y so the smoothing choice is unchanged by response reflection. For classification, D is the mean over predictors of each predictor's strongest dependence with a class indicator.  \code{(n.best = "all")} will select and weight all generated regression points.  Analogous to \code{k} in a
 \code{k Nearest Neighbors} algorithm.  Different values of \code{n.best} are tested using cross-validation in \link{NNS.stack}.}
 
 \item{smooth}{logical; \code{FALSE} (default) Applies a smoothing spline instead of local linear fit to regression points.}

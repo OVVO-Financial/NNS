@@ -69,7 +69,7 @@
   prior <- colMeans(probabilities)
   k <- if (identical(n.best, "all")) nrow(centres) else if (!is.null(n.best)) n.best else
     if (identical(order, "max") || categorical) 1L else
-      max(1L, floor((1 - mean(strength)) * sqrt(nrow(X))))
+      max(1L, floor((1 - mean(strength)) * sqrt(nrow(centres))))
   k <- max(1L, min(as.integer(k), nrow(centres)))
   neighbours <- function(kk) {
     kk <- if (identical(kk, "all")) nrow(centres) else as.integer(kk)
