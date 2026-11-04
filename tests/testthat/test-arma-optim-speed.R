@@ -126,3 +126,51 @@ test_that("linear.approximation defaults to TRUE", {
   # passes the linear search's selection to the nonlinear comparison.
   expect_identical(eval(formals(NNS.ARMA.optim)$linear.approximation), TRUE)
 })
+
+test_that("several lags of at least h give the step-by-step result", {
+  # The loop: each step regresses every lag's component series on its index,
+  # combines the lags with sum(), and appends the forecast to the series.
+  loop <- function(x, lags, h, w) {
+    out <- numeric(h)
+    for (j in seq_len(h)) {
+      gv <- NNS:::generate.vectors(x, lags)
+      est <- vapply(seq_along(lags), function(i) {
+        ci <- gv$Component.index[[i]]
+        cf <- NNS:::fast_lm(ci, gv$Component.series[[i]])$coef
+        as.numeric(cf[1] + cf[2] * (ci[length(ci)] + 1))
+      }, numeric(1))
+      out[j] <- pmax(0, sum(est * w))
+      x <- c(x, out[j])
+    }
+    out
+  }
+  x <- as.numeric(AirPassengers)
+  # c(6, 24) has a lag shorter than h = 12 and keeps the loop.
+  for (lags in list(c(12, 24), c(24, 36, 30), c(6, 24))) for (h in c(1, 6, 12)) {
+    w <- rep(1 / length(lags), length(lags))
+    expect_identical(NNS.ARMA(x, h = h, seasonal.factor = lags, method = "lin",
+                              weights = "equal", plot = FALSE),
+                     loop(x, lags, h, w))
+  }
+})
+
+test_that("the seasonality scan scores every lag in its own slot", {
+  # 1200 lags of 6000 values are scored on several threads.
+  set.seed(8)
+  t <- 1:6000
+  x <- 10 + sin(2 * pi * t / 24) + rnorm(6000, sd = .3)
+  M <- NNS:::NNS_seas_cpp(variable = x, modulo = NULL, mod_only = TRUE,
+                          max_period = NULL)$all.periods
+  direct <- function(m) {
+    comp <- split(x, (seq_along(x) - 1L) %% m)
+    d <- vapply(comp, function(z) {
+      k <- length(z)
+      s <- sort(z)
+      sum((2 * seq_len(k) - k - 1) * s) * 2 / (k * (k - 1)) / abs(mean(z))
+    }, numeric(1))
+    sum(lengths(comp) * d) / length(x)
+  }
+  for (m in c(24L, 48L, 600L, 1199L)) {
+    expect_equal(M$Coefficient.of.Variation[M$Period == m], direct(m), tolerance = 1e-10)
+  }
+})
