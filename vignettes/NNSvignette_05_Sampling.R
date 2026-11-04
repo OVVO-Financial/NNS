@@ -34,19 +34,19 @@ legend('left', legend = c('ecdf', 'LPM.ratio'), fill=c('black','red'), border=NA
 ## ----fig.align='center', fig.height=8, fig.width=8, echo=FALSE, warning=FALSE, message = FALSE, eval=FALSE----
 ## zzz = rnorm(length(x), mean = 0, sd = 1)
 ## norm_approx = pnorm(sort(zzz), mean=0, sd=1) #pnorm(sort(x),mean=-mean(x),sd=sd(x))
-##
+## 
 ## plot(ecdf(x), main = "eCDF via LPM.ratio()", lwd = 4)
-##
-##
+## 
+## 
 ## # Altering shape of distribution with LPM degree
 ## for(i in c(0, 0.25, .5, 1, 2)){
 ##   idx <- which(i == c(0, 0.25, .5, 1, 2))
 ##   lines(sort(x), LPM.ratio(i, sort(x),x), col = rainbow(5, alpha = 1)[idx], lty = 1, lwd = 3)
 ## }
-##
+## 
 ##  lines(sort(zzz), norm_approx ,col='black', lty = 3, lwd = 2)
-##
-##
+## 
+## 
 ## legend("topleft",c("LPM.ratio(degree = 0)","LPM.ratio(degree = 0.25)","LPM.ratio(degree = 0.5)","LPM.ratio(degree = 1)","LPM.ratio(degree = 2)", "N(0,1) approximation"),
 ##        col = c(rainbow(5)[1:5], "black"), lwd = 3, lty = c(rep(1, 5), 3))
 
@@ -55,51 +55,51 @@ legend('left', legend = c('ecdf', 'LPM.ratio'), fill=c('black','red'), border=NA
 ## layout(matrix(c(1, 1, 1,1,1,
 ##                 2, 3, 4,5,6,
 ##                 2, 3, 4,5,6), nrow=5, byrow=FALSE),widths = c(2,rep(1,5)))
-##
-##
+## 
+## 
 ## plot(ecdf(x), main = "eCDF via LPM.ratio()", lwd = 4)
-##
-##
+## 
+## 
 ## # Altering shape of distribution with LPM degree
 ## for(i in c(0, 0.25, .5, 1, 2)){
 ##   idx <- which(i == c(0, 0.25, .5, 1, 2))
 ##   lines(sort(x), LPM.ratio(i, sort(x),x), col = rainbow(5, alpha = 1)[idx], lty = 1, lwd = 3)
 ## }
-##
+## 
 ##  lines(sort(zzz), norm_approx ,col='black', lty = 3, lwd = 2)
-##
-##
+## 
+## 
 ## legend("topleft",c("LPM.ratio(degree = 0)","LPM.ratio(degree = 0.25)","LPM.ratio(degree = 0.5)","LPM.ratio(degree = 1)","LPM.ratio(degree = 2)", "N(0,1) approximation"),
 ##        col = c(rainbow(5)[1:5], "black"), lwd = 3, lty = c(rep(1, 5), 3))
-##
-##
-##
-##
+## 
+## 
+## 
+## 
 ## y = hist(LPM.VaR(seq(0,1,length.out = 100), 0, x), plot = FALSE, breaks = 15)
-##
+## 
 ## plot(y$breaks,
 ##      c(y$counts,0), type = "s",
 ##     col="black",lwd = 3, ylim = c(0,50), main = "Inverse CDF via LPM.VaR(degree 0)", breaks = 15, xlab = "x", ylab = "freq")
 ## hist(LPM.VaR(seq(0,1,length.out = 100), 0, x), add = TRUE, col =  rainbow(5, alpha = .5)[1], breaks = 15)
-##
+## 
 ## y = hist(LPM.VaR(seq(0,1,length.out = 100), 0, x), border = NA, plot = FALSE, breaks = 15)
 ## plot(y$breaks,
 ##      c(y$counts,0)
 ##      ,type="s",col="black",lwd = 3, ylim = c(0,50), main = "Inverse CDF via LPM.VaR(degree 0.25)", breaks = 15, xlab = "x", ylab = "freq")
 ## hist(LPM.VaR(seq(0,1,length.out = 100), .25, x), border = rainbow(5)[2], add = TRUE, col =  rainbow(5, alpha = .5)[2], breaks = 15)
-##
+## 
 ## y = hist(LPM.VaR(seq(0,1,length.out = 100), 0, x), plot = FALSE, breaks = 15)
 ## plot(y$breaks,
 ##      c(y$counts,0)
 ##      ,type="s",col="black",lwd = 3, ylim = c(0,50), main = "Inverse CDF via LPM.VaR(degree 0.5)", breaks = 15, xlab = "x", ylab = "freq")
 ## hist(LPM.VaR(seq(0,1,length.out = 100), .5, x), border = rainbow(5)[3], add = TRUE, col =  rainbow(5, alpha = .5)[3], breaks = 15)
-##
+## 
 ## y = hist(LPM.VaR(seq(0,1,length.out = 100), 0, x), plot = FALSE, breaks = 15)
 ## plot(y$breaks,
 ##      c(y$counts,0)
 ##      ,type="s",col="black",lwd = 3, ylim = c(0,50), main = "Inverse CDF via LPM.VaR(degree 1)", breaks = 15, xlab = "x", ylab = "freq")
 ## hist(LPM.VaR(seq(0,1,length.out = 100), 1, x), border = rainbow(5)[4], add = TRUE, col =  rainbow(5, alpha = .5)[4], breaks = 15)
-##
+## 
 ## y = hist(LPM.VaR(seq(0,1,length.out = 100), 0, x), plot = FALSE, breaks = 15)
 ## plot(y$breaks,
 ##      c(y$counts,0)
@@ -113,13 +113,13 @@ legend('left', legend = c('ecdf', 'LPM.ratio'), fill=c('black','red'), border=NA
 ## degree.0.5.samples = LPM.VaR(percentile = seq(0, 1, length.out = 100), degree = 0.5, x = x)
 ## degree.1.samples = LPM.VaR(percentile = seq(0, 1, length.out = 100), degree = 1, x = x)
 ## degree.2.samples = LPM.VaR(percentile = seq(0, 1, length.out = 100), degree = 2, x = x)
-##
+## 
 ## head(data.frame(check.names = FALSE, cbind("original x" = sort(x), degree.0.samples,
 ##                                                           degree.0.25.samples,
 ##                                                           degree.0.5.samples,
 ##                                                           degree.1.samples,
 ##                                                           degree.2.samples)), 10)
-##
+## 
 ##      original x degree.0.samples degree.0.25.samples degree.0.5.samples
 ##   1:  -2.309169        -2.309169           -2.309097         -2.3090915
 ##   2:  -1.966617        -1.966617           -1.941190         -1.6935509
@@ -147,15 +147,15 @@ legend('left', legend = c('ecdf', 'LPM.ratio'), fill=c('black','red'), border=NA
 ## ----fig.align='center', fig.width=8, fig.height=8, eval=FALSE----------------
 ## boots = NNS.MC(x, reps = 1, lower_rho = -1, upper_rho = 1, by = .5)$replicates
 ## reps = do.call(cbind, boots)
-##
-##
+## 
+## 
 ## matplot(reps, type = "l", col = rainbow(length(boots)))
 ## lines(x, type = "l", lwd = 3, ylim = c(min(reps), max(reps)))
 
 
 ## ----eval = FALSE-------------------------------------------------------------
 ## sapply(boots, function(r) cor(r, x, method = "spearman"))
-##
+## 
 ##     rho = 1   rho = 0.5     rho = 0  rho = -0.5    rho = -1
 ##  0.99732373  0.51147915  0.01036904 -0.48720072 -0.98294629
 
@@ -163,7 +163,7 @@ legend('left', legend = c('ecdf', 'LPM.ratio'), fill=c('black','red'), border=NA
 ## ----tgt_drift, fig.align='center', fig.width=8, fig.height=8, eval=FALSE-----
 ## boots = NNS.MC(x, reps = 1, lower_rho = -1, upper_rho = 1, by = .5, target_drift = 0.05)$replicates
 ## reps = do.call(cbind, boots)
-##
+## 
 ## plot(x, type = "l", lwd = 3, ylim = c(min(c(x, reps)), max(c(x, reps))))
 ## matplot(reps, type = "l", col = rainbow(length(boots)), add = TRUE)
 
@@ -180,7 +180,7 @@ legend('left', legend = c('ecdf', 'LPM.ratio'), fill=c('black','red'), border=NA
 ## new.dep.data <- vapply(seq_len(ncol(original.data)), function(j) {
 ##   LPM.VaR(percentile = dep.structure[, j], degree = 0, x = new.data[, j])
 ## }, numeric(n))
-##
+## 
 ## cor(original.data, method = "spearman")
 ## cor(new.dep.data, method = "spearman")
 
@@ -188,17 +188,17 @@ legend('left', legend = c('ecdf', 'LPM.ratio'), fill=c('black','red'), border=NA
 ## ----eval=FALSE---------------------------------------------------------------
 ## # Apply bootstrap to each variable
 ## new.boot.dep.data = apply(original.data, 2, function(r) NNS.meboot(r, reps = 100, rho = .95))
-##
+## 
 ## # Reformat into vectors
 ## boot.ensemble.vectors = lapply(new.boot.dep.data, function(z) unlist(z["ensemble",]))
-##
+## 
 ## # Create matrix from vectors
 ## new.boot.dep.matrix = do.call(cbind, boot.ensemble.vectors)
 
 
 ## ----eval=FALSE---------------------------------------------------------------
 ## for(i in 1:4) print(cor(new.boot.dep.matrix[,i], original.data[,i], method = "spearman"))
-##
+## 
 ## [1] 0.9885851
 ## [1] 0.9965075
 ## [1] 0.9906302
@@ -208,7 +208,7 @@ legend('left', legend = c('ecdf', 'LPM.ratio'), fill=c('black','red'), border=NA
 ## ----eval=FALSE---------------------------------------------------------------
 ## NNS.copula(original.data)
 ## NNS.copula(new.boot.dep.matrix)
-##
+## 
 ## [1] 0.4743531
 ## [1] 0.4704039
 
@@ -216,7 +216,7 @@ legend('left', legend = c('ecdf', 'LPM.ratio'), fill=c('black','red'), border=NA
 ## ----eval=FALSE---------------------------------------------------------------
 ## head(original.data)
 ## head(new.boot.dep.matrix)
-##
+## 
 ##                x           y          z           x
 ## [1,] -0.56047565 -0.99579872 -0.5116037 -0.56047565
 ## [2,] -0.23017749 -1.03995504  0.2369379 -0.23017749

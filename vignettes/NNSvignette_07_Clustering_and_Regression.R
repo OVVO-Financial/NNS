@@ -193,7 +193,7 @@ y_completed_mv <- y_mis
 y_completed_mv[miss] <- y_hat_mv
 
 # Plot observed vs imputed (multivariate, NNS 1-NN)
-plot(seq_along(y), y,
+plot(seq_along(y), y, 
      pch = 1, col = "steelblue", cex = 1.5, lwd = 2,
      xlab = "Observation index", ylab = "y",
      main = "NNS 1-NN Multivariate Imputation")

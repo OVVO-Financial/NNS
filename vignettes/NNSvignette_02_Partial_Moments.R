@@ -5,12 +5,14 @@ options(mc.cores = 1)
 RcppParallel::setThreadOptions(numThreads = 1)
 Sys.setenv("OMP_THREAD_LIMIT" = 1)
 
+
 ## ----mean, message=FALSE------------------------------------------------------
 library(NNS)
 set.seed(123) ; x = rnorm(100) ; y = rnorm(100)
 
 mean(x)
 UPM(1, 0, x) - LPM(1, 0, x)
+
 
 ## ----variance-----------------------------------------------------------------
 # Sample Variance (base R):
@@ -30,14 +32,17 @@ UPM(2, mean(x), x) + LPM(2, mean(x), x)
 # Variance is also the co-variance of itself:
 (Co.LPM(1, x, x, mean(x), mean(x)) + Co.UPM(1, x, x, mean(x), mean(x)) - D.LPM(1, 1, x, x, mean(x), mean(x)) - D.UPM(1, 1, x, x, mean(x), mean(x)))
 
+
 ## ----stdev--------------------------------------------------------------------
 sd(x)
 ((UPM(2, mean(x), x) + LPM(2, mean(x), x)) * (length(x) / (length(x) - 1))) ^ .5
+
 
 ## ----moments------------------------------------------------------------------
 NNS.moments(x)
 
 NNS.moments(x, population = FALSE)
+
 
 ## ----mode---------------------------------------------------------------------
 # Continuous
@@ -46,9 +51,11 @@ NNS.mode(x)
 # Discrete and multiple modes
 NNS.mode(c(1, 2, 2, 3, 3, 4, 4, 5), discrete = TRUE, multi = TRUE)
 
+
 ## ----covariance---------------------------------------------------------------
 cov(x, y)
 (Co.LPM(1, x, y, mean(x), mean(y)) + Co.UPM(1, x, y, mean(x), mean(y)) - D.LPM(1, 1, x, y, mean(x), mean(y)) - D.UPM(1, 1, x, y, mean(x), mean(y))) * (length(x) / (length(x) - 1))
+
 
 ## ----cov_dec, warning=FALSE---------------------------------------------------
 cov.mtx = PM.matrix(LPM_degree = 1, UPM_degree = 1, target = 'mean', variable = cbind(x, y), pop_adj = TRUE)
@@ -61,12 +68,14 @@ cov.mtx$clpm + cov.mtx$cupm - cov.mtx$dlpm - cov.mtx$dupm
 # Standard Covariance Matrix
 cov(cbind(x, y))
 
+
 ## ----pearson------------------------------------------------------------------
 cor(x, y)
 cov.xy = (Co.LPM(1, x, y, mean(x), mean(y)) + Co.UPM(1, x, y, mean(x), mean(y)) - D.LPM(1, 1, x, y, mean(x), mean(y)) - D.UPM(1, 1, x, y, mean(x), mean(y))) * (length(x) / (length(x) - 1))
 sd.x = ((UPM(2, mean(x), x) + LPM(2, mean(x), x)) * (length(x) / (length(x) - 1))) ^ .5
 sd.y = ((UPM(2, mean(y), y) + LPM(2, mean(y) , y)) * (length(y) / (length(y) - 1))) ^ .5
 cov.xy / (sd.x * sd.y)
+
 
 ## ----cdfs,fig.align="center",fig.width=5,fig.height=3, results='hide'---------
 P = ecdf(x)
@@ -94,7 +103,7 @@ u_y = LPM.ratio(0, y, y)
 # Value of copula at c(.5, .5)
 Co.LPM(0, u_x, u_y, .5, .5)
 
-# Continuous CDF:
+# Area-weighted CDF (degree 1): the share of deviation area below each point, not P(X <= t)
 NNS.CDF(x, 1)
 
 # CDF with target:
@@ -102,6 +111,7 @@ NNS.CDF(x, 1, target = mean(x))
 
 # Survival Function:
 NNS.CDF(x, 1, type = "survival")
+
 
 ## ----numerical integration----------------------------------------------------
 x = seq(0, 1, .001) ; y = x ^ 2

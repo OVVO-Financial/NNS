@@ -20,7 +20,7 @@ NNS.ANOVA(control = mpg_man_trans, treatment = mpg_auto_trans, robust = TRUE)
 
 
 ## ----cars2, warning=FALSE-----------------------------------------------------
-wilcox.test(mpg ~ am, data=mtcars)
+wilcox.test(mpg ~ am, data=mtcars) 
 
 
 ## ----equalmeans, echo=TRUE, fig.width=10, fig.align='center'------------------
@@ -60,19 +60,19 @@ NNS.SS(x, y)
 
 ## ----stochsuperiorityci, echo=TRUE, eval = FALSE------------------------------
 ## NNS.SS(x, y, confidence.interval = TRUE, reps = 999, ci = 0.95)[1:5]
-##
+## 
 ## $p_gt
 ## [1] 0.233915
-##
+## 
 ## $p_tie
 ## [1] 0
-##
+## 
 ## $p_star
 ## [1] 0.233915
-##
+## 
 ## $lower
 ## [1] 0.2105631
-##
+## 
 ## $upper
 ## [1] 0.2537789
 
