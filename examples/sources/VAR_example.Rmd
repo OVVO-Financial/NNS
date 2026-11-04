@@ -1,0 +1,415 @@
+---
+title: "Multivariate Time Series Forecasting: Nonparametric Vector Autoregression"
+author: "Fred Viole"
+date: "Regenerated `r format(Sys.Date(), '%B %d, %Y')`"
+output:
+  html_document:
+    self_contained: true
+    highlight: tango
+    toc: true
+    number_sections: true
+---
+
+<!--
+Source for examples/VAR_example.html, rebuilt in November 2026 from the
+archived page's code and text (and OVVO Labs' Markdown conversion of it).
+The archived page read Lutz Kilian's textbook data files (fedfunds.txt,
+realgnp.txt, gnpdeflator.txt). This page uses the same series from FRED:
+data/VAR_example_fred.csv holds FEDFUNDS, GNPC96 and GNPDEF as downloaded on
+2026-11-04. Set refresh_data <- TRUE below to download them again.
+Build: Rscript examples/sources/build.R VAR_example   (about 1 minute)
+-->
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, comment = "##", fig.align = "center", fig.width = 8)
+refresh_data <- FALSE
+```
+
+# Introduction
+
+This quick note is intended to introduce the intuition behind the `NNS.VAR`
+function, which serves as a nonparametric vector autoregression.
+
+Install the latest version of `NNS` and the other required packages...
+
+```{r install, eval = FALSE}
+require(devtools)
+install_github("OVVO-Financial/NNS", ref = "NNS-Beta-Version")
+```
+
+```{r packages, message = FALSE}
+library(NNS)
+library(vars)
+library(forecast)
+library(randomForest)
+packageVersion("NNS")
+```
+
+# `NNS.VAR` Example with 3 Variables: Fed Funds, Real GNP, and Inflation
+
+Using the log differences of each `Real GNP` and `Inflation`, the previous
+method creates lowest frequency series. In this illustrative VAR example from
+Lutz Kilian[^1], `Fed Funds` (monthly) is averaged over 3-period windows to
+align with quarterly GNP data.
+
+The series come from FRED: `FEDFUNDS` (effective federal funds rate, monthly,
+percent), `GNPC96` (real gross national product, quarterly) and `GNPDEF` (GNP
+implicit price deflator, quarterly). The window, 1954 Q4 to 2007 Q4, is the
+archived page's 213 quarters. Its interest rates are reproduced exactly; real
+growth and inflation differ slightly because FRED serves the current vintage of
+the national accounts.
+
+```{r data}
+if (refresh_data) {
+  fred_csv <- function(id) {
+    x <- read.csv(paste0("https://fred.stlouisfed.org/graph/fredgraph.csv?id=", id),
+                  na.strings = ".")
+    data.frame(series = id, date = x[[1]], value = x[[2]])
+  }
+  fred <- rbind(subset(fred_csv("FEDFUNDS"), date >= "1954-10-01" & date <= "2007-12-01"),
+                subset(fred_csv("GNPC96"), date >= "1954-07-01" & date <= "2007-10-01"),
+                subset(fred_csv("GNPDEF"), date >= "1954-07-01" & date <= "2007-10-01"))
+  write.csv(fred[!is.na(fred$value), ], "data/VAR_example_fred.csv", row.names = FALSE)
+}
+
+# Load Variables
+fred <- read.csv("data/VAR_example_fred.csv")
+series <- function(id) setNames(fred$value[fred$series == id], fred$date[fred$series == id])
+FF <- series("FEDFUNDS")
+realgnp <- series("GNPC96")
+gnpdeflator <- series("GNPDEF")
+
+drgdp <- diff(log(realgnp)) * 100
+infl <- diff(log(gnpdeflator)) * 100
+irate <- tapply(FF, rep(seq_len(length(FF) / 3), each = 3), mean)
+
+y <- cbind(`Diff Real GDP` = drgdp, `Interest Rate` = irate, Inflation = infl)
+quarter <- function(d) paste0(substr(d, 1, 4), " Q", (as.integer(substr(d, 6, 7)) + 2) / 3)
+rownames(y) <- quarter(names(drgdp))
+head(y)
+tail(y)
+```
+
+# Forecast 12 Quarters Out-of-Sample Using All Methods
+
+We will withhold 12 quarters of observations as the `test` set. Let's see how
+accurate a VAR, a random forest and `NNS` are...
+
+Why a random forest? The Bank of England has recently been posting working
+papers utilizing machine learning, specifically random forests:
+
+* [Machine Learning at Central Banks](https://techpolicyinstitute.org/wp-content/uploads/2018/02/Joseph-machine-learning-at-central-banks.pdf)
+* [Predicting Bank Distress in the UK with Machine Learning](https://www.bankofengland.co.uk/-/media/boe/files/working-paper/2019/predicting-bank-distress-in-the-uk-with-machine-learning.pdf)
+
+Every method is fit and tuned on the training quarters. The tuning steps hold
+out the end of the training sample for internal validation; their scores choose
+settings and are reported as such. Only the final forecasts meet the test
+quarters.
+
+```{r windows}
+h <- 12
+y_train_VAR <- head(y, nrow(y) - h)
+y_test_VAR <- tail(y, h)
+span <- function(r) paste(r[1], "to", r[length(r)])
+data.frame(Window = c("Training (fit and tune)",
+                      "Internal validation: NNS.ARMA.optim, NNS.boost, NNS.stack",
+                      "Internal validation: NNS.VAR (pipeline)",
+                      "Test (final forecasts only)"),
+           Quarters = c(span(rownames(y_train_VAR)),
+                        span(tail(rownames(y_train_VAR), 2 * h)),
+                        span(tail(rownames(y_train_VAR), 40)),
+                        span(rownames(y_test_VAR))),
+           Length = c(nrow(y_train_VAR), 2 * h, 40, h))
+```
+
+The window of `NNS.VAR` is `max(2 * h, 0.2 * (n - tau))` quarters, 40 here; its
+output below confirms it.
+
+# Traditional VAR
+
+```{r var}
+# 4 quarterly lags used in VAR
+VAR_train <- VAR(y = y_train_VAR, p = 4)
+VAR_test <- predict(VAR_train, n.ahead = h)
+VAR_fc <- sapply(VAR_test$fcst, function(f) f[, "fcst"])
+
+rmse <- function(f, a) sqrt(mean((f - a)^2))
+# A constant forecast path has no rank correlation: NA.
+spearman <- function(f, a) if (sd(f) == 0) NA_real_ else cor(f, a, method = "spearman")
+test_scores <- function(fc, label) {
+  out <- cbind(sapply(1:3, function(i) rmse(fc[, i], y_test_VAR[, i])),
+               sapply(1:3, function(i) spearman(fc[, i], y_test_VAR[, i])))
+  dimnames(out) <- list(colnames(y), paste(label, c("RMSE", "Spearman")))
+  out
+}
+VAR_results <- test_scores(VAR_fc, "VAR")
+knitr::kable(VAR_results, digits = 4,
+             caption = paste("Test scores,", span(rownames(y_test_VAR))))
+```
+
+The Spearman correlations of the VAR forecasts with the test values are
+`r paste(sprintf("%.2f", VAR_results[, 2]), collapse = ", ")` for real growth,
+the interest rate and inflation.
+
+This highlights the dual objective of differenced time series data:
+
+* Get the sign right
+* Get the magnitude right
+
+`NNS` is able to address this dual objective in its routines as detailed in the
+following code chunks.
+
+# `NNS` and Random Forest
+
+## Function to Generate Lagged Variables
+
+The following code is to generate a matrix of lagged variables to be used in
+both `NNS` and Random Forest routines.
+
+```{r lag-mtx}
+lag.mtx <- function(x, tau) {
+  colheads <- NULL
+  if (is.null(dim(x)[2])) {
+    colheads <- noquote(as.character(deparse(substitute(x))))
+    x <- t(t(x))
+  }
+  j.vectors <- list()
+  for (j in 1:ncol(x)) {
+    if (is.null(colheads)) {
+      colheads <- colnames(x)[j]
+      colheads <- noquote(as.character(deparse(substitute(colheads))))
+    }
+    x.vectors <- list()
+    heads <- paste0(colheads, ".tau.")
+    heads <- gsub("\"", "", heads)
+    for (i in 0:tau) {
+      x.vectors[[paste(heads, i, sep = "")]] <- numeric(0L)
+      start <- tau - i + 1
+      end <- length(x[, j]) - i
+      x.vectors[[i + 1]] <- x[start:end, j]
+    }
+    j.vectors[[j]] <- do.call(cbind, x.vectors)
+    colheads <- NULL
+  }
+  return(as.data.frame(do.call(cbind, j.vectors)))
+}
+
+# Test it
+set.seed(123)
+V1 <- rnorm(10)
+V2 <- rnorm(10)
+V3 <- rnorm(10)
+lag.mtx(cbind(V1 = V1, V2 = V2, V3 = V3), 3)
+
+# Compare to last values of each variable
+cbind(V1 = tail(V1), V2 = tail(V2), V3 = tail(V3))
+```
+
+# Predictions
+
+## 1 Year Lag $(\tau = 4)$, 3 Year Forecast $(h = 12)$
+
+## Create Forecasted IVs Using `NNS.ARMA()`
+
+Each series is forecast on its own. `NNS.seas` lists candidate periods, and
+`NNS.ARMA.optim` chooses among them on the last `2 * h` training quarters.
+
+```{r nns-arma}
+nns_uni <- lapply(seq_len(ncol(y_train_VAR)), function(i) {
+  variable <- y_train_VAR[, i]
+  periods <- NNS.seas(variable, modulo = 4, mod.only = FALSE, plot = FALSE)$periods
+  NNS.ARMA.optim(variable, h = h, seasonal.factor = periods,
+                 training.set = length(variable) - 2 * h, ncores = 1,
+                 print.trace = FALSE, obj.fn = expression(sum((predicted - actual)^2)),
+                 objective = "min")
+})
+nns_IVs <- sapply(nns_uni, `[[`, "results")
+colnames(nns_IVs) <- colnames(y)
+
+knitr::kable(data.frame(Periods = sapply(nns_uni, function(b) paste(b$periods, collapse = ", ")),
+                        Method = sapply(nns_uni, `[[`, "method"),
+                        `Validation RMSE` = sqrt(sapply(nns_uni, `[[`, "obj.fn") / (2 * h)),
+                        row.names = colnames(y), check.names = FALSE),
+             digits = 4,
+             caption = paste("NNS.ARMA.optim internal validation,",
+                             span(tail(rownames(y_train_VAR), 2 * h)),
+                             "(the selected settings' own score)"))
+```
+
+```{r arma-compare}
+# Test how accurate the univariate NNS.ARMA forecasts are, against auto ARIMA
+arma_fc <- sapply(seq_len(ncol(y_train_VAR)), function(i)
+  as.numeric(forecast(auto.arima(y_train_VAR[, i]), h = h)$mean))
+NNS.ARMA_results <- test_scores(nns_IVs, "NNS ARMA")
+auto.ARMA_results <- test_scores(arma_fc, "Auto ARMA")
+knitr::kable(cbind(VAR_results, NNS.ARMA_results, auto.ARMA_results), digits = 4,
+             caption = paste("Test scores,", span(rownames(y_test_VAR))))
+```
+
+`NA` marks a constant forecast path, which has no rank correlation.
+
+```{r arma-plots, fig.height = 9}
+par(mfrow = c(3, 1), mar = c(4, 4, 1, 1))
+for (i in 1:3) {
+  plot(1:h, y_test_VAR[, i], type = "l", lwd = 3,
+       ylim = range(y[, i]), xlab = "Forecast Period", ylab = colnames(y)[i])
+  lines(1:h, nns_IVs[, i], col = "red", lwd = 2)
+  lines(1:h, VAR_fc[, i], col = "blue", lwd = 2)
+  lines(1:h, arma_fc[, i], col = "brown", lwd = 2)
+  legend("topleft", col = c("black", "red", "blue", "brown"),
+         legend = c("Actual", "NNS", "VAR", "ARMA"), lty = 1, lwd = c(3, 2, 2, 2))
+}
+```
+
+The archived page also ran Kolmogorov-Smirnov tests between each forecast path
+and the test values. Those treat the 12 forecasts and the 12 outcomes as two
+independent samples and compare their spreads, not the forecast errors, so they
+are not repeated here.
+
+# Use Forecasted IVs in `NNS` and Random Forest
+
+We will now utilize the forecasted variables in the multi-variate `NNS.reg()`
+function. Our first step is to pass these variables through the `NNS.boost()`
+function in order to reduce any unnecessary features. The objective function
+`obj.fn` and objective `objective` are set explicitly, since this is not a
+classification problem.
+
+From there, we use the reduced variable set (if any reduction) in the
+`NNS.stack()` function which cross-validates the `n.best` and `threshold`
+parameters from the `NNS.reg()` function. Both tune on the last `2 * h` rows of
+the lagged training matrix.
+
+```{r nns-stack, fig.height = 9}
+# Combine forecasted IVs onto training data.frame, then lag it
+new_values <- rbind(y_train_VAR, nns_IVs)
+lagged_new_values <- lag.mtx(new_values, tau = 4)
+y_train_nns <- head(lagged_new_values, nrow(lagged_new_values) - h)
+y_test_nns <- tail(lagged_new_values, h)
+
+# Select tau = 0 as test set DVs
+DVs <- which(grepl("tau.0", colnames(y_train_nns)))
+nns_est <- rf_est <- list()
+stack_validation <- matrix(NA, 3, 2, dimnames = list(colnames(y), c("Multivariate", "Dimension reduction")))
+
+par(mfrow = c(3, 1), mar = c(4, 4, 1, 1))
+for (i in DVs) {
+  index <- which(DVs == i)
+  # NNS.boost() is an ensemble method comparable to xgboost, and aids in dimension reduction
+  nns_boost_est <- NNS.boost(IVs.train = y_train_nns[, -i], DV.train = y_train_nns[, i],
+                             IVs.test = y_test_nns[, -i],
+                             obj.fn = expression(sum((predicted - actual)^2)), objective = "min",
+                             ts.test = 2 * h, learner.trials = 100, epochs = 100, type = NULL,
+                             feature.importance = FALSE, folds = 1, status = FALSE)
+
+  # NNS.stack() cross-validates the parameters of the multivariate NNS.reg()
+  # and dimension reduction NNS.reg()
+  relevant_vars <- colnames(y_train_nns) %in% names(nns_boost_est$feature.weights)
+  nns_stack <- NNS.stack(IVs.train = y_train_nns[, relevant_vars], DV.train = y_train_nns[, i],
+                         IVs.test = y_test_nns[, relevant_vars], folds = 1, ts.test = 2 * h,
+                         order = "max", obj.fn = expression(sum((predicted - actual)^2)),
+                         objective = "min", type = "REG", status = FALSE)
+  stack_validation[index, ] <- sqrt(c(nns_stack$OBJfn.reg, nns_stack$OBJfn.dim.red) / (2 * h))
+
+  # Ensemble with univariate estimates
+  nns_est[[index]] <- (nns_IVs[, index] + nns_stack$stack) / 2
+
+  # Random Forest
+  set.seed(123)
+  rf <- randomForest(y_train_nns[, -i], y_train_nns[, i], ntree = 100)
+  rf_est[[index]] <- predict(rf, newdata = y_test_nns[, -i])
+
+  # Plot all results
+  plot(1:h, y_test_VAR[, index], type = "l", lwd = 3, ylim = range(y[, index]),
+       xlab = "Forecast Period", ylab = colnames(y)[index])
+  lines(1:h, nns_est[[index]], col = "red", lwd = 2)
+  lines(1:h, rf_est[[index]], col = "green", lwd = 2)
+  lines(1:h, VAR_fc[, index], col = "blue", lwd = 2)
+  legend("topleft", col = c("black", "red", "blue", "green"),
+         legend = c("Actual", "NNS", "VAR", "RF"), lty = 1, lwd = c(3, 2, 2, 2))
+}
+nns_est <- do.call(cbind, nns_est)
+rf_est <- do.call(cbind, rf_est)
+```
+
+```{r stack-validation}
+knitr::kable(stack_validation, digits = 4,
+             caption = paste("NNS.stack internal validation RMSE,",
+                             span(tail(rownames(y_train_VAR), 2 * h)),
+                             "(best tuned value of each component)"))
+```
+
+```{r all-results}
+ALL_RESULTS <- cbind(VAR_results, NNS.ARMA_results,
+                     test_scores(nns_est, "NNS"), test_scores(rf_est, "RF"))
+knitr::kable(ALL_RESULTS, digits = 4,
+             caption = paste("Test scores,", span(rownames(y_test_VAR))))
+```
+
+# `NNS.VAR()`
+
+The `NNS.VAR()` function now accomplishes all of the prior steps in a single
+line of code. By default (`naive.weights = TRUE`) its ensemble weights the
+univariate and multivariate forecasts equally.
+
+`NNS.VAR` tunes on its own chronological holdout inside the training sample.
+With the default `validation = "pipeline"`, the holdout's lagged predictors are
+built from each series' forecasts made at the holdout's origin, as they would
+be in use, and only observed holdout values are scored.
+
+```{r nns-var}
+nns_var_estimates <- NNS.VAR(y_train_VAR, h = 12, tau = 4, ncores = 1, status = FALSE)
+nns_var_estimates[c("univariate", "multivariate", "ensemble")]
+nns_var_estimates$validation
+```
+
+The holdout starts after training quarter
+`r nns_var_estimates$validation$origin`
+(`r rownames(y_train_VAR)[nns_var_estimates$validation$origin]`) and covers
+`r nns_var_estimates$validation$horizon` quarters.
+
+```{r nns-var-scores}
+NNS_VAR_results <- rbind(test_scores(as.matrix(nns_var_estimates$univariate), "x"),
+                         test_scores(as.matrix(nns_var_estimates$multivariate), "x"),
+                         test_scores(as.matrix(nns_var_estimates$ensemble), "x"))
+NNS_VAR_results <- data.frame(Forecast = rep(c("univariate", "multivariate", "ensemble"), each = 3),
+                              Variable = rep(colnames(y), 3),
+                              RMSE = NNS_VAR_results[, 1], Spearman = NNS_VAR_results[, 2])
+knitr::kable(NNS_VAR_results, digits = 4, row.names = FALSE,
+             caption = paste("NNS.VAR test scores,", span(rownames(y_test_VAR))))
+```
+
+# Comparing the Methods
+
+```{r summary}
+rmse_table <- cbind(VAR = VAR_results[, 1], `NNS ARMA` = NNS.ARMA_results[, 1],
+                    `Auto ARMA` = auto.ARMA_results[, 1],
+                    `NNS (boost + stack)` = ALL_RESULTS[, "NNS RMSE"],
+                    RF = ALL_RESULTS[, "RF RMSE"],
+                    `NNS.VAR ensemble` = NNS_VAR_results$RMSE[NNS_VAR_results$Forecast == "ensemble"])
+knitr::kable(rmse_table, digits = 4,
+             caption = paste("Test RMSE by method,", span(rownames(y_test_VAR))))
+```
+
+These are scores from one forecast origin: 12 quarters for each of three
+series. They describe this window.
+Ranking the methods would need several forecast origins (rolling or expanding
+windows) with the same data, origins, horizon and tuning budget for every
+method. The internal validation tables above are the scores each `NNS` step
+optimized; they are not estimates of test accuracy.
+
+> **Note (2026).** This page was rebuilt with the current `NNS`. The archived
+> page's tables came from an earlier data vintage and `NNS` version and are not
+> carried forward. `NNS.ARMA.optim` no longer adds a validation bias shift by
+> default (`bias.correction = "none"`), and `NNS.VAR` now validates with
+> predictors built from forecasts. The Kolmogorov-Smirnov section is withdrawn
+> (see above). See `examples/example-corrections.md`.
+
+# Session Information
+
+```{r session}
+sessionInfo()
+```
+
+[^1]: Kilian, L. and Lütkepohl, H. (2017) *Structural Vector Autoregressive
+Analysis*, Cambridge University Press. The archived page linked the textbook
+data at <https://sites.google.com/site/lkilian2019/>.

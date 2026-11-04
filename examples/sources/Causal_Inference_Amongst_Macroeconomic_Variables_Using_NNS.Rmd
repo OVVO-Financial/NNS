@@ -1,0 +1,273 @@
+---
+title: "Causal Inference Amongst Macroeconomic Variables Using NNS"
+author: "Fred Viole"
+date: "December 7, 2022; regenerated `r format(Sys.Date(), '%B %d, %Y')`"
+output:
+  html_document:
+    self_contained: true
+    highlight: tango
+    toc: true
+---
+
+<!--
+Source for examples/Causal_Inference_Amongst_Macroeconomic_Variables_Using_NNS.html,
+rebuilt in November 2026 from the archived page's code and text (and OVVO
+Labs' Markdown conversion of it). The archived page called NNS.nowcast(),
+which is no longer in NNS; this page builds the same 29 FRED series into a
+monthly panel and aligns it with NNS.VAR(h = 0) as NNS.nowcast did.
+data/Causal_Inference_Amongst_Macroeconomic_Variables_fred.csv holds the panel
+as downloaded on 2026-11-04. Set refresh_data <- TRUE below to download it again.
+Build: Rscript examples/sources/build.R Causal_Inference_Amongst_Macroeconomic_Variables_Using_NNS
+       (under a minute)
+-->
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, comment = "##", fig.align = "center")
+refresh_data <- FALSE
+```
+
+```{r packages, message = FALSE}
+library(NNS)
+packageVersion("NNS")
+```
+
+# Economic Variables
+
+The variable list was used from the NY Fed Nowcast method
+(<https://www.newyorkfed.org/research/policy/nowcast>) and augmented with
+several additional variables, specifically:
+
+* 10-year Treasury rates `DGS10`
+* 2-10 year Treasury rate spread `T10Y2Y`
+* weekly unemployment claims `ICSA`
+* Federal Reserve total assets `WALCL`
+
+```{r variables}
+variables <- c(PAYEMS = "Payroll Employment", JTSJOL = "Job Openings",
+               CPIAUCSL = "Consumer Price Index", DGORDER = "Durable Goods Orders",
+               RSAFS = "Retail Sales", UNRATE = "Unemployment Rate",
+               HOUST = "Housing Starts", INDPRO = "Industrial Production",
+               DSPIC96 = "Real Disposable Personal Income", BOPTEXP = "Exports",
+               BOPTIMP = "Imports", TTLCONS = "Construction Spending",
+               IR = "Import Price Index", CPILFESL = "Core Consumer Price Index",
+               PCEPILFE = "Core PCE Price Index", PCEPI = "PCE Price Index",
+               PERMIT = "Building Permits", TCU = "Capacity Utilization Rate",
+               BUSINV = "Business Inventories", ULCNFB = "Unit Labor Cost (quarterly)",
+               IQ = "Export Price Index", GACDISA066MSFRBNY = "Empire State Mfg Index",
+               GACDFSA066MSFRBPHI = "Philadelphia Fed Mfg Index",
+               PCEC96 = "Real Consumption Spending", GDPC1 = "Real GDP (quarterly)",
+               ICSA = "Weekly Unemployment Claims", DGS10 = "10-year Treasury Rate",
+               T10Y2Y = "2-10 year Treasury Spread", WALCL = "Fed Total Assets (weekly)")
+knitr::kable(data.frame(FRED = names(variables), Series = unname(variables)))
+```
+
+The series come from FRED. Monthly series are used as published. Daily and
+weekly series keep each month's last observation, as `NNS.nowcast()` did.
+Quarterly series sit in the first month of their quarter, with the other two
+months missing. The panel runs from January 2007 to December 2022, the month
+of the archived page; every series is observed from January 2007 (real
+consumption spending, `PCEC96`, starts there in the current vintage). The
+archived page started in 2000 and filled the years before a series began.
+
+```{r data}
+if (refresh_data) {
+  months <- format(seq(as.Date("2007-01-01"), as.Date("2022-12-01"), by = "month"), "%Y-%m")
+  panel <- data.frame(month = months, sapply(names(variables), function(id) {
+    x <- read.csv(paste0("https://fred.stlouisfed.org/graph/fredgraph.csv?id=", id),
+                  na.strings = ".")
+    x <- x[!is.na(x[[2]]), ]
+    last <- tapply(x[[2]], substr(x[[1]], 1, 7), function(v) v[length(v)])
+    as.numeric(last[months])
+  }), check.names = FALSE)
+  write.csv(panel, "data/Causal_Inference_Amongst_Macroeconomic_Variables_fred.csv",
+            row.names = FALSE)
+}
+panel <- read.csv("data/Causal_Inference_Amongst_Macroeconomic_Variables_fred.csv",
+                  check.names = FALSE)
+econ_variables <- ts(panel[, names(variables)], start = c(2007, 1), frequency = 12)
+dim(econ_variables)
+colSums(is.na(econ_variables))[colSums(is.na(econ_variables)) > 0]
+```
+
+# Step 1: Align the Frequencies with `NNS.VAR`
+
+This preliminary step will create an interpolated/extrapolated data.frame of
+all of the economic variables such that frequencies are aligned to monthly
+values. `NNS.nowcast()` did this with the variables predefined; it called
+`NNS.VAR` with `h = 0`, which returns just the completed data. Missing months
+before a series' last observation are interpolated linearly; missing months
+after it are `NNS.ARMA` forecasts (here November and December 2022 for the two
+quarterly series).
+
+```{r nowcast}
+nns_estimates <- NNS.VAR(econ_variables, h = 0, tau = 12, nowcast = TRUE, status = FALSE)
+# View the last year's values
+tail(nns_estimates[, c("PAYEMS", "UNRATE", "GDPC1", "ULCNFB", "DGS10", "WALCL")], 12)
+```
+
+With `h = 0` no forecast is made, so the validation step of `NNS.VAR` does not run.
+A forecast (`h > 0`) tunes on a chronological holdout whose predictors are
+built from forecasts made at the holdout's origin (`validation = "pipeline"`).
+
+# Step 2: Directional Association with `NNS.caus`
+
+`NNS.caus(x, y, tau)` compares the lagged pairs $(x_{t-\tau}, y_t)$ and
+$(y_{t-\tau}, x_t)$ after mapping each variable to the copula scale with its
+ranks, so the result does not depend on units or on any increasing
+transformation of either variable. For each direction it combines how much of
+the effect's deviation is resolved by the candidate cause's position, $P$, with
+the excess directional dependence of the lagged pair, $\rho$:
+
+$$\tilde{C}_{x \to y} = \tfrac{1}{2}\left[P_{x \to y} + \max(\rho_{x \to y} - \rho_{y \to x}, 0)\right],
+\qquad
+C_{x \to y} = \frac{\tilde{C}_{x \to y} + \kappa}{\tilde{C}_{x \to y} + \tilde{C}_{y \to x} + 2\kappa},$$
+
+with $\kappa = 1/\sqrt{n - \tau}$. The two directions sum to 1, and 0.5 means
+no net direction. For a matrix, entry `[i, j]` is $C$(column `i` $\to$ column
+`j`); the archived page read the matrix the other way round.
+
+The index measures **directional lagged association**. It does not condition
+on the effect's own history or on the other variables, and a common driver
+that reaches one series before another can produce a direction without any
+causal effect between them.
+
+The permutation test below circularly shifts one series, which requires series
+whose behaviour does not change over time. Levels of employment, prices or the
+Fed's balance sheet trend upward, so each series is transformed first: monthly
+log changes (percent) for positive trending series, monthly changes for rates,
+and levels for the Treasury spread and the two survey indices.
+
+```{r transform}
+transform <- setNames(rep("log change", length(variables)), names(variables))
+transform[c("UNRATE", "TCU", "DGS10")] <- "change"
+transform[c("T10Y2Y", "GACDISA066MSFRBNY", "GACDFSA066MSFRBPHI")] <- "level"
+X <- sapply(names(variables), function(id) {
+  v <- nns_estimates[[id]]
+  switch(transform[[id]],
+         "log change" = c(NA, diff(log(v))) * 100,
+         "change" = c(NA, diff(v)),
+         "level" = v)
+})
+X <- X[-1, ]
+rownames(X) <- rownames(nns_estimates)[-1]
+table(transform)
+```
+
+We use a one-month lag, `tau = 1`.
+
+```{r caus}
+nns_econ_causes <- NNS.caus(X, tau = 1)
+dim(nns_econ_causes)
+```
+
+Large 29x29 matrix output, so we will just call the `WALCL` row, the index of
+`WALCL` leading each variable, and the matching column, each variable leading
+`WALCL`.
+
+```{r walcl}
+walcl <- data.frame(`WALCL -> variable` = nns_econ_causes["WALCL", ],
+                    `variable -> WALCL` = nns_econ_causes[, "WALCL"],
+                    check.names = FALSE)[colnames(X) != "WALCL", ]
+knitr::kable(walcl[order(-walcl[, 1]), ], digits = 3)
+```
+
+The `WALCL` row ranges from `r sprintf("%.2f", min(walcl[, 1]))` to
+`r sprintf("%.2f", max(walcl[, 1]))`; `r sum(walcl[, 1] > 0.5)` of the 28
+values are above 0.5. Distance from 0.5 alone is not evidence: the index
+varies under independence too, more for persistent series. The next sections
+calibrate it.
+
+# Add Some Noise Terms
+
+We will add some noise terms to see how `WALCL` relates to variables that, by
+construction, it cannot lead. `NOISE` is $N(0,1)$ while `NOISE_2` is
+$N(10,20)$. Because the index uses ranks, `NOISE_2` is a second noise draw on
+another scale, nothing more.
+
+```{r noise}
+set.seed(123)
+X_noise <- cbind(X, NOISE = rnorm(nrow(X), 0, 1), NOISE_2 = rnorm(nrow(X), 10, 20))
+nns_econ_causes_with_noise <- NNS.caus(X_noise, tau = 1)
+round(nns_econ_causes_with_noise[c("WALCL", "NOISE", "NOISE_2"), c("WALCL", "NOISE", "NOISE_2")], 3)
+noise_rows <- c(nns_econ_causes_with_noise[c("NOISE", "NOISE_2"), colnames(X)])
+round(summary(noise_rows), 3)
+```
+
+The noise rows' indices for the 29 economic variables run from
+`r sprintf("%.2f", min(noise_rows))` to `r sprintf("%.2f", max(noise_rows))`,
+against `r sprintf("%.2f", min(walcl[, 1]))` to
+`r sprintf("%.2f", max(walcl[, 1]))` for the `WALCL` row.
+
+# Significance and Strength of Inference
+
+The archived page compared each `WALCL` value with the 95% quantile of
+indices for 100 fresh draws of the noise terms. Independent noise has none of
+the serial dependence of `WALCL`, so it is not a reference for `WALCL`.
+`NNS.caus(..., p.value = TRUE)` instead shifts the effect series circularly
+against `WALCL` by offsets at least `max(tau + 1, n / 10)` months from
+alignment. The shift keeps each series' own dependence and breaks their
+alignment; the p-values test the signed statistic $C_{x \to y} - C_{y \to x}$
+against those shifts. The two noise series are included as a check.
+
+```{r pvalues}
+targets <- c(colnames(X)[colnames(X) != "WALCL"], "NOISE", "NOISE_2")
+tests <- lapply(targets, function(v)
+  NNS.caus(X_noise[, "WALCL"], X_noise[, v], tau = 1, p.value = TRUE, nperm = 1000, seed = 123))
+final_comp <- data.frame(`WALCL -> variable` = sapply(tests, function(r) r$causation[[1]]),
+                         `p (two-sided)` = sapply(tests, function(r) r$p.value$two.sided),
+                         `p (WALCL leads)` = sapply(tests, function(r) r$p.value$x_causes_y),
+                         row.names = targets, check.names = FALSE)
+final_comp$`Holm p (two-sided)` <- NA
+economic <- !(targets %in% c("NOISE", "NOISE_2"))
+final_comp$`Holm p (two-sided)`[economic] <- p.adjust(final_comp$`p (two-sided)`[economic], "holm")
+nperm_used <- tests[[1]]$p.value$nperm
+knitr::kable(final_comp[order(final_comp$`p (two-sided)`), ], digits = 3)
+```
+
+Each test used the `r nperm_used` admissible shifts of
+`r nrow(X) - 1` lagged pairs, so no p-value can be smaller than
+`r sprintf("%.4f", 1 / (nperm_used + 1))`.
+
+## Strength of Causal Inference
+
+```{r strength}
+below <- final_comp$`p (two-sided)` < 0.05
+significant <- rownames(final_comp)[economic & below]
+noise_below <- rownames(final_comp)[!economic & below]
+knitr::kable(final_comp[below, , drop = FALSE], digits = 3)
+```
+
+```{r strength-text, include = FALSE}
+listing <- function(v) if (length(v)) paste0(" (", paste(v, collapse = ", "), ")") else ""
+holm_below <- sum(final_comp[["Holm p (two-sided)"]] < 0.05, na.rm = TRUE)
+```
+
+Before adjustment, `r length(significant)` of the 28 economic
+variables`r listing(significant)` and `r length(noise_below)` of the 2 noise
+series`r listing(noise_below)` are below 5%. After a Holm adjustment for the 28
+comparisons, `r if (holm_below == 0) "none is" else paste(holm_below, if (holm_below == 1) "is" else "are")`.
+With 30 tests, one or two p-values below 5% are expected by chance alone, as
+the noise check shows. A result here would describe a one-month directional
+lagged association in 2007-2022, not an effect of the Fed's assets on the
+economy.
+
+> **Note (2026).** The archived page (December 2022) used `NNS.nowcast()`,
+> which is no longer in `NNS`, applied the former `NNS.caus` to the variables'
+> levels from 2000, read its matrix with the opposite orientation, and judged
+> significance against independent noise. Its tables and its conclusion that
+> Fed assets cause the listed variables are withdrawn. See
+> `examples/example-corrections.md`.
+
+# Session Information
+
+```{r session}
+sessionInfo()
+```
+
+# References
+
+1. Viole, Fred, Multivariate Time Series Forecasting: Nonparametric Vector
+   Autoregression Using NNS (November 18, 2019). Available at SSRN:
+   <https://ssrn.com/abstract=3489550>
+2. Viole, Fred and Nawrocki, David N., Causation (June 1, 2013). Available at
+   SSRN: <https://ssrn.com/abstract=2273756>

@@ -1,0 +1,324 @@
+---
+title: "Nonlinear Scaling Normalization with NNS"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+<!--
+Source for examples/Normalization.pdf, reconstructed in November 2026 from the
+published PDF's text (OVVO Labs' Markdown conversion of it). The code runs
+against the current NNS. Quantile normalization uses Bioconductor's
+preprocessCore when it is installed and otherwise the base R version defined
+below. The financial sections download data from Yahoo Finance and FRED and
+run only when those downloads succeed; FRED series are read from its
+fredgraph.csv endpoint because quantmod's older FRED route no longer resolves.
+Build: Rscript examples/sources/build.R Normalization
+-->
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, comment = "##", fig.align = "center")
+library(NNS)
+library(quantmod)
+# Yahoo Finance data for the financial sections, when it can be downloaded.
+yahoo <- function(sym, ...) tryCatch(getSymbols(sym, src = "yahoo", auto.assign = FALSE, ...),
+                                     error = function(e) NULL)
+fred <- function(id) {
+  d <- tryCatch(read.csv(paste0("https://fred.stlouisfed.org/graph/fredgraph.csv?id=", id),
+                         na.strings = "."), error = function(e) NULL)
+  if (is.null(d)) return(NULL)
+  xts::xts(as.numeric(d[[2]]), as.Date(d[[1]]), dimnames = list(NULL, id))
+}
+# Download everything once; a section runs only when all of its series arrived.
+fin <- lapply(c(SPY = "SPY", GLD = "GLD", TLT = "TLT", FXE = "FXE"), yahoo)
+fin_ok <- !any(vapply(fin, is.null, logical(1)))
+spy_long <- if (fin_ok) yahoo("SPY", from = "1965-01-01")
+mzm <- fred("MZMNS")
+dgs10 <- fred("DGS10")
+mag_ok <- fin_ok && !is.null(spy_long) && !is.null(mzm) && !is.null(dgs10)
+```
+
+# Install NNS
+
+We need the latest version of NNS available on GitHub.
+
+```{r install, eval = FALSE}
+require(devtools); install_github('OVVO-Financial/NNS', ref = "NNS-Beta-Version")
+require(NNS)
+```
+
+# Nonlinear Scaling Normalization
+
+NNS nonlinear scaling normalization involves using the degree of nonlinearity
+between variables to then transform the values to a shared range.
+
+NNS's technique is different than linear scaling where all variables are
+assumed to have a perfect linear relationship (and by extension wind up with
+the same mean); and different than standardization
+($\frac{x - \mu}{\sigma}$) which does not consider variable relationships.
+
+NNS is also different than quantile normalization, which as we'll show is not
+robust to different original scale values in multivariate problems.
+
+# Examples
+
+A multivariate example of each technique will highlight the differences.
+
+We will use the quintessential quantile normalization example on Wikipedia as
+well as a more intricate financial variable example.
+
+```{r data, fig.height = 4}
+A <- c(5, 4, 3); B <- c(2, 1, 4); C <- c(3, 4, 6); D <- c(4, 2, 8)
+matplot(cbind(A, B, C, D), type = 'l')
+```
+
+## Linear Scaling
+
+NNS offers a linear scaling option which essentially sets the correlation
+between variables to 1.
+
+```{r linear, fig.height = 4}
+lin.norm.variables <- NNS.norm(cbind(A, B, C, D), chart.type = 'l', linear = TRUE)
+```
+
+A quick check verifies all of the means are equal for the linear scaling
+technique:
+
+```{r linear-check}
+t(lin.norm.variables)
+
+apply(lin.norm.variables, 2, function(x) c(mean = mean(x), sd = sd(x)))
+```
+
+## Standard Standardization
+
+Variables after going through a standard standardization technique will have a
+zero mean and unit variance. The following demonstrates the results.
+
+```{r standard, fig.height = 4}
+matplot(scale(cbind(A, B, C, D)), type = 'l')
+```
+
+Means = 0; variances = 1...
+
+```{r standard-check}
+apply(scale(cbind(A, B, C, D)), 2, function(x) c(mean = mean(x), sd = sd(x)))
+```
+
+## NNS Nonlinear Scaling
+
+We can now compare the nonlinear scaling normalization technique.
+
+```{r nonlinear, fig.height = 4}
+nonlin.norm.variables <- NNS.norm(cbind(A, B, C, D), chart.type = 'l')
+```
+
+And we note the difference in means along with the smaller standard deviation
+for each transformed variable versus the other methods.
+
+```{r nonlinear-check}
+t(nonlin.norm.variables)
+
+apply(nonlin.norm.variables, 2, function(x) c(mean = mean(x), sd = sd(x)))
+```
+
+## Quantile Normalization
+
+Quantile normalization is a technique for making two or more distributions
+identical in statistical properties. This is the antithesis of `NNS.norm` as
+we seek to retain the uniqueness of each distribution while creating a shared
+range of observations.
+
+The PDF used `normalize.quantiles()` from Bioconductor's **preprocessCore**
+(`BiocManager::install("preprocessCore")`). When it is not installed, the
+base R version below averages the sorted columns and gives tied values their
+lowest rank, as in the Wikipedia example.
+
+```{r quantile-function}
+if (requireNamespace("preprocessCore", quietly = TRUE)) {
+  normalize.quantiles <- preprocessCore::normalize.quantiles
+} else {
+  normalize.quantiles <- function(x) {
+    means <- rowMeans(apply(x, 2, sort))
+    apply(x, 2, function(z) means[rank(z, ties.method = "min")])
+  }
+}
+```
+
+```{r quantile}
+# QN function expects a matrix...create a matrix using the same example
+mat <- matrix(c(5, 2, 3, 4, 4, 1, 4, 2, 3, 4, 6, 8),
+              ncol = 3)
+row.names(mat) <- c("A", "B", "C", "D")
+mat
+
+qn.mat <- apply(normalize.quantiles(mat), 1, function(x) c(mean = mean(x), sd = sd(x)))
+colnames(qn.mat) <- c("A", "B", "C", "D")
+
+QN <- normalize.quantiles(mat)
+```
+
+Comparing all methods with the original dataset yields:
+
+```{r compare-small, fig.height = 3.5}
+# Rotate matrix for plotting as QN is row based variables
+QN <- t(QN[1:nrow(QN), ])
+
+# Plot
+par(mfrow = c(1, 3))
+matplot(QN, type = 'l')
+title(main = "Quantile Normalization")
+matplot(nonlin.norm.variables, type = 'l')
+title(main = "Nonlinear Normalization")
+matplot(lin.norm.variables, type = 'l')
+title(main = "Linear Normalization")
+```
+
+# Financial Series Example
+
+Let's load some financial variables that have overlapping prices...
+
+```{r financial-data, eval = fin_ok, fig.height = 4}
+# fin: daily prices downloaded from Yahoo Finance in the setup chunk
+SPY <- Cl(to.monthly(fin$SPY))
+GLD <- Cl(to.monthly(fin$GLD))
+TLT <- Cl(to.monthly(fin$TLT))
+FXE <- Cl(to.monthly(fin$FXE))
+A <- as.matrix(cbind(SPY, GLD, TLT, FXE))
+A <- A[complete.cases(A), ]
+
+# Plot
+matplot(A, type = 'l')
+legend('topleft', legend = c("SPY", "GLD", "TLT", "FXE"), col = seq_len(ncol(A)),
+       fill = seq_len(ncol(A)), horiz = TRUE, bty = 'n')
+```
+
+Comparing all methods with the original dataset yields:
+
+```{r financial-compare, eval = fin_ok, fig.height = 3.5}
+# Rotate matrix to variables by row for QN
+qn.mat <- t(A[1:nrow(A), ])
+QN <- normalize.quantiles(qn.mat)
+nonlin.norm.variables <- NNS.norm(A)
+lin.norm.variables <- NNS.norm(A, linear = TRUE)
+
+# Rotate QN results so matplot can use columns
+QN <- t(QN[1:nrow(QN), ])
+
+# Plot
+par(mfrow = c(1, 3))
+matplot(QN, type = 'l')
+title(main = "Quantile Normalization")
+matplot(nonlin.norm.variables, type = 'l')
+title(main = "Nonlinear Normalization")
+matplot(lin.norm.variables, type = 'l')
+title(main = "Linear Normalization")
+```
+
+```{r financial-skipped, echo = FALSE, eval = !fin_ok, results = "asis"}
+cat("*Yahoo Finance data could not be downloaded when this document was built, so this section was not run.*")
+```
+
+Note the tighter overall range for `NNS.norm`.
+
+# Non-overlapping variables
+
+When the variables do not share any ranges of observations, quantile
+normalization merely reports the mean value for that variable.
+
+```{r nonoverlap-data, fig.height = 4}
+set.seed(123)
+x <- rnorm(100); y = rnorm(100) + 5; z = rnorm(100) + 10
+A <- as.matrix(cbind(x, y, z))
+nonlin.norm.variables <- NNS.norm(A)
+lin.norm.variables <- NNS.norm(A, linear = TRUE)
+
+# Plot
+matplot(A, type = 'l')
+legend('topleft', legend = colnames(A), col = seq_len(ncol(A)),
+       fill = seq_len(ncol(A)), horiz = TRUE, bty = 'n')
+
+# Rotate matrix to variables by row for QN
+qn.mat <- t(A[1:nrow(A), ])
+QN <- normalize.quantiles(qn.mat)
+```
+
+Quantiles have a problem...
+
+```{r nonoverlap-compare, fig.height = 3.5}
+# Rotate QN results so matplot can use columns
+QN <- t(QN[1:nrow(QN), ])
+
+# Plot
+par(mfrow = c(1, 3))
+matplot(QN, type = 'l')
+title(main = "Quantile Normalization")
+matplot(nonlin.norm.variables, type = 'l')
+title(main = "Nonlinear Normalization")
+matplot(lin.norm.variables, type = 'l')
+title(main = "Linear Normalization")
+```
+
+# Orders of Magnitude Reduced
+
+We can successfully remove orders of magnitude differences between variables.
+Here is a financial example using money supply (MZM) measured in billions of
+dollars, the S&P 500 (SPY) closing prices measured in points and US 10-year
+Treasury yields (Ts) measured in percentage points.
+
+```{r magnitude, eval = mag_ok, fig.height = 4}
+# spy_long from Yahoo Finance; mzm and dgs10 from FRED (setup chunk)
+SPY <- Ad(to.monthly(spy_long['1962::']))
+MZM <- mzm['1962::']
+Ts <- Cl(to.monthly(dgs10['1962::']))
+A <- as.matrix(merge(SPY, MZM, Ts, join = "inner"))
+A <- A[complete.cases(A), ]
+
+# Plot
+matplot(A, type = 'l')
+legend('topleft', legend = c("SPY", "MZM", "Ts"), col = seq_len(ncol(A)),
+       fill = seq_len(ncol(A)), horiz = TRUE, bty = 'n')
+```
+
+```{r magnitude-compare, eval = mag_ok, fig.height = 3.5}
+# Rotate matrix to variables by row for QN
+qn.mat <- t(A[1:nrow(A), ])
+nonlin.norm.variables <- NNS.norm(A)
+lin.norm.variables <- NNS.norm(A, linear = TRUE)
+QN <- normalize.quantiles(qn.mat)
+
+# Rotate QN results so matplot can use columns
+QN <- t(QN[1:nrow(QN), ])
+
+# Plot
+par(mfrow = c(1, 3))
+matplot(QN, type = 'l')
+title(main = "Quantile Normalization")
+matplot(nonlin.norm.variables, type = 'l')
+title(main = "Nonlinear Normalization")
+matplot(lin.norm.variables, type = 'l')
+title(main = "Linear Normalization")
+```
+
+```{r magnitude-skipped, echo = FALSE, eval = !mag_ok, results = "asis"}
+cat("*Yahoo Finance or FRED data could not be downloaded when this document was built, so this section was not run.*")
+```
+
+> **Note (2026).** `NNS.norm` multiplies each column by a scaling factor.
+> Positive factors preserve Pearson correlations; a negative factor reverses
+> the sign of that column's correlations. Check the factors' signs before
+> interpreting associations between normalized variables (see
+> `examples/example-corrections.md`).
+
+# Practical Applications
+
+Normalization eliminates the need for multiple y-axis charts and prohibits the
+misuse thereof. Furthermore, placing variables on the same axes with shared
+ranges permits a more relevant conditional probability analysis, which along
+with time normalization is used in the `NNS.caus()` routine for identifying
+causal relationships between variables.
+
+To learn more about NNS statistics and their theoretical foundations, see
+*Nonlinear Nonparametric Statistics: Using Partial Moments*
+(<https://ovvo-financial.github.io/NNS/book/>). More NNS examples are posted
+on GitHub: <https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/index.md>

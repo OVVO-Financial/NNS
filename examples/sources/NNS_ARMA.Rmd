@@ -1,0 +1,203 @@
+---
+title: "Forecasting with NNS"
+author: "Fred Viole (fred.viole@gmail.com)"
+date: "November 1, 2017"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+<!--
+Source for "examples/NNS ARMA.pdf", reconstructed in November 2026 from the
+published PDF's text (OVVO Labs' Markdown conversion of it). The Wang (2008)
+data link (goo.gl) no longer resolves and the PDF printed only a plot of it,
+so that section is shown but not run. The cross-validation now selects the
+period on the in-sample validation window, as its text intends; the 2017 code
+selected it on the final test window. The code runs against the current NNS;
+figures and values regenerate.
+Build: Rscript examples/sources/build.R NNS_ARMA
+-->
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, comment = "##", fig.align = "center")
+library(NNS)
+```
+
+# Install NNS
+
+We need the latest version of NNS available on GitHub.
+
+```{r install, eval = FALSE}
+require(devtools); install_github('OVVO-Financial/NNS', ref = "NNS-Beta-Version")
+require(NNS)
+```
+
+# NNS Forecasting
+
+NNS forecasting is an autoregressive technique that has the following
+advantages over an ARIMA model:
+
+* no stationarity requirement
+* no model identification
+* capable of handling nonlinearity
+
+This is accomplished by determining the seasonality present and then
+regressing the relevant periods.
+
+# Seasonality
+
+First let's load an example dataset found in Wang [2008], "A Guide to Box
+Jenkins Modeling".
+
+NNS uses a coefficient of variation (CV) ($\frac{\sigma}{\mu}$) for
+determining seasonality. If a period's CV is less than the overall dataset's
+CV, that period exhibits seasonality. Large CV's are dismissed, which
+ameliorates any logical concerns astute readers would have using this
+statistic.
+
+The variable's overall CV provides an objective cutoff point for significance,
+and avoids any subjective interpretations to be made from the analogous ACF
+and PACF plots in the standard ARMA technique. Furthermore, we avoid dependence
+on a linear technique when trying to determine a relationship in lagged values
+that may be nonlinear.
+
+```{r wang, eval = FALSE}
+# The 2017 data link (https://goo.gl/UDk2xB) no longer resolves.
+Wang.dataset <- read.csv("https://goo.gl/UDk2xB", header = FALSE, sep = '')
+plot.ts(Wang.dataset[, 2])
+```
+
+Now we can run a NNS seasonality test on this series.
+
+```{r wang-seas, eval = FALSE}
+NNS.seas(Wang.dataset[, 2])
+```
+
+In 2017 this returned periods 4, 8, 2, 10, 6, 11, 7 and 3, with a best period
+of 4. NNS returns all periods that exhibit seasonality, and the period with the
+highest amount of seasonality. For convenience, NNS also plots all periods
+with significant seasonality, highlighting the most significant. The
+"best.period" was a 4 period lag, reflective of quarterly periodicity in this
+monthly time series.
+
+# Forecasting
+
+Now that we have our seasonality determined, we can forecast our time series
+using the range extension features of `NNS.reg`.
+
+```{r wang-arma, eval = FALSE}
+NNS.ARMA(Wang.dataset[, 2], h = 50)
+```
+
+# Options
+
+NNS forecasting offers a multitude of options. These options include:
+
+* The ability to use linear or nonlinear regressions on the relevant
+  sub-series
+* Specify and test individual lags or all reported seasonality periods
+* Use forecast periods to determine new seasonality periods
+* Cross-validate fit on sections of original series
+
+# AirPassengers Example
+
+Here is an example on the preloaded **AirPassengers** dataset.
+
+```{r ap-seas}
+plot.ts(AirPassengers)
+head(NNS.seas(AirPassengers)$all.periods)
+```
+
+We generate a 50 period forecast using just the first 100 observations; select
+a seasonal factor of 12 (present in our output above); and a nonlinear
+regression.
+
+```{r ap-arma, fig.height = 4}
+invisible(NNS.ARMA(AirPassengers, h = 50, training.set = 100, seasonal.factor = 12,
+                   seasonal.plot = FALSE))
+```
+
+And extending the range further...
+
+```{r ap-extend, fig.height = 4}
+invisible(NNS.ARMA(AirPassengers, h = 50, seasonal.factor = 12, seasonal.plot = FALSE))
+```
+
+# Non-Time Series Data
+
+Here's a sine wave extended well beyond its final observation...
+
+```{r sine, fig.height = 6}
+x = seq(0, 30, .01); y = sin(x)
+nns.estimate = NNS.ARMA(y, h = 1000, negative.values = TRUE)
+```
+
+And our accuracy (MSE) to the known values:
+
+```{r sine-mse}
+mean(c(nns.estimate - sin(seq(30.01, 40, .01)))^2)
+```
+
+The 2017 version printed 3.491865e-10 here ("essentially 0"). The seasonal
+period that `NNS.seas` selects, and with it the forecast, has changed since.
+
+# Cross-Validation
+
+It may be helpful to evaluate several seasonal lags against known values and
+compare a preferred statistic of interest, in this case the MAPE (mean
+absolute percentage error). We speed this up by only using the linear method
+for identification, then 'nonlin' in final analysis.
+
+We are forecasting the last 336 observations of the `taylor` dataset from the
+**forecast** package.
+
+Data: create [train] and [test] datasets and then do the same for the reduced
+[train] set in order to avoid any leakage of test information into our
+training set.
+
+```{r taylor-data, message = FALSE}
+require(forecast); data(taylor)
+test = tail(taylor, 336)
+train = head(taylor, (length(taylor) - 336))
+in.sample.train = head(train, (length(train) - 336))
+in.sample.test = tail(train, 336)
+```
+
+Analysis using the top 10 reported seasonal lags, each scored on the in-sample
+validation window:
+
+```{r taylor-cv}
+a = NNS.seas(in.sample.train, plot = FALSE)
+cv.test = t(sapply(a$all.periods$Period[1:10], function(i)
+  c(i, mean(abs((NNS.ARMA(train, h = 336, training.set = length(train) - 336,
+                          seasonal.factor = i, plot = FALSE, method = 'lin')) -
+                  in.sample.test) / in.sample.test))))
+colnames(cv.test) = c("Period", "MAPE")
+cv.test
+```
+
+Using our lowest MAPE period from the `cv.test` data frame we have
+
+```{r taylor-final, fig.height = 4}
+nns.estimate = NNS.ARMA(taylor, h = 336, training.set = length(taylor) - 336,
+                        seasonal.factor = cv.test[which.min(cv.test[, 2]), 1],
+                        plot = TRUE, method = 'nonlin')
+```
+
+Yielding our final MAPE:
+
+```{r taylor-mape}
+mean(abs(nns.estimate - test) / test)
+```
+
+> **Note (2026).** The 2017 code scored the candidate lags against the final
+> test window, so its final MAPE (0.0147) was not an out-of-sample score. Here
+> the lag is chosen on `in.sample.test` and only the final forecast meets
+> `test` (see `examples/example-corrections.md`).
+
+# More NNS
+
+To learn more about NNS statistics and their theoretical foundations, see
+*Nonlinear Nonparametric Statistics: Using Partial Moments*
+(<https://ovvo-financial.github.io/NNS/book/>). More NNS examples are posted
+on GitHub: <https://github.com/OVVO-Financial/NNS/tree/NNS-Beta-Version/examples>

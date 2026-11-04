@@ -1,0 +1,249 @@
+---
+title: "Nonlinear Correlation and Dependence Using NNS"
+author: "Fred Viole (fred.viole@gmail.com)"
+date: "April 23, 2021"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+<!--
+Source for examples/Nonlinear_Correlation_and_Dependence_Using_NNS.pdf,
+reconstructed in November 2026 from the published PDF's text (OVVO Labs'
+Markdown conversion of it). The quadrant figure's code was not printed and is
+rebuilt here. The clustered data link (goo.gl) no longer resolves, so that
+example is shown but not run. NNS.copula's 3-D plots are interactive (rgl);
+the document prints the copula values and shows the plotting call. The code
+runs against the current NNS; values regenerate and can differ from the PDF.
+Build: Rscript examples/sources/build.R Nonlinear_Correlation_and_Dependence_Using_NNS
+-->
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, comment = "##", fig.align = "center",
+                      fig.height = 4)
+```
+
+# Install NNS
+
+We need the latest version of NNS available on GitHub.
+
+```{r install}
+# library(devtools); install_github('OVVO-Financial/NNS', ref = "NNS-Beta-Version")
+library(NNS)
+```
+
+# Correlation
+
+NNS nonlinear correlation is based on partial moment matrices. Partial moment
+matrices reflect the relationship between variables. Using these topological
+relations, we are able to avoid relying upon geometry for correlation. There
+are only 4 relationships between 2 variables and each relationship is
+represented by a partial moment matrix:
+
+* $X \le$ target, $Y \le$ target $\rightarrow$ CLPM matrix
+* $X \le$ target, $Y >$ target $\rightarrow$ DUPM matrix
+* $X >$ target, $Y \le$ target $\rightarrow$ DLPM matrix
+* $X >$ target, $Y >$ target $\rightarrow$ CUPM matrix
+
+```{r quadrants, echo = FALSE, fig.height = 6}
+set.seed(123)
+qx <- rnorm(1000); qy <- rnorm(1000)
+quad <- list("CLPM Quadrant" = qx <= 0 & qy <= 0, "DUPM Quadrant" = qx <= 0 & qy > 0,
+             "CUPM Quadrant" = qx > 0 & qy > 0, "DLPM Quadrant" = qx > 0 & qy <= 0)
+par(mfrow = c(2, 2))
+for (q in names(quad)) {
+  plot(qx, qy, col = ifelse(quad[[q]], "steelblue", "grey85"), pch = 19, cex = .5,
+       xlab = "X", ylab = "Y", main = q)
+  abline(h = 0, v = 0, lty = 2)
+}
+```
+
+# Linear Equivalence
+
+First, let's demonstrate NNS equivalence to Pearson's correlation coefficient
+under a condition of perfect linearity.
+
+```{r linear}
+x = seq(-3, 3, .01); y = 2 * x
+cor(x, y)
+NNS.dep(x, y, print.map = TRUE)
+```
+
+Note how under perfect correlation, all of the observations are in the similar
+CUPM and CLPM quadrants.
+
+```{r inverse}
+x = seq(-3, 3, .01); y = -2 * x
+cor(x, y); NNS.dep(x, y, print.map = TRUE)
+```
+
+Note how under perfect inverse correlation, all of the observations are in the
+divergent DUPM and DLPM quadrants.
+
+# Nonlinear Examples
+
+Now that you understand the relationship between the relationship matrices, we
+can introduce some nonlinearity to the analysis.
+
+```{r squared}
+x = seq(0, 3, .01); y = x^2
+cor(x, y); NNS.dep(x, y, print.map = TRUE)
+```
+
+Both methods report a high correlation for the previous gentle example.
+Increasing the nonlinearity will reveal the deficiencies in the geometric
+based linear approach.
+
+```{r tenth}
+x = seq(0, 3, .01); y = x^10
+cor(x, y); NNS.dep(x, y, print.map = TRUE)
+```
+
+Again, even though the observations do not follow a straight line, they occur
+primarily in the CUPM and CLPM quadrants, yielding a far higher NNS correlation
+coefficient than Pearson's.
+
+# Clustered Examples
+
+In highly clustered datasets, linear correlation is essentially useless. Here
+is an example showing 3 distinct clusters and the significant inverse
+correlation Pearson's inappropriately assigns.
+
+```{r clusters, eval = FALSE}
+# The 2021 data link (https://goo.gl/AA6HMf) no longer resolves.
+cluster.df <- read.csv("https://goo.gl/AA6HMf", header = FALSE, sep = '')
+cor(cluster.df[, 3], cluster.df[, 4])
+NNS.dep(cluster.df[, 3], cluster.df[, 4], print.map = TRUE)
+```
+
+In 2021 this printed a Pearson correlation of -0.6275592 against an NNS
+correlation of -0.01117909 and dependence of 0.1079831.
+
+# Dependence
+
+The spherical distribution is the best example of the dependence technique.
+Many cite it as a counter-example to the applicability of Pearson's
+correlation when trying to determine the relationship between two variables.
+
+```{r circle}
+set.seed(123)
+df <- data.frame(x = runif(10000, -1, 1), y = runif(10000, -1, 1))
+df <- subset(df, (x^2 + y^2 <= 1 & x^2 + y^2 >= 0.95))
+NNS.dep(df$x, df$y, print.map = TRUE)
+```
+
+While there is no correlation to speak of in this spherical distribution,
+there is obvious dependence between $X$ and $Y$. This dependence is reported by
+NNS.
+
+A majority of observations are in either similar (CUPM, CLPM) partial moment
+quadrants or divergent (DUPM, DLPM) quadrants.
+
+Here is our earlier $y = x^2$ example, where the dispersion of the line affects
+the dependence...
+
+```{r noisy}
+set.seed(123)
+x = seq(0, 3, .01); y = x^2 + rnorm(length(x), sd = 1)
+NNS.dep(x, y, print.map = TRUE)
+```
+
+# Multivariate Dependence
+
+These partial moment insights permit us to extend the analysis to multivariate
+instances. This level of analysis is simply impossible with Pearson or other
+rank based correlation methods, which are restricted to bi-variate cases.
+
+## Independent Case
+
+First we present the independent case. In the 3-D plot below, the regions of
+co-partial moments are shaded: green is the Co-UPM and red is the Co-LPM.
+Under independence, we know that $2(.5^n)$ of the observations should occupy
+these regions for $n$ dimensions. In our 3 variable normal example, the green
+and red dots representing Co-UPM and Co-LPM observations respectively are
+restricted to their appropriate regions.
+
+```{r copula-independent}
+set.seed(123)
+x = rnorm(1000); y = rnorm(1000); z = rnorm(1000)
+NNS.copula(cbind(x, y, z))
+```
+
+```{r copula-independent-plot, eval = FALSE}
+# Interactive 3-D view (rgl)
+NNS.copula(cbind(x, y, z), plot = TRUE, independence.overlay = TRUE)
+```
+
+The 2021 version printed 0.09571785 here. That value is not reproduced by the
+current implementation, which gives the value above; it is a descriptive
+finite-sample score, not a p-value or an independence threshold (see
+`examples/example-corrections.md`).
+
+## Dependent Case
+
+In our dependent case, where all variables are equal, all of the observations
+fall within the co-partial moment regions, exhibiting a co-correlation of 1.
+
+```{r copula-equal}
+y = x; z = x
+NNS.copula(cbind(x, y, z))
+```
+
+In our second dependent case, we examine $y = x_1^2 \cdot x_2^2$ where $y$ is
+clearly dependent upon both $x_1$ and $x_2$. In the 3-D plot there is an
+abundance of green Co-UPM observations outside of the green Co-UPM
+independence shaded region.
+
+```{r copula-product}
+x = seq(0, 1, .01); y = seq(0, 1, .01); B = expand.grid(x, y)
+z = B[, 1]^2 * B[, 2]^2
+NNS.copula(cbind(B, z))
+```
+
+# Significance
+
+One question remaining is, how significant are these results? p-values can be
+obtained from sampling random permutations of $y \rightarrow y_p$ and running
+`NNS.dep(x, y_p)` to compare against a null hypothesis of 0 correlation or
+independence between $(x, y)$.
+
+```{r significance, fig.height = 3.5}
+set.seed(123)
+x = seq(-5, 5, .1); y = x^2 + rnorm(length(x))
+NNS.dep(x, y, p.value = TRUE, print.map = TRUE)
+```
+
+We fail to reject the null hypothesis of 0 correlation between $(x, y)$.
+
+We reject the null hypothesis of independence between $(x, y)$: our dependence
+result lies far outside the distribution of permuted results.
+
+> **Note (2026).** The quantiles of the permuted statistics describe a null
+> reference distribution under exchangeability. They are not a confidence
+> interval for the population correlation or dependence. For serial or
+> clustered data, use a resampling scheme that preserves that structure (see
+> `examples/example-corrections.md`).
+
+# Key Takeaway
+
+These examples illustrate the main point on dependence:
+
+If $X$ and $Y$ are perfectly correlated or perfectly inversely correlated, they
+are completely dependent upon one another.
+
+# Other Considerations
+
+Rank based correlations do not consider the area of the distribution. This
+potentially ignores a lot of important information when trying to determine
+the relationship between two variables. NNS has additional features to
+consider the area of the joint distribution by altering its partial moment
+degree, 0 for frequency and 1 for area.
+
+Furthermore, correlation and dependence matrices are generated when a matrix
+is entered into `NNS.dep()`. We refer readers to the NNS manual available on
+CRAN: <https://cran.r-project.org/web/packages/NNS/NNS.pdf>
+
+To learn more about NNS statistics and their theoretical foundations, see
+*Nonlinear Nonparametric Statistics: Using Partial Moments*
+(<https://ovvo-financial.github.io/NNS/book/>). More NNS examples are posted
+on GitHub: <https://github.com/OVVO-Financial/NNS/tree/NNS-Beta-Version/examples>

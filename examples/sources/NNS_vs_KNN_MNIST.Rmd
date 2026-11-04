@@ -1,0 +1,163 @@
+---
+title: "NNS vs. kNN MNIST dataset"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+<!--
+Source for "examples/NNS vs KNN MNIST dataset.pdf", reconstructed in November
+2026 from the published PDF's text (OVVO Labs' Markdown conversion of it). The
+MNIST download and the fits (about 45 minutes in 2019) are not run when the
+document is built: set `run_mnist <- TRUE` below to run them. The printed
+results are the 2019 output.
+Build: Rscript examples/sources/build.R NNS_vs_KNN_MNIST
+-->
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, comment = "##")
+run_mnist <- FALSE   # downloads MNIST and runs the full comparison
+```
+
+# Intro
+
+This is a quick note on comparing the output of the NNS clustering, regression
+and classification technique to the already well documented k-nearest
+neighbors (kNN) approach.
+
+# Load Required Packages in R NNS (>= 4.1)
+
+```{r packages, eval = run_mnist}
+# require(devtools); install_github('OVVO-Financial/NNS', ref = "NNS-Beta-Version")
+require(NNS)
+require(data.table)
+require(caret)
+require(R.utils)
+```
+
+# Download the MNIST dataset
+
+The following routines download and load the MNIST dataset.
+
+```{r mnist, eval = run_mnist}
+get.mnist <- function(dir = NULL) {
+  # dir: the path containing the extracted files:
+  # train-images-idx3-ubyte ; train-labels-idx1-ubyte
+  # t10k-images-idx3-ubyte ; t10k-labels-idx1-ubyte
+  if (is.null(dir)) {
+    dir <- getwd()
+    u <- c('http://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz',
+           'http://yann.lecun.com/exdb/mnist/train-labels-idx1-ubyte.gz',
+           'http://yann.lecun.com/exdb/mnist/t10k-images-idx3-ubyte.gz',
+           'http://yann.lecun.com/exdb/mnist/t10k-labels-idx1-ubyte.gz')
+    sapply(u, function(x) {
+      download.file(x, f <- file.path(dir, basename(x)))
+      gunzip(f) })
+  }
+}
+
+load_mnist <- function() {
+  load_image_file <- function(filename) {
+    ret = list()
+    f = file(filename, 'rb')
+    readBin(f, 'integer', n = 1, size = 4, endian = 'big')
+    ret$n = readBin(f, 'integer', n = 1, size = 4, endian = 'big')
+    nrow = readBin(f, 'integer', n = 1, size = 4, endian = 'big')
+    ncol = readBin(f, 'integer', n = 1, size = 4, endian = 'big')
+    x = readBin(f, 'integer', n = ret$n * nrow * ncol, size = 1, signed = FALSE)
+    ret$x = matrix(x, ncol = nrow * ncol, byrow = TRUE)
+    close(f)
+    ret
+  }
+  load_label_file <- function(filename) {
+    f = file(filename, 'rb')
+    readBin(f, 'integer', n = 1, size = 4, endian = 'big')
+    n = readBin(f, 'integer', n = 1, size = 4, endian = 'big')
+    y = readBin(f, 'integer', n = n, size = 1, signed = FALSE)
+    close(f)
+    y
+  }
+  train <<- load_image_file('train-images-idx3-ubyte')
+  test <<- load_image_file('t10k-images-idx3-ubyte')
+
+  train$y <<- load_label_file('train-labels-idx1-ubyte')
+  test$y <<- load_label_file('t10k-labels-idx1-ubyte')
+}
+train <- data.frame()
+test <- data.frame()
+
+# Load data.
+get.mnist()
+load_mnist()
+```
+
+# NNS.reg
+
+NNS will treat this as a multivariate regression with each pixel as a
+feature, or regressor. There is no need to normalize the intensities to a 255
+grey-scale.
+
+`NNS.reg(..., order = "max", n.best = 1, ...)` is similar to a kNN = 1
+methodology, but we can test to see how many clusters provide the best
+estimate by using the `NNS.stack` routine which iteratively checks the
+`n.best` parameter (analogous to the k in kNN).
+
+```{r stack, eval = run_mnist}
+start.time = Sys.time()
+NNS.stack(IVs.train = train$x[1:6000, ], DV.train = train$y[1:6000],
+          method = 1, order = 'max',
+          obj.fn = expression(mean(round(predicted) == as.numeric(actual))),
+          objective = "max")
+print(Sys.time() - start.time)
+```
+
+The 2019 run printed `$NNS.reg.n.best` 1 with `$OBJfn.reg` 0.8914667, in
+13.4 minutes.
+
+`n.best = 1` is our best result, so we will use it now in the `NNS.reg` on
+the full dataset, then check our accuracy.
+
+```{r full, eval = run_mnist}
+start.time = Sys.time()
+
+nns.predictions = NNS.reg(train$x, train$y, point.est = test$x,
+                          order = 'max', n.best = 1, plot = FALSE,
+                          residual.plot = FALSE)$Point.est
+
+# Make sure estimates are between 0 and 9
+nns.predictions = pmin(pmax(nns.predictions, 0), 9)
+
+mean(round(nns.predictions) == test$y)
+print(Sys.time() - start.time)
+```
+
+The 2019 run printed an accuracy of 0.9691, in 29.3 minutes.
+
+> **Note (2026).** This is one reported run. It does not include a matched kNN
+> fit, so it does not by itself establish an error reduction relative to kNN;
+> comparative claims need common splits, preprocessing, tuning, metrics and
+> repeated runs (see `examples/example-corrections.md`).
+
+# Comments
+
+The goal of this demonstration of NNS vs. kNN for the MNIST dataset is to show
+the wide range of capability of NNS multivariate regression in machine
+learning applications.
+
+NNS is not a one-trick pony, as it has been demonstrated to excel in
+time-series forecasting, nonlinear continuous regressions, and provide
+solutions for econometric applications. See the following examples:
+
+* NNS Forecasting Presentation: <https://ssrn.com/abstract=3382300>
+* NNS Forecasting vs. KERAS LSTM Deep Learning:
+  <https://ovvo-financial.github.io/NNS/examples/Sunspots_example.html>
+* Classification Using NNS Clustering Analysis: <https://ssrn.com/abstract=2864711>
+* The 7 Reasons Most Econometric Investments Fail - NNS Contributions Towards
+  Solutions: <https://ovvo-financial.github.io/NNS/examples/7_Econometric_Reasons.html>
+
+I look forward to further discussions and collaboration with those equally as
+passionate about these issues, and open to embracing alternative solutions. If
+you found this presentation interesting or useful, please feel free to reach
+out via e-mail: ovvo.financial.systems@gmail.com
+
+Thanks for your interest!

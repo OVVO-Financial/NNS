@@ -34,6 +34,16 @@ The earlier interval-benchmark ranking and unsupported comparative accuracy
 claims have been withdrawn. Current results must be regenerated under the
 stated validation protocol.
 
+## Sources
+
+R Markdown sources for the twelve PDF write-ups and for the applied HTML pages
+rebuilt in November 2026 (tides, sunspots, VAR, the Federal Reserve causal
+analysis and the prophet comparison) are in [`examples/sources`](https://github.com/OVVO-Financial/NNS/tree/NNS-Beta-Version/examples/sources).
+Each records its data provenance and build command. From the repository root,
+`Rscript examples/sources/build.R` rebuilds them all, and
+`Rscript examples/sources/build.R tides` rebuilds one. PDFs need LaTeX; without
+it, or with `--html`, the write-ups render to HTML.
+
 ## Applied studies and extended examples
 
 The following material applies NNS to specific problems, comparisons, and

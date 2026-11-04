@@ -1,0 +1,320 @@
+---
+title: "Bayes' Theorem From Partial Moments"
+author: "Fred Viole (fred.viole@gmail.com)"
+date: "March 8, 2017"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+<!--
+Source for "examples/Bayes' Theorem From Partial Moments.pdf", reconstructed in
+November 2026 from the published PDF's text (OVVO Labs' Markdown conversion of
+it). The data link in the PDF (goo.gl) no longer resolves, so the 100
+observations it printed are written out below. The code runs against the
+current NNS: Co.UPM() and Co.LPM() now take one degree for both variables,
+Co.UPM(degree, x, y, target_x, target_y).
+Build: Rscript examples/sources/build.R Bayes_Theorem_From_Partial_Moments
+-->
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, comment = "##")
+library(NNS)
+```
+
+This quick note is intended to further inform the reader on the inherent
+flexibility of partial moments. Such flexibility is also exemplified in the
+following examples, and the reader is strongly urged to recreate them in order
+to grasp a feel for the wide-ranging potential of the NNS R package:
+<https://github.com/OVVO-Financial/NNS/tree/NNS-Beta-Version/examples>
+
+# Bayes' Theorem
+
+Bayes' Theorem is represented by:
+
+$$P(A|B) = \frac{P(B|A)P(A)}{P(B)}$$
+
+and we will show the corresponding partial moment equivalences to each of the
+probabilities.
+
+The following example is used after installing NNS:
+
+```{r install, eval = FALSE}
+require(devtools)
+install_github("OVVO-Financial/NNS", ref = "NNS-Beta-Version")
+require(NNS)
+```
+
+# Data
+
+The data consists of 100 observations of S&P 500 and 10-Year yield returns
+during the period of 2012-05-08 :: 2012-09-27 and originally appeared in Viole
+and Nawrocki (2013), "Causation", available at:
+<https://ssrn.com/abstract=2273756>
+
+S&P 500 data (S):
+
+```{r S}
+S = c(
+  0.0256, -0.0150, 0.0153, -0.0040, -0.0258, 0.0118, 0.0201, 0.0165, 0.0017,
+  0.0013, -0.0281, 0.0374, 0.0198, 0.0131, -0.0016, 0.0133, 0.0065, -0.0094,
+  -0.0290, 0.0057, 0.0211, 0.0235, 0.0340, 0.0184, 0.0198, 0.0054, 0.0144,
+  -0.0265, 0.0395, 0.0319, 0.0022, 0.0041, -0.0444, 0.0288, 0.0280, -0.0508,
+  0.0108, -0.0703, -0.0175, -0.0284, 0.0398, 0.0236, -0.0452, -0.0646,
+  0.0190, -0.0516, -0.2281, -0.0927, -0.0062, -0.0137, -0.0723, -0.0616,
+  0.1135, 0.0620, 0.0259, 0.0104, 0.0760, 0.0339, 0.0219, 0.0189, 0.0203,
+  0.0118, -0.0311, 0.0561, 0.0385, -0.0622, -0.0378, -0.0033, 0.0069, 0.0315,
+  0.0432, 0.0230, 0.0349, 0.0326, 0.0296, -0.0127, 0.0205, 0.0051, -0.0389,
+  0.0290, -0.1115, -0.0097, 0.0280, 0.0158, 0.0137, 0.0450, 0.0391, 0.0268,
+  -0.0020, -0.0331, -0.0134, 0.0271, 0.0316, 0.0281, -0.0039, -0.0306,
+  0.0197, 0.0400, 0.0213, 0.0252)
+S
+```
+
+10-Year yield data (I):
+
+```{r I}
+I = c(
+  0.0095, -0.0024, -0.0119, 0.0762, -0.0362, -0.0472, -0.0344, 0.0440,
+  0.0190, -0.0142, 0.0601, 0.0178, -0.0155, -0.0112, 0.0334, 0.0323, 0.0556,
+  0.0238, 0.0000, -0.0039, -0.0421, -0.0333, 0.0021, -0.0279, -0.0087,
+  0.0429, -0.0084, -0.0345, 0.0281, 0.0127, 0.0711, -0.0198, -0.0683,
+  -0.0326, 0.0022, -0.0876, -0.0121, -0.0919, 0.0000, -0.0635, 0.0473,
+  0.0529, 0.0552, -0.0222, -0.0304, -0.0528, 0.0320, -0.0763, -0.3775,
+  0.0405, 0.1301, -0.0176, 0.0383, 0.1159, 0.1228, -0.0440, 0.0084, -0.0544,
+  -0.0029, 0.0029, 0.0544, 0.0383, -0.0108, 0.0108, 0.0317, -0.1184, -0.0665,
+  -0.0612, -0.1087, -0.0187, -0.0424, 0.0831, 0.1757, 0.0299, 0.0545,
+  -0.0487, 0.0146, -0.0875, -0.0551, 0.0000, -0.2657, -0.1498, 0.0824,
+  -0.0673, -0.0150, -0.0051, 0.0000, 0.0967, -0.0569, -0.1301, -0.1054,
+  -0.0572, 0.0935, 0.0235, 0.0173, -0.0588, 0.0415, 0.1048, 0.0360, -0.0102)
+I
+```
+
+# Question for Bayes
+
+The question we seek to answer in this elementary example is "What is the
+probability of a stock market increase given an increase in interest rates?".
+Bayes' theorem is perfectly suited to answer such a query.
+
+## Notations
+
+Bayes:
+
+* P(SI) = probability of the SP 500 increasing
+* P(SD) = probability of the SP 500 decreasing
+* P(II) = probability of interest rates increasing
+* P(ID) = probability of interest rates decreasing
+
+$$P(SI|II) = \frac{P(II|SI)P(SI)}{P(II)}$$
+
+Partial Moments:
+
+* SP 500 $\le$ target, Interest Rates $\le$ target $\rightarrow$ CLPM matrix
+* SP 500 $\le$ target, Interest Rates $>$ target $\rightarrow$ DUPM matrix
+* SP 500 $>$ target, Interest Rates $\le$ target $\rightarrow$ DLPM matrix
+* SP 500 $>$ target, Interest Rates $>$ target $\rightarrow$ CUPM matrix
+
+Since we are examining increases and decreases, target = 0 in this example,
+but it can accommodate any value of interest.
+
+## Data Tables
+
+Simply counting the events in the data above yields the following outcomes:
+
+|                | Interest Increase | Interest Decrease | Unch | Total |
+|----------------|------------------:|------------------:|-----:|------:|
+| Stock Increase | 35                | 28                | 2    | 65    |
+| Stock Decrease | 9                 | 24                | 2    | 35    |
+| Total          | 44                | 52                | 4    | 100   |
+
+Partial moments represent the following entries, where the rows represent the
+A variable and the columns represent the given B variable:
+
+| S $\downarrow$ I $\rightarrow$ | Interest Increase   | Interest Decrease        | Total       |
+|----------------|---------------------|--------------------------|-------------|
+| Stock Increase | `Co.UPM(0, S, I, 0, 0)` | `D.LPM(0, 0, S, I, 0, 0)` | `UPM(0, 0, S)` |
+| Stock Decrease | `D.UPM(0, 0, S, I, 0, 0)` | `Co.LPM(0, S, I, 0, 0)` | `LPM(0, 0, S)` |
+| Total          | `UPM(0, 0, I)`      | `LPM(0, 0, I)`           | UPM + LPM = 1 |
+
+```{r table}
+SI.II = matrix(c(Co.UPM(0, S, I, 0, 0), D.LPM(0, 0, S, I, 0, 0), UPM(0, 0, S),
+                 D.UPM(0, 0, S, I, 0, 0), Co.LPM(0, S, I, 0, 0), LPM(0, 0, S),
+                 UPM(0, 0, I), LPM(0, 0, I), 1),
+               byrow = TRUE, nrow = 3)
+colnames(SI.II) = c("Interest Increase", "Interest Decrease", "Total")
+rownames(SI.II) = c("Stock Increase", "Stock Decrease", "Total")
+SI.II
+```
+
+A degree-0 lower partial moment counts observations at the target, so the
+four unchanged yields fall in the "Interest Decrease" column and each row adds
+up to its total. The probabilities below involve only increases, which the
+unchanged entries do not affect.
+
+# Probabilities
+
+## Probability of a Stock Increase
+
+$P(SI) = \frac{65}{100}$, which is the same as the degree 0 UPM of the S&P
+500 from a 0 target:
+
+```{r p-si}
+UPM(0, 0, S)
+```
+
+## Probability of an Interest Rate Increase
+
+$P(II) = \frac{44}{100}$, which is the same as the degree 0 UPM of the
+10-Year yield from a 0 target:
+
+```{r p-ii}
+UPM(0, 0, I)
+```
+
+## Probability of an Interest Rate Increase Given a Stock Increase
+
+$P(II|SI) = \frac{35}{65} = 0.5385$, which is identical to the degree 0
+co-UPM of the S&P 500 and the 10-Year yield from a 0 target, divided by the
+probability of an increase in the S&P 500, defined above as `UPM(0, 0, S)`.
+
+```{r p-ii-si}
+Co.UPM(0, S, I, 0, 0) / UPM(0, 0, S)
+```
+
+## Putting it all together
+
+Combining all of our probabilities, we can now answer our question using
+Bayes' theorem.
+
+$$P(SI|II) = \frac{\frac{35}{65} \cdot \frac{65}{100}}{\frac{44}{100}} = \frac{35}{44} = 0.7954545$$
+
+and via partial moments:
+
+$$P(SI|II) = \frac{\frac{\textrm{Co.UPM}(0,S,I,0,0)}{\textrm{UPM}(0,0,S)} \cdot \textrm{UPM}(0,0,S)}{\textrm{UPM}(0,0,I)}$$
+
+```{r bayes-pm}
+((Co.UPM(0, S, I, 0, 0) / UPM(0, 0, S)) * UPM(0, 0, S)) / UPM(0, 0, I)
+```
+
+which simplifies greatly (as does Bayes) to just
+$\frac{\textrm{Co.UPM}(0,S,I,0,0)}{\textrm{UPM}(0,0,I)}$:
+
+```{r bayes-simple}
+Co.UPM(0, S, I, 0, 0) / UPM(0, 0, I)
+```
+
+# Additional Information
+
+Furthermore, partial moments are aptly suited to provide an answer to a more
+motivated question, "How much on average do stocks increase given an interest
+rate increase?" All we have to do is alter the degree of the dependent
+variable (S), and subtract the negative instances.
+
+This is precisely the inverse of an expected shortfall calculation, which is
+the average loss beyond a VaR % of interest.
+
+We subtract the degree (1|0) `D.UPM(S, I)` from the degree (1|0)
+`Co.UPM(S, I)` and divide that by the probability of an interest rate increase
+already defined as `UPM(0, 0, I)`.
+
+```{r expectation}
+(Co.UPM(1, S, I, 0, 0, degree_y = 0) - D.UPM(1, 0, S, I, 0, 0)) / UPM(0, 0, I)
+```
+
+Alternatively, we can use some convenient subsetting features of R to reduce
+the calculation to univariate partial moments:
+
+```{r subset}
+UPM(1, 0, S[I > 0]) - LPM(1, 0, S[I > 0])
+```
+
+and since we know $UPM(1, 0, x) - LPM(1, 0, x) = \bar{x}$ this can be reduced
+to:
+
+```{r mean}
+mean(S[I > 0])
+```
+
+# Canonical Breast Cancer Example
+
+We can also recreate the widely used breast cancer example when people explain
+Bayes' theorem.
+
+* 1% of women have breast cancer (and therefore 99% do not).
+* 80% of mammograms detect breast cancer when it is there (and therefore 20%
+  miss it).
+* 10% of mammograms detect breast cancer when it's not there (and therefore
+  90% correctly return a negative result).
+
+We can create 2 variables representing 1000 individuals:
+
+* C where a 1 will denote those with cancer and -1 for those without cancer.
+* Test where a 1 will denote those with a positive test result and a -1 for
+  those with a negative test result.
+
+```{r cancer-data}
+C = c(rep(1, 8), rep(-1, 990), rep(1, 2)); Test = c(rep(1, 107), rep(-1, 893))
+```
+
+## Data Tables
+
+We can assemble the probabilities in the data above in the following table:
+
+|               | Cancer                | No Cancer             | Total |
+|---------------|-----------------------|-----------------------|------:|
+| Test Positive | (80% * 1%) = .008     | (10% * 99%) = .099    | .107  |
+| Test Negative | (20% * 1%) = .002     | (90% * 99%) = .891    | .893  |
+| Total         | .01                   | .99                   | 1     |
+
+Partial moments represent the following entries, where this time the columns
+represent the A variable and the rows represent the given B variable:
+
+| Test $\downarrow$ C $\rightarrow$ | Cancer                 | No Cancer                  | Total            |
+|---------------|------------------------|----------------------------|------------------|
+| Test Positive | `Co.UPM(0, Test, C, 0, 0)` | `D.LPM(0, 0, Test, C, 0, 0)` | `UPM(0, 0, Test)` |
+| Test Negative | `D.UPM(0, 0, Test, C, 0, 0)` | `Co.LPM(0, Test, C, 0, 0)` | `LPM(0, 0, Test)` |
+| Total         | `UPM(0, 0, C)`         | `LPM(0, 0, C)`             | UPM + LPM = 1    |
+
+```{r cancer-table}
+C.Test = matrix(c(Co.UPM(0, Test, C, 0, 0), D.LPM(0, 0, Test, C, 0, 0), UPM(0, 0, Test),
+                  D.UPM(0, 0, Test, C, 0, 0), Co.LPM(0, Test, C, 0, 0), LPM(0, 0, Test),
+                  UPM(0, 0, C), LPM(0, 0, C), 1),
+                byrow = TRUE, nrow = 3)
+colnames(C.Test) = c("Cancer", "No Cancer", "Total")
+rownames(C.Test) = c("Test Positive", "Test Negative", "Total")
+C.Test
+```
+
+So what's the chance we really have cancer given a positive test result?
+
+$$P(C|Test) = \frac{P(Test|C) \cdot P(C)}{P(Test)}$$
+
+## Putting it all together
+
+Combining all of our probabilities, we can now answer our question using
+Bayes' theorem.
+
+$$P(C|Test) = \frac{.8 \cdot .01}{.107} = \frac{0.008}{.107} = 0.074766355$$
+
+and via partial moments:
+
+$$P(C|Test) = \frac{\frac{\textrm{Co.UPM}(0,C,Test,0,0)}{\textrm{UPM}(0,0,C)} \cdot \textrm{UPM}(0,0,C)}{\textrm{UPM}(0,0,Test)}$$
+
+```{r cancer-pm}
+((Co.UPM(0, C, Test, 0, 0) / UPM(0, 0, C)) * UPM(0, 0, C)) / UPM(0, 0, Test)
+```
+
+which simplifies greatly (as does Bayes) to just
+$\frac{\textrm{Co.UPM}(0,C,Test,0,0)}{\textrm{UPM}(0,0,Test)}$:
+
+```{r cancer-simple}
+Co.UPM(0, C, Test, 0, 0) / UPM(0, 0, Test)
+```
+
+# Summary
+
+We are not re-inventing a wheel. Conditional probability is conditional
+probability, nothing has changed. What we have (uniquely?) done is represent
+the partial moment equivalences to these conditional probabilities. Given the
+myriad of other classical equivalences partial moments demonstrate, the only
+surprise is the lack of consideration they receive.

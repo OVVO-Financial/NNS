@@ -1,0 +1,211 @@
+---
+title: "Spiral Matching Example Using NNS Clustering"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+<!--
+Source for "examples/Spiral Matching Example.pdf", reconstructed in November
+2026 from the published PDF's text (OVVO Labs' Markdown conversion of it). The
+code runs against the current NNS: NNS.cor() is now NNS.dep()$Correlation, and
+NNS.part() returns a data frame, converted to a data.table below. Printed
+values regenerate and can differ from the published PDF.
+Build: Rscript examples/sources/build.R Spiral_Matching_Example
+-->
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, comment = "##", fig.align = "center")
+```
+
+# Install NNS
+
+We need the latest version of NNS available on GitHub.
+
+```{r install, eval = FALSE}
+require(devtools); install_github('OVVO-Financial/NNS', ref = "NNS-Beta-Version")
+```
+
+```{r packages, message = FALSE}
+require(NNS)
+require(data.table)
+```
+
+# Data
+
+Let's create a spiral dataset.
+
+```{r data, fig.height = 5, fig.width = 5}
+N <- 200 # number of points per class
+D <- 2 # dimensionality
+K <- 4 # number of classes
+X <- data.frame() # data matrix (each row = single example)
+y <- data.frame() # class labels
+set.seed(123)
+for (j in (1:K)) {
+  r <- seq(0.05, 1, length.out = N) # radius
+  t <- seq((j - 1) * 4.7, j * 4.7, length.out = N) # theta
+  Xtemp <- data.frame(x = r * sin(t), y = r * cos(t))
+  ytemp <- data.frame(matrix(j, N, 1))
+  X <- rbind(X, Xtemp)
+  y <- rbind(y, ytemp)
+}
+data <- cbind(X, y)
+colnames(data) <- c(colnames(X), 'label')
+plot(data[, 1], data[, 2], col = 'steelblue', xlab = 'x', ylab = 'y')
+```
+
+# More Data
+
+Next we will create two more spirals. The second spiral will have a noise term
+added to the first spiral. The third spiral will have a different seed and the
+same noise term added.
+
+```{r more-data}
+X <- data.frame() # data matrix (each row = single example)
+y <- data.frame() # class labels
+set.seed(123)
+for (j in (1:K)) {
+  r <- seq(0.05, 1, length.out = N) # radius
+  t <- seq((j - 1) * 4.7, j * 4.7, length.out = N) + rnorm(N, sd = 0.1) # theta
+  Xtemp <- data.frame(x = r * sin(t), y = r * cos(t))
+  ytemp <- data.frame(matrix(j, N, 1))
+  X <- rbind(X, Xtemp)
+  y <- rbind(y, ytemp)
+}
+data2 <- cbind(X, y)
+colnames(data2) <- c(colnames(X), 'label')
+
+X <- data.frame() # data matrix (each row = single example)
+y <- data.frame() # class labels
+set.seed(1234)
+for (j in (1:K)) {
+  r <- seq(0.05, 1, length.out = N) # radius
+  t <- seq((j - 1) * 4.7, j * 4.7, length.out = N) + rnorm(N, sd = 0.1) # theta
+  Xtemp <- data.frame(x = r * sin(t), y = r * cos(t))
+  ytemp <- data.frame(matrix(j, N, 1))
+  X <- rbind(X, Xtemp)
+  y <- rbind(y, ytemp)
+}
+data3 <- cbind(X, y)
+colnames(data3) <- c(colnames(X), 'label')
+```
+
+# Simple Correlation Analysis
+
+Does a simple correlation distinguish these spirals from one another? No,
+unfortunately all of the x's are correlated and all of the y's are correlated.
+
+```{r pearson}
+options(digits = 4)
+cor(cbind(data$x, data2$x, data3$x, data$y, data2$y, data3$y))
+```
+
+How about nonlinear NNS correlation?
+
+```{r nns-correlation}
+NNS.dep(cbind(data$x, data2$x, data3$x, data$y, data2$y, data3$y))$Correlation
+```
+
+Nope, still correlated. We need a different feature to distinguish these
+spirals.
+
+# NNS Clustering
+
+Next let's compare all 3 different spirals using the partition map in NNS.
+Visually, this is not too different from an analyst placing dots on
+fingerprints at feature locations.
+
+```{r partitions, fig.height = 3.5}
+par(mfrow = c(1, 3))
+order = 3
+z = as.data.table(NNS.part(data$x, data$y, Voronoi = TRUE, order = order)$regression.points)
+z2 = as.data.table(NNS.part(data2$x, data2$y, Voronoi = TRUE, order = order)$regression.points)
+z3 = as.data.table(NNS.part(data3$x, data3$y, Voronoi = TRUE, order = order)$regression.points)
+```
+
+# Distances
+
+Now we can compare the regression points of each spiral to ascertain whether
+they have the same structure. Euclidean distances are used to reduce the
+$(x, y)$ coordinates to a single distance metric.
+
+$$d = \sqrt{(x_2 - x_1)^2 + (y_2 - y_1)^2} \qquad (1)$$
+
+## Central Coordinates
+
+Our first step requires a central point for each set of coordinates.
+Transforming our equation to:
+
+$$d = \sqrt{(x - \bar{x})^2 + (y - \bar{y})^2} \qquad (2)$$
+
+We subtract our column means from each point, transforming our data tables:
+
+```{r centre}
+for (j in c("x", "y")) set(z, j = j, value = z[[j]] - mean(z[[j]]))
+for (j in c("x", "y")) set(z2, j = j, value = z2[[j]] - mean(z2[[j]]))
+for (j in c("x", "y")) set(z3, j = j, value = z3[[j]] - mean(z3[[j]]))
+```
+
+## Squared Distances from Central Coordinates
+
+Borrowing from Pythagoras, we then square the distances from the central
+coordinates of each set, sum them, and take their square root.
+
+```{r distances}
+z[, Dist := sqrt(sum(x^2, y^2)), by = quadrant]
+z2[, Dist := sqrt(sum(x^2, y^2)), by = quadrant]
+z3[, Dist := sqrt(sum(x^2, y^2)), by = quadrant]
+```
+
+## Hypotenuse
+
+Following our (and Euclid's) Pythagorean guideline, we take the square root of
+the summed squares for the hypotenuse, or distance from the central point.
+
+```{r hypotenuse}
+dis.1 = z[, Dist]
+dis.2 = z2[, Dist]
+dis.3 = z3[, Dist]
+```
+
+# Comparison
+
+Identical geometric structures (the constellation of NNS points) will have
+perfectly correlated distances. But, if the images and constellations are
+rotated, how do we reconcile the alignment? Sorting the distances should still
+yield identical structures...
+
+Pearson Correlation:
+
+```{r compare-pearson}
+cor(cbind(sort(dis.1), sort(dis.2), sort(dis.3)))
+```
+
+NNS Correlation:
+
+```{r compare-nns}
+NNS.dep(cbind(sort(dis.1), sort(dis.2), sort(dis.3)))$Correlation
+```
+
+The 2017 version printed NNS correlations of 0.875 between spirals 1 and 2
+and 0.625 and 0.750 against spiral 3, against Pearson correlations of
+0.998, 0.999 and 0.997, and concluded that the same-seed spirals 1 and 2 match
+while spiral 3 does not. The current `NNS.dep` returns 1 for every pair: each
+sorted distance vector is increasing, and NNS correlation is 1 for any
+monotone increasing relationship, so this comparison no longer separates
+spiral 3.
+
+> **Note (2026).** Matching, association and forecasting are separate tasks.
+> A claimed matching accuracy needs an explicit labelled correspondence and a
+> held-out evaluation (see `examples/example-corrections.md`).
+
+# More NNS
+
+To learn more about NNS statistics and their theoretical foundations, see
+*Nonlinear Nonparametric Statistics: Using Partial Moments*
+(<https://ovvo-financial.github.io/NNS/book/>). More NNS examples are posted
+on GitHub: <https://github.com/OVVO-Financial/NNS/tree/NNS-Beta-Version/examples>
+
+See this blog post for the dataset:
+<https://www.r-bloggers.com/build-your-own-neural-network-classifier-in-r/>

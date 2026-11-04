@@ -1,0 +1,239 @@
+---
+title: "Sunspots: NNS vs. KERAS"
+author: "Fred Viole"
+date: "Regenerated `r format(Sys.Date(), '%m/%d/%Y')`"
+output:
+  html_document:
+    self_contained: true
+    highlight: tango
+---
+
+<!--
+Source for examples/Sunspots_example.html, rebuilt in November 2026 from the
+archived page's code and text (and OVVO Labs' Markdown conversion of it). The
+KERAS LSTM RMSEs are quoted from the business-science.io article cited below;
+they are not rerun here.
+Build: Rscript examples/sources/build.R Sunspots_example
+-->
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, comment = "##", fig.align = "center", fig.width = 8)
+```
+
+# Intro
+
+We are comparing RMSE of eleven 10 year predictions (120 monthly
+observations) for the `sunspot.month` dataset in R using `KERAS LSTM` and
+`NNS.ARMA`.
+
+## Long Short-Term Memory (LSTM) Models
+
+LSTMs are quite useful in time series prediction tasks involving
+autocorrelation, the presence of correlation between the time series and
+lagged versions of itself, because of their ability to maintain state and
+recognize patterns over the length of the time series.
+
+In normal (or `stateless`) mode, `KERAS` shuffles the samples, and the
+dependencies between the time series and the lagged version of itself are
+lost. However, when run in `stateful` mode, we can often get high accuracy
+results by leveraging the autocorrelations present in the time series.
+
+`KERAS LSTM` description and example with accompanying code (lots of it!)
+available via the following link:
+<https://www.business-science.io/timeseries-analysis/2018/04/18/keras-lstm-sunspots-time-series-prediction.html>
+
+## NNS.ARMA
+
+`NNS` in its forecasting routine `NNS.ARMA` also maintains the dependencies
+between the time series and lagged values of itself, and then uses these
+dependencies in a regression (either linear or nonlinear). See here for a
+thorough description: <https://www.researchgate.net/publication/327495856_Forecasting>
+
+### Install the Latest Version of `NNS`
+
+```{r packages, message = FALSE}
+#library(devtools); install_github('OVVO-Financial/NNS', ref = "NNS-Beta-Version")
+library(NNS)
+library(Metrics)
+library(xts)
+library(zoo)
+library(doParallel)
+packageVersion("NNS")
+```
+
+# Step 1: Create the Subsets of `sunspot.month`
+
+We need to align dates to the `KERAS` example, so we create an `xts` object to
+manipulate the dates and verify they match.
+
+```{r slices}
+sunspots_xts <- as.xts(sunspot.month)
+
+tmp <- tempfile()
+
+write.zoo(sunspots_xts, sep = ",", file = tmp)
+
+sun <- read.zoo(tmp, sep = ",", FUN = as.yearmon)
+
+sun_xts <- as.xts(sun)
+
+# Create the same end date for all slices
+dates = c("/18081202", "/18290102", "/18490202", "/18690302", "/18890402",
+          "/19090502", "/19290602", "/19490702", "/19690802", "/19890902", "/20091002")
+
+Slice = list()
+
+for (i in 1:11) {
+  Slice[[paste0("Slice_", i)]] = sun_xts[dates[i]]
+  print(tail(Slice[[i]], 1))
+}
+```
+
+# Step 2: Determine the seasonality
+
+Here's the general procedure on a single `Slice`.
+
+We use a modulo 12 `(%%12)` call on the generated seasonal periods from
+`NNS.seas` to find the nearest logical annual cycle data point.
+
+***No test set leakage into the detected seasonal periods as we are
+eliminating the last 120 observations from the variable and store it in the
+new variable `training`.***
+
+```{r seas}
+training = Slice[[6]][1:(length(Slice[[6]]) - 120)]
+
+periods = NNS.seas(training, modulo = 12)$periods
+
+head(periods)
+```
+
+# Step 3: Determine the Optimal Parameters
+
+The `NNS.ARMA.optim` routine checks various parameter combinations in order to
+best fit the training set according to any objective function specified.
+`NNS.ARMA.optim` returns the optimal seasonal periods, the objective function
+result, and which `NNS` regression method was used: linear, nonlinear, or a
+combination of both. It tunes on the last part of `training`, so the final 120
+observations stay out of the selection.
+
+We also specify the objective function via
+`obj.fn = expression(Metrics::rmse(actual, predicted))` and the objective to
+minimize it. Any objective function can be used, calling the specific terms
+`actual` and `predicted` within the `expression(...)` call.
+
+```{r optim}
+start.time = Sys.time()
+nns.predict = NNS.ARMA.optim(variable = training,
+                             h = 120,
+                             seasonal.factor = periods,
+                             obj.fn = expression(Metrics::rmse(actual, predicted)),
+                             objective = "min",
+                             print.trace = TRUE)$results
+Sys.time() - start.time
+```
+
+# Step 4: Calculate `NNS` RMSE
+
+The performance measure used is the root mean squared error (RMSE) against the
+last 120 observations of that particular `Slice`.
+
+```{r rmse-6}
+Metrics::rmse(predicted = nns.predict, actual = tail(Slice[[6]], 120))
+```
+
+# Step 5: Plot the `NNS` forecast
+
+The `NNS` forecast of the last 10 years of `Slice 6` against the actual
+values:
+
+```{r plot-6}
+plot(as.numeric(tail(Slice[[6]], 120)), type = "l", lwd = 2, col = "steelblue",
+     xlab = "Month", ylab = "Sunspots", main = "Slice 6: last 120 months")
+lines(nns.predict, col = "red", lwd = 2)
+legend("topright", legend = c("Actual", "NNS forecast"), col = c("steelblue", "red"),
+       lwd = 2, bty = "n")
+```
+
+# Step 6: Let's try all the slices...
+
+We compare the `KERAS` implementation of its rolling forecasts, as reported in
+the article above, to `NNS` forecasts per `Slice`. `KERAS` reports
+$\mu_{RMSE} = 34.4$ and $\sigma_{RMSE} = 13.0$.
+
+```{r all-slices}
+start.time = Sys.time()
+NNS.RMSE = list()
+
+# Run in parallel
+cl <- makeCluster(max(1, detectCores() - 1))
+registerDoParallel(cl)
+
+NNS.RMSE <- foreach(i = 1:11, .packages = c("NNS", "Metrics")) %dopar% {
+  training = as.vector(Slice[[i]][1:(length(Slice[[i]]) - 120)])
+
+  # Seasonality per slice
+  periods = NNS.seas(training, modulo = 12, plot = FALSE)$periods
+
+  # Determine optimal parameters
+  nns.predictions = NNS.ARMA.optim(variable = training,
+                                   h = 120,
+                                   seasonal.factor = periods,
+                                   obj.fn = expression(Metrics::rmse(actual, predicted)),
+                                   objective = "min",
+                                   ncores = 1,
+                                   print.trace = FALSE)$results
+
+  # RMSE call
+  Metrics::rmse(predicted = nns.predictions, actual = tail(Slice[[i]], 120))
+}
+
+stopCluster(cl)
+registerDoSEQ()
+print(Sys.time() - start.time)
+```
+
+# Results & Comments
+
+## Per Slice results:
+
+```{r per-slice}
+"NNS.RMSE" = as.vector(unlist(NNS.RMSE))
+"KERAS.RMSE" = c(48.2, 17.4, 41, 26.6, 22.2, 49, 18.1, 54.9, 28, 38.4, 34.2)
+
+print(as.data.frame(cbind(NNS.RMSE, KERAS.RMSE, "NNS % Improvement" = 1 - NNS.RMSE / KERAS.RMSE),
+                    row.names = names(Slice)))
+```
+
+## Aggregate results:
+
+```{r aggregate}
+"Mean NNS.RMSE" = mean(NNS.RMSE)
+
+"SD NNS.RMSE" = sd(NNS.RMSE)
+
+rbind(`Mean NNS.RMSE`,
+      `Mean KERAS.RMSE` = mean(KERAS.RMSE),
+      `SD NNS.RMSE`,
+      `SD KERAS.RMSE` = sd(KERAS.RMSE))
+```
+
+`NNS` has the lower RMSE in `r sum(NNS.RMSE < KERAS.RMSE)` of the 11 slices,
+with a mean RMSE of `r round(mean(NNS.RMSE), 1)` against
+`r round(mean(KERAS.RMSE), 1)` for `KERAS LSTM` and a standard deviation of
+`r round(sd(NNS.RMSE), 1)` against `r round(sd(KERAS.RMSE), 1)`. Eleven slices
+are too few to call either difference significant, and the `KERAS` figures
+are the article's, not a rerun on the same machine.
+
+The parsimonious code and interpretability of parameter settings favors `NNS`.
+
+If you have any related questions / comments, feel free to e-mail:
+<ovvo.financial.systems@gmail.com>
+
+Thanks for your interest!
+
+# Build information
+
+```{r session}
+sessionInfo()
+```

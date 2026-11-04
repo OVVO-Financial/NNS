@@ -26,32 +26,36 @@ and evidence.
 
 ## Historical HTML output regeneration
 
-Issue #72 remains open for the six archived HTML pages below. The documentation
-workflow copies their existing content and adds a visible historical-output
-notice to the **staged copies**; it does not rerun their analyses. The original
-HTML files remain unchanged. Neither a successful site build nor the revised
-PDF companions should be read as regeneration of these outputs.
+The six archived HTML pages listed in issue #72 have been rebuilt with the
+current NNS from R Markdown sources in [`sources/`](sources/), or retired. Each
+source records its data provenance and its training, validation and test
+windows, prints `sessionInfo()`, and rebuilds with
+`Rscript examples/sources/build.R <name>`. Scores from the archived pages are
+not carried forward.
 
-- [ ] [Macroeconomic causal analysis](Causal_Inference_Amongst_Macroeconomic_Variables_Using_NNS.html): regenerate the `NNS.VAR` output with the current validation policy and state the directional-association target.
-- [ ] [Archived overview](NNSvignette_Overview.html): replace affected `NNS.VAR`, `NNS.ARMA`, `NNS.CDF`, derivative, seasonality, and copula output with current executable examples, or retire the duplicates in favor of the canonical numbered vignettes.
-- [ ] [Sunspots](Sunspots_example.html): regenerate seasonal selection and forecasting output with periods chosen before the evaluation horizon.
-- [ ] [VAR example](VAR_example.html): regenerate the full multivariate forecast pipeline and label internal-validation versus later-test scores.
-- [ ] [Prophet comparison](prophet_NNS_comparison.html): rerun both methods with the same data, forecast origins, horizon, and tuning budget before reporting comparative scores.
-- [ ] [Tides](tides.html): regenerate seasonality and forecasting output with its data version and temporal validation split recorded.
-
-For each page, add editable source, data provenance, package versions, and a
-repeatable build command. Retain only the current results or explicitly withdraw
-unsupported historical comparisons. The exact book text corrections, the
-independent three-variable copula erratum, and current executable vignette
-sources are addressed separately; they do not close this remaining checklist.
+- [x] [Macroeconomic causal analysis](Causal_Inference_Amongst_Macroeconomic_Variables_Using_NNS.html): `NNS.nowcast()` is no longer in NNS. The same 29 FRED series are aligned monthly with `NNS.VAR(h = 0)`, which makes no forecast and so runs no validation step. `NNS.caus` is reported as a one-month directional lagged association between transformed (detrended) series, with circular-shift p-values and a Holm adjustment. The archived conclusion that Fed assets cause the listed variables is withdrawn.
+- [x] [Archived overview](NNSvignette_Overview.html): retired. The page forwards to the canonical numbered vignettes.
+- [x] [Sunspots](Sunspots_example.html): each slice selects its periods with `NNS.seas` and `NNS.ARMA.optim` on its own training window, before its 120-month evaluation horizon. The KERAS LSTM scores are quoted from the cited article and labelled as not rerun.
+- [x] [VAR example](VAR_example.html): the full pipeline (VAR, `NNS.ARMA`, auto ARIMA, `NNS.boost` and `NNS.stack`, random forest, `NNS.VAR`) is rerun on FRED data for the archived 1954 Q4 to 2007 Q4 window. Internal-validation scores and the 12-quarter test scores are reported in separate, labelled tables. The Kolmogorov-Smirnov comparisons are withdrawn.
+- [x] [Prophet comparison](prophet_NNS_comparison.html): both methods use the same data, forecast origins and horizons, and neither is tuned on a test window. The Peyton Manning periods come from the training data, the lynx forecast has the test window's length, and the S&P 500 section uses FRED's `SP500` series at three fixed origins. A last-value forecast is scored for reference, and the archived tallies are withdrawn.
+- [x] [Tides](tides.html): rerun on the Win-Vector data file, checked by MD5, with the training and test windows printed. The forecast origin precedes the test window, and the archived R-squared values are not carried forward.
 
 ## Published PDF source status
 
-The twelve published PDFs are retained as historical documents. Matching original
-editable sources were not present in the audited repository. The new
-[revised-companions.Rmd](revised-companions.Rmd) is an explicitly revised,
-executable companion, **not a reconstruction of the original authors' source**.
-It provides corrected demonstrations and clear limits for each PDF below.
+The twelve published PDFs are retained as historical documents. Their original
+editable sources were not recovered. [`sources/`](sources/) now holds an R
+Markdown source for each PDF, reconstructed in November 2026 from the published
+text (OVVO Labs' Markdown conversions of the PDFs). Each source runs against the
+current NNS and notes, at the top and in "Note (2026)" boxes, where its output
+or interpretation differs from the published PDF. Rebuild them with
+`Rscript examples/sources/build.R` (all sources) or name one or more, for
+example `Rscript examples/sources/build.R Normalization`. PDFs need a LaTeX
+installation; without one, or with `--html`, they render to HTML. Re-rendering
+replaces a published PDF, so the PDFs below have not been regenerated.
+
+The [revised-companions.Rmd](revised-companions.Rmd) remains an explicitly
+revised, executable companion. It provides corrected demonstrations and clear
+limits for each PDF below.
 
 | Historical PDF | Revised companion section |
 |---|---|

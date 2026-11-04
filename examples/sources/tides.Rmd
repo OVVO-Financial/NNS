@@ -1,0 +1,272 @@
+---
+title: "Tide Prediction Using NNS"
+author: "Fred Viole"
+date: "01/03/2025; regenerated `r format(Sys.Date(), '%m/%d/%Y')`"
+output:
+  html_document:
+    self_contained: true
+    highlight: tango
+---
+
+<!--
+Source for examples/tides.html, rebuilt in November 2026 from the archived
+page's code and text (and OVVO Labs' Markdown conversion of it).
+Build: Rscript examples/sources/build.R tides   (about 1 minute with NNS 13.3
+on four cores, plus a few minutes for the SCUM comparison)
+-->
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, comment = "##", fig.align = "center", fig.width = 8)
+# smooth::ces() needs about 14 GB of memory on this series; set TRUE to include it.
+run_ces <- FALSE
+```
+
+# Introduction
+
+John Mount of Win-Vector LLC posted a very interesting example of tide
+prediction using known theory generating frequencies to model tides vs.
+alternative methods of generated frequencies and prediction thereof. Please
+give the post a full read to familiarize yourself with the problem:
+
+<http://www.win-vector.com/blog/2019/08/lord-kelvin-data-scientist/>
+
+# Predict Tides Using `NNS`
+
+This is an excellent application of the time-series forecasting method in the
+`NNS` R-package.
+
+## Step 1: Install the Latest Version of `NNS`
+
+```{r packages}
+#library(devtools); install_github('OVVO-Financial/NNS', ref = "NNS-Beta-Version")
+library(NNS)
+packageVersion("NNS")
+```
+
+## Step 2: Read & Load the Variables, Create Train and Test Sets
+
+The data are the Win-Vector `tides.RDS` file
+(<https://github.com/WinVector/Examples/blob/master/Tides/tides.RDS>): water
+levels at six-minute intervals from 2017-01-01. The download is checked
+against the version this page was built from.
+
+```{r data}
+tides_file <- file.path(tempdir(), "tides.RDS")
+if (!file.exists(tides_file)) {
+  download.file("https://raw.githubusercontent.com/WinVector/Examples/master/Tides/tides.RDS",
+                tides_file, mode = "wb")
+}
+stopifnot(unname(tools::md5sum(tides_file)) == "f7950d1c7e7fa31d6df0738ddf98bed3")
+tides <- readRDS(tides_file)
+```
+
+Create the training set `dtrain` and the test set `dtest` using the dates
+provided in the original post. The forecast origin is the cut date: nothing
+after it is used for fitting or tuning.
+
+```{r split}
+base_date_time =  as.POSIXct('2001/01/01 00:00', tz = "UTC")
+first_date_time =  as.POSIXct('2019/06/01 00:00', tz = "UTC")
+cut_date_time = as.POSIXct('2019/07/15 00:00', tz = "UTC")
+
+dtrain <- tides[tides$dt < cut_date_time, , drop = FALSE]
+dtest <- tides[tides$dt >= cut_date_time, , drop = FALSE]
+
+training_length <- dim(dtrain)[1] - dim(dtest)[1]
+
+data.frame(set = c("dtrain", "dtest"),
+           rows = c(nrow(dtrain), nrow(dtest)),
+           from = c(min(dtrain$dt), min(dtest$dt)),
+           to = c(max(dtrain$dt), max(dtest$dt)))
+```
+
+`NNS.ARMA.optim` tunes on the last `nrow(dtest)` observations of `dtrain`
+(training set `r training_length` observations) and then forecasts the test
+period from the whole training series.
+
+## Step 3: Determine Frequencies, Optimize & Forecast
+
+### 3.1: Determine Frequencies
+
+In this step we will ascertain the most relevant periods via the `NNS.seas()`
+function. To isolate just the periods, we call `nns_periods$periods`.
+
+```{r seas}
+nns_start.time <- Sys.time()
+nns_periods <- NNS.seas(dtrain$tide_feet, modulo = 240, mod.only = FALSE)$periods
+```
+
+```{r seas-head}
+head(nns_periods)
+
+# Total relevant periods...
+length(nns_periods)
+```
+
+### 3.2: Optimize the Combination of Frequencies
+
+Now we will utilize the `nns_periods` in the `NNS.ARMA.optim` function, as
+well as the number of forecast periods `h`.
+
+***We are only going to use the first 200 relevant periods. There are
+thousands more relevant periods that can be included but would require
+additional computational resources.***
+
+```{r optim}
+nns_periods <- nns_periods[nns_periods < 44000]
+
+arma_parameters <- NNS.ARMA.optim(variable = dtrain$tide_feet,
+                                  h = nrow(dtest),
+                                  training.set = length(dtrain$tide_feet) - nrow(dtest),
+                                  pred.int = .95,
+                                  seasonal.factor = nns_periods[1:200],
+                                  print.trace = FALSE)
+
+Sys.time() - nns_start.time
+```
+
+### 3.3: Forecast
+
+Finally, we will extract the `results` using these optimum parameters, already
+provided in our `arma_parameters` object along with the other following
+parameters for the `NNS.ARMA` forecast.
+
+```{r forecast}
+arma_parameters[1:6]
+
+nns_estimates <- arma_parameters$results
+```
+
+## Step 4: Evaluate the Results
+
+Let's see how we did. The R-squared^[See Hayfield and Racine
+<https://cran.r-project.org/web/packages/np/vignettes/np.pdf>] between
+predicted and actual is the presented metric.
+
+$$R^2 = \frac{[\sum_{i=1}^n (y_i - \bar{y})(\hat{y_i} - \bar{y})]^2}{\sum_{i=1}^n (y_i - \bar{y})^2\sum_{i=1}^n (\hat{y_i} - \bar{y})^2}$$
+
+```{r r2}
+(sum((nns_estimates - mean(dtest$tide_feet)) * (dtest$tide_feet - mean(dtest$tide_feet))) ^ 2) /
+  (sum((dtest$tide_feet - mean(dtest$tide_feet)) ^ 2) * sum((nns_estimates - mean(dtest$tide_feet)) ^ 2))
+```
+
+```{r plots, message = FALSE}
+library(ggplot2)
+ggplot(aes(x = dt), data = dtest) +
+  geom_line(aes(y = tide_feet), color = 'blue', alpha = 1) +
+  geom_line(aes(y = nns_estimates), color = 'black', alpha = 0.5) +
+  geom_line(aes(y = arma_parameters$lower.pred.int), color = 'red', alpha = 0.25) +
+  geom_line(aes(y = arma_parameters$upper.pred.int), color = 'red', alpha = 0.25) +
+  ggtitle("prediction (black) superimposed on actuals (blue) on test")
+
+ggplot_data <- data.frame(cbind(nns_estimates, dtest, arma_parameters$lower.pred.int,
+                                arma_parameters$upper.pred.int))
+
+ggplot(aes(x = nns_estimates, y = tide_feet), data = ggplot_data) +
+  geom_point(alpha = 0.1) +
+  ggtitle("prediction versus actual on test")
+```
+
+The red band is the optimizer's residual-quantile interval at the requested
+95% level; its coverage of future values has not been assessed here.
+
+## SCUM Forecasts and Timings
+
+In addition to the `NNS` forecasts, the SCUM method (the median of ETS,
+ARIMA, Theta and CES forecasts) was employed to generate forecasts and compare
+timings. Theta stops with an error on this series, as it did in the original
+run, and CES (`smooth::ces`) needs about 14 GB of memory here, so it runs only
+when `run_ces <- TRUE` is set at the top of the source; the SCUM median uses
+the forecasts that completed.
+
+```{r scum-packages}
+library(forecast)
+library(smooth)
+```
+
+```{r scum}
+# Start timing for SCUM
+scum_start.time <- Sys.time()
+
+# Generate SCUM forecasts
+h <- length(dtest$tide_feet)
+
+# Helper function for safe forecasting
+safe_forecast <- function(forecast_function, data, h) {
+  tryCatch({
+    forecast_function(data, h = h)$mean
+  }, error = function(e) {
+    message(paste("Error in", deparse(substitute(forecast_function)), ":", e$message))
+    return(rep(NA, h)) # Return NA for each horizon in case of an error
+  })
+}
+
+# Perform individual forecasts safely
+ets_forecast <- safe_forecast(function(data, h) forecast(ets(data), h = h), dtrain$tide_feet, h)
+arima_forecast <- safe_forecast(function(data, h) forecast(auto.arima(data), h = h), dtrain$tide_feet, h)
+theta_forecast <- safe_forecast(function(data, h) forecast(thetaf(data), h = h), dtrain$tide_feet, h)
+ces_forecast <- if (run_ces) {
+  safe_forecast(function(data, h) forecast(ces(data), h = h), dtrain$tide_feet, h)
+} else rep(NA, h)
+
+# Combine forecasts, excluding errors (NA)
+forecasts_matrix <- rbind(ets_forecast, arima_forecast, theta_forecast, ces_forecast)
+forecasts_matrix <- forecasts_matrix[complete.cases(forecasts_matrix), , drop = FALSE] # Remove rows with NA
+scum_forecast <- apply(forecasts_matrix, 2, median)
+rownames(forecasts_matrix)   # forecasts in the median
+
+# End timing for SCUM
+scum_end.time <- Sys.time()
+
+# SCUM execution time
+scum_end.time - scum_start.time
+```
+
+```{r scum-eval}
+# SCUM evaluation
+(sum((scum_forecast - mean(dtest$tide_feet)) * (dtest$tide_feet - mean(dtest$tide_feet))) ^ 2) /
+  (sum((dtest$tide_feet - mean(dtest$tide_feet)) ^ 2) * sum((scum_forecast - mean(dtest$tide_feet)) ^ 2))
+
+# Plot SCUM forecasts vs actual
+ggplot() +
+  geom_line(aes(x = dtest$dt, y = dtest$tide_feet), color = 'blue', alpha = 1) +
+  geom_line(aes(x = dtest$dt, y = scum_forecast), color = 'green', alpha = 0.7) +
+  ggtitle("SCUM Forecasts vs Actual")
+```
+
+# Comments
+
+The `NNS` method produces a very good result without any knowledge of or
+access to the tide machine, and is well above the R-squared of 0.81 obtained
+with FFT frequencies used in the Elastic Net Regularized Linear Regression in
+the original blog post. Both are scored on the same test period after the same
+cut date. Could `NNS` perform better? Yes. `NNS.ARMA` and `NNS.ARMA.optim` is
+an active area of development.
+
+Furthermore, more relevant periods and more granular data than the 6-minute
+intervals would also help. How much better could `NNS` perform is an open
+question...
+
+`NNS` is not a one-trick pony: it is also applied to nonlinear continuous
+regression, classification and econometric problems. See the following
+examples:
+
+- `NNS` Forecasting Presentation: <https://ssrn.com/abstract=3382300>
+- `NNS` Forecasting vs. KERAS LSTM Deep Learning:
+  <https://ovvo-financial.github.io/NNS/examples/Sunspots_example.html>
+- Classification Using NNS Clustering Analysis: <https://ssrn.com/abstract=2864711>
+- The 7 Reasons Most Econometric Investments Fail - NNS Contributions Towards
+  Solutions: <https://ovvo-financial.github.io/NNS/examples/7_Econometric_Reasons.html>
+
+I look forward to further discussions and collaboration with those equally as
+passionate about these issues, and open to embracing alternative solutions. If
+you found this presentation interesting or useful, please feel free to reach
+out via e-mail: <ovvo.financial.systems@gmail.com>
+
+Thanks for your interest!
+
+# Build information
+
+```{r session}
+sessionInfo()
+```

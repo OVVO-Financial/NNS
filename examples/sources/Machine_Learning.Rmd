@@ -1,0 +1,146 @@
+---
+title: "Machine Learning with NNS"
+author: "Fred Viole (ovvo.financial.systems@gmail.com)"
+date: "May 3, 2019"
+output:
+  pdf_document:
+    number_sections: true
+  html_document:
+    number_sections: true
+---
+
+<!--
+Source for examples/Machine_Learning.pdf, reconstructed in November 2026 from
+the published PDF's text (OVVO Labs' Markdown conversion of it, with code the
+conversion dropped restored from the PDF). The code runs against the current
+NNS; figures regenerate and can differ from the 2019 PDF.
+Build: Rscript examples/sources/build.R Machine_Learning
+-->
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, comment = "##", fig.align = "center")
+library(NNS)
+```
+
+There was a recent image that was posted^[<http://www.datasciencecentral.com/profiles/blogs/machine-learning-summarized-in-one-picture>],
+and NNS' seamless integration of the identified tasks (clustering, regression,
+and classification) in machine learning was apparent. It is a regression based
+on clusters!
+
+# Clustering
+
+> Reference: Clustering and Curve Fitting by Line Segments,
+> <https://ssrn.com/abstract=2861339>
+
+The first step of NNS regression (`NNS.reg`) is to iteratively partition the
+data into partial moment quadrants and assign a sequential quadrant number to
+each observation. It is both a partitional and hierarchical clustering.
+
+Below is a visualization of the unsupervised NNS partitioning (`NNS.part`) and
+the resulting clusters (red points):
+
+```{r install, eval = FALSE}
+require(devtools)
+install_github('OVVO-Financial/NNS', ref = "NNS-Beta-Version")
+require(NNS)
+```
+
+```{r partition, fig.height = 6, fig.cap = "NNS partition and clustering"}
+x <- seq(0, 4 * pi, pi / 1000); y <- sin(x)
+par(mfrow = c(2, 3))
+for (i in 1:6) {
+  NNS.part(x, y, order = i, obs.req = 1, Voronoi = TRUE)
+}
+```
+
+# Regression
+
+> Reference: Nonparametric Regression Using Clusters,
+> <https://link.springer.com/article/10.1007/s10614-017-9713-5>
+
+`NNS.reg` uses the `NNS.part` clusters as the basis of a nonlinear
+nonparametric regression.
+
+## Univariate regression
+
+```{r univariate, fig.height = 6, fig.cap = "NNS regression sequence of orders in univariate example."}
+par(mfrow = c(2, 3))
+for (i in 1:6) {
+  NNS.reg(x, y, order = i, noise.reduction = "off", residual.plot = FALSE)
+}
+```
+
+## Multivariate regression
+
+NNS extends this partitioning and clustering to higher dimensions for a
+complete multivariate analysis.
+
+```{r multivariate-data}
+f <- function(x, y) x^3 + 3 * y - y^3 - 3 * x
+x <- seq(-5, 5, 0.1); y <- seq(-5, 5, 0.1)
+z <- expand.grid(x, y)
+g <- f(z[, 1], z[, 2])
+```
+
+The regions at each order are drawn in an interactive 3-D device:
+
+```{r multivariate-regions, eval = FALSE}
+for (i in 1:6) {
+  NNS.reg(z, g, plot.regions = TRUE, order = i)
+}
+```
+
+Multivariate $\hat{Y}$ vs. $Y$ plot:
+
+```{r multivariate-fit, fig.cap = "NNS multivariate regression fitted vs. actual values."}
+fit <- NNS.reg(z, g, plot = FALSE)$Fitted.xy
+plot(fit$y, fit$y.hat, pch = 19, cex = .3, col = "steelblue",
+     xlab = "Y", ylab = expression(hat(Y)))
+abline(0, 1, col = "red", lwd = 2)
+```
+
+# Classification
+
+> Reference: Classification Using NNS Clustering Analysis,
+> <https://ssrn.com/abstract=2864711>
+
+`NNS.reg` is also applicable to classification methods and for smaller
+dimensions will report the same output as a k-nearest neighbor algorithm (KNN)
+when both are set to k = 1 under specific NNS settings (limit condition whereby
+every observation is its own cluster). NNS does not have the same restrictions
+as KNN, such as using an odd numbered k to avoid ties.
+
+The above reference demonstrates several classification tasks from Iris, UCI
+Wine dataset, an XOR classification, the Cassini dataset and a text
+classification example.
+
+> **Note (2026).** The original version compared NNS and KNN on MNIST and
+> reported a 75% reduction in error rate. That figure was one reported run
+> without a matched KNN fit, and the comparative and dimensionality claims are
+> withdrawn pending common splits, preprocessing, tuning, metrics and repeated
+> runs (see `examples/example-corrections.md`).
+
+# Time-Series Forecasting
+
+> Reference: Forecasting Using NNS, <https://ssrn.com/abstract=3382300>
+
+`NNS.reg` has also been integrated into a time-series forecasting routine.
+Regressions are performed on seasonal components, without the need for
+stationarity or ACF / PACF analysis.
+
+For examples of `NNS.ARMA`, see the examples directory:
+<https://github.com/OVVO-Financial/NNS/tree/NNS-Beta-Version/examples>
+
+```{r forecast, fig.height = 7, fig.cap = "NNS seasonal periods and resulting forecast."}
+x <- seq(0, 30, .01); y <- sin(x)
+invisible(NNS.ARMA(y, h = 1000, negative.values = TRUE, method = "lin"))
+```
+
+# More NNS {-}
+
+To learn more about NNS statistics and their theoretical foundations, see
+*Nonlinear Nonparametric Statistics: Using Partial Moments*
+(<https://ovvo-financial.github.io/NNS/book/>).
+
+More NNS examples are posted on GitHub:
+<https://github.com/OVVO-Financial/NNS/tree/NNS-Beta-Version/examples>

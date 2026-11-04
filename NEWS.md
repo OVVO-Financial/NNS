@@ -125,6 +125,12 @@
   parallel work, and make integer-degree VaR root stopping scale invariant.
 * Fix target hazard evaluation, stochastic-dominance cluster ordering, residual
   clusters, efficient-set order dependence, and caller column-name mutation.
+* `examples/sources/` holds R Markdown sources for the twelve PDF write-ups and
+  the archived HTML examples, and `examples/sources/build.R` rebuilds them. The
+  tides, sunspots, VAR, Federal Reserve causal analysis and prophet pages are
+  regenerated with the current package and record their data and validation
+  windows; the archived overview forwards to the numbered vignettes. The
+  committed vignette HTML is re-rendered.
 * Replace unsupported example rankings and inference claims with explicit
   targets and corrected executable workflows. Forecast examples reserve test
   outcomes; fitted-contrast uncertainty includes model refitting. Add revised

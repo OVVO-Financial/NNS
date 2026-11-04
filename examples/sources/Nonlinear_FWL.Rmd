@@ -1,0 +1,216 @@
+---
+title: "Frisch–Waugh–Lovell Theorem Using Nonlinear Regression Residuals"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+<!--
+Source for examples/Nonlinear_FWL.pdf, reconstructed in November 2026 from the
+published PDF's text (OVVO Labs' Markdown conversion of it). The code runs
+against the current NNS and np; printed values regenerate and can differ from
+the published PDF.
+Build: Rscript examples/sources/build.R Nonlinear_FWL
+-->
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, comment = "##")
+```
+
+Demonstrating the approximation of Frisch–Waugh–Lovell (FWL) theorem with
+nonlinear regression residuals using `NNS.reg()` and `np`.
+
+# Basic FWL result with OLS
+
+```{r ols-100}
+set.seed(123)
+x1 = rnorm(100)
+x2 = rnorm(100)
+y1 = 1 + x1 - x2 + rnorm(100)
+
+r1 = residuals(lm(y1 ~ x2))
+r2 = residuals(lm(x1 ~ x2))
+
+# ols
+coef(lm(y1 ~ x1 + x2))
+
+# fwl ols
+coef(lm(r1 ~ -1 + r2))
+```
+
+```{r packages, message = FALSE}
+require(NNS)
+require(data.table)
+require(np)
+options(np.messages = FALSE)
+```
+
+# NNS Residuals to Capture $\beta_1$
+
+Step 1: NNS regression y1 on x2 and store residuals
+
+```{r step1}
+nns_r1 = NNS.reg(x2, y1, plot = FALSE)$Fitted.xy$residuals
+```
+
+Step 2: NNS regression x1 on x2 and store residuals
+
+```{r step2}
+nns_r2 = NNS.reg(x2, x1, plot = FALSE)$Fitted.xy$residuals
+```
+
+Step 3: OLS of NNS residuals is very close to $\beta_1$ of the FWL result
+
+```{r step3}
+lm(nns_r1 ~ nns_r2)
+```
+
+Step 4: Reverse x1 and x2 for the $\beta_2$ FWL result
+
+```{r step4}
+nns_r1 = NNS.reg(x1, y1, plot = FALSE)$Fitted.xy$residuals
+
+nns_r2 = NNS.reg(x1, x2, plot = FALSE)$Fitted.xy$residuals
+
+lm(nns_r1 ~ nns_r2)
+```
+
+## Step 4a: Let's check np
+
+```{r np-100}
+# Beta 1
+np_1 = npreg(y1 ~ x2, residuals = TRUE)$resid
+
+np_2 = npreg(x1 ~ x2, residuals = TRUE)$resid
+
+coef(lm(np_1 ~ np_2))
+
+# Beta 2
+np_1 = npreg(y1 ~ x1, residuals = TRUE)$resid
+
+np_2 = npreg(x2 ~ x1, residuals = TRUE)$resid
+
+coef(lm(np_1 ~ np_2))
+```
+
+# Increase the number of observations
+
+```{r n-1000}
+set.seed(123)
+x1 = rnorm(1000)
+x2 = rnorm(1000)
+y1 = 1 + x1 - x2 + rnorm(1000)
+
+r1 = residuals(lm(y1 ~ x2))
+r2 = residuals(lm(x1 ~ x2))
+# ols
+coef(lm(y1 ~ x1 + x2))
+
+# nns Beta 1
+nns_r1 = NNS.reg(x2, y1, plot = FALSE)$Fitted.xy$residuals
+
+nns_r2 = NNS.reg(x2, x1, plot = FALSE)$Fitted.xy$residuals
+
+lm(nns_r1 ~ nns_r2)
+
+# nns Beta 2
+nns_r1 = NNS.reg(x1, y1, plot = FALSE)$Fitted.xy$residuals
+
+nns_r2 = NNS.reg(x1, x2, plot = FALSE)$Fitted.xy$residuals
+
+lm(nns_r1 ~ nns_r2)
+
+# np Beta 1
+np_1 = npreg(y1 ~ x2, residuals = TRUE)$resid
+
+np_2 = npreg(x1 ~ x2, residuals = TRUE)$resid
+
+coef(lm(np_1 ~ np_2))
+
+# np Beta 2
+np_1 = npreg(y1 ~ x1, residuals = TRUE)$resid
+
+np_2 = npreg(x2 ~ x1, residuals = TRUE)$resid
+
+coef(lm(np_1 ~ np_2))
+```
+
+# Increase the number of observations... again
+
+`np` takes way too long for this size regression...
+
+```{r n-10000}
+set.seed(123)
+x1 = rnorm(10000)
+x2 = rnorm(10000)
+y1 = 1 + x1 - x2 + rnorm(10000)
+
+r1 = residuals(lm(y1 ~ x2))
+r2 = residuals(lm(x1 ~ x2))
+
+# ols
+coef(lm(y1 ~ x1 + x2))
+
+# nns Beta 1
+nns_r1 = NNS.reg(x2, y1, plot = FALSE)$Fitted.xy$residuals
+
+nns_r2 = NNS.reg(x2, x1, plot = FALSE)$Fitted.xy$residuals
+
+lm(nns_r1 ~ nns_r2)
+
+# nns Beta 2
+nns_r1 = NNS.reg(x1, y1, plot = FALSE)$Fitted.xy$residuals
+
+nns_r2 = NNS.reg(x1, x2, plot = FALSE)$Fitted.xy$residuals
+
+lm(nns_r1 ~ nns_r2)
+```
+
+# Completely Different Functional Form
+
+```{r nonlinear}
+set.seed(123)
+x1 = runif(1000)
+x2 = runif(1000)
+y1 = x1^2 * x2^2 + runif(1000)
+
+r1 = residuals(lm(y1 ~ x2))
+r2 = residuals(lm(x1 ~ x2))
+
+# ols
+coef(lm(y1 ~ x1 + x2))
+
+# nns Beta 1
+nns_r1 = NNS.reg(x2, y1, plot = FALSE)$Fitted.xy$residuals
+
+nns_r2 = NNS.reg(x2, x1, plot = FALSE)$Fitted.xy$residuals
+
+lm(nns_r1 ~ nns_r2)
+
+# nns Beta 2
+nns_r1 = NNS.reg(x1, y1, plot = FALSE)$Fitted.xy$residuals
+
+nns_r2 = NNS.reg(x1, x2, plot = FALSE)$Fitted.xy$residuals
+
+lm(nns_r1 ~ nns_r2)
+
+# np Beta 1
+np_1 = npreg(y1 ~ x2, residuals = TRUE)$resid
+
+np_2 = npreg(x1 ~ x2, residuals = TRUE)$resid
+
+coef(lm(np_1 ~ np_2))
+
+# np Beta 2
+np_1 = npreg(y1 ~ x1, residuals = TRUE)$resid
+
+np_2 = npreg(x2 ~ x1, residuals = TRUE)$resid
+
+coef(lm(np_1 ~ np_2))
+```
+
+> **Note (2026).** With $y = x_1^2 x_2^2 + u$ there is no single linear
+> coefficient to recover: the slope of residual on residual is a
+> best-linear-approximation summary of a conditional relationship, not a
+> structural $\beta$ (see the residualization section of
+> `examples/revised-companions.Rmd`).

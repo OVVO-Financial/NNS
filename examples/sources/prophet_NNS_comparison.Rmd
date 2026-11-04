@@ -1,0 +1,369 @@
+---
+title: "prophet and NNS.ARMA comparison"
+author: "Fred Viole"
+date: "November 1, 2017; regenerated `r format(Sys.Date(), '%B %d, %Y')`"
+output:
+  html_document:
+    self_contained: true
+    highlight: tango
+    toc: true
+---
+
+<!--
+Source for examples/prophet_NNS_comparison.html, rebuilt in November 2026 from
+the archived page's code and text (and OVVO Labs' Markdown conversion of it).
+The retail sales and Peyton Manning data come from the prophet repository
+(checked against the versions this page was built from); lynx is in R; the
+S&P 500 section uses FRED's SP500 series, downloaded at build time, because
+the archived page's Yahoo Finance SPY download is not reproducible here.
+Build: Rscript examples/sources/build.R prophet_NNS_comparison   (a few minutes)
+-->
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, comment = "##", fig.align = "center", fig.width = 8,
+                      fig.height = 4.5)
+```
+
+## Required Packages
+
+```{r packages, message = FALSE}
+library(NNS)
+library(prophet)
+packageVersion("NNS")
+packageVersion("prophet")
+```
+
+## Comparison Design
+
+Each comparison gives both methods the same training data and forecast origin
+and scores the same horizon. Neither method is tuned on the test window:
+`prophet` runs with its default settings, and `NNS.ARMA` uses either calendar
+lags fixed in advance or the periods `NNS.seas` finds in the training data. A
+last-value forecast is scored alongside as a reference.
+
+The archived page (November 2017) differed in three ways. It chose the Peyton
+Manning periods with the lowest error on the test year, which made that year
+part of the tuning; its lynx `prophet` forecast had 35 values for 34 test years;
+and its S&P 500 data came from Yahoo Finance, which this build cannot
+download. Its scores and tallies are not carried forward.
+
+```{r helpers}
+rmse <- function(f, a) sqrt(mean((f - a)^2))
+# Download a file once per build and check it is the version this page used.
+fetch <- function(url, md5) {
+  path <- file.path(tempdir(), basename(url))
+  if (!file.exists(path)) download.file(url, path, mode = "wb", quiet = TRUE)
+  stopifnot(unname(tools::md5sum(path)) == md5)
+  path
+}
+results <- list()
+record <- function(name, h, prophet_fc, nns_fc, actual, last_value, seconds) {
+  results[[name]] <<- data.frame(Comparison = name, Horizon = h,
+                                 `prophet RMSE` = rmse(prophet_fc, actual),
+                                 `NNS RMSE` = rmse(nns_fc, actual),
+                                 `Last value RMSE` = rmse(last_value, actual),
+                                 `prophet s` = seconds[1], `NNS s` = seconds[2],
+                                 check.names = FALSE)
+  results[[name]][, 3:5]
+}
+timed <- function(expr) {
+  t0 <- proc.time()[["elapsed"]]
+  value <- expr
+  list(value = value, seconds = proc.time()[["elapsed"]] - t0)
+}
+```
+
+## Retail Sales Example
+
+Below is the retail sales data incorporated with the Facebook `prophet`
+repository.
+
+```{r retail-data}
+retail <- read.csv(fetch(
+  "https://raw.githubusercontent.com/facebook/prophet/main/examples/example_retail_sales.csv",
+  "efbd7c178abf498e5db39eb1ff3c84a3"))
+retail$ds <- as.Date(retail$ds)
+range(retail$ds)
+```
+
+We are forecasting the last 50 periods...
+
+```{r retail-split}
+l <- length(retail[, 1]) - 50
+```
+
+### prophet model:
+
+```{r retail-prophet}
+p <- timed({
+  m <- prophet(retail[1:l, ])
+  predict(m, data.frame(ds = retail$ds[(l + 1):nrow(retail)]))
+})
+retail_fcst <- p$value
+plot(m, predict(m, data.frame(ds = retail$ds)))
+```
+
+### NNS model:
+
+`NNS` uses the 12-month calendar lag and a linear regression of each lag's
+components.
+
+```{r retail-nns}
+n <- timed(NNS.ARMA(retail[, 2], h = 50, seasonal.factor = 12, method = 'lin',
+                    training.set = l, seasonal.plot = FALSE))
+nns.retail.fcst <- n$value
+```
+
+### MSE:
+
+```{r retail-mse}
+c(prophet = mean((retail_fcst$yhat - tail(retail[, 2], 50))^2),
+  NNS = mean((nns.retail.fcst - tail(retail[, 2], 50))^2))
+record("Retail sales", 50, retail_fcst$yhat, nns.retail.fcst, tail(retail[, 2], 50),
+       retail[l, 2], c(p$seconds, n$seconds))
+```
+
+## Peyton Manning Example (Raw Values)
+
+Next is the Peyton Manning example from the Facebook `prophet` repository:
+daily log page views of Peyton Manning's Wikipedia page. The repository now
+ships only the log file; the raw views are its exponent. Twenty-nine days are
+missing, so `NNS.ARMA`'s lags count observations rather than calendar days,
+while `prophet` uses the dates.
+
+```{r pm-data}
+log_omaha <- read.csv(fetch(
+  "https://raw.githubusercontent.com/facebook/prophet/main/examples/example_wp_log_peyton_manning.csv",
+  "43a15e3f903a6e82cc0a53f0be249575"))
+log_omaha$ds <- as.Date(log_omaha$ds)
+omaha <- data.frame(ds = log_omaha$ds, y = exp(log_omaha$y))
+range(omaha$ds)
+sum(diff(omaha$ds) > 1)
+```
+
+We are forecasting the last 365 periods...
+
+```{r pm-split}
+l <- length(omaha[, 1]) - 365
+test_days <- omaha$ds[(l + 1):nrow(omaha)]
+```
+
+### prophet model:
+
+```{r pm-prophet}
+p <- timed({
+  m <- prophet(omaha[1:l, ])
+  predict(m, data.frame(ds = test_days))
+})
+omaha_fcst <- p$value
+plot(m, predict(m, data.frame(ds = omaha$ds)))
+```
+
+### NNS model:
+
+`NNS` is using a `seasonal.factor = c(1, sf)`, which translates to a daily and
+the best reported lag from our seasonality test on the training data. This is
+not optimized.
+
+```{r pm-nns}
+sf <- NNS.seas(omaha[1:l, 2], plot = FALSE)$best.period
+sf
+n <- timed(NNS.ARMA(omaha[, 2], h = 365, seasonal.factor = c(1, sf), method = 'lin',
+                    training.set = l, seasonal.plot = FALSE))
+nns.omaha.fcst <- n$value
+```
+
+### MSE:
+
+```{r pm-mse}
+c(prophet = mean((omaha_fcst$yhat - tail(omaha[, 2], 365))^2),
+  NNS = mean((nns.omaha.fcst - tail(omaha[, 2], 365))^2))
+record("Peyton Manning, raw", 365, omaha_fcst$yhat, nns.omaha.fcst, tail(omaha[, 2], 365),
+       omaha[l, 2], c(p$seconds, n$seconds))
+```
+
+## Peyton Manning Example (Log Values)
+
+Using the log values of the preceding Peyton Manning dataset. Again, we are
+forecasting the last 365 periods...
+
+### prophet model:
+
+```{r pm-log-prophet}
+p <- timed({
+  m <- prophet(log_omaha[1:l, ])
+  predict(m, data.frame(ds = test_days))
+})
+log_omaha_fcst <- p$value
+plot(m, predict(m, data.frame(ds = log_omaha$ds)))
+```
+
+### NNS model:
+
+```{r pm-log-nns}
+sf <- NNS.seas(log_omaha[1:l, 2], plot = FALSE)$best.period
+sf
+n <- timed(NNS.ARMA(log_omaha[, 2], h = 365, seasonal.factor = c(1, sf), method = 'nonlin',
+                    training.set = l, seasonal.plot = FALSE))
+nns.log.omaha.fcst <- n$value
+```
+
+### MSE:
+
+```{r pm-log-mse}
+c(prophet = mean((log_omaha_fcst$yhat - tail(log_omaha[, 2], 365))^2),
+  NNS = mean((nns.log.omaha.fcst - tail(log_omaha[, 2], 365))^2))
+record("Peyton Manning, log", 365, log_omaha_fcst$yhat, nns.log.omaha.fcst,
+       tail(log_omaha[, 2], 365), log_omaha[l, 2], c(p$seconds, n$seconds))
+```
+
+### Notes
+
+Can we recover better raw estimates from translated log estimates for
+`prophet`, or better log estimates from translated raw estimates for `NNS`?
+The exponent of a log forecast is a median-type forecast of the raw views, not
+their mean.
+
+```{r pm-translate}
+c(`prophet, exp(log forecast) vs raw` = mean((exp(log_omaha_fcst$yhat) - tail(omaha[, 2], 365))^2),
+  `prophet, raw forecast vs raw` = mean((omaha_fcst$yhat - tail(omaha[, 2], 365))^2))
+c(`NNS, log(raw forecast) vs log` = mean((log(nns.omaha.fcst) - tail(log_omaha[, 2], 365))^2),
+  `NNS, log forecast vs log` = mean((nns.log.omaha.fcst - tail(log_omaha[, 2], 365))^2))
+```
+
+## lynx Dataset
+
+Next we test the Canadian lynx dataset suggested from Andrew Gelman's blog post
+on prophet: <http://andrewgelman.com/2017/03/01/facebooks-prophet-uses-stan/>.
+The annual trappings from 1821 to 1934 are split into the first 80 years for
+training and the last 34 for testing.
+
+```{r lynx-data}
+data(lynx)
+l <- length(lynx) - 34
+lynx_df <- data.frame(ds = as.Date(paste0(time(lynx), "-01-01")), y = as.numeric(lynx))
+```
+
+### prophet model and RMSE:
+
+```{r lynx-prophet}
+p <- timed({
+  m <- prophet(lynx_df[1:l, ])
+  predict(m, data.frame(ds = lynx_df$ds[(l + 1):nrow(lynx_df)]))
+})
+fcast <- p$value
+sqrt(mean((tail(lynx, 34) - fcast$yhat)^2))
+plot(m, predict(m, data.frame(ds = lynx_df$ds)))
+```
+
+### NNS model and RMSE:
+
+`NNS` uses the two best periods `NNS.seas` finds in the 80 training years.
+
+```{r lynx-nns}
+n <- timed(NNS.ARMA(lynx, h = 34, training.set = l, method = 'lin', seasonal.factor = FALSE,
+                    best.periods = 2, seasonal.plot = FALSE))
+nns.lynx <- n$value
+sqrt(mean((nns.lynx - tail(lynx, 34))^2))
+record("lynx", 34, fcast$yhat, nns.lynx, tail(lynx, 34), lynx[l], c(p$seconds, n$seconds))
+```
+
+## S&P 500
+
+Finally we are going to forecast 252 trading days of the S&P 500 index, at
+three consecutive forecast origins. The archived page used SPY prices from
+2007 to 2017 downloaded from Yahoo Finance with `quantmod`. This build uses
+FRED's `SP500` series (index closes from S&P Dow Jones Indices), downloaded at
+build time; FRED keeps the most recent ten years. Each origin is trained on the
+1260 trading days (about five years) before it, so the windows stay inside
+FRED's range when the page is rebuilt, until late 2028.
+
+```{r sp-data}
+sp <- read.csv("https://fred.stlouisfed.org/graph/fredgraph.csv?id=SP500", na.strings = ".")
+sp <- sp[!is.na(sp[[2]]), ]
+sp <- data.frame(ds = as.Date(sp[[1]]), y = sp[[2]])
+sp <- sp[sp$ds <= as.Date("2026-10-30"), ]
+origins <- nrow(sp) - 252 * (3:1)
+data.frame(Year = 1:3,
+           `Training from` = sp$ds[origins - 1259], `Origin` = sp$ds[origins],
+           `Test from` = sp$ds[origins + 1], `Test to` = sp$ds[origins + 252],
+           check.names = FALSE)
+```
+
+`NNS` is using a `seasonal.factor = c(1, 5, 21, 63, 126, 252)`, which
+translates to a daily, weekly, monthly, quarterly, bi-annual and annual lag
+for S&P closing prices.
+
+```{r sp-forecasts, fig.height = 9}
+par(mfrow = c(3, 1), mar = c(4, 4, 2, 1))
+for (k in 1:3) {
+  window <- (origins[k] - 1259):(origins[k] + 252)
+  train <- sp[window[1:1260], ]
+  test <- sp[window[1261:1512], ]
+  p <- timed({
+    m <- prophet(train)
+    predict(m, data.frame(ds = test$ds))
+  })
+  n <- timed(NNS.ARMA(train$y, h = 252, seasonal.factor = c(1, 5, 21, 63, 126, 252),
+                      method = 'nonlin', plot = FALSE, seasonal.plot = FALSE))
+  print(record(paste0("S&P 500, year ", k), 252, p$value$yhat, n$value, test$y,
+               tail(train$y, 1), c(p$seconds, n$seconds)))
+  plot(c(train$ds, test$ds), c(train$y, test$y), type = "l", xlab = "", ylab = "S&P 500",
+       main = paste0("Year ", k, ": ", test$ds[1], " to ", test$ds[252]))
+  lines(test$ds, p$value$yhat, col = "blue", lwd = 2)
+  lines(test$ds, n$value, col = "red", lwd = 2)
+  abline(v = train$ds[1260], lty = 3)
+  legend("topleft", legend = c("Actual", "prophet", "NNS"), col = c("black", "blue", "red"),
+         lty = 1, lwd = c(1, 2, 2), bty = "n")
+}
+```
+
+## Summary
+
+```{r summary}
+summary_table <- do.call(rbind, results)
+knitr::kable(summary_table, digits = c(0, 0, 4, 4, 4, 1, 1), row.names = FALSE,
+             caption = "Test RMSE and run time (seconds) of each forecast")
+```
+
+```{r summary-counts, include = FALSE}
+nns_lower <- sum(summary_table[["NNS RMSE"]] < summary_table[["prophet RMSE"]])
+naive_vs_prophet <- sum(summary_table[["Last value RMSE"]] < summary_table[["prophet RMSE"]])
+naive_vs_nns <- sum(summary_table[["Last value RMSE"]] < summary_table[["NNS RMSE"]])
+secs <- function(x) paste(sprintf("%.1f", range(x)), collapse = " to ")
+```
+
+`NNS.ARMA` has the lower RMSE in `r nns_lower` of these `r nrow(summary_table)`
+forecasts and `prophet` in `r nrow(summary_table) - nns_lower`. The last-value
+forecast is more accurate than `prophet` in `r naive_vs_prophet` and than
+`NNS.ARMA` in `r naive_vs_nns`. Each `prophet` fit took
+`r secs(summary_table[["prophet s"]])` seconds here and each `NNS.ARMA` forecast
+`r secs(summary_table[["NNS s"]])` seconds.
+
+These are single forecast origins for retail sales, Peyton Manning (raw and
+log) and lynx, and three consecutive years of the S&P 500, so they describe
+these windows rather than rank the methods. A ranking would need many origins
+per series, scored with the same data, origins, horizon and tuning budget for
+every method.
+
+To be fair, `prophet` was not altered from its default settings and any
+interested readers are more than welcome to suggest different settings to
+improve performance. `NNS` was not optimized either.
+
+> **Note (2026).** The archived page's scores, including the running tally,
+> came from test-window period selection (Peyton Manning), a misaligned lynx
+> comparison and SPY data that cannot be reproduced; they are withdrawn. See
+> `examples/example-corrections.md`.
+
+Comments welcome at: [ovvo.financial.systems@gmail.com](mailto:ovvo.financial.systems@gmail.com)
+
+Further `NNS.ARMA` examples are available at:
+<https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/NNS%20ARMA.pdf>
+
+Thank you for your interest!
+
+## Session Information
+
+```{r session}
+sessionInfo()
+```
