@@ -94,6 +94,8 @@ test_that("VAR completes a mixed-frequency prefix before seeing later releases",
     NNS.ARMA.optim = function(variable, h, ...) {
       list(results = tail(variable, 1) + seq_len(h) / 10)
     },
+    # Trailing missing releases are forecast from the completed prefix.
+    NNS.ARMA = function(variable, h, ...) rep(mean(variable), h),
     NNS.reg = function(x, y, point.est, ...) {
       list(Point.est = rep(mean(y), length(point.est)))
     },

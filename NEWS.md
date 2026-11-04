@@ -86,6 +86,16 @@
   (222,000 six-minute observations, 200 candidate periods) took 11 min on one
   core with 13.0 and 13 min before this change; it now takes 1.0 min, or 0.7
   min with the default cores.
+* `NNS.VAR` fills the missing values of mixed-frequency panels as documented:
+  values before a variable's last observation are interpolated linearly between
+  its neighbouring observations, and trailing values are `NNS.ARMA` forecasts
+  from the completed series. When a variable had trailing `NA`s, every missing
+  value, interior ones included, came from an `NNS.stack` fit on the time index,
+  which lags a trending series: quarterly real GDP in a monthly panel was filled
+  up to 3% below its observed quarters in 2021-2022. On one- and two-month
+  trailing gaps in 12 FRED series (origins 2016-2022), `NNS.ARMA` had the lowest
+  median error of five fills and the index fit the highest, six to ten times
+  the others for quarterly series.
 * VAR keeps its two-stage forecast design and uses prefix-generated predictors
   for chronological validation by default. `validation = "observed"` is the
   compatibility option. Known contemporaneous outcomes and imputed future
