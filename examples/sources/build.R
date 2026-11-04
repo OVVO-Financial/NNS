@@ -65,7 +65,14 @@ for (name in todo) {
     format <- if (pdf) "pdf_document" else "html_document"
   }
   message("Rendering ", input, " -> ", file.path(out_dir, target))
-  rmarkdown::render(input, output_format = format, output_file = target,
-                    output_dir = out_dir, intermediates_dir = tempdir(),
-                    envir = new.env(parent = globalenv()), quiet = TRUE)
+  # Each source renders in its own R session, so packages one source attaches
+  # cannot affect another or appear in its sessionInfo().
+  script <- tempfile(fileext = ".R")
+  writeLines(sprintf(paste("rmarkdown::render(%s, output_format = %s, output_file = %s,",
+                           "output_dir = %s, intermediates_dir = tempdir(), quiet = TRUE)"),
+                     deparse(normalizePath(input)), deparse(format), deparse(target),
+                     deparse(normalizePath(out_dir))), script)
+  status <- system2(file.path(R.home("bin"), "Rscript"), shQuote(script))
+  unlink(script)
+  if (!identical(status, 0L)) stop("Rendering ", name, " failed.")
 }
