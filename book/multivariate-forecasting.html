@@ -1125,7 +1125,7 @@ X_t = c + A_1 X_{t-1} + A_2 X_{t-2} + \cdots + A_k X_{t-k} + \varepsilon_t,
 <p>The implementation has a clear architecture.</p>
 <div id="stage-1-complete-each-series-individually" class="section level3 hasAnchor" number="26.3.1">
 <h3><span class="header-section-number">26.3.1</span> Stage 1: complete each series individually<a href="multivariate-forecasting.html#stage-1-complete-each-series-individually" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<p>Each variable is first interpolated where values are missing and extrapolated forward using <code>NNS.ARMA</code>. The returned object explicitly includes</p>
+<p>Each variable’s missing values are first estimated from its own observations, and each completed series is forecast forward with <code>NNS.ARMA</code>. When a variable’s latest values are missing, every missing value comes from an <code>NNS.stack</code> fit on the time index: it takes the value of the nearest regression point on the index, the newest observation keeps its own regression point, and values after it extend the gradient at that boundary. When only earlier values are missing, they are interpolated linearly. The returned object explicitly includes</p>
 <ul>
 <li><code>interpolated_and_extrapolated</code>,</li>
 <li><code>univariate</code>,</li>
@@ -1229,12 +1229,11 @@ X^{\mathrm{completed}}_{k,s\mid T}, &amp; s\le T,\\
 <p><span class="math display">\[
 V_t = (X_{1t},\dots,X_{pt}),
 \]</span></p>
-<p>with some entries unobserved because the reporting frequencies differ. <code>NNS.VAR</code> explicitly returns a matrix called <code>interpolated_and_extrapolated</code>, whose purpose is to replace missing values in the original panel using interpolation and univariate extrapolation. This is not an incidental preprocessing step. It is foundational to the mixed-frequency design of the method.</p>
+<p>with some entries unobserved because the reporting frequencies differ. <code>NNS.VAR</code> explicitly returns a matrix called <code>interpolated_and_extrapolated</code>, whose purpose is to replace missing values in the original panel with a nonparametric fit of each variable on the time index. This is not an incidental preprocessing step. It is foundational to the mixed-frequency design of the method.</p>
 <p>Conceptually, the procedure is:</p>
 <ol style="list-style-type: decimal">
 <li>place all series on a common index,</li>
-<li>fill interior gaps via interpolation,</li>
-<li>forecast trailing missing values using univariate nonlinear forecasting,</li>
+<li>complete each series from its own observations: when its latest values are missing, with an <code>NNS.stack</code> fit on the index that also carries the series to the end of the panel, and otherwise by linear interpolation,</li>
 <li>build the lagged multivariate system on the completed panel.</li>
 </ol>
 <p>So mixed-frequency forecasting is handled natively, rather than being outsourced to a separate parametric state-space model.</p>

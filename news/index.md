@@ -98,17 +98,20 @@ CRAN release: 2026-10-30
   once. The tides example (222,000 six-minute observations, 200
   candidate periods) took 11 min on one core with 13.0 and 13 min before
   this change; it now takes 1.0 min, or 0.7 min with the default cores.
-- `NNS.VAR` fills the missing values of mixed-frequency panels as
-  documented: values before a variable’s last observation are
-  interpolated linearly between its neighbouring observations, and
-  trailing values are `NNS.ARMA` forecasts from the completed series.
-  When a variable had trailing `NA`s, every missing value, interior ones
-  included, came from an `NNS.stack` fit on the time index, which lags a
-  trending series: quarterly real GDP in a monthly panel was filled up
-  to 3% below its observed quarters in 2021-2022. On one- and two-month
-  trailing gaps in 12 FRED series (origins 2016-2022), `NNS.ARMA` had
-  the lowest median error of five fills and the index fit the highest,
-  six to ten times the others for quarterly series.
+- `NNS.VAR` again completes a variable whose latest values are missing
+  with the `NNS.stack` fit on the time index used in NNS 13.0: every
+  missing value takes the value of the nearest regression point on the
+  index, the newest observation keeps its own regression point, and
+  values after it extend the gradient at that boundary. In the 13.1-13.3
+  betas the multivariate regression behind that fit merged the newest
+  observation into the previous cell, stopped extending past the data,
+  and later partitioned the index more coarsely, so quarterly real GDP
+  in a monthly panel was filled at 21,474 for November 2022 after an
+  observed 22,273 (13.0: 22,316). On one- and two-month trailing gaps in
+  12 FRED series (origins 2016-2022), the restored fill’s median error
+  is 0.88 mean absolute monthly changes for monthly series and 1.09 for
+  quarterly series (13.0: 0.88 and 1.06). When only earlier values are
+  missing they are still interpolated linearly.
 - VAR keeps its two-stage forecast design and uses prefix-generated
   predictors for chronological validation by default.
   `validation = "observed"` is the compatibility option. Known

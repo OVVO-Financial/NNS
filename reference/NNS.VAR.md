@@ -120,17 +120,21 @@ mean((predicted - actual)^2)/.denom
 
 Returns the following matrices of forecasted variables:
 
-- `"interpolated_and_extrapolated"` Returns a `data.frame` of the linear
-  interpolated and
-  [NNS.ARMA](https://OVVO-Financial.github.io/NNS/reference/NNS.ARMA.md)
-  extrapolated values to replace `NA` values in the original `variables`
-  argument: `NA` values before a variable's last observation are
-  interpolated linearly between its neighbouring observations, and
-  trailing `NA` values are
-  [NNS.ARMA](https://OVVO-Financial.github.io/NNS/reference/NNS.ARMA.md)
-  forecasts from the completed series. This is required for working with
-  variables containing different frequencies, e.g. where `NA` would be
-  reported for intra-quarterly data when indexed with monthly periods.
+- `"interpolated_and_extrapolated"` Returns a `data.frame` of the
+  original `variables` with their `NA` values replaced. When a
+  variable's latest values are missing, every `NA` of that variable is
+  estimated from its own observations by the
+  [NNS.stack](https://OVVO-Financial.github.io/NNS/reference/NNS.stack.md)
+  fit on the time index used in NNS 13.0:
+  [NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md)
+  with one nearest regression point, on the index duplicated into two
+  predictors. The latest observation keeps its own regression point, and
+  values after it (or before the first observation) extend the gradient
+  at that boundary. When only earlier values are missing, they are
+  interpolated linearly with `NNS.reg(order = "max")` on the index. This
+  is required for working with variables containing different
+  frequencies, e.g. where `NA` would be reported for intra-quarterly
+  data when indexed with monthly periods.
 
 - `"relevant_variables"` Returns, for each variable, the lagged
   regressors retained after the
