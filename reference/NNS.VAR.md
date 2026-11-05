@@ -124,9 +124,13 @@ Returns the following matrices of forecasted variables:
   interpolated and
   [NNS.ARMA](https://OVVO-Financial.github.io/NNS/reference/NNS.ARMA.md)
   extrapolated values to replace `NA` values in the original `variables`
-  argument. This is required for working with variables containing
-  different frequencies, e.g. where `NA` would be reported for
-  intra-quarterly data when indexed with monthly periods.
+  argument: `NA` values before a variable's last observation are
+  interpolated linearly between its neighbouring observations, and
+  trailing `NA` values are
+  [NNS.ARMA](https://OVVO-Financial.github.io/NNS/reference/NNS.ARMA.md)
+  forecasts from the completed series. This is required for working with
+  variables containing different frequencies, e.g. where `NA` would be
+  reported for intra-quarterly data when indexed with monthly periods.
 
 - `"relevant_variables"` Returns, for each variable, the lagged
   regressors retained after the
