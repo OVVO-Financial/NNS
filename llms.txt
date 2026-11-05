@@ -176,6 +176,8 @@ learning and econometrics examples.
   : UPM VaR
 - [`UPM.ratio()`](https://OVVO-Financial.github.io/NNS/reference/UPM.ratio.md)
   : Upper Partial Moment Ratio
+- [`.nns_fd_weights()`](https://OVVO-Financial.github.io/NNS/reference/dot-nns_fd_weights.md)
+  : Partial Derivative dy/d\_\[wrt\]
 - [`dy.d_()`](https://OVVO-Financial.github.io/NNS/reference/dy.d_.md) :
   Partial Derivative dy/d\_\[wrt\]
 - [`dy.dx()`](https://OVVO-Financial.github.io/NNS/reference/dy.dx.md) :

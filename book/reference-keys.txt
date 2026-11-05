@@ -643,7 +643,7 @@ multivariate-forecasting-as-nonlinear-regression
 ensemble-construction
 relevant-variables-as-a-structural-map
 a-small-synthetic-illustration
-nowcasting-with-nns.nowcast
+nowcasting-with-nns.var
 what-the-nowcast-output-means
 prediction-intervals-1
 comparison-with-classical-var

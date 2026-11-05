@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">NNS</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">13.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">14.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -146,12 +146,12 @@
 <dd><p>integer; value specifying the number of cores to be used in the parallelized subroutine <a href="NNS.reg.html">NNS.reg</a>. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.</p></dd>
 
 
-<dt id="arg--validation">.validation<a class="anchor" aria-label="anchor" href="#arg--validation"></a></dt>
-<dd><p>Internal forecast-validation contract, normally NULL. A list with <code>IVs.train</code>, <code>DV.train</code>, <code>IVs.test</code>, and <code>DV.test</code> supplies the single chronological validation fold when <code>ts.test</code> is set, <code>folds = 1</code>, and <code>CV.size = NULL</code>. It requires exactly <code>N-ts.test</code> training rows and one through <code>ts.test</code> held-out rows; this allows scoring only observed future targets. Training prefixes and generated validation predictors must be constructed without later data. Used only for regression tuning; numeric two-level responses remain regression when this contract is supplied with type = NULL. The final model still fits all original training observations.</p></dd>
-
-
 <dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
 <dd><p>Optional integer random seed used for reproducible resampling, fold construction, and stochastic fitting steps. If `NULL`, the current random-number-generator state is used.</p></dd>
+
+
+<dt id="arg--validation">.validation<a class="anchor" aria-label="anchor" href="#arg--validation"></a></dt>
+<dd><p>Internal forecast-validation contract, normally NULL. A list with <code>IVs.train</code>, <code>DV.train</code>, <code>IVs.test</code>, and <code>DV.test</code> supplies the single chronological validation fold when <code>ts.test</code> is set, <code>folds = 1</code>, and <code>CV.size = NULL</code>. It requires exactly <code>N-ts.test</code> training rows and one through <code>ts.test</code> held-out rows; this allows scoring only observed future targets. Training prefixes and generated validation predictors must be constructed without later data. Used only for regression tuning; numeric two-level responses remain regression when this contract is supplied with type = NULL. The final model still fits all original training observations.</p></dd>
 
 </dl></div>
     <div class="section level2">

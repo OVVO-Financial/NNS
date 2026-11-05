@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">NNS</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">13.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">14.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -530,9 +530,9 @@ the neighbor count <code>n.best</code> using heldout performance:</p>
 <span>                          point.est <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">x</span><span class="op">)</span>, plot <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>                          residual.plot <span class="op">=</span> <span class="cn">FALSE</span>, ncores <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>                          confidence.interval <span class="op">=</span> <span class="fl">.95</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, pch <span class="op">=</span> <span class="fl">19</span>, col <span class="op">=</span> <span class="st">"grey60"</span>, main <span class="op">=</span> <span class="st">"Tuned multivariate prediction path"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, pch <span class="op">=</span> <span class="fl">19</span>, col <span class="op">=</span> <span class="st">"steelblue"</span>, main <span class="op">=</span> <span class="st">"Tuned multivariate prediction path"</span><span class="op">)</span></span>
 <span><span class="va">o</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">x</span><span class="op">[</span><span class="va">o</span><span class="op">]</span>, <span class="va">duplicated_fit</span><span class="op">$</span><span class="va">Point.est</span><span class="op">[</span><span class="va">o</span><span class="op">]</span>, col <span class="op">=</span> <span class="st">"steelblue"</span>, lwd <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">x</span><span class="op">[</span><span class="va">o</span><span class="op">]</span>, <span class="va">duplicated_fit</span><span class="op">$</span><span class="va">Point.est</span><span class="op">[</span><span class="va">o</span><span class="op">]</span>, col <span class="op">=</span> <span class="st">"red"</span>, lwd <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 <p><img src="NNSvignette_07_Clustering_and_Regression_files/figure-html/stack2res-1.png" class="r-plt" alt="" width="480" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level2">

@@ -169,6 +169,12 @@ NNS.stack(
   If NULL (default), the number of cores to be used is equal to the
   number of cores of the machine - 1.
 
+- seed:
+
+  Optional integer random seed used for reproducible resampling, fold
+  construction, and stochastic fitting steps. If \`NULL\`, the current
+  random-number-generator state is used.
+
 - .validation:
 
   Internal forecast-validation contract, normally NULL. A list with
@@ -181,12 +187,6 @@ NNS.stack(
   tuning; numeric two-level responses remain regression when this
   contract is supplied with type = NULL. The final model still fits all
   original training observations.
-
-- seed:
-
-  Optional integer random seed used for reproducible resampling, fold
-  construction, and stochastic fitting steps. If \`NULL\`, the current
-  random-number-generator state is used.
 
 ## Value
 

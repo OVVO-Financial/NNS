@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">NNS</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">13.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">14.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -67,7 +67,7 @@
 
 
 <dl><dt id="arg-variables">variables<a class="anchor" aria-label="anchor" href="#arg-variables"></a></dt>
-<dd><p>a numeric matrix, data.frame, <code>ts</code>, <code>xts</code> or <code>zoo</code> object of contemporaneous time-series to forecast.</p></dd>
+<dd><p>a numeric matrix or data.frame of contemporaneous time-series to forecast.</p></dd>
 
 
 <dt id="arg-h">h<a class="anchor" aria-label="anchor" href="#arg-h"></a></dt>
@@ -75,7 +75,7 @@
 
 
 <dt id="arg-tau">tau<a class="anchor" aria-label="anchor" href="#arg-tau"></a></dt>
-<dd><p>positive integer [ &gt; 0]; 1 (default) Number of lagged observations to consider for the time-series data.  A single integer uses lags <code>1:tau</code> for every variable.  A vector with one entry per variable uses that single lag for each respective variable, and a list with one lag vector per variable (or one lag vector shared by every variable) uses multiple lags per variable.  The smallest lag of each variable is also the <code>modulo</code> for its <a href="NNS.seas.html">NNS.seas</a> seasonal-period search.</p></dd>
+<dd><p>positive integer [ &gt; 0]; 1 (default) Number of lagged observations to consider for the time-series data.  Vector for single lag for each respective variable or list for multiple lags per each variable.</p></dd>
 
 
 <dt id="arg-dim-red-method">dim.red.method<a class="anchor" aria-label="anchor" href="#arg-dim-red-method"></a></dt>
@@ -104,30 +104,27 @@
 
 
 <dt id="arg-nowcast">nowcast<a class="anchor" aria-label="anchor" href="#arg-nowcast"></a></dt>
-<dd><p>logical; <code>FALSE</code> (default) internal call for frequency alignment in downstream nowcasting applications.  When <code>TRUE</code>, rows of a time-indexed <code>variables</code> are labelled by month (<code>"Mon YYYY"</code>) whatever the input frequency, with the forecast rows labelled by the following <code>h</code> months.</p></dd>
+<dd><p>logical; <code>FALSE</code> (default) internal call for frequency alignment in downstream nowcasting applications.</p></dd>
 
 
 <dt id="arg-validation">validation<a class="anchor" aria-label="anchor" href="#arg-validation"></a></dt>
-<dd><p><code>"pipeline"</code> (default) rebuilds interpolation, univariate forecasts and lagged predictors using only the prefix before the chronological holdout. Same-period and later-horizon covariates are forecast, and only observed holdout targets are scored. <code>"observed"</code> retains conditional-regression tuning on realized holdout covariates; that score does not evaluate deployment forecasts.</p></dd>
+<dd><p><code>"pipeline"</code> (default) tunes with a chronological holdout whose predictors are built by completing and forecasting each series using only its prefix. Only observed holdout targets are scored. <code>"observed"</code> retains the former conditional-regression validation on realized covariates; it is not a deployment forecast score.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>Returns the following matrices of forecasted variables:</p><ul><li><p><code>"interpolated_and_extrapolated"</code> Returns a <code>data.frame</code> of the original <code>variables</code> with their <code>NA</code> values replaced.  When a variable's latest values are missing, every <code>NA</code> of that variable is estimated from its own observations by the <a href="NNS.stack.html">NNS.stack</a> fit on the time index used in NNS 13.0: <a href="NNS.reg.html">NNS.reg</a> with one nearest regression point, on the index duplicated into two predictors.  The latest observation keeps its own regression point, and values after it (or before the first observation) extend the gradient at that boundary.  When only earlier values are missing, they are interpolated linearly with <code>NNS.reg(order = "max")</code> on the index.  This is required for working with variables containing different frequencies, e.g. where <code>NA</code> would be reported for intra-quarterly data when indexed with monthly periods.</p></li>
-<li><p><code>"relevant_variables"</code> Returns, for each variable, the lagged regressors retained after the <a href="NNS.reg.html">NNS.reg</a> coefficient-cutoff validation search. These are the only regressors used in the <code>"multivariate"</code> estimate.</p></li>
+<li><p><code>"relevant_variables"</code> Returns the relevant variables from the dimension reduction step: the lagged regressors whose dimension reduction coefficient meets the cross-validated threshold.  These are the only regressors used in the <code>"multivariate"</code> estimate.</p></li>
 <li><p><code>"univariate"</code> Returns the univariate <a href="NNS.ARMA.html">NNS.ARMA</a> forecasts.</p></li>
 <li><p><code>"multivariate"</code> Returns the multi-variate forecasts: <a href="NNS.stack.html">NNS.stack</a> <code>(method = 1, stack = FALSE)</code> on the relevant variables, evaluated on the lag-matrix rows of the forecast period (built from the univariate forecasts).</p></li>
-<li><p><code>"validation"</code> Returns the validation mode, origin, horizon and number of observed holdout targets for each series.</p></li>
+<li><p><code>"validation"</code> validation mode, origin and horizon used for tuning; pipeline mode excludes future covariates from prefix completion and prediction.</p></li>
 <li><p><code>"ensemble"</code> Returns the ensemble of both <code>"univariate"</code> and <code>"multivariate"</code> forecasts.</p></li>
-</ul><p>When <code>variables</code> is a <code>ts</code>, <code>xts</code> or <code>zoo</code> object, rows are labelled with its time index and the forecast rows with the following <code>h</code> periods.</p>
-    </div>
+</ul></div>
     <div class="section level2">
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
-    <p>Pipeline validation uses one chronological tuning origin. Missing prefix values are completed without later observations. Relevance coefficients are fitted on that prefix, the selected variables are retained for tuning, and the final forecast is refitted on all available observations. Assess the complete model at additional rolling origins for a performance estimate.</p>
 
 <ul><li><p><code>"Error in { : task xx failed -}"</code> should be re-run with <code>NNS.VAR(..., ncores = 1)</code>.</p></li>
 <li><p>Not recommended for factor variables, even after transformed to numeric.  <a href="NNS.reg.html">NNS.reg</a> is better suited for factor or binary regressor extrapolation.</p></li>
-<li><p>The lagged training sample, <code>nrow(variables) - max(tau)</code>, must contain at least <code>2 * h + 3</code> observations.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>

@@ -34,8 +34,8 @@ mean((predicted - actual)^2)/.denom
 
 - variables:
 
-  a numeric matrix, data.frame, `ts`, `xts` or `zoo` object of
-  contemporaneous time-series to forecast.
+  a numeric matrix or data.frame of contemporaneous time-series to
+  forecast.
 
 - h:
 
@@ -45,14 +45,8 @@ mean((predicted - actual)^2)/.denom
 - tau:
 
   positive integer \[ \> 0\]; 1 (default) Number of lagged observations
-  to consider for the time-series data. A single integer uses lags
-  `1:tau` for every variable. A vector with one entry per variable uses
-  that single lag for each respective variable, and a list with one lag
-  vector per variable (or one lag vector shared by every variable) uses
-  multiple lags per variable. The smallest lag of each variable is also
-  the `modulo` for its
-  [NNS.seas](https://OVVO-Financial.github.io/NNS/reference/NNS.seas.md)
-  seasonal-period search.
+  to consider for the time-series data. Vector for single lag for each
+  respective variable or list for multiple lags per each variable.
 
 - dim.red.method:
 
@@ -102,19 +96,15 @@ mean((predicted - actual)^2)/.denom
 - nowcast:
 
   logical; `FALSE` (default) internal call for frequency alignment in
-  downstream nowcasting applications. When `TRUE`, rows of a
-  time-indexed `variables` are labelled by month (`"Mon YYYY"`) whatever
-  the input frequency, with the forecast rows labelled by the following
-  `h` months.
+  downstream nowcasting applications.
 
 - validation:
 
-  `"pipeline"` (default) rebuilds interpolation, univariate forecasts
-  and lagged predictors using only the prefix before the chronological
-  holdout. Same-period and later-horizon covariates are forecast, and
-  only observed holdout targets are scored. `"observed"` retains
-  conditional-regression tuning on realized holdout covariates; that
-  score does not evaluate deployment forecasts.
+  `"pipeline"` (default) tunes with a chronological holdout whose
+  predictors are built by completing and forecasting each series using
+  only its prefix. Only observed holdout targets are scored.
+  `"observed"` retains the former conditional-regression validation on
+  realized covariates; it is not a deployment forecast score.
 
 ## Value
 
@@ -136,11 +126,10 @@ Returns the following matrices of forecasted variables:
   frequencies, e.g. where `NA` would be reported for intra-quarterly
   data when indexed with monthly periods.
 
-- `"relevant_variables"` Returns, for each variable, the lagged
-  regressors retained after the
-  [NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md)
-  coefficient-cutoff validation search. These are the only regressors
-  used in the `"multivariate"` estimate.
+- `"relevant_variables"` Returns the relevant variables from the
+  dimension reduction step: the lagged regressors whose dimension
+  reduction coefficient meets the cross-validated threshold. These are
+  the only regressors used in the `"multivariate"` estimate.
 
 - `"univariate"` Returns the univariate
   [NNS.ARMA](https://OVVO-Financial.github.io/NNS/reference/NNS.ARMA.md)
@@ -152,24 +141,14 @@ Returns the following matrices of forecasted variables:
   the lag-matrix rows of the forecast period (built from the univariate
   forecasts).
 
-- `"validation"` Returns the validation mode, origin, horizon and number
-  of observed holdout targets for each series.
+- `"validation"` validation mode, origin and horizon used for tuning;
+  pipeline mode excludes future covariates from prefix completion and
+  prediction.
 
 - `"ensemble"` Returns the ensemble of both `"univariate"` and
   `"multivariate"` forecasts.
 
-When `variables` is a `ts`, `xts` or `zoo` object, rows are labelled
-with its time index and the forecast rows with the following `h`
-periods.
-
 ## Note
-
-Pipeline validation uses one chronological tuning origin. Missing prefix
-values are completed without later observations. Relevance coefficients
-are fitted on that prefix, the selected variables are retained for
-tuning, and the final forecast is refitted on all available
-observations. Assess the complete model at additional rolling origins
-for a performance estimate.
 
 - `"Error in { : task xx failed -}"` should be re-run with
   `NNS.VAR(..., ncores = 1)`.
@@ -178,9 +157,6 @@ for a performance estimate.
   numeric.
   [NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md)
   is better suited for factor or binary regressor extrapolation.
-
-- The lagged training sample, `nrow(variables) - max(tau)`, must contain
-  at least `2 * h + 3` observations.
 
 ## References
 

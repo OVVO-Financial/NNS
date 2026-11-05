@@ -979,7 +979,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="26.9" data-path="multivariate-forecasting.html"><a href="multivariate-forecasting.html#ensemble-construction"><i class="fa fa-check"></i><b>26.9</b> Ensemble Construction</a></li>
 <li class="chapter" data-level="26.10" data-path="multivariate-forecasting.html"><a href="multivariate-forecasting.html#relevant-variables-as-a-structural-map"><i class="fa fa-check"></i><b>26.10</b> Relevant Variables as a Structural Map</a></li>
 <li class="chapter" data-level="26.11" data-path="multivariate-forecasting.html"><a href="multivariate-forecasting.html#a-small-synthetic-illustration"><i class="fa fa-check"></i><b>26.11</b> A Small Synthetic Illustration</a></li>
-<li class="chapter" data-level="26.12" data-path="multivariate-forecasting.html"><a href="multivariate-forecasting.html#nowcasting-with-nns.nowcast"><i class="fa fa-check"></i><b>26.12</b> Nowcasting with <code>NNS.nowcast</code></a>
+<li class="chapter" data-level="26.12" data-path="multivariate-forecasting.html"><a href="multivariate-forecasting.html#nowcasting-with-nns.var"><i class="fa fa-check"></i><b>26.12</b> Nowcasting with <code>NNS.VAR</code></a>
 <ul>
 <li class="chapter" data-level="26.12.1" data-path="multivariate-forecasting.html"><a href="multivariate-forecasting.html#what-the-nowcast-output-means"><i class="fa fa-check"></i><b>26.12.1</b> What the nowcast output means</a></li>
 </ul></li>
@@ -1405,8 +1405,8 @@ U_{t-1},\ U_{t-12},\ I_{t-3},
 <p>That is exactly what a nonlinear vector autoregression should do.</p>
 <hr />
 </div>
-<div id="nowcasting-with-nns.nowcast" class="section level2 hasAnchor" number="26.12">
-<h2><span class="header-section-number">26.12</span> Nowcasting with <code>NNS.nowcast</code><a href="multivariate-forecasting.html#nowcasting-with-nns.nowcast" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="nowcasting-with-nns.var" class="section level2 hasAnchor" number="26.12">
+<h2><span class="header-section-number">26.12</span> Nowcasting with <code>NNS.VAR</code><a href="multivariate-forecasting.html#nowcasting-with-nns.var" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>Nowcasting deserves special treatment because it is one of the most practical uses of the framework.</p>
 <p><code>NNS.nowcast</code> is a wrapper built around <code>NNS.VAR</code>. It downloads a base panel of macroeconomic indicators, converts each to monthly frequency, merges them into a common panel, and then calls <code>NNS.VAR(econ_variables, h = h, tau = 12, nowcast = TRUE, naive.weights = naive.weights)</code>.</p>
 <p>This gives a ready-made mixed-frequency multivariate forecasting system.</p>

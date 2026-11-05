@@ -96,7 +96,7 @@ back to the labels.
 
 ``` r
 
-set.seed(20261103)
+set.seed(123)
 test.set <- sort(unlist(lapply(split(seq_len(nrow(iris)), iris$Species),
                                function(rows) sample(rows, 4))))
  
