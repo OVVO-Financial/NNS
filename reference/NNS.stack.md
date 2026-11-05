@@ -250,23 +250,33 @@ for all models.
 
 - `"pred.int"` returns the prediction intervals for the stacked model.
 
+- `"weights"` returns the weights of `"reg"` and `"dim.red"` in
+  `"stack"`. For classification they are proportional to the squared
+  `"OBJfn.reg"` and `"OBJfn.dim.red"` (inverse squares when
+  `objective = "min"`); for regression the weight is selected by
+  `obj.fn` on the out-of-fold predictions of the blend.
+
 ## Details
 
 Classification tunes and combines class-probability vectors from the NNS
 predictor cells, preserving nominal label identity. `probabilities`,
 `reg.probabilities`, and `dim.red.probabilities` return the final
 probability matrices. Class balancing resamples the training rows of
-each fold. The neighbour count, the dimension count, the blend weight
-and the binary probability threshold are chosen by optimizing `obj.fn`
-on the pooled out-of-fold predictions; the default classification
-objective is accuracy. `OBJfn.reg` and `OBJfn.dim.red` are the best
-scores of that search on the same predictions, so they are
-selection-optimized and overstate held-out performance; assess the final
-model on an independent test set. Custom objectives receive original
-numeric or logical response values, and factor/character codes as
-identified by `class.levels`. Relabelling is invariant for
-label-invariant objectives such as accuracy; a custom loss assigning
-different costs to classes can deliberately change the result.
+each fold. The neighbour count and the dimension count are chosen by
+optimizing `obj.fn` on the pooled out-of-fold predictions; the default
+classification objective is accuracy. As in NNS 13.0, the two models'
+probability vectors are then blended with weights proportional to their
+squared objective scores (inverse squares when `objective = "min"`), so
+models with nearly equal scores are blended nearly equally, and the
+binary probability threshold is tuned on the out-of-fold predictions of
+that blend. `OBJfn.reg` and `OBJfn.dim.red` are the best scores of that
+search on the same predictions, so they are selection-optimized and
+overstate held-out performance; assess the final model on an independent
+test set. Custom objectives receive original numeric or logical response
+values, and factor/character codes as identified by `class.levels`.
+Relabelling is invariant for label-invariant objectives such as
+accuracy; a custom loss assigning different costs to classes can
+deliberately change the result.
 
 Named numeric dimension-reduction coefficients are matched to encoded
 predictor names in both regression and classification. Factor columns

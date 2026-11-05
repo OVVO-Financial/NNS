@@ -460,8 +460,8 @@ stack_fit[c("OBJfn.reg", "OBJfn.dim.red", "NNS.reg.n.best",
     ## [1] 1
     ## 
     ## $weights
-    ##     reg dim.red 
-    ##       1       0 
+    ##       reg   dim.red 
+    ## 0.5446865 0.4553135 
     ## 
     ## $class.levels
     ## [1] "setosa"     "versicolor" "virginica"

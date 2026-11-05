@@ -1175,8 +1175,10 @@ The second level stabilizes that geometry across feature subsets, folds, and can
 <p>A stacked model does not choose one of them. It treats them as a new feature vector</p>
 <p><span class="math display">\[z(x)=\bigl(\hat y^{(1)}(x),\dots,\hat y^{(K)}(x)\bigr)\]</span></p>
 <p>and then selects a second-stage combination. In the current two-component implementation, the rule is a convex blend</p>
-<p><span class="math display">\[\hat y_{\mathrm{stack}}(x)=w\hat y^{(1)}(x)+(1-w)\hat y^{(2)}(x),\qquad w\in\{0,.01,\ldots,1\},\]</span></p>
-<p>with the weight selected on pooled out-of-fold predictions. Classification blends the class-probability vectors before making the label decision. This is a restricted meta-model, not an arbitrary fitted function <span class="math inline">\(G\)</span>.</p>
+<p><span class="math display">\[\hat y_{\mathrm{stack}}(x)=w\hat y^{(1)}(x)+(1-w)\hat y^{(2)}(x).\]</span></p>
+<p>For regression, the weight is selected from <span class="math inline">\(w\in\{0,.01,\ldots,1\}\)</span> on pooled out-of-fold predictions. Classification blends the class-probability vectors before making the label decision, weighting each component by its squared out-of-fold objective score <span class="math inline">\(S_k\)</span> (inverse squares for a minimized objective):</p>
+<p><span class="math display">\[w=\frac{S_1^2}{S_1^2+S_2^2}.\]</span></p>
+<p>Two components with nearly equal scores are therefore blended nearly equally, rather than one taking all the weight because it classified one more held-out observation correctly. This is a restricted meta-model, not an arbitrary fitted function <span class="math inline">\(G\)</span>.</p>
 <p>In the NNS setting, the base learners come from two main sources documented in the function interface:</p>
 <ul>
 <li><strong>Method 1</strong>: direct <code>NNS.reg</code> prediction, which in the multivariate case operates as regression-point nearest-neighbor search over a compressed set of local conditional means (as developed in Chapter 22) — not a piecewise-linear surface.</li>
