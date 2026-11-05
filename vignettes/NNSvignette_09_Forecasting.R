@@ -5,7 +5,6 @@ options(mc.cores = 1)
 RcppParallel::setThreadOptions(numThreads = 1)
 Sys.setenv("OMP_THREAD_LIMIT" = 1)
 
-
 ## ----linear,fig.width=5,fig.height=3,fig.align = "center", warning=FALSE------
 nns_lin = NNS.ARMA(AirPassengers,
                h = 44,
@@ -17,7 +16,6 @@ nns_lin = NNS.ARMA(AirPassengers,
 
 sqrt(mean((nns_lin - tail(AirPassengers, 44)) ^ 2))
 
-
 ## ----nonlinear,fig.width=5,fig.height=3,fig.align = "center"------------------
 nns_nonlin = NNS.ARMA(AirPassengers,
                h = 44,
@@ -28,7 +26,6 @@ nns_nonlin = NNS.ARMA(AirPassengers,
                seasonal.plot = FALSE)
 
 sqrt(mean((nns_nonlin - tail(AirPassengers, 44)) ^ 2))
-
 
 ## ----seasonal-test, eval=TRUE-------------------------------------------------
 training <- head(AirPassengers, 100)
@@ -46,16 +43,13 @@ seas <- data.frame(
 a <- seas$Period[which.min(seas$validation_RMSE)]
 seas
 
-
 ## ----selected-period-test, fig.width=5,fig.height=3,fig.align="center"--------
 selected <- NNS.ARMA(training, h = 44, method = "lin", seasonal.factor = a,
                      plot = TRUE, seasonal.plot = FALSE)
 sqrt(mean((selected - tail(AirPassengers, 44))^2))
 
-
 ## ----modulo, eval=TRUE--------------------------------------------------------
 NNS.seas(training, modulo = 12, plot = FALSE)
-
 
 ## ----optimizer, fig.width=6,fig.height=4,fig.align="center"-------------------
 optimizer_periods <- c(12L, 18L, 24L)
@@ -69,12 +63,10 @@ nns.optimal <- NNS.ARMA.optim(training,
 
 nns.optimal
 
-
 ## ----optimizer-test-score-----------------------------------------------------
 c(internal_validation_RMSE = nns.optimal$obj.fn,
   raw_reserved_test_RMSE = sqrt(mean((nns.optimal$raw.results - tail(AirPassengers, 44))^2)),
   corrected_reserved_test_RMSE = sqrt(mean((nns.optimal$results - tail(AirPassengers, 44))^2)))
-
 
 ## ----extension,fig.width=6,fig.height=4,fig.align="center"--------------------
 extended <- NNS.ARMA.optim(AirPassengers,

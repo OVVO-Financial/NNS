@@ -59,7 +59,7 @@ Let's have a look and see how it works. We hold out four observations from each 
 **NOTE:** class labels can be factor levels or any distinct numbers. Numeric and logical responses are returned on their own values; factor and character responses are returned as codes, which `class.levels` maps back to the labels.
 
 ```{r NNSBOOST,fig.align = "center", fig.height = 8,fig.width=6.5, eval=FALSE}
-set.seed(20261103)
+set.seed(123)
 test.set <- sort(unlist(lapply(split(seq_len(nrow(iris)), iris$Species),
                                function(rows) sample(rows, 4))))
  

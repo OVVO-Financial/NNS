@@ -5,33 +5,26 @@ options(mc.cores = 1)
 RcppParallel::setThreadOptions(numThreads = 1)
 Sys.setenv("OMP_THREAD_LIMIT" = 1)
 
-
 ## ----setup2, message=FALSE, warning=FALSE-------------------------------------
 library(NNS)
 require(knitr)
-
 
 ## ----linear-------------------------------------------------------------------
 x = seq(-5, 5, .05); y = x ^ 3
 
 for(i in 1 : 4){NNS.part(x, y, order = i, Voronoi = TRUE, obs.req = 0)}
 
-
 ## ----x part,results='hide'----------------------------------------------------
 for(i in 1 : 4){NNS.part(x, y, order = i, type = "XONLY", Voronoi = TRUE)}
-
 
 ## ----res2, echo=FALSE---------------------------------------------------------
 NNS.part(x,y,order = 4, type = "XONLY")
 
-
 ## ----depreg,results='hide'----------------------------------------------------
 for(i in 1 : 3){NNS.part(x, y, order = i, obs.req = 0, Voronoi = TRUE, type = "XONLY") ; NNS.reg(x, y, order = i, ncores = 1)}
 
-
 ## ----nonlinear,fig.width=5,fig.height=3,fig.align = "center"------------------
 NNS.reg(x, y, ncores = 1)
-
 
 ## ----nonlinear multi,fig.width=5,fig.height=3,fig.align = "center"------------
 f = function(x, y) x ^ 3 + 3 * y - y ^ 3 - 3 * x
@@ -39,14 +32,12 @@ y = x ; z <- expand.grid(x, y)
 g = f(z[ , 1], z[ , 2])
 NNS.reg(z, g, order = "max", plot = FALSE, ncores = 1)
 
-
 ## ----dimension_reduction,fig.width=5,fig.height=3,fig.align="center"----------
 regression_x <- iris[, 2:4]
 regression_y <- iris$Sepal.Length
 reduced <- NNS.reg(regression_x, regression_y, dim.red.method = "cor",
                    plot = FALSE, ncores = 1)
 reduced$equation
-
 
 ## ----dimension_reduction_threshold,fig.width=5,fig.height=3,fig.align="center"----
 reduced_threshold <- NNS.reg(regression_x, regression_y,
@@ -56,19 +47,16 @@ reduced_threshold <- NNS.reg(regression_x, regression_y,
 reduced_threshold$equation
 reduced_threshold$Point.est
 
-
 ## ----class,fig.width=5,fig.height=3,fig.align="center",message=FALSE----------
 classification <- NNS.reg(iris[, 1:4], iris$Species, type = "CLASS",
                           point.est = iris[1:10, 1:4], plot = FALSE, ncores = 1)
 classification$class.levels[classification$Point.est]
 classification$Point.probabilities
 
-
 ## ----classification_indices---------------------------------------------------
 class_reduced <- NNS.reg(iris[, 1:4], iris$Species, dim.red.method = "cor",
                          plot = FALSE, ncores = 1)
 class_reduced$equation
-
 
 ## ----stack,fig.width=5,fig.height=3,fig.align="center",message=FALSE----------
 set.seed(123)
@@ -83,7 +71,6 @@ stack_fit[c("OBJfn.reg", "OBJfn.dim.red", "NNS.reg.n.best",
             "NNS.dim.red.count", "weights", "class.levels")]
 stack_fit$class.levels[stack_fit$stack]
 
-
 ## ----stack2, message = FALSE,fig.width=5,fig.height=3,fig.align = "center",results='hide'----
 set.seed(123)
 x = rnorm(100); y = rnorm(100)
@@ -92,21 +79,18 @@ nns.params = NNS.stack(IVs.train = cbind(x, x),
                         DV.train = y,
                         method = 1, ncores = 1)
 
-
 ## ----stack2res, fig.width=5,fig.height=3,fig.align = "center",results='hide'----
 duplicated_fit <- NNS.reg(cbind(x, x), y,
                           n.best = nns.params$NNS.reg.n.best,
                           point.est = cbind(x, x), plot = FALSE,
                           residual.plot = FALSE, ncores = 1,
                           confidence.interval = .95)
-plot(x, y, pch = 19, col = "grey60", main = "Tuned multivariate prediction path")
+plot(x, y, pch = 19, col = "steelblue", main = "Tuned multivariate prediction path")
 o <- order(x)
-lines(x[o], duplicated_fit$Point.est[o], col = "steelblue", lwd = 2)
-
+lines(x[o], duplicated_fit$Point.est[o], col = "red", lwd = 2)
 
 ## ----smooth, fig.width=5,fig.height=3,fig.align = "center",results='hide'-----
 NNS.reg(x, y, smooth = TRUE)
-
 
 ## ----uniimpute, fig.width=7, fig.height=5-------------------------------------
 set.seed(123)
@@ -153,7 +137,6 @@ legend("topleft",
        pt.lwd = c(2, NA),
        bty    = "n")
 
-
 ## ----multiimpute, fig.width=7, fig.height=5-----------------------------------
 set.seed(123)
 
@@ -193,7 +176,7 @@ y_completed_mv <- y_mis
 y_completed_mv[miss] <- y_hat_mv
 
 # Plot observed vs imputed (multivariate, NNS 1-NN)
-plot(seq_along(y), y,
+plot(seq_along(y), y, 
      pch = 1, col = "steelblue", cex = 1.5, lwd = 2,
      xlab = "Observation index", ylab = "y",
      main = "NNS 1-NN Multivariate Imputation")

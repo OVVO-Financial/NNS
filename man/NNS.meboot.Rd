@@ -72,9 +72,9 @@ xmax = largest value + trimmed mean) are given when the random draw happens to b
 \item{coltimes}{numeric; an optional argument indicating the column that contains the times at which the observations for each individual are observed. It is ignored if the input data \code{x}
 is not a \code{pdata.frame} object.}
 
-\item{expand.residual.sd}{Logical; TRUE retains residual-space SD expansion before trend reconstruction. FALSE leaves the generated residual scales unexpanded, separately from the later level-space expand.sd switch.}
-
 \item{...}{possible argument \code{fiv} to be passed to \code{expand.sd}.}
+
+\item{expand.residual.sd}{logical; \code{TRUE} (default) retains the residual-space SD expansion before trend reconstruction. Set to \code{FALSE} to leave the generated residual scales unexpanded; this is separate from the later level-space \code{expand.sd} switch.}
 }
 \value{
 Returns the following row names in a matrix:
@@ -98,7 +98,7 @@ Returns the following row names in a matrix:
 Adapted maximum entropy bootstrap routine from \code{meboot} \url{https://cran.r-project.org/package=meboot}.
 }
 \note{
-These are dependence-targeted synthetic scenarios. Zero rank or linear correlation does not imply independence, and interior-rho mixing can alter marginal distributions. The force.clt scale sd(x)/sqrt(n) is an iid finite-variance reference, not a serial-dependence long-run standard error or a calibration for arbitrary statistics.
+These are dependence-targeted synthetic scenarios. Zero Spearman or Pearson correlation does not imply independence; interior-rho mixtures can retain nonlinear dependence and change the residual marginal distribution. Matching ranks or path moments does not by itself calibrate sampling confidence intervals. The \code{force.clt} scale \code{sd(x)/sqrt(n)} is an iid finite-variance reference, not a long-run standard error under serial dependence, and does not calibrate uncertainty of other statistics.
 
 Vectorized \code{rho} and \code{drift} parameters will not vectorize both simultaneously.  Also, do not specify \code{target_drift = NULL}.
 
@@ -106,11 +106,11 @@ The \code{rho} dependence alignment is calibrated on each individual \code{repli
 }
 \examples{
 \dontrun{
-# Target zero Spearman correlation of individual detrended residuals
+# Target zero Spearman correlation of each replicate's detrended residuals
 boots <- NNS.meboot(AirPassengers, reps = 100, rho = 0, drift = FALSE,
   expand.sd = FALSE, force.clt = FALSE)
 
-# Inspect residual correlations on individual replicates
+# Inspect individual residual correlations, not the ensemble's level correlation
 detrend <- function(z) residuals(lm(as.numeric(z) ~ seq_along(z)))
 apply(boots["replicates",]$replicates, 2, function(z)
   cor(z, detrend(AirPassengers), method = "spearman"))

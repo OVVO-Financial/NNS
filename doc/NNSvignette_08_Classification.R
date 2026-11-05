@@ -14,7 +14,9 @@ require(rgl)
 NNS.reg(iris[,1:4], iris[,5], residual.plot = FALSE, ncores = 1)$rhs.partitions
 
 ## ----NNSBOOST,fig.align = "center", fig.height = 8,fig.width=6.5, eval=FALSE----
-# test.set = 141:150
+# set.seed(123)
+# test.set <- sort(unlist(lapply(split(seq_len(nrow(iris)), iris$Species),
+#                                function(rows) sample(rows, 4))))
 # 
 # a = NNS.boost(IVs.train = iris[-test.set, 1:4],
 #               DV.train = iris[-test.set, 5],
@@ -24,25 +26,7 @@ NNS.reg(iris[,1:4], iris[,5], residual.plot = FALSE, ncores = 1)$rhs.partitions
 #               type = "CLASS")
 # 
 # a
-# $results
-#  [1] 3 3 3 3 3 3 3 3 3 3
-# 
-# $pred.int
-# NULL
-# 
-# $feature.weights
-# Petal.Length  Petal.Width Sepal.Length  Sepal.Width
-#    0.2777778    0.2777778    0.2222222    0.2222222
-# 
-# $feature.frequency
-# Petal.Length  Petal.Width Sepal.Length  Sepal.Width
-#            5            5            4            4
-# 
-# $class.levels
-# [1] "setosa"     "versicolor" "virginica"
-# 
-# mean( a$results == as.numeric(iris[test.set, 5]) )
-# [1] 1
+# mean(a$results == as.numeric(iris[test.set, 5]))
 
 ## ----NNSstack,fig.align = "center", fig.height = 8,fig.width=6.5, message=FALSE, eval= FALSE----
 # b = NNS.stack(IVs.train = iris[-test.set, 1:4],
@@ -54,49 +38,5 @@ NNS.reg(iris[,1:4], iris[,5], residual.plot = FALSE, ncores = 1)$rhs.partitions
 # b
 
 ## ----stackeval, eval = FALSE--------------------------------------------------
-# $OBJfn.reg
-# [1] 0.9714286
-# 
-# $NNS.reg.n.best
-# [1] 1
-# 
-# $probability.threshold
-# [1] 0.13
-# 
-# $OBJfn.dim.red
-# [1] 0.9642857
-# 
-# $NNS.dim.red.threshold
-# [1] 0.9335162
-# 
-# $reg
-#  [1] 3 3 3 3 3 3 3 3 3 3
-# 
-# $reg.pred.int
-# NULL
-# 
-# $dim.red
-#  [1] 3 3 3 3 3 3 3 3 3 3
-# 
-# $dim.red.pred.int
-# NULL
-# 
-# $stack
-#  [1] 3 3 3 3 3 3 3 3 3 3
-# 
-# $pred.int
-# NULL
-# 
-# $weights
-#     reg dim.red
-#    0.85    0.15
-# 
-# $class.levels
-# [1] "setosa"     "versicolor" "virginica"
-
-## ----stackevalres, eval = FALSE-----------------------------------------------
-# mean( b$stack == as.numeric(iris[test.set, 5]) )
-
-## ----stackreseval, eval = FALSE-----------------------------------------------
-# [1] 1
+# mean(b$stack == as.numeric(iris[test.set, 5]))
 

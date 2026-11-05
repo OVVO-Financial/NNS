@@ -67,9 +67,9 @@ NNS.stack(
 
 \item{ncores}{integer; value specifying the number of cores to be used in the parallelized subroutine \link{NNS.reg}. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.}
 
-\item{.validation}{Internal forecast-validation contract, normally NULL. A list with \code{IVs.train}, \code{DV.train}, \code{IVs.test}, and \code{DV.test} supplies the single chronological validation fold when \code{ts.test} is set, \code{folds = 1}, and \code{CV.size = NULL}. It requires exactly \code{N-ts.test} training rows and one through \code{ts.test} held-out rows; this allows scoring only observed future targets. Training prefixes and generated validation predictors must be constructed without later data. Used only for regression tuning; numeric two-level responses remain regression when this contract is supplied with type = NULL. The final model still fits all original training observations.}
-
 \item{seed}{Optional integer random seed used for reproducible resampling, fold construction, and stochastic fitting steps. If `NULL`, the current random-number-generator state is used.}
+
+\item{.validation}{Internal forecast-validation contract, normally NULL. A list with \code{IVs.train}, \code{DV.train}, \code{IVs.test}, and \code{DV.test} supplies the single chronological validation fold when \code{ts.test} is set, \code{folds = 1}, and \code{CV.size = NULL}. It requires exactly \code{N-ts.test} training rows and one through \code{ts.test} held-out rows; this allows scoring only observed future targets. Training prefixes and generated validation predictors must be constructed without later data. Used only for regression tuning; numeric two-level responses remain regression when this contract is supplied with type = NULL. The final model still fits all original training observations.}
 }
 \value{
 Returns a vector of fitted values for the dependent variable test set for all models.

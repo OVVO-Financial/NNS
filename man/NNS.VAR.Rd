@@ -25,11 +25,11 @@ NNS.VAR(
 )
 }
 \arguments{
-\item{variables}{a numeric matrix, data.frame, \code{ts}, \code{xts} or \code{zoo} object of contemporaneous time-series to forecast.}
+\item{variables}{a numeric matrix or data.frame of contemporaneous time-series to forecast.}
 
 \item{h}{integer; 1 (default) Number of periods to forecast. \code{(h = 0)} will return just the interpolated and extrapolated values.}
 
-\item{tau}{positive integer [ > 0]; 1 (default) Number of lagged observations to consider for the time-series data.  A single integer uses lags \code{1:tau} for every variable.  A vector with one entry per variable uses that single lag for each respective variable, and a list with one lag vector per variable (or one lag vector shared by every variable) uses multiple lags per variable.  The smallest lag of each variable is also the \code{modulo} for its \link{NNS.seas} seasonal-period search.}
+\item{tau}{positive integer [ > 0]; 1 (default) Number of lagged observations to consider for the time-series data.  Vector for single lag for each respective variable or list for multiple lags per each variable.}
 
 \item{dim.red.method}{options: ("cor", "NNS.dep", "NNS.caus", "all") method for screening lagged regressors with \link{NNS.reg} before the multivariate \link{NNS.stack} fit. \code{dim.red.method = "cor"} (default) uses signed Spearman rank-correlation coefficients, screened by magnitude. \code{"NNS.dep"} uses nonlinear dependence weights, and \code{"NNS.caus"} uses directional association weights. \code{"all"} averages the Spearman, dependence, directional-association, and unit-weight coefficients. The coefficient cutoff is selected by scoring \code{NNS.reg} validation forecasts.}
 
@@ -44,38 +44,32 @@ NNS.VAR(
 
 \item{ncores}{integer; value specifying the number of cores to be used in the parallelized subroutine \link{NNS.ARMA.optim}. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.}
 
-\item{nowcast}{logical; \code{FALSE} (default) internal call for frequency alignment in downstream nowcasting applications.  When \code{TRUE}, rows of a time-indexed \code{variables} are labelled by month (\code{"Mon YYYY"}) whatever the input frequency, with the forecast rows labelled by the following \code{h} months.}
+\item{nowcast}{logical; \code{FALSE} (default) internal call for frequency alignment in downstream nowcasting applications.}
 
-\item{validation}{\code{"pipeline"} (default) rebuilds interpolation, univariate forecasts and lagged predictors using only the prefix before the chronological holdout. Same-period and later-horizon covariates are forecast, and only observed holdout targets are scored. \code{"observed"} retains conditional-regression tuning on realized holdout covariates; that score does not evaluate deployment forecasts.}
+\item{validation}{\code{"pipeline"} (default) tunes with a chronological holdout whose predictors are built by completing and forecasting each series using only its prefix. Only observed holdout targets are scored. \code{"observed"} retains the former conditional-regression validation on realized covariates; it is not a deployment forecast score.}
 }
 \value{
 Returns the following matrices of forecasted variables:
 \itemize{
  \item{\code{"interpolated_and_extrapolated"}} Returns a \code{data.frame} of the original \code{variables} with their \code{NA} values replaced.  When a variable's latest values are missing, every \code{NA} of that variable is estimated from its own observations by the \link{NNS.stack} fit on the time index used in NNS 13.0: \link{NNS.reg} with one nearest regression point, on the index duplicated into two predictors.  The latest observation keeps its own regression point, and values after it (or before the first observation) extend the gradient at that boundary.  When only earlier values are missing, they are interpolated linearly with \code{NNS.reg(order = "max")} on the index.  This is required for working with variables containing different frequencies, e.g. where \code{NA} would be reported for intra-quarterly data when indexed with monthly periods.
- \item{\code{"relevant_variables"}} Returns, for each variable, the lagged regressors retained after the \link{NNS.reg} coefficient-cutoff validation search. These are the only regressors used in the \code{"multivariate"} estimate.
+ \item{\code{"relevant_variables"}} Returns the relevant variables from the dimension reduction step: the lagged regressors whose dimension reduction coefficient meets the cross-validated threshold.  These are the only regressors used in the \code{"multivariate"} estimate.
 
  \item{\code{"univariate"}} Returns the univariate \link{NNS.ARMA} forecasts.
 
  \item{\code{"multivariate"}} Returns the multi-variate forecasts: \link{NNS.stack} \code{(method = 1, stack = FALSE)} on the relevant variables, evaluated on the lag-matrix rows of the forecast period (built from the univariate forecasts).
 
- \item{\code{"validation"}} Returns the validation mode, origin, horizon and number of observed holdout targets for each series.
+ \item{\code{"validation"}} validation mode, origin and horizon used for tuning; pipeline mode excludes future covariates from prefix completion and prediction.
 
  \item{\code{"ensemble"}} Returns the ensemble of both \code{"univariate"} and \code{"multivariate"} forecasts.
  }
-
-When \code{variables} is a \code{ts}, \code{xts} or \code{zoo} object, rows are labelled with its time index and the forecast rows with the following \code{h} periods.
 }
 \description{
 Nonparametric vector autoregressive model incorporating \link{NNS.ARMA} estimates of variables into \link{NNS.reg} for a multi-variate time-series forecast.
 }
 \note{
-Pipeline validation uses one chronological tuning origin. Missing prefix values are completed without later observations. Relevance coefficients are fitted on that prefix, the selected variables are retained for tuning, and the final forecast is refitted on all available observations. Assess the complete model at additional rolling origins for a performance estimate.
-
-
 \itemize{
 \item \code{"Error in { : task xx failed -}"} should be re-run with \code{NNS.VAR(..., ncores = 1)}.
 \item Not recommended for factor variables, even after transformed to numeric.  \link{NNS.reg} is better suited for factor or binary regressor extrapolation.
-\item The lagged training sample, \code{nrow(variables) - max(tau)}, must contain at least \code{2 * h + 3} observations.
 }
 }
 \examples{

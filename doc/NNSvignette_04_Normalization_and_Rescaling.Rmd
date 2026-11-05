@@ -31,7 +31,7 @@ This vignette covers two related tools:
 - `NNS.norm()` for cross‑variable normalization when comparing multiple series.
 - `NNS.rescale()` for single‑vector rescaling with either min‑max or risk‑neutral targets.
 
-Both functions perform deterministic affine transformations that preserve rank structure while modifying scale.
+Both functions are deterministic rescalings. `NNS.rescale()` is affine on a single vector and preserves its rank structure. `NNS.norm()` multiplies each column by its own factor, so it preserves the order within each column, but in nonlinear mode a factor can be negative, which reverses that column's order and the sign of its correlations with the others (see the note below).
 
 ---
 
@@ -142,15 +142,15 @@ Thus, the normalized mean becomes a dependence‑weighted average of original me
 
 ### Basic Multivariate Example
 
-This holds for any distribution type and can be applied to vectors of different lengths.
+This holds for any distribution type and can be applied to vectors of different lengths. Each column is multiplied by a factor built from ratios of column means, so the columns should have positive means. A mean near zero, or of the opposite sign to the others, gives a very large or negative factor (see the note at the end of this vignette); the columns below are all positive.
 
 ```{r basic-example, eval=FALSE}
 set.seed(123)
 
-A <- rnorm(100, mean = 0, sd = 1)
-B <- rnorm(100, mean = 0, sd = 5)
+A <- rnorm(100, mean = 5, sd = 1)
+B <- rnorm(100, mean = 20, sd = 5)
 C <- rnorm(100, mean = 10, sd = 1)
-D <- rnorm(100, mean = 10, sd = 10)
+D <- rnorm(100, mean = 50, sd = 10)
 
 X <- data.frame(A, B, C, D)
 
@@ -158,20 +158,22 @@ X <- data.frame(A, B, C, D)
 lin_norm <- NNS.norm(X, linear = TRUE, chart.type = NULL)
 head(lin_norm)
      A Normalized B Normalized C Normalized D Normalized
-[1,]   -29.929719    31.889828     5.819152    1.4264014
-[2,]   -12.291609   -11.531393     5.396317    1.2388239
-[3,]    83.235911    11.073887     4.643781    0.3078703
-[4,]     3.765188    15.601030     5.029380   -0.2630481
-[5,]     6.904039    42.717726     4.572611    2.8193657
-[6,]    91.585447     2.021274     4.543080    6.6681079
+[1,]     18.38264     17.81323     25.40626     18.19440
+[2,]     19.75029     23.05113     23.56018     18.03539
+[3,]     27.15749     20.32425     20.27462     17.24622
+[4,]     20.99534     19.77814     21.95814     16.76224
+[5,]     21.23872     16.50706     19.96390     19.37523
+[6,]     27.80492     21.41627     19.83496     22.63783
 
 # Verify means are equal
 apply(lin_norm, 2, function(x) c(mean = mean(x), sd = sd(x)))
 
      A Normalized B Normalized C Normalized D Normalized
-mean     4.827727     4.827727    4.8277270     4.827727
-sd      48.744888    43.407590    0.4531172     5.203436
+mean    21.077727    21.077727    21.077727    21.077727
+sd       3.779676     5.236256     1.978297     4.410985
 ```
+
+Each column keeps its coefficient of variation and its correlations with the others, because it is multiplied by a single positive factor.
 
 
 Now compare with **nonlinear scaling**:
@@ -180,18 +182,18 @@ Now compare with **nonlinear scaling**:
 nonlin_norm <- NNS.norm(X, linear = FALSE, chart.type = NULL)
 head(nonlin_norm)
      A Normalized B Normalized C Normalized D Normalized
-[1,]   -2.7834653   0.32807768     3.178568    0.7439872
-[2,]   -1.1431202  -0.11863321     2.947605    0.6461499
-[3,]    7.7409438   0.11392645     2.536550    0.1605800
-[4,]    0.3501627   0.16050101     2.747174   -0.1372015
-[5,]    0.6420759   0.43947344     2.497676    1.4705341
-[6,]    8.5174510   0.02079456     2.481545    3.4779738
+[1,]     2.082162     4.690344     4.098285     11.04240
+[2,]     2.237074     6.069519     3.800493     10.94589
+[3,]     3.076072     5.351514     3.270500     10.46693
+[4,]     2.378098     5.207720     3.542068     10.17321
+[5,]     2.405665     4.346421     3.220377     11.75906
+[6,]     3.149404     5.639050     3.199579     13.73917
 
 apply(nonlin_norm, 2, function(x) c(mean = mean(x), sd = sd(x)))
 
      A Normalized B Normalized C Normalized D Normalized
-mean    0.4489788   0.04966692     2.637026     2.518062
-sd      4.5332769   0.44657066     0.247504     2.714025
+mean    2.3874296     5.549909    3.4000486     12.79232
+sd      0.4281159     1.378742    0.3191192      2.67708
 ```
 
 Note that the means differ and the standard deviations are smaller than in the linear case, reflecting the dependence structure.
@@ -230,7 +232,7 @@ Quantile normalization forces distributions to be identical. This is literally t
 
 ## Practical Applications
 
-Normalization eliminates the need for multiple y‑axis charts and prevents their misuse. By placing variables on the same axes with shared ranges, we enable more relevant conditional probability analyses. This technique, combined with time normalization, is used in `NNS.caus()` to identify causal relationships between variables.
+Normalization eliminates the need for multiple y‑axis charts and prevents their misuse. By placing variables on the same axes with shared ranges, we enable more relevant conditional probability analyses. `NNS.caus()` places variables on a shared scale with per-column ranks instead, so its results do not depend on the location or units of either variable.
 
 ---
 
@@ -405,7 +407,7 @@ c(
 - Multivariate
 - Dependence‑aware scaling
 - Equalizes means only in linear mode
-- Preserves shape and order
+- One factor per column: shape is preserved, and order too unless the factor is negative
 
 ### `NNS.rescale()`
 
@@ -414,7 +416,7 @@ c(
 - Either range‑targeted or expectation‑targeted
 - Preserves rank structure
 
-Both functions maintain monotonicity and are therefore compatible with NNS copula and dependence modeling frameworks.
+`NNS.rescale()` is monotone increasing, so ranks, copulas and NNS dependence measures are unchanged by it. `NNS.norm()` is too when every factor is positive, but in either mode a column whose mean has the opposite sign from the others gets a negative factor. For example, with `x ~ N(1, 1)` and `y = x - 1.5 + noise`, `cor(x, y)` is 0.957 before `NNS.norm()` and -0.957 after; with `x <- 1:4` and `y <- x - 4`, `linear = TRUE` turns a correlation of 1 into -1 as well. Check the signs of the factors before using normalized columns for dependence or causation.
 
 
 ```{r image}
@@ -511,6 +513,6 @@ If the user is so motivated, detailed arguments further examples are provided wi
 
 -   [Nonlinear Nonparametric Statistics: Using Partial Moments](https://ovvo-financial.github.io/NNS/book/)
 
--   [Nonlinear Scaling Normalization with NNS](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Normalization.pdf)
+-   [Nonlinear Scaling Normalization with NNS](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/Normalization.pdf) (archived PDF; see the [current corrections and editable companion](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/example-corrections.md) for the normalization qualifications).
 
 -   [Distributional Equivalence in GBM: Outcome Transformation for Efficient Risk-Neutral Pricing](https://doi.org/10.2139/ssrn.5742907)

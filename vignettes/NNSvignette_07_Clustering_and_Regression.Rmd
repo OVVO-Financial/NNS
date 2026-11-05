@@ -177,9 +177,9 @@ duplicated_fit <- NNS.reg(cbind(x, x), y,
                           point.est = cbind(x, x), plot = FALSE,
                           residual.plot = FALSE, ncores = 1,
                           confidence.interval = .95)
-plot(x, y, pch = 19, col = "grey60", main = "Tuned multivariate prediction path")
+plot(x, y, pch = 19, col = "steelblue", main = "Tuned multivariate prediction path")
 o <- order(x)
-lines(x[o], duplicated_fit$Point.est[o], col = "steelblue", lwd = 2)
+lines(x[o], duplicated_fit$Point.est[o], col = "red", lwd = 2)
 ```
 
 

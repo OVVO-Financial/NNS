@@ -159,45 +159,19 @@ legend('left', legend = c('ecdf', 'LPM.ratio'), fill=c('black','red'), border=NA
 
 ## ----multisim, eval=FALSE-----------------------------------------------------
 # set.seed(123)
-# x = rnorm(1000); y = rnorm(1000); z = rnorm(1000)
+# x <- rnorm(1000); y <- rnorm(1000); z <- rnorm(1000)
+# original.data <- cbind(x, y, z, x_copy = x)
+# n <- nrow(original.data)
+# dep.structure <- apply(original.data, 2, function(v) {
+#   LPM.ratio(degree = 0, target = v, variable = v) - .5 / n
+# })
+# new.data <- replicate(ncol(original.data), rnorm(2000, mean = 10, sd = 20))
+# new.dep.data <- vapply(seq_len(ncol(original.data)), function(j) {
+#   LPM.VaR(percentile = dep.structure[, j], degree = 0, x = new.data[, j])
+# }, numeric(n))
 # 
-# # Add variable x to original data to avoid total independence (example only)
-# original.data = cbind(x, y, z, x)
-# 
-# # Determine dependence structure
-# dep.structure = apply(original.data, 2, function(x) LPM.ratio(degree = 1, target = x, variable = x))
-# 
-# # Generate new data with different mean, sd and length (or distribution type)
-# new.data = sapply(1:ncol(original.data), function(x) rnorm(nrow(original.data)*2, mean = 10, sd = 20))
-# 
-# # Apply dependence structure to new data
-# new.dep.data = sapply(1:ncol(original.data), function(x) LPM.VaR(percentile = dep.structure[,x], degree = 1, x = new.data[,x]))
-
-## ----comparison, warning=FALSE, eval=FALSE------------------------------------
-# NNS.copula(original.data)
-# NNS.copula(new.dep.data)
-# 
-# [1] 0.4743531
-# [1] 0.4753264
-
-## ----eval=FALSE---------------------------------------------------------------
-# head(original.data)
-# head(new.dep.data)
-# 
-#                x           y          z           x
-# [1,] -0.56047565 -0.99579872 -0.5116037 -0.56047565
-# [2,] -0.23017749 -1.03995504  0.2369379 -0.23017749
-# [3,]  1.55870831 -0.01798024 -0.5415892  1.55870831
-# [4,]  0.07050839 -0.13217513  1.2192276  0.07050839
-# [5,]  0.12928774 -2.54934277  0.1741359  0.12928774
-# [6,]  1.71506499  1.04057346 -0.6152683  1.71506499
-#           [,1]       [,2]       [,3]      [,4]
-# [1,] -2.028109 -10.498044 -0.2090467 -1.682949
-# [2,]  4.608303 -11.390485 15.6213689  4.852534
-# [3,] 39.478741   8.836581 -0.8508203 40.585505
-# [4,] 10.683731   6.609255 36.0328589 10.877677
-# [5,] 11.866922 -47.955235 14.3111350 12.064633
-# [6,] 42.665726  29.639640 -2.4141874 43.797025
+# cor(original.data, method = "spearman")
+# cor(new.dep.data, method = "spearman")
 
 ## ----eval=FALSE---------------------------------------------------------------
 # # Apply bootstrap to each variable

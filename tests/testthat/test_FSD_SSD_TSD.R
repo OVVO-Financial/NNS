@@ -6,19 +6,19 @@ z <- c(0.19999193561416084,0.6010279101158327,0.9788327513669298,0.8608964619298
 test_that(
 	"FSD", {
 	  expect_equal(NNS.FSD(x, y, type="discrete", plot=F), "NO FSD EXISTS")
-      expect_equal(NNS.FSD(x, y, type="continuous", plot=T), "NO OMEGA DOMINANCE EXISTS")
+      expect_equal(NNS.FSD(x, y, type="continuous", plot=T), "NO FSD EXISTS")
       expect_equal(NNS.FSD(x, y, type="discrete", plot=F), "NO FSD EXISTS")
-      expect_equal(NNS.FSD(x, y, type="continuous", plot=F), "NO OMEGA DOMINANCE EXISTS")
+      expect_equal(NNS.FSD(x, y, type="continuous", plot=F), "NO FSD EXISTS")
 
       expect_equal(NNS.FSD(x, y ** 2, type="discrete", plot=T), "X FSD Y")
-      expect_equal(NNS.FSD(x, y ** 2, type="continuous", plot=T), "X OMEGA Y")
+      expect_equal(NNS.FSD(x, y ** 2, type="continuous", plot=T), "X FSD Y")
       expect_equal(NNS.FSD(x, y ** 2, type="discrete", plot=F), "X FSD Y")
-      expect_equal(NNS.FSD(x, y ** 2, type="continuous", plot=F), "X OMEGA Y")
+      expect_equal(NNS.FSD(x, y ** 2, type="continuous", plot=F), "X FSD Y")
 
       expect_equal(NNS.FSD(y ** 2, x, type="discrete", plot=T), "Y FSD X")
-      expect_equal(NNS.FSD(y ** 2, x, type="continuous", plot=T), "Y OMEGA X")
+      expect_equal(NNS.FSD(y ** 2, x, type="continuous", plot=T), "Y FSD X")
       expect_equal(NNS.FSD(y ** 2, x, type="discrete", plot=F), "Y FSD X")
-      expect_equal(NNS.FSD(y ** 2, x, type="continuous", plot=F), "Y OMEGA X")
+      expect_equal(NNS.FSD(y ** 2, x, type="continuous", plot=F), "Y FSD X")
 	}
 )
 

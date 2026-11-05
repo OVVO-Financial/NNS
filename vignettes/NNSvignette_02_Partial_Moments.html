@@ -411,7 +411,7 @@ as the elements of variance.</p>
 ## [1] 0.8332328
 ## 
 ## $skewness
-## [1] 0.06235774
+## [1] 0.06142471
 ## 
 ## $kurtosis
 ## [1] -0.1069186</code></pre>
@@ -422,7 +422,7 @@ as the elements of variance.</p>
 distributions as well as recognizing multiple modes.</p>
 <div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a><span class="co"># Continuous</span></span>
 <span id="cb23-2"><a href="#cb23-2" tabindex="-1"></a><span class="fu">NNS.mode</span>(x)</span></code></pre></div>
-<pre><code>## [1] -0.4132834</code></pre>
+<pre><code>## [1] -0.3545662</code></pre>
 <div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" tabindex="-1"></a><span class="co"># Discrete and multiple modes</span></span>
 <span id="cb25-2"><a href="#cb25-2" tabindex="-1"></a><span class="fu">NNS.mode</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">5</span>), <span class="at">discrete =</span> <span class="cn">TRUE</span>, <span class="at">multi =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
 <pre><code>## [1] 2 3 4</code></pre>
@@ -514,7 +514,7 @@ divergent partial moments matrices. <span class="math display">\[ \Sigma
 <span id="cb42-12"><a href="#cb42-12" tabindex="-1"></a><span class="co"># Value of copula at c(.5, .5)</span></span>
 <span id="cb42-13"><a href="#cb42-13" tabindex="-1"></a><span class="fu">Co.LPM</span>(<span class="dv">0</span>, u_x, u_y, .<span class="dv">5</span>, .<span class="dv">5</span>)</span>
 <span id="cb42-14"><a href="#cb42-14" tabindex="-1"></a></span>
-<span id="cb42-15"><a href="#cb42-15" tabindex="-1"></a><span class="co"># Continuous CDF:</span></span>
+<span id="cb42-15"><a href="#cb42-15" tabindex="-1"></a><span class="co"># Area-weighted CDF (degree 1): the share of deviation area below each point, not P(X &lt;= t)</span></span>
 <span id="cb42-16"><a href="#cb42-16" tabindex="-1"></a><span class="fu">NNS.CDF</span>(x, <span class="dv">1</span>)</span>
 <span id="cb42-17"><a href="#cb42-17" tabindex="-1"></a></span>
 <span id="cb42-18"><a href="#cb42-18" tabindex="-1"></a><span class="co"># CDF with target:</span></span>

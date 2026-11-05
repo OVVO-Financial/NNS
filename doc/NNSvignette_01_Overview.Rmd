@@ -209,10 +209,11 @@ NNS provides two main tools for scaling data while preserving rank structure and
 -   `NNS.norm(x, linear=TRUE, chart.type = NULL)`
 
 ```{r}
-A <- rnorm(100, mean = 0, sd = 1)
-B <- rnorm(100, mean = 0, sd = 5)
+# NNS.norm scales by ratios of column means, so the columns need positive means.
+A <- rnorm(100, mean = 5, sd = 1)
+B <- rnorm(100, mean = 20, sd = 5)
 C <- rnorm(100, mean = 10, sd = 1)
-D <- rnorm(100, mean = 10, sd = 10)
+D <- rnorm(100, mean = 50, sd = 10)
 
 X <- data.frame(A, B, C, D)
 
@@ -344,7 +345,7 @@ NNS.SS(x, y)
 -   `NNS.reg(x, y, order=NULL, smooth=TRUE, ncores=1, ...)` → `$Fitted.xy`, `$Point.est`, …
 -   `NNS.boost(IVs.train, DV.train, IVs.test, epochs, learner.trials, status, balance, type, folds)`
 -   `NNS.stack(IVs.train, DV.train, IVs.test, type, balance, ncores, folds)`
--   `NNS.caus(x, y)` (directional causality score via conditional dependence)
+-   `NNS.caus(x, y)` (directional causation index for each direction, in \[0, 1\])
 
 ## 6.2 Code: classification via regression + ensembles
 
@@ -394,7 +395,7 @@ NNS.caus(mtcars$hp,  mtcars$mpg)  # hp -> mpg
 NNS.caus(mtcars$mpg, mtcars$hp)   # hp -> mpg
 ```
 
-**Interpretation.** Examine asymmetry in scores to infer direction. The method conditions partial‑moment dependence on candidate drivers.
+**Interpretation.** Each call returns `C(x--->y)` and `C(y--->x)`, which sum to 1; a value above 0.5 favours that direction, and swapping the arguments swaps the two values. The method compares lagged pairs on the copula scale (set `tau` for time series), so it is unaffected by the units or scale of either variable.
 
 ------------------------------------------------------------------------
 
@@ -551,7 +552,7 @@ See NNS Vignette: [Getting Started with NNS: Comparing Distributions](NNSvignett
 - `NNS.part(x, y, ...)` — partition analysis for variable segmentation.
 - `NNS.reg(x, y, ...)` — partition-based regression/classification (`$Fitted.xy`, `$Point.est`).
 - `NNS.boost(IVs, DV, ...)`, `NNS.stack(IVs, DV, ...)` — ensembles using `NNS.reg` base learners.
-- `NNS.caus(x, y)` — directional causality score.
+- `NNS.caus(x, y)` — directional causation index.
 
 See NNS Vignette: [Getting Started with NNS: Clustering and Regression](NNSvignette_07_Clustering_and_Regression.html)
 

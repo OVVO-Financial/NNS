@@ -466,7 +466,7 @@ That is exactly what a nonlinear vector autoregression should do.
 
 ---
 
-## Nowcasting with `NNS.nowcast`
+## Nowcasting with `NNS.VAR`
 
 Nowcasting deserves special treatment because it is one of the most practical uses of the framework.
 
