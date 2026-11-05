@@ -397,7 +397,7 @@ are probability estimates from different base learners, a stacked classifier for
 \hat p_c^{\text{stack}}(x)
 \]
 
-through optimized combination, then classifies by the largest combined probability.
+through a weighted combination, then classifies by the largest combined probability.
 
 In the NNS setting, stacking is especially natural because class probabilities are already interpretable directional quantities. The second-stage learner therefore combines probability surfaces, not merely hard labels.
 
