@@ -51,7 +51,7 @@ NNS.VAR(
 \value{
 Returns the following matrices of forecasted variables:
 \itemize{
- \item{\code{"interpolated_and_extrapolated"}} Returns a \code{data.frame} of the linear interpolated and \link{NNS.ARMA} extrapolated values to replace \code{NA} values in the original \code{variables} argument.  This is required for working with variables containing different frequencies, e.g. where \code{NA} would be reported for intra-quarterly data when indexed with monthly periods.
+ \item{\code{"interpolated_and_extrapolated"}} Returns a \code{data.frame} of the linear interpolated and \link{NNS.ARMA} extrapolated values to replace \code{NA} values in the original \code{variables} argument: \code{NA} values before a variable's last observation are interpolated linearly between its neighbouring observations, and trailing \code{NA} values are \link{NNS.ARMA} forecasts from the completed series.  This is required for working with variables containing different frequencies, e.g. where \code{NA} would be reported for intra-quarterly data when indexed with monthly periods.
  \item{\code{"relevant_variables"}} Returns, for each variable, the lagged regressors retained after the \link{NNS.reg} coefficient-cutoff validation search. These are the only regressors used in the \code{"multivariate"} estimate.
 
  \item{\code{"univariate"}} Returns the univariate \link{NNS.ARMA} forecasts.
