@@ -17,7 +17,7 @@
 #'
 #' @return Returns the following matrices of forecasted variables:
 #' \itemize{
-#'  \item{\code{"interpolated_and_extrapolated"}} Returns a \code{data.frame} of the linear interpolated and \link{NNS.ARMA} extrapolated values to replace \code{NA} values in the original \code{variables} argument: \code{NA} values before a variable's last observation are interpolated linearly between its neighbouring observations, and trailing \code{NA} values are \link{NNS.ARMA} forecasts from the completed series.  This is required for working with variables containing different frequencies, e.g. where \code{NA} would be reported for intra-quarterly data when indexed with monthly periods.
+#'  \item{\code{"interpolated_and_extrapolated"}} Returns a \code{data.frame} of the original \code{variables} with their \code{NA} values replaced.  When a variable's latest values are missing, every \code{NA} of that variable is estimated from its own observations by the \link{NNS.stack} fit on the time index used in NNS 13.0: \link{NNS.reg} with one nearest regression point, on the index duplicated into two predictors.  The latest observation keeps its own regression point, and values after it (or before the first observation) extend the gradient at that boundary.  When only earlier values are missing, they are interpolated linearly with \code{NNS.reg(order = "max")} on the index.  This is required for working with variables containing different frequencies, e.g. where \code{NA} would be reported for intra-quarterly data when indexed with monthly periods.
 #'  \item{\code{"relevant_variables"}} Returns the relevant variables from the dimension reduction step: the lagged regressors whose dimension reduction coefficient meets the cross-validated threshold.  These are the only regressors used in the \code{"multivariate"} estimate.
 #'
 #'  \item{\code{"univariate"}} Returns the univariate \link{NNS.ARMA} forecasts.
@@ -327,29 +327,18 @@ NNS.VAR <- function(variables,
       # keep the original series exactly
       variable_interpolation <- as.numeric(panel[, i])
       
+    } else if (h_int > 0) {
+      # trailing NA(s): estimate every NA, interior ones included, with the
+      # NNS.stack fit on the index that NNS 13.0 used (see .nns_var_index_fit).
+      variable_interpolation[missing_index] <-
+        .nns_var_index_fit(selected_variable[,1], selected_variable[,2], missing_index)
+      
     } else {
-      # NAs before the last observation: linear interpolation between the
-      # neighbouring observations (NNS.reg with order = "max"; leading NAs extend
-      # the first segment). Only the missing indices are filled (no global smoothing).
-      inner <- missing_index[missing_index < interpolation_point]
-      if (length(inner)) {
-        fitted_missing <- NNS.reg(selected_variable[,1], selected_variable[,2],
-                                  order = "max", type = "REG", ncores = 1,
-                                  point.est = inner, plot = FALSE, point.only = TRUE)$Point.est
-        variable_interpolation[inner] <- as.numeric(fitted_missing)
-      }
-      # Trailing NA(s): NNS.ARMA forecasts from the completed series up to the
-      # last observation. A series too short to forecast repeats its last value.
-      if (h_int > 0) {
-        prefix <- variable_interpolation[seq_len(interpolation_point)]
-        trailing <- tryCatch(as.numeric(NNS.ARMA(prefix, h = h_int,
-                                                 negative.values = any(prefix < 0),
-                                                 plot = FALSE, seasonal.plot = FALSE)),
-                             error = function(e) NULL)
-        if (length(trailing) != h_int || !all(is.finite(trailing)))
-          trailing <- rep(prefix[interpolation_point], h_int)
-        variable_interpolation[interpolation_point + seq_len(h_int)] <- trailing
-      }
+      # interior NA(s) only: fit on index, but fill ONLY the missing indices (no global smoothing)
+      fitted_missing <- NNS.reg(selected_variable[,1], selected_variable[,2],
+                                order = "max", type = "REG", ncores = 1,
+                                point.est = missing_index, plot = FALSE, point.only = TRUE)$Point.est
+      if (length(missing_index)) variable_interpolation[missing_index] <- as.numeric(fitted_missing)
     }
     
     if(ahead > 0){

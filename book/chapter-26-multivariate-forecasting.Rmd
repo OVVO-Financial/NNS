@@ -111,7 +111,7 @@ The implementation has a clear architecture.
 
 ### Stage 1: complete each series individually
 
-Each variable is first interpolated where values are missing and extrapolated forward using `NNS.ARMA`. The returned object explicitly includes
+Each variable's missing values are first estimated from its own observations, and each completed series is forecast forward with `NNS.ARMA`. When a variable's latest values are missing, every missing value comes from an `NNS.stack` fit on the time index: it takes the value of the nearest regression point on the index, the newest observation keeps its own regression point, and values after it extend the gradient at that boundary. When only earlier values are missing, they are interpolated linearly. The returned object explicitly includes
 
 - `interpolated_and_extrapolated`,
 - `univariate`,
@@ -237,14 +237,13 @@ Let
 V_t = (X_{1t},\dots,X_{pt}),
 \]
 
-with some entries unobserved because the reporting frequencies differ. `NNS.VAR` explicitly returns a matrix called `interpolated_and_extrapolated`, whose purpose is to replace missing values in the original panel using interpolation and univariate extrapolation. This is not an incidental preprocessing step. It is foundational to the mixed-frequency design of the method.
+with some entries unobserved because the reporting frequencies differ. `NNS.VAR` explicitly returns a matrix called `interpolated_and_extrapolated`, whose purpose is to replace missing values in the original panel with a nonparametric fit of each variable on the time index. This is not an incidental preprocessing step. It is foundational to the mixed-frequency design of the method.
 
 Conceptually, the procedure is:
 
 1. place all series on a common index,
-2. fill interior gaps via interpolation,
-3. forecast trailing missing values using univariate nonlinear forecasting,
-4. build the lagged multivariate system on the completed panel.
+2. complete each series from its own observations: when its latest values are missing, with an `NNS.stack` fit on the index that also carries the series to the end of the panel, and otherwise by linear interpolation,
+3. build the lagged multivariate system on the completed panel.
 
 So mixed-frequency forecasting is handled natively, rather than being outsourced to a separate parametric state-space model.
 
