@@ -23,7 +23,20 @@ test_that("NNS.boost returns 0/1 response values for a 0/1 numeric response", {
 })
 
 test_that("NNS.boost returns -5/5 response values for a -5/5 numeric response", {
-  f <- boost_binary(-5, 5)
+  # Near-zero epoch scores can trigger the best-trial fallback by roundoff.
+  # Accept only that documented warning, without requiring it on every platform.
+  fallback_warning <- paste0(
+    "No feature combination re-passed the objective cutoff during epochs; ",
+    "using the best learner-trial combination. ",
+    "Consider a lower [threshold] probability."
+  )
+  f <- withCallingHandlers(
+    boost_binary(-5, 5),
+    warning = function(w) {
+      expect_identical(conditionMessage(w), fallback_warning)
+      invokeRestart("muffleWarning")
+    }
+  )
   expect_equal(f$results, c(5, 5, 5, -5, -5, -5))
   expect_equal(unname(as.matrix(f$pred.int)), cbind(c(5, 5, 5, -5, -5, -5), c(5, 5, 5, -5, -5, -5)))
 })
