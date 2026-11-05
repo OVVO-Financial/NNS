@@ -25,6 +25,14 @@
   combines those probabilities before choosing labels. Numeric class labels are
   not interpolation coordinates. Probability outputs and descriptive prediction
   sets expose the target; factor/character output codes use `class.levels`.
+* `NNS.stack` classification blends its two models with weights proportional
+  to their squared objective scores (inverse squares when `objective = "min"`),
+  as in NNS 13.0, and tunes the binary threshold for that blend. The weight had
+  been the value in 0, 0.01, ..., 1 with the best out-of-fold objective, which
+  gave one model all the weight when it was ahead by a single out-of-fold row:
+  on an iris split with out-of-fold accuracies of 0.942 and 0.949 (130 and 131
+  of 138 rows), the weights were 0 and 1, and the stack missed a test row that
+  the 13.0 weights (0.496 and 0.504) classify correctly.
 * Binary numeric coordinates retain distinct terminal cells in both R and
   native regression paths, including dummy columns in mixed predictor designs.
 * Stack's multivariate component searches selected predictor coordinates; its

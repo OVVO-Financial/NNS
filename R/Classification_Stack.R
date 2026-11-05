@@ -124,15 +124,16 @@
   weights <- c(reg = as.numeric(!is.null(reg.fit)), dim.red = as.numeric(!is.null(dim.fit)))
   threshold <- if (is.null(reg.fit)) dim.fit$threshold else reg.fit$threshold
   if (!is.null(reg.fit) && !is.null(dim.fit)) {
+    # As in NNS 13.0, the models are weighted by their squared objective
+    # scores, so nearly equal scores give a nearly equal blend. Choosing the
+    # blend weight by its own out-of-fold accuracy gave one model all the
+    # weight whenever it was ahead by a single out-of-fold row.
+    weights <- .nns_stack_objective_weights(reg.fit$score, dim.fit$score, objective)
     valid <- reg.fit$valid & dim.fit$valid
-    grid <- seq(0, 1, .01)
-    assessments <- lapply(grid, function(w) evaluate(
-      w * reg.fit$probability[valid, , drop = FALSE] +
-        (1 - w) * dim.fit$probability[valid, , drop = FALSE], y[valid]))
-    losses <- vapply(assessments, `[[`, numeric(1), "score")
-    selected <- if (objective == "min") which.min(losses) else which.max(losses)
-    weights <- c(reg = grid[selected], dim.red = 1 - grid[selected])
-    threshold <- assessments[[selected]]$threshold
+    threshold <- evaluate(
+      weights[["reg"]] * reg.fit$probability[valid, , drop = FALSE] +
+        weights[["dim.red"]] * dim.fit$probability[valid, , drop = FALSE],
+      y[valid])$threshold
   }
   final <- function(component, record) {
     if (is.null(record)) return(NULL)
@@ -177,4 +178,17 @@
     probabilities = probability, reg.probabilities = rp, dim.red.probabilities = dp,
     weights = weights, class.levels = class.values)
   .NNS.out(result)
+}
+
+# NNS 13.0's stack weights: each model's squared objective score, or its inverse
+# square when the objective is minimized, normalized to sum to one. A zero score
+# counts as 1e-10, a non-finite weight as 0, and two zero weights give an equal
+# blend.
+.nns_stack_objective_weights <- function(reg.score, dim.score, objective) {
+  s <- c(reg.score, dim.score)
+  s[!is.na(s) & s == 0] <- 1e-10
+  w <- pmax(if (identical(objective, "min")) 1 / s^2 else s^2, 1e-10)
+  w[!is.finite(w)] <- 0
+  w <- if (sum(w) > 0) w / sum(w) else c(.5, .5)
+  c(reg = w[1], dim.red = w[2])
 }
