@@ -127,7 +127,7 @@ NNS.SD.cluster <- function(data, degree = 1, type = "discrete", min_cluster = 1,
     hc <- hclust(dist_matrix, method = "complete")
     
     # plot.hclust rejects a two-leaf tree; plot.dendrogram draws it
-    plot(if (length(all_vars) > 2) hc else as.dendrogram(hc),
+    plot(if (length(all_vars) > 2) hc else stats::as.dendrogram(hc),
          main = paste0("Hierarchical Clustering of Stochastic Dominance Sets \nSD Degree: ", degree),
          xlab = "Variables",
          ylab = "SD Distance",

@@ -170,10 +170,8 @@
 #   * no names in common -> the names cannot express an alignment at all, as in
 #     cbind(test.x_1, test.x_2) against cbind(x_1, x_2), so keep the supplied
 #     order and match positionally per the documented "compatible dimensions";
-#   * renamed in place   -> every shared name sits at its training position and
-#     the other names occupy the same positions on both sides, as when a
-#     header is altered on export (read.csv turns a byte-order mark before
-#     "Male" into "X...Male"), so the columns align positionally;
+#   * CSV BOM first header -> normalize an Excel/CSV UTF-8 import artifact
+#     such as "X...Male" (or a literal BOM) before name-based matching;
 #   * other overlap      -> ambiguous, and in practice a wrong, misspelled or
 #     misplaced column, so error.
 #
@@ -183,9 +181,17 @@
 .nns_match_predictor_names <- function(supplied, train.names, label) {
   if (setequal(supplied, train.names)) return(match(train.names, supplied))
   if (!any(supplied %in% train.names)) return(NULL)
-  renamed <- supplied != train.names
-  if (!any(supplied[renamed] %in% train.names) &&
-      !any(train.names[renamed] %in% supplied)) return(NULL)
+  # A CSV UTF-8 byte-order mark can corrupt only the *first* header.
+  # read.csv() sometimes turns "Male" into "X...Male"; other import paths
+  # can retain the BOM itself. Repair this recognizable artifact only.
+  # An arbitrary in-place rename is ambiguous and must not silently pass.
+  repaired <- supplied
+  if (startsWith(repaired[1L], "X...")) {
+    repaired[1L] <- substring(repaired[1L], 5L)
+  } else if (startsWith(repaired[1L], "\ufeff")) {
+    repaired[1L] <- substring(repaired[1L], 2L)
+  }
+  if (setequal(repaired, train.names)) return(match(train.names, repaired))
 
   missing.names <- setdiff(train.names, supplied)
   extra.names <- setdiff(supplied, train.names)
@@ -732,7 +738,7 @@
 #' @param dim.red.method options: ("cor", "NNS.dep", "NNS.caus", "all", "equal", \code{numeric vector}, NULL) method for determining synthetic X* coefficients (per Dana and Dawes (2004)).  Selection of a method automatically engages the dimension reduction regression.  The default is \code{NULL} for full multivariate regression.  \code{(dim.red.method = "NNS.dep")} uses \link{NNS.dep} for nonlinear dependence weights, while \code{(dim.red.method = "NNS.caus")} uses \link{NNS.caus} for directional association weights.  \code{(dim.red.method = "cor")} uses Spearman rank correlation for weights.  \code{(dim.red.method = "all")} averages all methods for further feature engineering.  \code{(dim.red.method = "equal")} uses unit weights.  Alternatively, user can specify a numeric vector of coefficients. Named vectors must exactly match the encoded predictor columns and are matched by name; unnamed vectors follow encoded column order.
 #' @param tau options("ts", NULL); \code{NULL}(default) To be used in conjunction with \code{(dim.red.method = "NNS.caus")} or \code{(dim.red.method = "all")}.  If the regression is using time-series data, set \code{(tau = "ts")} to use the time-series lag convention.
 #' @param type \code{NULL} (default).  To perform a classification, set to \code{(type = "CLASS")}.  Like a logistic regression, it is not necessary for target variable of two classes e.g. [0, 1]: a numeric response with exactly the values 0 and 1, or a factor, character or logical response, is classified automatically.  Use \code{type = "REG"} to fit a numeric response as regression, including a two-valued response, with one or more predictors. \code{(type = "XONLY")} is the single-predictor regression alias and keeps the default x-only partition.
-#' @param point.est a numeric or factor vector with compatible dimensions to \code{x}.  Returns the fitted value \code{y.hat} for any value of \code{x}.  Columns are matched to \code{x} by name when the two share the same predictor names, and positionally when they share no names at all (as in \code{cbind(test.x_1, test.x_2)} against \code{cbind(x_1, x_2)}).  A column renamed in place, with every other name at its training position (as when \code{read.csv} reads a byte-order mark into the first header), is also matched positionally. Names that otherwise only partly overlap the training predictors are ambiguous and return an error.
+#' @param point.est a numeric or factor vector with compatible dimensions to \code{x}.  Returns the fitted value \code{y.hat} for any value of \code{x}.  Columns are matched to \code{x} by name when the two share the same predictor names, and positionally when they share no names at all (as in \code{cbind(test.x_1, test.x_2)} against \code{cbind(x_1, x_2)}).  A CSV UTF-8 byte-order mark in the first header (for example, \code{Male} becoming \code{X...Male}) is repaired before matching names. Other partial overlaps, including misspelled predictors, are ambiguous and return an error.
 #' @param location Sets the legend location within the plot, per the \code{x} and \code{y} co-ordinates used in base graphics \link{legend}.
 #' @param return.values logical; \code{TRUE} (default), set to \code{FALSE} in order to only display a regression plot and call values as needed.
 #' @param plot logical; \code{TRUE} (default) To plot regression.
