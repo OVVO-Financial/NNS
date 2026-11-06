@@ -32,8 +32,17 @@ test_that("named prediction columns are reordered and schema checked", {
                 residual.plot = FALSE, ncores = 1)
   expect_equal(f1$Point.est, f2$Point.est, tolerance = 1e-12)
 
+  # A column renamed in place is matched by position; a shared name away from
+  # its training position is not.
+  renamed <- p1
+  names(renamed) <- c("a", "c")
+  expect_equal(
+    NNS.reg(x, y, point.est = renamed, plot = FALSE,
+            residual.plot = FALSE, ncores = 1)$Point.est,
+    f1$Point.est, tolerance = 1e-12
+  )
   bad <- p1
-  names(bad) <- c("a", "c")
+  names(bad) <- c("c", "a")
   expect_error(
     NNS.reg(x, y, point.est = bad, plot = FALSE,
             residual.plot = FALSE),

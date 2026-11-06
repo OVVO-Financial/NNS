@@ -82,7 +82,8 @@
 }
 
 .nns_reg_validate_nbest <- function(n.best) {
-  if (is.null(n.best)) return(NULL)
+  # NA (as NNS.stack reports for a single predictor) selects the default.
+  if (is.null(n.best) || (length(n.best) == 1L && is.na(n.best))) return(NULL)
   if (is.character(n.best) && length(n.best) == 1L &&
       !is.na(n.best) && tolower(n.best) == "all") return("all")
   if (!is.numeric(n.best) || length(n.best) != 1L || !is.finite(n.best) ||
@@ -90,6 +91,22 @@
     stop("[n.best] must be NULL, 'all', or a positive integer.", call. = FALSE)
   }
   as.integer(n.best)
+}
+
+# NULL or NA means no screening (0), as does an NA entry of a vector. A vector
+# holds one cutoff per class for classification, as NNS.stack reports.
+.nns_reg_validate_threshold <- function(threshold) {
+  if (is.null(threshold) || !length(threshold)) return(0)
+  if (!is.numeric(threshold) && !all(is.na(threshold))) {
+    stop("[threshold] must be NULL, NA, or finite nonnegative numbers.", call. = FALSE)
+  }
+  out <- as.numeric(threshold)
+  names(out) <- names(threshold)
+  out[is.na(out)] <- 0
+  if (any(!is.finite(out)) || any(out < 0)) {
+    stop("[threshold] must be NULL, NA, or finite nonnegative numbers.", call. = FALSE)
+  }
+  out
 }
 
 .nns_reg_validate_dist <- function(dist) {
@@ -153,8 +170,12 @@
 #   * no names in common -> the names cannot express an alignment at all, as in
 #     cbind(test.x_1, test.x_2) against cbind(x_1, x_2), so keep the supplied
 #     order and match positionally per the documented "compatible dimensions";
-#   * partial overlap    -> ambiguous, and in practice a wrong or misspelled
-#     column, so error.
+#   * renamed in place   -> every shared name sits at its training position and
+#     the other names occupy the same positions on both sides, as when a
+#     header is altered on export (read.csv turns a byte-order mark before
+#     "Male" into "X...Male"), so the columns align positionally;
+#   * other overlap      -> ambiguous, and in practice a wrong, misspelled or
+#     misplaced column, so error.
 #
 # [supplied] and [train.names] must already be make.unique() normalized and of
 # equal length.  Returns the permutation to apply to the supplied columns, or
@@ -162,6 +183,9 @@
 .nns_match_predictor_names <- function(supplied, train.names, label) {
   if (setequal(supplied, train.names)) return(match(train.names, supplied))
   if (!any(supplied %in% train.names)) return(NULL)
+  renamed <- supplied != train.names
+  if (!any(supplied[renamed] %in% train.names) &&
+      !any(train.names[renamed] %in% supplied)) return(NULL)
 
   missing.names <- setdiff(train.names, supplied)
   extra.names <- setdiff(supplied, train.names)
@@ -708,16 +732,16 @@
 #' @param dim.red.method options: ("cor", "NNS.dep", "NNS.caus", "all", "equal", \code{numeric vector}, NULL) method for determining synthetic X* coefficients (per Dana and Dawes (2004)).  Selection of a method automatically engages the dimension reduction regression.  The default is \code{NULL} for full multivariate regression.  \code{(dim.red.method = "NNS.dep")} uses \link{NNS.dep} for nonlinear dependence weights, while \code{(dim.red.method = "NNS.caus")} uses \link{NNS.caus} for directional association weights.  \code{(dim.red.method = "cor")} uses Spearman rank correlation for weights.  \code{(dim.red.method = "all")} averages all methods for further feature engineering.  \code{(dim.red.method = "equal")} uses unit weights.  Alternatively, user can specify a numeric vector of coefficients. Named vectors must exactly match the encoded predictor columns and are matched by name; unnamed vectors follow encoded column order.
 #' @param tau options("ts", NULL); \code{NULL}(default) To be used in conjunction with \code{(dim.red.method = "NNS.caus")} or \code{(dim.red.method = "all")}.  If the regression is using time-series data, set \code{(tau = "ts")} to use the time-series lag convention.
 #' @param type \code{NULL} (default).  To perform a classification, set to \code{(type = "CLASS")}.  Like a logistic regression, it is not necessary for target variable of two classes e.g. [0, 1]: a numeric response with exactly the values 0 and 1, or a factor, character or logical response, is classified automatically.  Use \code{type = "REG"} to fit a numeric response as regression, including a two-valued response, with one or more predictors. \code{(type = "XONLY")} is the single-predictor regression alias and keeps the default x-only partition.
-#' @param point.est a numeric or factor vector with compatible dimensions to \code{x}.  Returns the fitted value \code{y.hat} for any value of \code{x}.  Columns are matched to \code{x} by name when the two share the same predictor names, and positionally when they share no names at all (as in \code{cbind(test.x_1, test.x_2)} against \code{cbind(x_1, x_2)}).  Names that only partly overlap the training predictors are ambiguous and return an error.
+#' @param point.est a numeric or factor vector with compatible dimensions to \code{x}.  Returns the fitted value \code{y.hat} for any value of \code{x}.  Columns are matched to \code{x} by name when the two share the same predictor names, and positionally when they share no names at all (as in \code{cbind(test.x_1, test.x_2)} against \code{cbind(x_1, x_2)}).  A column renamed in place, with every other name at its training position (as when \code{read.csv} reads a byte-order mark into the first header), is also matched positionally. Names that otherwise only partly overlap the training predictors are ambiguous and return an error.
 #' @param location Sets the legend location within the plot, per the \code{x} and \code{y} co-ordinates used in base graphics \link{legend}.
 #' @param return.values logical; \code{TRUE} (default), set to \code{FALSE} in order to only display a regression plot and call values as needed.
 #' @param plot logical; \code{TRUE} (default) To plot regression.
 #' @param plot.regions logical; \code{FALSE} (default).  Generates 3d regions associated with each regression point for multivariate regressions.  Note, adds significant time to routine.
 #' @param residual.plot logical; \code{TRUE} (default) To plot \code{y.hat} and \code{Y}.
 #' @param confidence.interval numeric [0, 1]; \code{NULL} (default) Plots the associated confidence interval with the estimate and adds \code{conf.int.pos} / \code{conf.int.neg} to \code{Fitted.xy}.  The intervals are global: they are built from the type-8 quantiles of the in-sample residuals (no per-segment standard errors are returned).  Also applies the same level for the prediction intervals.
-#' @param threshold  numeric [0, 1]; \code{(threshold = 0)} (default) Sets the threshold for dimension reduction of independent variables when \code{(dim.red.method)} is not \code{NULL}.
+#' @param threshold  numeric [0, 1]; \code{(threshold = 0)} (default) Sets the threshold for dimension reduction of independent variables when \code{(dim.red.method)} is not \code{NULL}. Predictors whose coefficient magnitude is below \code{threshold} are dropped; \code{NULL} or \code{NA} means 0. For classification, a vector with one cutoff per class (named by class, or in class order) applies each cutoff to that class's index, as \link{NNS.stack} can report in \code{NNS.dim.red.threshold}.
 #' @param n.best integer; \code{NULL} (default) Sets the number of nearest regression points to use in weighting for multivariate regression at \code{floor((1 - D) * sqrt(nrow(x)))} (at least 1, at most the number of regression points), where D averages the copula summaries with response y and -y so the smoothing choice is unchanged by response reflection.  \code{(n.best = "all")} will select and weight all generated regression points.  Analogous to \code{k} in a
-#' \code{k Nearest Neighbors} algorithm.  Different values of \code{n.best} are tested using cross-validation in \link{NNS.stack}.
+#' \code{k Nearest Neighbors} algorithm.  Different values of \code{n.best} are tested using cross-validation in \link{NNS.stack}. \code{NA} selects the default, as \code{NULL} does.
 #' @param smooth logical; \code{FALSE} (default) Applies a smoothing spline instead of local linear fit to regression points.
 #' @param noise.reduction the method of determining regression points options: ("mean", "median", "mode", "off"); In low signal:noise situations,\code{(noise.reduction = "mean")}  uses means for \link{NNS.dep} restricted partitions, \code{(noise.reduction = "median")} uses medians instead of means for \link{NNS.dep} restricted partitions, while \code{(noise.reduction = "mode")}  uses modes instead of means for \link{NNS.dep} restricted partitions.  \code{(noise.reduction = "off")} uses an overall central tendency measure for partitions.
 #' @param dist options:(NULL, "NNS", "L1", "L2", "FACTOR") the method of distance calculation. \code{dist = NULL} is the default and selects the native blended NNS distance, \eqn{sum(abs(z) + z^2)}, over range-normalized coordinates. \code{dist = "NNS"} is an explicit alias for the default. \code{dist = "L2"} selects Euclidean distance; \code{dist = "L1"} selects Manhattan distance; \code{dist = "FACTOR"} uses a frequency.
@@ -870,6 +894,7 @@ NNS.reg <- function(x, y,
   multivariate.call <- .nns_reg_scalar_logical(multivariate.call, "multivariate.call")
   order <- .nns_reg_validate_order(order)
   n.best <- .nns_reg_validate_nbest(n.best)
+  threshold <- .nns_reg_validate_threshold(threshold)
   dist <- .nns_reg_validate_dist(dist)
   noise.reduction <- .nns_reg_validate_noise(noise.reduction)
   confidence.interval <- .nns_reg_validate_ci(confidence.interval)
@@ -932,6 +957,10 @@ NNS.reg <- function(x, y,
   
   # Dimension reduction converts the encoded matrix to one training-fitted X*.
   if (ncol(encoded$x) > 1L) {
+    if (length(threshold) > 1L) {
+      stop(paste0("[threshold] must be a single number for regression; one cutoff ",
+                  "per class applies to classification."), call. = FALSE)
+    }
     dr <- .nns_reg_dimreduce(encoded$x, encoded$point.est, y.numeric,
                              dim.red.method, tau, threshold)
     ux <- dr$x.star

@@ -33,6 +33,20 @@
   on an iris split with out-of-fold accuracies of 0.942 and 0.949 (130 and 131
   of 138 rows), the weights were 0 and 1, and the stack missed a test row that
   the 13.0 weights (0.496 and 0.504) classify correctly.
+* `NNS.reg`, `NNS.stack` and `NNS.boost` match a test column renamed in place,
+  with every other name at its training position, by position. `read.csv`
+  reads the byte-order mark of an Excel "CSV UTF-8" file into the first header
+  (`Male` becomes `X...Male`), which had stopped the logistic regression
+  example. Other partial overlaps remain an error.
+* Classification `NNS.stack` reports `NNS.dim.red.threshold` as the
+  coefficient cutoff at which `NNS.reg` on the training data keeps the tuned
+  number of predictors, as regression stacks do: one number when the class
+  indices share it, as two-class indices always do, and otherwise one cutoff
+  per class, which `NNS.reg` accepts as `threshold`. It had been `NA`, which
+  `NNS.reg` rejected. When all cells are the best neighbour count, the stack
+  reports their number rather than `NA`.
+* `NNS.reg` treats `threshold = NULL` or `NA` as 0 and `n.best = NA` as the
+  default, so `NA` values reported by `NNS.stack` can be passed back.
 * Binary numeric coordinates retain distinct terminal cells in both R and
   native regression paths, including dummy columns in mixed predictor designs.
 * Stack's multivariate component searches selected predictor coordinates; its

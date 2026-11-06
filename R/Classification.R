@@ -147,11 +147,22 @@
   categorical <- all(vapply(encoded$metadata, `[[`, logical(1), "categorical"))
   equations <- NULL
   if (!is.null(dim.red.method) && ncol(X) > 1L) {
+    # One cutoff for every class index, or one per class (named by class, or
+    # in class order), as NNS.stack reports for classification.
+    class.threshold <- if (length(threshold) <= 1L) {
+      rep(threshold, length(values))
+    } else if (!is.null(names(threshold)) && all(labels %in% names(threshold))) {
+      unname(threshold[labels])
+    } else if (length(threshold) == length(values)) {
+      unname(threshold)
+    } else {
+      stop("[threshold] must be one number, or one cutoff per class.", call. = FALSE)
+    }
     # Each nominal class has its own signed NNS indicator index. A single
     # index fitted to numeric class codes would impose an arbitrary ordering.
     models <- lapply(seq_along(values), function(j) {
       coef <- .nns_reg_dimred_coefficients(X, indicators[, j], dim.red.method,
-                                          tau, threshold)
+                                          tau, class.threshold[j])
       if (!is.null(dim.count) && dim.count < length(coef)) {
         keep <- order(abs(coef), decreasing = TRUE)[seq_len(dim.count)]
         coef[-keep] <- 0

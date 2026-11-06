@@ -44,7 +44,7 @@ NNS.reg(
 
 \item{type}{\code{NULL} (default).  To perform a classification, set to \code{(type = "CLASS")}.  Like a logistic regression, it is not necessary for target variable of two classes e.g. [0, 1]: a numeric response with exactly the values 0 and 1, or a factor, character or logical response, is classified automatically.  Use \code{type = "REG"} to fit a numeric response as regression, including a two-valued response, with one or more predictors. \code{(type = "XONLY")} is the single-predictor regression alias and keeps the default x-only partition.}
 
-\item{point.est}{a numeric or factor vector with compatible dimensions to \code{x}.  Returns the fitted value \code{y.hat} for any value of \code{x}.  Columns are matched to \code{x} by name when the two share the same predictor names, and positionally when they share no names at all (as in \code{cbind(test.x_1, test.x_2)} against \code{cbind(x_1, x_2)}).  Names that only partly overlap the training predictors are ambiguous and return an error.}
+\item{point.est}{a numeric or factor vector with compatible dimensions to \code{x}.  Returns the fitted value \code{y.hat} for any value of \code{x}.  Columns are matched to \code{x} by name when the two share the same predictor names, and positionally when they share no names at all (as in \code{cbind(test.x_1, test.x_2)} against \code{cbind(x_1, x_2)}).  A column renamed in place, with every other name at its training position (as when \code{read.csv} reads a byte-order mark into the first header), is also matched positionally. Names that otherwise only partly overlap the training predictors are ambiguous and return an error.}
 
 \item{location}{Sets the legend location within the plot, per the \code{x} and \code{y} co-ordinates used in base graphics \link{legend}.}
 
@@ -58,10 +58,10 @@ NNS.reg(
 
 \item{confidence.interval}{numeric [0, 1]; \code{NULL} (default) Plots the associated confidence interval with the estimate and adds \code{conf.int.pos} / \code{conf.int.neg} to \code{Fitted.xy}.  The intervals are global: they are built from the type-8 quantiles of the in-sample residuals (no per-segment standard errors are returned).  Also applies the same level for the prediction intervals.}
 
-\item{threshold}{numeric [0, 1]; \code{(threshold = 0)} (default) Sets the threshold for dimension reduction of independent variables when \code{(dim.red.method)} is not \code{NULL}.}
+\item{threshold}{numeric [0, 1]; \code{(threshold = 0)} (default) Sets the threshold for dimension reduction of independent variables when \code{(dim.red.method)} is not \code{NULL}. Predictors whose coefficient magnitude is below \code{threshold} are dropped; \code{NULL} or \code{NA} means 0. For classification, a vector with one cutoff per class (named by class, or in class order) applies each cutoff to that class's index, as \link{NNS.stack} can report in \code{NNS.dim.red.threshold}.}
 
 \item{n.best}{integer; \code{NULL} (default) Sets the number of nearest regression points to use in weighting for multivariate regression at \code{floor((1 - D) * sqrt(nrow(x)))} (at least 1, at most the number of regression points), where D averages the copula summaries with response y and -y so the smoothing choice is unchanged by response reflection.  \code{(n.best = "all")} will select and weight all generated regression points.  Analogous to \code{k} in a
-\code{k Nearest Neighbors} algorithm.  Different values of \code{n.best} are tested using cross-validation in \link{NNS.stack}.}
+\code{k Nearest Neighbors} algorithm.  Different values of \code{n.best} are tested using cross-validation in \link{NNS.stack}. \code{NA} selects the default, as \code{NULL} does.}
 
 \item{smooth}{logical; \code{FALSE} (default) Applies a smoothing spline instead of local linear fit to regression points.}
 
