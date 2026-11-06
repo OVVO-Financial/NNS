@@ -50,11 +50,10 @@ NNS.boost(
   `(IVs.train)` as default. Columns are matched to `(IVs.train)` by name
   when the two share the same predictor names, and positionally when
   they share no names at all (as in `cbind(test.x_1, test.x_2)` against
-  `cbind(x_1, x_2)`). A column renamed in place, with every other name
-  at its training position (as when `read.csv` reads a byte-order mark
-  into the first header), is also matched positionally. Names that
-  otherwise only partly overlap the training predictors are ambiguous
-  and return an error.
+  `cbind(x_1, x_2)`). A CSV UTF-8 byte-order mark in the first header
+  (for example, `Male` becoming `X...Male`) is repaired before matching
+  names. Other partial overlaps, including misspelled predictors, are
+  ambiguous and return an error.
 
 - type:
 
