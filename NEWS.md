@@ -33,11 +33,12 @@
   on an iris split with out-of-fold accuracies of 0.942 and 0.949 (130 and 131
   of 138 rows), the weights were 0 and 1, and the stack missed a test row that
   the 13.0 weights (0.496 and 0.504) classify correctly.
-* `NNS.reg`, `NNS.stack` and `NNS.boost` match a test column renamed in place,
-  with every other name at its training position, by position. `read.csv`
-  reads the byte-order mark of an Excel "CSV UTF-8" file into the first header
-  (`Male` becomes `X...Male`), which had stopped the logistic regression
-  example. Other partial overlaps remain an error.
+* `NNS.reg`, `NNS.stack` and `NNS.boost` match complete predictor
+  names in any order and use positional matching when the test and training
+  columns share no names. The known Excel CSV UTF-8 first-header artifact
+  (`Male` becoming `X...Male`) is repaired before name matching. Arbitrary
+  partial renames or misspelled predictors now fail instead of being silently
+  treated as positional matches.
 * Classification `NNS.stack` reports `NNS.dim.red.threshold` as the
   coefficient cutoff at which `NNS.reg` on the training data keeps the tuned
   number of predictors, as regression stacks do: one number when the class

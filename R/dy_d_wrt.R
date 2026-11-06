@@ -1,3 +1,54 @@
+#' Finite-difference weights for a local polynomial stencil
+#'
+#' Construct polynomial finite-difference weights on distinct local nodes.
+#' Invalid or degenerate stencils return NA coefficients.
+#'
+#' @param nodes Numeric vector of distinct stencil coordinates.
+#' @param at Numeric evaluation coordinate.
+#' @param degree Integer derivative order; defaults to 1.
+#' @return Numeric vector of finite-difference weights, or NA coefficients
+#'   when the stencil is invalid.
+#' @keywords internal
+#' @export
+
+.nns_fd_weights <- function(nodes, at, degree = 1L) {
+  if (length(nodes) <= degree || length(unique(nodes)) != length(nodes))
+    return(rep(NA_real_, length(nodes)))
+  scale <- max(abs(nodes - at))
+  if (!is.finite(scale) || scale == 0) return(rep(NA_real_, length(nodes)))
+  z <- (nodes - at) / scale
+  powers <- outer(seq.int(0, length(nodes) - 1L), z, function(k, value) value^k)
+  rhs <- numeric(length(nodes)); rhs[degree + 1L] <- factorial(degree)
+  as.numeric(solve(powers, rhs)) / scale^degree
+}
+
+.nns_dy_stencil <- function(col, at, probability.width) {
+  support <- sort(unique(col))
+  lower <- support[1L]; upper <- tail(support, 1L)
+  if (!is.finite(at) || at < lower || at > upper)
+    stop("Derivative evaluation points must lie inside the observed coordinate support.")
+  if (length(support) < 2L) return(list(nodes = at, first = NA_real_, second = NA_real_))
+  if (length(support) == 2L) {
+    nodes <- support
+  } else {
+    share <- LPM.ratio(1, at, col)
+    lo <- LPM.VaR(max(0, share - probability.width), 1, col)
+    hi <- LPM.VaR(min(1, share + probability.width), 1, col)
+    # A local half-window, never an entire-support extrapolation step.
+    h <- min((hi - lo) / 2, (upper - lower) / 4)
+    if (!is.finite(h) || h <= 0) h <- min(diff(support))
+    if (at == lower) {
+      nodes <- at + c(0, h, 2 * h)
+    } else if (at == upper) {
+      nodes <- at - c(2 * h, h, 0)
+    } else {
+      nodes <- c(max(lower, at - h), at, min(upper, at + h))
+    }
+  }
+  list(nodes = nodes, first = .nns_fd_weights(nodes, at, 1L),
+       second = .nns_fd_weights(nodes, at, 2L))
+}
+
 #' Partial Derivative dy/d_[wrt]
 #'
 #' Returns the numerical partial derivative of \code{y} with respect to [wrt] any regressor for a point of interest.  Finite difference method is used with \link{NNS.reg} estimates as \code{f(x + h)} and \code{f(x - h)} values.
@@ -65,46 +116,6 @@
 #' UPM.VaR(.025, 0, apd[,1]$First)
 #' }
 #' @export
-
-
-
-.nns_fd_weights <- function(nodes, at, degree = 1L) {
-  if (length(nodes) <= degree || length(unique(nodes)) != length(nodes))
-    return(rep(NA_real_, length(nodes)))
-  scale <- max(abs(nodes - at))
-  if (!is.finite(scale) || scale == 0) return(rep(NA_real_, length(nodes)))
-  z <- (nodes - at) / scale
-  powers <- outer(seq.int(0, length(nodes) - 1L), z, function(k, value) value^k)
-  rhs <- numeric(length(nodes)); rhs[degree + 1L] <- factorial(degree)
-  as.numeric(solve(powers, rhs)) / scale^degree
-}
-
-.nns_dy_stencil <- function(col, at, probability.width) {
-  support <- sort(unique(col))
-  lower <- support[1L]; upper <- tail(support, 1L)
-  if (!is.finite(at) || at < lower || at > upper)
-    stop("Derivative evaluation points must lie inside the observed coordinate support.")
-  if (length(support) < 2L) return(list(nodes = at, first = NA_real_, second = NA_real_))
-  if (length(support) == 2L) {
-    nodes <- support
-  } else {
-    share <- LPM.ratio(1, at, col)
-    lo <- LPM.VaR(max(0, share - probability.width), 1, col)
-    hi <- LPM.VaR(min(1, share + probability.width), 1, col)
-    # A local half-window, never an entire-support extrapolation step.
-    h <- min((hi - lo) / 2, (upper - lower) / 4)
-    if (!is.finite(h) || h <= 0) h <- min(diff(support))
-    if (at == lower) {
-      nodes <- at + c(0, h, 2 * h)
-    } else if (at == upper) {
-      nodes <- at - c(2 * h, h, 0)
-    } else {
-      nodes <- c(max(lower, at - h), at, min(upper, at + h))
-    }
-  }
-  list(nodes = nodes, first = .nns_fd_weights(nodes, at, 1L),
-       second = .nns_fd_weights(nodes, at, 2L))
-}
 
 dy.d_ <- function(x, y, wrt, eval.points = "obs", mixed = FALSE, messages = TRUE) {
   if (is.null(ncol(x)) || ncol(x) < 2L)
