@@ -100,7 +100,7 @@
 
 
 <dt id="arg-point-est">point.est<a class="anchor" aria-label="anchor" href="#arg-point-est"></a></dt>
-<dd><p>a numeric or factor vector with compatible dimensions to <code>x</code>.  Returns the fitted value <code>y.hat</code> for any value of <code>x</code>.  Columns are matched to <code>x</code> by name when the two share the same predictor names, and positionally when they share no names at all (as in <code>cbind(test.x_1, test.x_2)</code> against <code>cbind(x_1, x_2)</code>).  Names that only partly overlap the training predictors are ambiguous and return an error.</p></dd>
+<dd><p>a numeric or factor vector with compatible dimensions to <code>x</code>.  Returns the fitted value <code>y.hat</code> for any value of <code>x</code>.  Columns are matched to <code>x</code> by name when the two share the same predictor names, and positionally when they share no names at all (as in <code>cbind(test.x_1, test.x_2)</code> against <code>cbind(x_1, x_2)</code>).  A column renamed in place, with every other name at its training position (as when <code>read.csv</code> reads a byte-order mark into the first header), is also matched positionally. Names that otherwise only partly overlap the training predictors are ambiguous and return an error.</p></dd>
 
 
 <dt id="arg-location">location<a class="anchor" aria-label="anchor" href="#arg-location"></a></dt>
@@ -128,12 +128,12 @@
 
 
 <dt id="arg-threshold">threshold<a class="anchor" aria-label="anchor" href="#arg-threshold"></a></dt>
-<dd><p>numeric [0, 1]; <code>(threshold = 0)</code> (default) Sets the threshold for dimension reduction of independent variables when <code>(dim.red.method)</code> is not <code>NULL</code>.</p></dd>
+<dd><p>numeric [0, 1]; <code>(threshold = 0)</code> (default) Sets the threshold for dimension reduction of independent variables when <code>(dim.red.method)</code> is not <code>NULL</code>. Predictors whose coefficient magnitude is below <code>threshold</code> are dropped; <code>NULL</code> or <code>NA</code> means 0. For classification, a vector with one cutoff per class (named by class, or in class order) applies each cutoff to that class's index, as <a href="NNS.stack.html">NNS.stack</a> can report in <code>NNS.dim.red.threshold</code>.</p></dd>
 
 
 <dt id="arg-n-best">n.best<a class="anchor" aria-label="anchor" href="#arg-n-best"></a></dt>
 <dd><p>integer; <code>NULL</code> (default) Sets the number of nearest regression points to use in weighting for multivariate regression at <code>floor((1 - D) * sqrt(nrow(x)))</code> (at least 1, at most the number of regression points), where D averages the copula summaries with response y and -y so the smoothing choice is unchanged by response reflection.  <code>(n.best = "all")</code> will select and weight all generated regression points.  Analogous to <code>k</code> in a
-<code>k Nearest Neighbors</code> algorithm.  Different values of <code>n.best</code> are tested using cross-validation in <a href="NNS.stack.html">NNS.stack</a>.</p></dd>
+<code>k Nearest Neighbors</code> algorithm.  Different values of <code>n.best</code> are tested using cross-validation in <a href="NNS.stack.html">NNS.stack</a>. <code>NA</code> selects the default, as <code>NULL</code> does.</p></dd>
 
 
 <dt id="arg-smooth">smooth<a class="anchor" aria-label="anchor" href="#arg-smooth"></a></dt>

@@ -101,9 +101,11 @@ NNS.reg(
   the fitted value `y.hat` for any value of `x`. Columns are matched to
   `x` by name when the two share the same predictor names, and
   positionally when they share no names at all (as in
-  `cbind(test.x_1, test.x_2)` against `cbind(x_1, x_2)`). Names that
-  only partly overlap the training predictors are ambiguous and return
-  an error.
+  `cbind(test.x_1, test.x_2)` against `cbind(x_1, x_2)`). A column
+  renamed in place, with every other name at its training position (as
+  when `read.csv` reads a byte-order mark into the first header), is
+  also matched positionally. Names that otherwise only partly overlap
+  the training predictors are ambiguous and return an error.
 
 - location:
 
@@ -143,7 +145,12 @@ NNS.reg(
 
   numeric \[0, 1\]; `(threshold = 0)` (default) Sets the threshold for
   dimension reduction of independent variables when `(dim.red.method)`
-  is not `NULL`.
+  is not `NULL`. Predictors whose coefficient magnitude is below
+  `threshold` are dropped; `NULL` or `NA` means 0. For classification, a
+  vector with one cutoff per class (named by class, or in class order)
+  applies each cutoff to that class's index, as
+  [NNS.stack](https://OVVO-Financial.github.io/NNS/reference/NNS.stack.md)
+  can report in `NNS.dim.red.threshold`.
 
 - n.best:
 
@@ -157,6 +164,7 @@ NNS.reg(
   algorithm. Different values of `n.best` are tested using
   cross-validation in
   [NNS.stack](https://OVVO-Financial.github.io/NNS/reference/NNS.stack.md).
+  `NA` selects the default, as `NULL` does.
 
 - smooth:
 

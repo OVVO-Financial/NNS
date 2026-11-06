@@ -51,8 +51,11 @@ NNS.stack(
   `(IVs.train)` as default. Columns are matched to `(IVs.train)` by name
   when the two share the same predictor names, and positionally when
   they share no names at all (as in `cbind(test.x_1, test.x_2)` against
-  `cbind(x_1, x_2)`). Names that only partly overlap the training
-  predictors are ambiguous and return an error.
+  `cbind(x_1, x_2)`). A column renamed in place, with every other name
+  at its training position (as when `read.csv` reads a byte-order mark
+  into the first header), is also matched positionally. Names that
+  otherwise only partly overlap the training predictors are ambiguous
+  and return an error.
 
 - type:
 
@@ -195,10 +198,12 @@ for all models.
 
 - `"NNS.reg.n.best"` returns the optimum `"n.best"` parameter for the
   [NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md)
-  multivariate regression; `NA` for a single predictor, whose univariate
+  multivariate regression; when all regression points (for
+  classification, all cells) are selected, their number in the final
+  fit. `NA` for a single predictor in regression, whose univariate
   [NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md)
-  fit has no `n.best` to tune (use `cbind(x, x)` to search one).
-  `"SSE.reg"` returns the SSE for the
+  fit has no `n.best` to tune (use `cbind(x, x)` to search one), and
+  when `method` does not include 1. `"SSE.reg"` returns the SSE for the
   [NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md)
   multivariate regression.
 
@@ -207,9 +212,16 @@ for all models.
   regression's tuning on the out-of-fold predictions; it is
   selection-optimized, not an estimate of out-of-sample performance.
 
-- `"NNS.dim.red.threshold"` returns the optimum `"threshold"` from the
+- `"NNS.dim.red.threshold"` returns the coefficient cutoff at which
   [NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md)
-  dimension reduction regression.
+  on `(IVs.train, DV.train)` with the same `dim.red.method` keeps the
+  tuned number of predictors: the smallest kept coefficient magnitude,
+  or 0 when every predictor is kept. Ties at the cutoff keep every tied
+  predictor. For classification it is one number when every class index
+  shares the cutoff, as two-class indices always do, and otherwise one
+  cutoff per class, which
+  [NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md)
+  accepts as `threshold`. `NA` when `method` does not include 2.
 
 - `"NNS.dim.red.variables"` returns the names of the predictors carried
   by the final dimension reduction regression, ranked by absolute
@@ -283,19 +295,21 @@ predictor names in both regression and classification. Factor columns
 use `predictor__level` names; unnamed vectors follow encoded column
 order. Classification dimension reduction uses one signed index per
 class indicator. Its reported coefficients are a list of class-specific
-equations. The tuned dimension count is returned as `NNS.dim.red.count`;
-`NNS.dim.red.threshold` is NA because there is no single coefficient
-cutoff shared by all class indices. The field `NNS.dim.red.variables` is
-the union of their active encoded columns. These equations describe the
-synthetic indices, not a complete saved prediction model: reconstruction
-also requires training-fitted scaling, the predictor cells, their class
-frequencies, and the selected smoothing controls. With `stack = TRUE`,
-the multivariate classification component retains the selected number of
-actual encoded coordinates ranked by maximum class-indicator dependence.
-`Prediction.set` contains classes attaining the requested estimated
-probability mass. Binary interval fields contain the range of this set
-for compatibility; multiclass interval fields are NULL. The sets do not
-assert calibrated coverage.
+equations. The tuned dimension count is returned as `NNS.dim.red.count`,
+and `NNS.dim.red.threshold` gives the coefficient cutoff that keeps that
+count in every class index: one number when the class indices share it,
+as two-class indices always do, and otherwise one cutoff per class. The
+field `NNS.dim.red.variables` is the union of their active encoded
+columns. These equations describe the synthetic indices, not a complete
+saved prediction model: reconstruction also requires training-fitted
+scaling, the predictor cells, their class frequencies, and the selected
+smoothing controls. With `stack = TRUE`, the multivariate classification
+component retains the selected number of actual encoded coordinates
+ranked by maximum class-indicator dependence. `Prediction.set` contains
+classes attaining the requested estimated probability mass. Binary
+interval fields contain the range of this set for compatibility;
+multiclass interval fields are NULL. The sets do not assert calibrated
+coverage.
 
 For regression, all dimension-reduction coefficients, normalizations,
 and candidate predictions used in validation are fitted to the
