@@ -32,13 +32,7 @@ test_that("stack probabilities and decoded decisions are invariant to nominal la
   expect_equal(unclass(a$probabilities), b$probabilities[, colnames(a$probabilities)])
   expect_equal(a$weights, b$weights)
   expect_equal(rowSums(a$probabilities), rep(1, 3))
-  # The dimension-reduction cutoffs, per class when they differ, follow the
-  # labels rather than their order.
-  ta <- a$NNS.dim.red.threshold
-  tb <- b$NNS.dim.red.threshold
-  if (length(ta) > 1L) tb <- tb[names(ta)]
-  expect_equal(ta, tb)
-  expect_true(all(is.finite(ta)))
+  expect_true(is.na(a$NNS.dim.red.threshold))
   expect_true(a$NNS.dim.red.count %in% 1:3)
 })
 

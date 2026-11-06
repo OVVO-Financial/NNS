@@ -63,39 +63,14 @@ test_that("matching names are still aligned by name, not by position", {
   )
 })
 
-test_that("a column renamed in place is matched by position", {
-  # read.csv turns a byte-order mark before the first header into "X...", so
-  # a test set can carry one renamed column with every other name in place.
+test_that("partially overlapping names remain an error", {
+  # A test set that names some training predictors and not others is
+  # ambiguous, and in practice a wrong or misspelled column.
   set.seed(6)
   x <- data.frame(a = rnorm(60), b = rnorm(60))
   y <- x$a + x$b
 
-  renamed <- setNames(x[1:5, ], c("a", "c"))
-
-  expect_equal(
-    NNS.reg(x, y, point.est = renamed, plot = FALSE, residual.plot = FALSE,
-            ncores = 1)$Point.est,
-    NNS.reg(x, y, point.est = x[1:5, ], plot = FALSE, residual.plot = FALSE,
-            ncores = 1)$Point.est,
-    tolerance = 1e-12
-  )
-  expect_equal(
-    NNS.stack(x, y, IVs.test = renamed, method = 1, folds = 2, ncores = 1,
-              status = FALSE, seed = 1)$stack,
-    NNS.stack(x, y, IVs.test = x[1:5, ], method = 1, folds = 2, ncores = 1,
-              status = FALSE, seed = 1)$stack,
-    tolerance = 1e-12
-  )
-})
-
-test_that("other partially overlapping names remain an error", {
-  # A shared name away from its training position cannot be aligned: the
-  # columns are misplaced, or one of them is the wrong column.
-  set.seed(6)
-  x <- data.frame(a = rnorm(60), b = rnorm(60))
-  y <- x$a + x$b
-
-  bad <- setNames(x[1:5, ], c("c", "a"))
+  bad <- setNames(x[1:5, ], c("a", "c"))
 
   expect_error(
     NNS.reg(x, y, point.est = bad, plot = FALSE, residual.plot = FALSE),
@@ -128,14 +103,8 @@ test_that("named test vectors follow the same rule", {
             residual.plot = FALSE, ncores = 1)$Point.est,
     base, tolerance = 1e-12
   )
-  # A name renamed in place falls back to position; a misplaced one errors.
-  expect_equal(
-    NNS.reg(x, y, point.est = c(a = 0.5, z = -0.5), plot = FALSE,
-            residual.plot = FALSE, ncores = 1)$Point.est,
-    base, tolerance = 1e-12
-  )
   expect_error(
-    NNS.reg(x, y, point.est = c(z = 0.5, a = -0.5), plot = FALSE,
+    NNS.reg(x, y, point.est = c(a = 0.5, z = -0.5), plot = FALSE,
             residual.plot = FALSE),
     "exactly match"
   )
@@ -166,16 +135,9 @@ test_that("NNS.boost applies the same test-column rule", {
     NA
   )
 
-  renamed <- setNames(x[1:6, ], c("a", "t.b", "t.c"))
+  partial <- setNames(x[1:6, ], c("a", "t.b", "t.c"))
   expect_error(
-    NNS.boost(IVs.train = x, DV.train = y, IVs.test = renamed,
-              epochs = 8, learner.trials = 5, folds = 1, status = FALSE),
-    NA
-  )
-
-  misplaced <- setNames(x[1:6, ], c("t.a", "a", "t.c"))
-  expect_error(
-    NNS.boost(IVs.train = x, DV.train = y, IVs.test = misplaced,
+    NNS.boost(IVs.train = x, DV.train = y, IVs.test = partial,
               epochs = 8, learner.trials = 5, folds = 1, status = FALSE),
     "exactly match"
   )
