@@ -135,6 +135,24 @@
         weights[["dim.red"]] * dim.fit$probability[valid, , drop = FALSE],
       y[valid])$threshold
   }
+  # The coefficient cutoff at which NNS.reg(x, y, dim.red.method = ..., threshold
+  # = cutoff) keeps the tuned number of predictors in every class index,
+  # computed as for regression on all training rows: the smallest kept
+  # |coefficient|, or 0 when every predictor is kept. Ties at the cutoff keep
+  # every tied predictor. Two-class indices are mirror images, so one number
+  # serves both; with more classes each index can need its own cutoff, and the
+  # cutoffs are returned per class, which NNS.reg also accepts.
+  dim.cutoff <- function(count) {
+    cutoffs <- vapply(seq_along(values), function(j) {
+      coef <- .nns_reg_dimred_coefficients(full$x, as.numeric(y == values[j]),
+                                           dim.red.method, tau, 0)
+      if (count >= length(coef)) return(0)
+      cut <- sort(abs(coef), decreasing = TRUE)[count]
+      if (is.finite(cut)) cut else 0
+    }, numeric(1))
+    if (isTRUE(all.equal(min(cutoffs), max(cutoffs)))) min(cutoffs) else
+      setNames(cutoffs, labels)
+  }
   final <- function(component, record) {
     if (is.null(record)) return(NULL)
     fit(x[final.rows, , drop = FALSE], y[final.rows], z, component,
@@ -161,12 +179,12 @@
   }
   result <- list(
     OBJfn.reg = if (is.null(reg.fit)) NA_real_ else reg.fit$score,
-    NNS.reg.n.best = if (is.null(reg.fit) || identical(reg.fit$candidate, "all")) NA_integer_ else reg.fit$candidate,
+    # As for regression, a win for all cells reports the final fit's cell count.
+    NNS.reg.n.best = if (is.null(reg.fit)) NA_integer_ else if (identical(reg.fit$candidate, "all"))
+      as.integer(reg.final$n.best) else reg.fit$candidate,
     probability.threshold = threshold,
     OBJfn.dim.red = if (is.null(dim.fit)) NA_real_ else dim.fit$score,
-    # Each indicator index can have a different coefficient cutoff. Report
-    # the tuned count directly rather than mislabelling count/p as a cutoff.
-    NNS.dim.red.threshold = NA_real_,
+    NNS.dim.red.threshold = if (is.null(dim.fit)) NA_real_ else dim.cutoff(dim.fit$candidate),
     NNS.dim.red.count = if (is.null(dim.fit)) NA_integer_ else dim.fit$candidate,
     NNS.dim.red.variables = if (is.null(dim.final)) NULL else unique(unlist(lapply(
       dim.final$equation, function(eq) eq$Variable[eq$Variable != "DENOMINATOR" & abs(eq$Coefficient) > 0]))),
