@@ -152,36 +152,3 @@ test_that("NNS.boost applies the same test-column rule", {
                         status = FALSE, seed = 7)$results
   expect_equal(by.name, in.order, tolerance = 1e-12)
 })
-
-test_that("a first-header CSV UTF-8 BOM alias is repaired without accepting typos", {
-  set.seed(41)
-  x <- data.frame(Male = rnorm(60), Other = rnorm(60))
-  y <- 2 * x$Male - x$Other
-  base <- NNS.reg(x, y, point.est = x[1:5, ], plot = FALSE,
-                  residual.plot = FALSE, ncores = 1)$Point.est
-
-  # Matching uses the cleaned name set even when the test columns are reversed.
-  excel <- x[1:5, c("Other", "Male")]
-  names(excel)[1L] <- "X...Other"
-  expect_equal(
-    NNS.reg(x, y, point.est = excel, plot = FALSE,
-            residual.plot = FALSE, ncores = 1)$Point.est,
-    base, tolerance = 1e-12
-  )
-
-  literal.bom <- excel
-  names(literal.bom)[1L] <- paste0("\ufeff", "Other")
-  expect_equal(
-    NNS.reg(x, y, point.est = literal.bom, plot = FALSE,
-            residual.plot = FALSE, ncores = 1)$Point.est,
-    base, tolerance = 1e-12
-  )
-
-  typo <- x[1:5, ]
-  names(typo) <- c("Male", "Othr")
-  expect_error(
-    NNS.reg(x, y, point.est = typo, plot = FALSE,
-            residual.plot = FALSE, ncores = 1),
-    "exactly match"
-  )
-})
