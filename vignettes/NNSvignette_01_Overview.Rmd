@@ -38,22 +38,22 @@ Sys.setenv("OMP_THREAD_LIMIT" = 1)
 8. Simulation (max‑entropy) & Monte Carlo
 9. Portfolio & stochastic dominance
 
-**Notation.** For a random variable \(X\) and threshold/target \(t\), the population \(n\)‑th **partial moments** are defined as:
+**Notation.** For a random variable \(X\) and threshold/target \(t\), the population \(k\)‑th **partial moments** are defined as:
 
 \[
-\operatorname{LPM}(n,t,X) 
-= \int_{-\infty}^{t} (t-x)^{n} \, dF_X(x),
+\operatorname{LPM}(k,t,X) 
+= \int_{-\infty}^{t} (t-x)^{k} \, dF_X(x),
 \qquad
-\operatorname{UPM}(n,t,X) 
-= \int_{t}^{\infty} (x-t)^{n} \, dF_X(x).
+\operatorname{UPM}(k,t,X) 
+= \int_{t}^{\infty} (x-t)^{k} \, dF_X(x).
 \]
 
 The **empirical** estimators replace \(F_X\) with the empirical CDF \(\hat F_n\) (or, equivalently, use indicator functions):
 
 \[
-\widehat{\operatorname{LPM}}_n(t;X) = \frac{1}{n} \sum_{i=1}^n (t-x_i)^n \, \mathbf{1}_{\{x_i \le t\}},
+\widehat{\operatorname{LPM}}_k(t;X) = \frac{1}{n} \sum_{i=1}^n (t-x_i)^k \, \mathbf{1}_{\{x_i \le t\}},
 \qquad
-\widehat{\operatorname{UPM}}_n(t;X) = \frac{1}{n} \sum_{i=1}^n (x_i-t)^n \, \mathbf{1}_{\{x_i > t\}}.
+\widehat{\operatorname{UPM}}_k(t;X) = \frac{1}{n} \sum_{i=1}^n (x_i-t)^k \, \mathbf{1}_{\{x_i > t\}}.
 \]
 
 These correspond to integrals over the measurable subsets \(\{X \le t\}\) and \(\{X > t\}\) in a \(\sigma\)‑algebra; the empirical sums are discrete analogues of Lebesgue integrals.
@@ -136,8 +136,8 @@ NNS.mode(multimodal,multi = TRUE)
 
 -   `LPM.ratio(degree = 0, target, variable)` (empirical CDF when `degree=0`)
 -   `UPM.ratio(degree = 0, target, variable)`
--   `LPM.VaR(p, degree, variable)` (quantiles via partial‑moment CDFs)
--   `UPM.VaR(p, degree, variable)`
+-   `LPM.VaR(percentile, degree, x)` (quantiles when `degree=0`)
+-   `UPM.VaR(percentile, degree, x)`
 
 ```{r}
 qgrid <- LPM.VaR(seq(0.05,0.95,.1),0,z) # equivalent to quantile(z,probs = seq(0.05,0.95,by=0.1))
@@ -156,7 +156,7 @@ Pearson captures linear monotone relationships. Many structures (U‑shapes, sat
 **Headers.** 
 
 -   `Co.LPM(degree_lpm, x, y, target_x, target_y, degree_y)` / `Co.UPM(...)` (co‑partial moments)
--   `PM.matrix(LPM_degree, UPM_degree, target=NULL, variable, pop_adj=TRUE)`
+-   `PM.matrix(LPM_degree, UPM_degree, target, variable, pop_adj)`
 -   `NNS.dep(x, y)` (scalar dependence coefficient)
 -   `NNS.copula(X, target=NULL, continuous=TRUE, plot=FALSE, independence.overlay=FALSE)`
 
@@ -184,13 +184,13 @@ cop
 set.seed(123); x = rnorm(100); y = rnorm(100); z = expand.grid(x, y)
 
 # Plot
-rgl::plot3d(z[,1], z[,2], Co.LPM(0, z[,1], z[,2], z[,1], z[,2]), col = "red")
+rgl::plot3d(z[,1], z[,2], Co.LPM(0, x, y, z[,1], z[,2]), col = "red")
 
 # Uniform values
 u_x = LPM.ratio(0, x, x); u_y = LPM.ratio(0, y, y); z = expand.grid(u_x, u_y)
 
 # Plot
-rgl::plot3d(z[,1], z[,2], Co.LPM(0, z[,1], z[,2], z[,1], z[,2]), col = "blue")
+rgl::plot3d(z[,1], z[,2], Co.LPM(0, u_x, u_y, z[,1], z[,2]), col = "blue")
 ```
 
 **Interpretation.** `NNS.dep` remains high for curved relationships; `PM.matrix` collects co‑partial moments across variables; `NNS.copula` summarizes higher‑dimensional dependence using partial‑moment ratios. Copulas are returned and evaluated via `Co.LPM` functions.
@@ -265,7 +265,7 @@ A <- list(g1=rnorm(150,0.0,1.1), g2=rnorm(150,0.2,1.0), g3=rnorm(150,-0.1,0.9))
 NNS.ANOVA(control=A, means.only=TRUE, plot=FALSE)
 ```
 
-**Math sketch.** For each quantile/threshold \(t\), compare CDFs built from `LPM.ratio(0, t, •)` (possibly with one‑sided tails). Aggregate across \(t\) to a certainty score.
+**Math sketch.** At the grand mean \(t\), compare each group's `LPM.ratio(1, t, •)` with 0.5 (`LPM.ratio(0, t, •)` at the grand median when `medians = TRUE`). `means.only = FALSE` adds the degree‑1 ratios at four shared `LPM.VaR`/`UPM.VaR` targets (25% and 12.5%). Aggregate the deviations to a certainty score.
 
 ## 5.3 Stochastic Superiority
 
@@ -512,19 +512,19 @@ Centering at \(t=\mu_X\) yields the variance decomposition identity in Section 1
 ## 1. Partial Moments & Ratios
 - `LPM(degree, target, variable)` — lower partial moment of order `degree` at `target`.
 - `UPM(degree, target, variable)` — upper partial moment of order `degree` at `target`.
-- `LPM.ratio(degree, target, variable)`; `UPM.ratio(...)` — normalized shares; `degree=0` gives CDF.
-- `LPM.VaR(p, degree, variable)` — partial-moment quantile at probability `p`.
+- `LPM.ratio(degree, target, variable)`; `UPM.ratio(...)` — normalized shares; `degree=0` gives the CDF (`LPM.ratio`) and survival function (`UPM.ratio`).
+- `LPM.VaR(percentile, degree, x)` — partial-moment quantile at probability `percentile` when `degree=0`.
 - `Co.LPM(degree_lpm, x, y, target_x, target_y, degree_y)` — co-lower partial moment between two variables.
 - `Co.UPM(degree_upm, x, y, target_x, target_y, degree_y)` — co-upper partial moment between two variables.
-- `D.LPM(degree, target, variable)` — divergent lower partial moment (away from `target`).
-- `D.UPM(degree, target, variable)` — divergent upper partial moment (away from `target`).
-- `NNS.CDF(x, target = NULL, points = NULL, plot = TRUE/FALSE)` — CDF from partial moments.
+- `D.LPM(degree_lpm, degree_upm, x, y, target_x, target_y)` — divergent lower partial moment between two variables.
+- `D.UPM(degree_lpm, degree_upm, x, y, target_x, target_y)` — divergent upper partial moment between two variables.
+- `NNS.CDF(variable, degree = 0, target = NULL, type = "CDF", plot = TRUE)` — CDF from partial moments.
 - `NNS.moments(x)` — mean/var/skew/kurtosis via partial moments.
 
 ## 2. Descriptive Statistics & Distributions
 - `NNS.mode(x, multi = FALSE)` — nonparametric mode(s).
-- `PM.matrix(l_degree, u_degree, target, variable, pop_adj)` — co-/divergent partial-moment matrices.
-- `NNS.gravity(x, w = NULL)` — partial-moment weighted location (gravity center).
+- `PM.matrix(LPM_degree, UPM_degree, target, variable, pop_adj)` — co-/divergent partial-moment matrices.
+- `NNS.gravity(x, discrete = FALSE)` — partial-moment weighted location (gravity center).
 
 
 See NNS Vignette: [Getting Started with NNS: Partial Moments](NNSvignette_02_Partial_Moments.html)

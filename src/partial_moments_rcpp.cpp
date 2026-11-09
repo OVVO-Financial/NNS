@@ -177,7 +177,7 @@ NumericVector UPM_RCPP(const double &degree,
 //' @description
 //'   This function generates a standardized univariate lower partial moment
 //'   of any non‑negative degree for a given target.
-//' @param degree numeric; degree = 0 gives frequency (CDF), degree = 1 gives area.
+//' @param degree numeric; degree = 0 gives frequency (CDF), degree = 1 gives area. At degree 0 an observation equal to the target is counted (\code{variable <= target}).
 //' @param target numeric vector; threshold(s). There is no default: pass \code{NULL} to use \code{mean(variable)}.
 //' @param variable numeric vector or data‑frame column to evaluate.
 //' @return Numeric vector of standardized lower partial moments. For
@@ -228,7 +228,7 @@ NumericVector UPM_RCPP(const double &degree,
 //' @description
 //'   This function generates a standardized univariate upper partial moment
 //'   of any non‑negative degree for a given target.
-//' @param degree numeric; degree = 0 gives frequency, degree = 1 gives area.
+//' @param degree numeric; degree = 0 gives frequency, degree = 1 gives area. At degree 0 an observation equal to the target is not counted (\code{variable > target}).
 //' @param target numeric vector; threshold(s). There is no default: pass \code{NULL} to use \code{mean(variable)}.
 //' @param variable numeric vector or data‑frame column to evaluate.
 //' @return Numeric vector of standardized upper partial moments. For
@@ -359,7 +359,8 @@ NumericVector CoUPM_RCPP(
 //' @title Divergent‑Lower Partial Moment
 //' @description
 //'   Computes the divergent lower partial moment (lower‑right quadrant 3)
-//'   between two equal‑length numeric vectors.
+//'   between two equal‑length numeric vectors. \code{degree_upm} applies to \code{x}
+//'   (above \code{target_x}) and \code{degree_lpm} to \code{y} (below \code{target_y}).
 //' @param degree_lpm numeric; LPM degree = 0 gives frequency, = 1 gives area.
 //' @param degree_upm numeric; UPM degree = 0 gives frequency, = 1 gives area.
 //' @param x numeric vector of observations.
@@ -419,7 +420,8 @@ NumericVector CoUPM_RCPP(
 //' @title Divergent‑Upper Partial Moment
 //' @description
 //'   Computes the divergent upper partial moment (upper‑left quadrant 2)
-//'   between two equal‑length numeric vectors.
+//'   between two equal‑length numeric vectors. \code{degree_lpm} applies to \code{x}
+//'   (below \code{target_x}) and \code{degree_upm} to \code{y} (above \code{target_y}).
 //' @param degree_lpm numeric; LPM degree = 0 gives frequency, = 1 gives area.
 //' @param degree_upm numeric; UPM degree = 0 gives frequency, = 1 gives area.
 //' @param x numeric vector of observations.

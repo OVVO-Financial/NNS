@@ -2,7 +2,7 @@
 #'
 #' This function generates a univariate lower partial moment for any degree or target.
 #'
-#' @param degree numeric; \code{(degree = 0)} is frequency, \code{(degree = 1)} is area.
+#' @param degree numeric; \code{(degree = 0)} is frequency, \code{(degree = 1)} is area. At \code{degree = 0} an observation equal to the target is counted (\code{variable <= target}).
 #' @param target numeric; Set to \code{target = mean(variable)} for classical equivalences, but does not have to be.
 #'   When \code{excess_ret = FALSE}, this can be a scalar or a vectorized target for the standard partial moment calculation.
 #'   When \code{excess_ret = TRUE}, it is interpreted element-wise as the benchmark/threshold relative to \code{variable}.
@@ -40,7 +40,7 @@ LPM <- function(degree, target, variable, excess_ret = FALSE) {
 #'
 #' This function generates a univariate upper partial moment for any degree or target.
 #'
-#' @param degree numeric; \code{(degree = 0)} is frequency, \code{(degree = 1)} is area.
+#' @param degree numeric; \code{(degree = 0)} is frequency, \code{(degree = 1)} is area. At \code{degree = 0} an observation equal to the target is not counted (\code{variable > target}).
 #' @param target numeric; Set to \code{target = mean(variable)} for classical equivalences, but does not have to be.
 #'   When \code{excess_ret = FALSE}, this can be a scalar or a vectorized target for the standard partial moment calculation.
 #'   When \code{excess_ret = TRUE}, it is interpreted element-wise as the benchmark/threshold relative to \code{variable}.
@@ -160,7 +160,7 @@ Co.UPM_nD <- function(data, target, degree = 0.0, norm = TRUE) {
 #'
 #' @param data   A numeric matrix with observations in rows and variables in columns.
 #' @param target A numeric vector, length equal to ncol(data).
-#' @param degree numeric; degree for upper deviations (0 = frequency, 1 = area).
+#' @param degree numeric; degree for lower and upper deviations (0 = frequency, 1 = area).
 #' @param norm   logical; if \code{TRUE} (default) divide by the sum of the co-lower, co-upper and divergent nD partial moments at the same degree and target (→ [0,1]), otherwise return the raw moment. \code{norm} is ignored at \code{degree = 0}.
 #' @return Numeric; the n-dimensional divergent partial moment.
 #' @examples
@@ -195,7 +195,7 @@ DPM_nD <- function(data, target, degree = 0.0, norm = TRUE) {
 #' @return Returns:
 #' \itemize{
 #'  \item{\code{"Function"}} a data.frame (class \code{NNS.data.frame}) containing the observations and the resulting function of the variable.
-#'  \item{\code{"target.value"}} value from the \code{target} argument.
+#'  \item{\code{"target.value"}} value of the function at the \code{target} argument.
 #' }
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995, 2nd edition: \url{https://ovvo-financial.github.io/NNS/book/})
@@ -571,7 +571,7 @@ PM.matrix <- function(LPM_degree, UPM_degree, target, variable, pop_adj, norm = 
 #' @description
 #'   Computes the co‑lower partial moment (lower‑left quadrant 4) between two
 #'   equal‑length numeric vectors at any degree and target.
-#' @param degree_lpm numeric; degree for x ("degree_x"). degree = 0 gives frequency, degree = 1 gives area.
+#' @param degree_lpm numeric; degree for x ("degree_x"). degree = 0 gives frequency, degree = 1 gives area. At degree 0 an observation equal to its target is counted (\code{x <= target_x}, \code{y <= target_y}).
 #' @param x numeric vector of observations.
 #' @param y numeric vector of the same length as x.
 #' @param target_x numeric vector; thresholds for x. There is no default: pass \code{NULL} to use \code{mean(x)}.
@@ -600,7 +600,7 @@ Co.LPM <- function(degree_lpm, x, y, target_x, target_y, degree_y = NULL) {
 #' @description
 #'   Computes the co‑upper partial moment (upper‑right quadrant 1) between two
 #'   equal‑length numeric vectors at any degree and target.
-#' @param degree_upm numeric; degree for x ("degree_x"). degree = 0 gives frequency, degree = 1 gives area.
+#' @param degree_upm numeric; degree for x ("degree_x"). degree = 0 gives frequency, degree = 1 gives area. At degree 0 an observation equal to its target is not counted (\code{x > target_x}, \code{y > target_y}).
 #' @param x numeric vector of observations.
 #' @param y numeric vector of the same length as x.
 #' @param target_x numeric vector; thresholds for x. There is no default: pass \code{NULL} to use \code{mean(x)}.

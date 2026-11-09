@@ -7,7 +7,7 @@
 UPM.ratio(degree, target, variable)
 }
 \arguments{
-\item{degree}{numeric; degree = 0 gives frequency, degree = 1 gives area.}
+\item{degree}{numeric; degree = 0 gives frequency, degree = 1 gives area. At degree 0 an observation equal to the target is not counted (\code{variable > target}).}
 
 \item{target}{numeric vector; threshold(s). There is no default: pass \code{NULL} to use \code{mean(variable)}.}
 
