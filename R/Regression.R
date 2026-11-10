@@ -406,15 +406,24 @@
   }, numeric(1L))
 }
 
+# A vector with fewer than two distinct values, as length(unique(z)) < 2L but
+# without hashing every value.
+.nns_constant <- function(z) {
+  if (length(z) < 2L) return(TRUE)
+  if (anyNA(z)) return(length(unique(z)) < 2L)
+  all(z == z[1L])
+}
+
 .nns_reg_dependence <- function(x, y) {
-  if (length(unique(x)) < 2L || length(unique(y)) < 2L) return(0.1)
+  if (.nns_constant(x) || .nns_constant(y)) return(0.1)
   # The order heuristic needs a fine-scale signal-to-noise reading, which the
   # local measure gives; NNS.dep's multi-level measure would also count
   # dependence between coarse cells and over-partition noisy data (#95).
   d1 <- tryCatch(.nns_dep_local(x, y, asym = TRUE),
                  error = function(e) NA_real_)
   d2 <- tryCatch({
-    m <- cbind(NNS.rescale(x, 0, 1), NNS.rescale(x, 0, 1), NNS.rescale(y, 0, 1))
+    rescaled.x <- NNS.rescale(x, 0, 1)
+    m <- cbind(rescaled.x, rescaled.x, NNS.rescale(y, 0, 1), deparse.level = 0)
     reflected <- m
     reflected[, 3L] <- 1 - reflected[, 3L]
     # Model complexity should not depend on the sign chosen for the response.
