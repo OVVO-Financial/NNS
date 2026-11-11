@@ -374,9 +374,20 @@ List NNS_part_cpp(NumericVector x,
   List part = plain_data_frame(List::create(_["x"] = x, _["y"] = y, _["quadrant"] = q_cur,
                                             _["prior.quadrant"] = q_prior));
 
-  // Regression points: each group's values in row order, as the reducers
-  // that depend on it require.
+  // Regression points in label order (bytewise, as R's radix order), each
+  // from its group's values in row order, as the reducers that depend on it
+  // require.
   const int G = (int)rp_q.size();
+  {
+    std::vector<int> by_label(G), rank(G);
+    for (int g = 0; g < G; ++g) by_label[g] = g;
+    std::sort(by_label.begin(), by_label.end(),
+              [&](int a, int b) { return rp_q[a] < rp_q[b]; });
+    std::vector<std::string> sorted_q(G);
+    for (int r = 0; r < G; ++r) { rank[by_label[r]] = r; sorted_q[r] = rp_q[by_label[r]]; }
+    rp_q.swap(sorted_q);
+    for (int i = 0; i < n; ++i) group[i] = rank[group[i]];
+  }
   std::vector<int> g_start(G + 1, 0);
   for (int i = 0; i < n; ++i) ++g_start[group[i] + 1];
   for (int g = 0; g < G; ++g) g_start[g + 1] += g_start[g];

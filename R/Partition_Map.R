@@ -52,8 +52,9 @@ NNS.part <- function(x, y, Voronoi = FALSE, type = NULL,
   # Capture the original calls before x and y are coerced or subsetted.
   # Otherwise substitute(x) / substitute(y) deparse the entire numeric vectors
   # and place those values on the plot axes.
-  x.label <- paste(deparse(substitute(x)), collapse = " ")
-  y.label <- paste(deparse(substitute(y)), collapse = " ")
+  # They are only deparsed when a plot is drawn.
+  x.expr <- substitute(x)
+  y.expr <- substitute(y)
   
   if (inherits(x, c("tbl", "data.table")) || is.data.frame(x)) {
     if (NCOL(x) != 1L) {
@@ -211,8 +212,8 @@ NNS.part <- function(x, y, Voronoi = FALSE, type = NULL,
         x, y,
         col = "steelblue",
         cex.lab = 1.5,
-        xlab = x.label,
-        ylab = y.label,
+        xlab = paste(deparse(x.expr), collapse = " "),
+        ylab = paste(deparse(y.expr), collapse = " "),
         mgp = c(2.5, 0.5, 0)
       )
       graphics::points(RP$x, RP$y, pch = 15, lwd = 2, col = "red")
@@ -242,18 +243,18 @@ NNS.part <- function(x, y, Voronoi = FALSE, type = NULL,
     noise_reduction = noise.reduction
   )
   
-  PART <- as.data.frame(out$dt, stringsAsFactors = FALSE)
-  RP <- as.data.frame(out$regression.points, stringsAsFactors = FALSE)
-  RP <- RP[order(RP$quadrant, method = "radix"), , drop = FALSE]
-  rownames(RP) <- NULL
+  # Both are data frames already, and the regression points arrive in label
+  # order.
+  PART <- out$dt
+  RP <- out$regression.points
   
   if (Voronoi) {
     graphics::plot(
       x, y,
       col = "steelblue",
       cex.lab = 1.5,
-      xlab = x.label,
-      ylab = y.label,
+      xlab = paste(deparse(x.expr), collapse = " "),
+      ylab = paste(deparse(y.expr), collapse = " "),
       mgp = c(2.5, 0.5, 0)
     )
     if (is.null(type)) {
