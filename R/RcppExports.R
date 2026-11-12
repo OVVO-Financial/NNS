@@ -21,14 +21,6 @@ NNS_distance_cpp <- function(X, yhat, dest, k, use_class) {
     .Call(`_NNS_NNS_distance_cpp`, X, yhat, dest, k, use_class)
 }
 
-NNS_distance_path_cpp <- function(RPM, yhat, Xtest, kmax, is_class) {
-    .Call(`_NNS_NNS_distance_path_cpp`, RPM, yhat, Xtest, kmax, is_class)
-}
-
-NNS_distance_bulk_cpp <- function(RPM, yhat, Xtest, k, is_class) {
-    .Call(`_NNS_NNS_distance_bulk_cpp`, RPM, yhat, Xtest, k, is_class)
-}
-
 NNS_distance_path_parallel_cpp <- function(RPM, yhat, Xtest, kmax, is_class, nthreads = -1L) {
     .Call(`_NNS_NNS_distance_path_parallel_cpp`, RPM, yhat, Xtest, kmax, is_class, nthreads)
 }
@@ -109,14 +101,6 @@ fast_lm <- function(x, y) {
     .Call(`_NNS_fast_lm`, x, y)
 }
 
-fast_lm_mult <- function(x, y) {
-    .Call(`_NNS_fast_lm_mult`, x, y)
-}
-
-is.fcl <- function(x) {
-    .Call(`_NNS_is_fcl`, x)
-}
-
 is.discrete <- function(x) {
     .Call(`_NNS_is_discrete`, x)
 }
@@ -151,18 +135,6 @@ NNS.meboot.expand.sd <- function(x, ensemble, fiv = 5.0) {
 
 force.clt <- function(x, ensemble) {
     .Call(`_NNS_force_clt`, x, ensemble)
-}
-
-downSample <- function(x, y, list = FALSE, yname = "Class") {
-    .Call(`_NNS_downSample`, x, y, list, yname)
-}
-
-upSample <- function(x, y, list = FALSE, yname = "Class") {
-    .Call(`_NNS_upSample`, x, y, list, yname)
-}
-
-NNS_reg_points_cpp <- function(x_, y_, rpx_, rpy_, dependence, stn) {
-    .Call(`_NNS_NNS_reg_points_cpp`, x_, y_, rpx_, rpy_, dependence, stn)
 }
 
 CoLPM_nD_batch_RCPP <- function(data, targets, degree = 0.0, norm = TRUE) {
@@ -322,9 +294,5 @@ NNS_bin <- function(x, width, origin = 0, missinglast = FALSE) {
 
 stoch_superiority_cpp <- function(x, y) {
     .Call(`_NNS_stoch_superiority_cpp`, x, y)
-}
-
-NNS_mreg_reduce_cpp <- function(X, dv, ids, reducer, class_mode) {
-    .Call(`_NNS_NNS_mreg_reduce_cpp`, X, dv, ids, reducer, class_mode)
 }
 
