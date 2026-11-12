@@ -1,551 +1,618 @@
 # Dynamic Bandwidth Interpretation
 
-Chapter 18 introduced recursive mean splitting and gave a sufficient consistency result for a predictor-only cell-mean estimator. That result requires explicit assumptions about partition selection, shrinking cell diameter, growing occupancy, and the regression function. It does not establish consistency of every reducer, default order, interpolation rule, or multivariate prediction path in `NNS.reg`.
+Chapter 18 introduced recursive mean-split estimation as a nonparametric method built from local, benchmark-relative partitions. Its main theoretical conclusion was stronger than a claim about partitions chosen independently of the responses: **arithmetic cell means can be consistent even when the observations, including their responses, help select the partition**, provided the selected predictor-space neighborhoods localize, their local sample sizes grow, and the admissible partition class has controlled complexity. Chapter 18 also distinguished that cell-mean result from the additional interpolation and neighbor-weighting operations used by `NNS.reg`.
 
-A further interpretation now comes into focus:
+The next question is geometric: what controls the scale over which the estimator averages observations?
 
-**the partition cell itself plays the role of a bandwidth.**
+In conventional kernel regression, the answer is a bandwidth. In NNS, the answer begins with the recursively constructed predictor cell. Each split at a local center changes both the region represented by a regression point and the number of observations contributing to its response coordinate. The resulting local scale is **dynamic**: it depends on the realized predictor distribution, the requested partition order, the stopping controls, and, when order is selected from directional dependence, potentially on the responses as well.
 
-In classical nonparametric estimation, smoothing is controlled by a user-chosen parameter.
-In kernel regression this parameter is the bandwidth \(h\).
-In histogram methods it is the bin width.
-In splines it is the smoothing penalty.
+This chapter develops two related bandwidth concepts:
 
-These quantities determine the scale over which observations are averaged.
+1. **Partition bandwidth:** the geometric size of the predictor region represented by a local mean.
+2. **Prediction bandwidth:** the predictor neighborhood that actually contributes to a fitted value after interpolation or regression-point weighting.
 
-The recursive mean-split estimator also averages observations locally. But it does so without requiring the analyst to choose an external smoothing scale in the same way. Instead, the smoothing scale is induced by the partition:
+The two are identical for a simple cell-mean estimator, but need not coincide for the complete `NNS.reg` predictor. Keeping them separate gives an exact connection to consistency theory, the original NNS motivation, and the finite-sample bias-variance tradeoff.
 
-- large cells produce coarse smoothing,
-- small cells produce fine smoothing.
-
-This chapter interprets the partition diameter as a **dynamic, stochastic, location-dependent bandwidth**, and uses that interpretation to connect recursive mean-split estimation to the broader theory of nonparametric smoothing. The sufficient conditions from Chapter 18 can be read through this bandwidth lens: shrinking neighborhoods control localization error while growing local sample sizes control averaging noise.
+The central lesson is not that NNS dispenses with smoothing. Rather, **NNS makes smoothing implicit in its data-driven geometry**. Increasing resolution without limit can preserve observation noise; keeping resolution bounded can preserve approximation bias. A consistency-compatible NNS sequence refines the geometry while retaining increasingly reliable local estimates.
 
 ---
 
 ## Bandwidth in Classical Nonparametric Estimation
 
-The notion of bandwidth is central to classical nonparametric methods.
-
-In kernel regression, the Nadaraya–Watson estimator takes the form
+Suppose independent observations obey
 
 \[
-\hat f_h(x)
+Y_i=f(X_i)+\varepsilon_i,
+\qquad E[\varepsilon_i\mid X_i]=0,
+\]
+
+where the regression target is
+
+\[
+f(x)=E[Y\mid X=x].
+\]
+
+The Nadaraya-Watson kernel estimator is
+
+\[
+\hat f_h(x)=
+\frac{\sum_{i=1}^n K\!\left((x-X_i)/h\right)Y_i}
+{\sum_{i=1}^n K\!\left((x-X_i)/h\right)},
+\]
+
+when the denominator is positive. The kernel determines relative weighting and the bandwidth \(h>0\) determines how far the weights reach. A small bandwidth emphasizes nearby observations and gives a flexible, potentially noisy estimate; a large bandwidth averages more observations, usually reducing sampling variation at the cost of coarser approximation.
+
+Histogram and partition estimators use a similar principle, but select observations by membership in cells. Local polynomial methods additionally fit a low-order polynomial to the weighted neighborhood. Splines can control smoothness through basis resolution and/or a smoothing penalty. Not every classical nonparametric method uses one global numeric bandwidth, and adaptive or variable-bandwidth kernels are also possible.
+
+The shared problem is the balance between **localization error** and **sampling error**. Under standard smoothness and design assumptions, a small neighborhood reduces the former, while sufficient observations in that neighborhood reduce the latter. A bandwidth must therefore be interpreted together with the number and arrangement of observations it retains.
+
+For a fixed-dimensional predictor, the familiar heuristic is
+
+\[
+h_n\longrightarrow0,
+\qquad nh_n^d\longrightarrow\infty,
+\]
+
+where \(d\) is dimension and the second condition assumes a locally regular predictor density and a neighborhood volume of order \(h_n^d\). It is a heuristic, not a theorem for every partition rule or distribution. The NNS analogue replaces the prespecified scale \(h_n\) with the *observed scale of an adaptive cell* and replaces \(nh_n^d\) with its realized occupancy.
+
+---
+
+## From Partial-Moment Splits to Local Neighborhoods
+
+### The mean benchmark
+
+Let \(R\) be a region occupied by observations with indices \(I_R\). With arithmetic-mean reduction, define
+
+\[
+\bar X_R=\frac{1}{|I_R|}\sum_{i\in I_R}X_i,
+\qquad
+\bar Y_R=\frac{1}{|I_R|}\sum_{i\in I_R}Y_i.
+\]
+
+For one predictor, the benchmark \(\bar X_R\) has the first-order partial-moment balance
+
+\[
+E_n[(X-\bar X_R)_+\mid R]
 =
-\frac{\sum_{i=1}^n K\!\left(\frac{x-X_i}{h}\right)Y_i}
-{\sum_{i=1}^n K\!\left(\frac{x-X_i}{h}\right)}.
+E_n[(\bar X_R-X)_+\mid R].
 \]
 
-Here:
+Thus a mean split is not an arbitrary geometric cut. It is located at the local point where upper and lower first-order deviations balance. Repeating the split within occupied daughter regions defines a nested, benchmark-relative partition. This is the directional interpretation developed throughout the NNS framework and illustrated in Chapter 18.
 
-- \(K(\cdot)\) is a kernel function,
-- \(h>0\) is the bandwidth.
+In `NNS.part(..., type = "XONLY", noise.reduction = "mean")`, the region is subdivided using the predictor center alone. In joint `NNS.part` mode, both predictor and response centers define four partial-moment quadrants; the resulting joint cells describe observed \((X,Y)\) geometry rather than intervals identifiable from a new \(x\) without its unknown response.
 
-The bandwidth determines how quickly weights decay as observations move away from \(x\).
+The current univariate numeric-order `NNS.reg` implementation constructs predictor-only regression points. The regression-point response coordinates are still estimated from observed responses, and `order = NULL` chooses a bounded order using dependence information. Consequently, even when the split axis is only \(X\), **selection of the depth can be response-adaptive**. Chapter 18 explains why this is not, by itself, a contradiction of consistency.
 
-If \(h\) is small, only very nearby observations influence the estimate.
-If \(h\) is large, distant observations receive substantial weight.
+### The cell-mean building block
 
-Thus bandwidth governs the bias–variance tradeoff:
+Let \(A_n(x)\) denote a predictor-space cell containing a query \(x\). Its occupancy and local arithmetic response mean are
 
-- **small bandwidth** \(\rightarrow\) low bias, high variance,
-- **large bandwidth** \(\rightarrow\) high bias, low variance.
+\[
+N_n(x)=\sum_{i=1}^n\mathbf1\{X_i\in A_n(x)\},
+\qquad
+\hat f_n^{\mathrm{cell}}(x)
+=\frac{1}{N_n(x)}\sum_{i:X_i\in A_n(x)}Y_i,
+\]
 
-The same logic appears in histogram regression and fixed-grid estimators.
-There the analogue of \(h\) is the cell width.
+for a nonempty cell. The estimator has the exact weight representation
 
-Although classical methods differ in form, they share a common structure:
+\[
+\hat f_n^{\mathrm{cell}}(x)
+=\sum_{i=1}^n w_{ni}^{\mathrm{cell}}(x)Y_i,
+\qquad
+w_{ni}^{\mathrm{cell}}(x)
+=\frac{\mathbf1\{X_i\in A_n(x)\}}{N_n(x)}.
+\]
 
-**they smooth by averaging observations over neighborhoods whose size is controlled by a tuning parameter.**
+These weights are uniform inside the cell and zero outside. Unlike a symmetric kernel window, the cell need not be centered at \(x\) or have the same width on either side. Its shape is created by the recursive means, and its occupancy reflects the sample's local predictor mass.
 
-This parameter is usually chosen by cross-validation, plug-in rules, or asymptotic heuristics.
-
-That choice is often difficult, unstable, and highly consequential.
+This formula describes **the cell-mean estimator**, not every value returned by `NNS.reg`. The package can connect regression-point means by straight segments, smooth them using a spline when requested, and combine multivariate RPM rows through distance-based weighting. We will describe those additional operations separately.
 
 ---
 
-## Local Averaging in the Recursive Mean-Split Estimator
+## The Stochastic Partition Bandwidth
 
-Recall from Chapter 18 that the recursive mean-split estimator has the form
+### Geometric cell diameter
 
-\[
-\hat f_n(x)
-=
-\frac{1}{N_{n,x}}
-\sum_{i:X_i\in A_n(x)} Y_i,
-\]
-
-where
-
-- \(A_n(x)\) is the terminal cell containing \(x\),
-- \(N_{n,x}\) is the number of observations in that cell.
-
-This is the **local-average building block** with the mean reducer. The full NNS predictor can additionally use response-dependent partition selection, alternative centers, interpolation, and nearest-neighbor weights.
-
-In kernel regression, the neighborhood is determined by a distance-weighting rule around \(x\).
-In recursive mean-split estimation, the neighborhood is the partition cell \(A_n(x)\).
-
-So the estimator already has the essential structure of a smoother:
-
-1. identify a local region around \(x\),
-2. average the responses inside that region.
-
-The smoothing scale is therefore determined by the **size of the cell containing \(x\)**.
-
-This suggests the natural bandwidth analogue
+For a bounded interval or rectangular predictor cell, a natural bandwidth analogue is
 
 \[
-h_n(x) := \operatorname{diam}(A_n(x)),
+h_n^{\mathrm{part}}(x)=\operatorname{diam}(A_n(x)),
 \]
 
-where \(\operatorname{diam}(A_n(x))\) denotes the diameter of the cell.
+with diameter measured in the relevant predictor norm. In one dimension, the diameter is simply the width of the interval. For an axis-aligned rectangle in \(d\) dimensions, the Euclidean diameter is
 
-This quantity depends on
+\[
+h_n^{\mathrm{part}}(x)
+=\left(\sum_{j=1}^d h_{nj}(x)^2\right)^{1/2},
+\]
 
-- the sample,
-- the recursive splitting path,
-- the predictor location \(x\),
-- the stopping rule.
+where \(h_{nj}(x)\) is its width along coordinate \(j\).
 
-It is therefore **data-adaptive and location-specific**.
+The realized widths are:
+
+- **stochastic**, because the cuts use sample-dependent centers;
+- **location-specific**, because different cells can have different widths;
+- **endogenous to the estimator**, because order, occupancy, reducer and any selected tuning rule determine where the cuts occur.
+
+A fixed order does not generally impose a common cell width. Two cells at the same depth may have different sizes and very different occupancies. This makes recursive mean splitting unlike a uniform, prespecified grid, though both are partition estimators.
+
+### The support and boundary qualification
+
+There is an important distinction between a theoretical cell and its observed data span. If the first split occurs at \(c\), the raw cells \(( -\infty,c]\) and \((c,\infty)\) have infinite diameter when regarded as subsets of the full real line. That is not a meaningful local bandwidth for a bounded-support regression problem.
+
+On a compact design domain \(S\), use the **support-restricted cell** \(A_n(x)\cap S\) when defining geometric diameter. Alternatively, at a fixed query define the observed predictor reach
+
+\[
+r_n^{\mathrm{cell}}(x)
+=\max_{i:X_i\in A_n(x)}\|X_i-x\|,
+\]
+
+for nonempty cells. This quantity measures the maximum observed distance from the query to observations used by the cell mean; it can be defined even if the formal outer cell is unbounded. A shrinking *theoretical* diameter implies shrinking observed reach, but the converse need not hold without assumptions on the predictor support and sample coverage.
+
+The observed within-cell span, for example \(\max_{i\in A}X_i-\min_{i\in A}X_i\), is a useful diagnostic, but is not necessarily the mathematical diameter of the interval assigned by the partition. The distinction is especially relevant near the boundary of the design domain.
+
+### Adaptive to what?
+
+At a fixed order, predictor-only arithmetic-mean splits respond to the distribution of \(X\). If the response changes while the predictor sample remains the same, those particular split boundaries do not change. They are therefore **density- or geometry-adaptive**, not automatically local-curvature-adaptive.
+
+Response information enters through other mechanisms: joint \((X,Y)\) partitions, response-dependent choice of order, and final regression-point combination. In `NNS.reg`, a dependence-selected order is a dimension-specific resolution choice, not a separate local optimization of curvature at every \(x\). Keeping these sources of adaptivity distinct avoids attributing a property to the geometric split that actually belongs to tuning or prediction.
+
+The bandwidth interpretation should accordingly be read as: the **realized region width** is data-driven, not that its width is automatically optimal for the unknown regression function.
 
 ---
 
-## Partition Diameter as Stochastic Bandwidth
+## Bandwidth, Occupancy, and Conditional-Mean Consistency
 
-The interpretation
+Chapter 18 established an elementary pointwise result for response-adaptive, axis-aligned predictor cells. Here the same result becomes a statement about stochastic bandwidth.
 
-\[
-h_n(x) := \operatorname{diam}(A_n(x))
-\]
-
-makes the connection precise.
-
-The recursive mean-split estimator can be viewed as a **local-constant smoother with random bandwidth \(h_n(x)\)**.
-
-This bandwidth differs from the classical kernel bandwidth in three important ways.
-
-### It is stochastic
-
-The cells are determined by the observed sample, so \(h_n(x)\) is random.
-
-### It is location-dependent
-
-Different regions of the predictor space can have different cell sizes:
+Assume independent identically distributed observations \((X_i,Y_i)\), a fixed predictor dimension \(d\), bounded responses \(|Y_i|\le M\), and a version of \(f(x)=E[Y\mid X=x]\) continuous at the query \(x\). Let \(A_n(x)\) be an axis-aligned rectangular predictor cell selected by a measurable rule that may use the **full sample, including the responses**. The sufficient conditions are
 
 \[
-h_n(x_1) \neq h_n(x_2)
+\boxed{
+ r_n^{\mathrm{cell}}(x)\xrightarrow{P}0,
+ \qquad
+ \frac{N_n(x)}{\log n}\xrightarrow{P}\infty.
+}
 \]
 
-in general.
+One may replace observed reach by a shrinking support-restricted diameter. Under these conditions, the arithmetic cell mean satisfies
 
-### It is endogenous
+\[
+\boxed{
+E\bigl[(\hat f_n^{\mathrm{cell}}(x)-f(x))^2\bigr]
+\longrightarrow0.
+}
+\]
 
-The realized bandwidth emerges from the recursive splitting geometry. Order, occupancy, reducer, and any data-driven tuning rule still determine that geometry, so bandwidth is implicit rather than free of tuning decisions.
+The point is not that choosing cells with \(Y\) is harmless in every circumstance. Rather, selection over **all rectangular cells** has sufficiently controlled complexity that one can bound the random response-average error *simultaneously* over those candidate cells. The selected cell then inherits that uniform bound, even if the selection used the responses.
 
-This is the key conceptual shift.
+### Why response selection does not defeat this result
 
-Classical bandwidth methods ask:
+Write \(\varepsilon_i=Y_i-f(X_i)\). Since \(|Y_i|\le M\), we have \(|\varepsilon_i|\le 2M\) and \(E[\varepsilon_i\mid X_i]=0\). For any nonempty predictor cell,
 
-**What smoothing scale should we choose?**
+\[
+\hat f_n^{\mathrm{cell}}(x)-f(x)
+=\underbrace{\frac1{N_n(x)}\sum_{i:X_i\in A_n(x)}\varepsilon_i}_{\text{sample noise}}
++\underbrace{\frac1{N_n(x)}\sum_{i:X_i\in A_n(x)}\{f(X_i)-f(x)\}}_{\text{localization error}}.
+\]
 
-The recursive mean-split framework instead asks:
+Let \(\omega_{f,x}(r)=\sup_{\|z-x\|\le r}|f(z)-f(x)|\). The second term is bounded in magnitude by \(\omega_{f,x}(r_n^{\mathrm{cell}}(x))\), which tends to zero by continuity and shrinking reach.
 
-**What smoothing scale does the data imply through repeated mean-based partitioning?**
+For the first term, conditional on the predictors, the number of distinct sample subsets selected by axis-aligned rectangles in fixed dimension is at most \((n+1)^{2d}\). Hoeffding's inequality and a union bound therefore yield, for any \(m\ge1\) and \(t>0\),
 
-The answer is encoded in the partition diameter.
+\[
+\Pr\!\left(
+\sup_{\substack{A\text{ rectangular}\\N_n(A)\ge m}}
+\left|\frac1{N_n(A)}\sum_{i:X_i\in A}\varepsilon_i\right|>t
+\right)
+\le
+2(n+1)^{2d}\exp\!\left(-\frac{m t^2}{8M^2}\right).
+\]
+
+This bound concerns the supremum over candidate rectangular subsets, *before* the selected partition is known. If the chosen cell's occupancy grows faster than \(\log n\), the right side tends to zero. Since both the cell average and \(f(x)\) are bounded, convergence in probability also gives mean-square convergence.
+
+This argument establishes the cell-mean building block. It does not require the split positions to be preselected, independent of \(Y\), or symmetric about \(x\). It does require fixed dimension, appropriate localization and occupancy, and the specified rectangular candidate class. The broader integrated theory of Nobel (1996) uses partition complexity and shrinking cells without requiring the same pointwise \(N_n/\log n\) condition in every selected cell.
+
+### A resolution sequence compatible with consistency
+
+For a regular one-dimensional design, suppose recursive splits remain sufficiently balanced that cells at depth \(O_n\) have widths of order \(2^{-O_n}\) and occupancies of order \(n2^{-O_n}\). Then a sufficient *illustrative scaling regime* is
+
+\[
+O_n\longrightarrow\infty,
+\qquad
+\frac{n2^{-O_n}}{\log n}\longrightarrow\infty.
+\]
+
+For example, a depth sequence of order \(O_n\asymp \tfrac12\log_2 n\) gives widths of order \(n^{-1/2}\) and local counts of order \(n^{1/2}\), subject to those balancing assumptions. That example establishes **compatibility** between refinement and noise averaging. It does not prove that the actual iterative-mean recursion always yields balanced daughters; ties, atoms, uneven predictor distributions, depth caps, and stopping rules must be examined.
+
+More abstractly, if \(K_n\) cells of comparable probability are produced, the heuristic requirements are
+
+\[
+K_n\longrightarrow\infty,
+\qquad
+\frac{K_n\log n}{n}\longrightarrow0.
+\]
+
+Cell count alone is not enough: local geometry and actual occupancy are the quantities used in the theorem.
 
 ---
 
-## Adaptive Smoothing Mechanisms
+## Two Bandwidths in the Complete NNS Predictor
 
-The induced bandwidth changes with location because local predictor means and occupied ranges differ across the sample. At a fixed order, predictor-only boundaries depend on \(X\), not on \(Y\). Replacing a flat response by a sharply curved one while holding \(X\) and the order fixed leaves those boundaries unchanged.
+A cell mean is piecewise constant. Univariate `NNS.reg` ordinarily returns a piecewise-linear interpolation between selected regression points. This creates a second, **prediction-level** neighborhood.
 
-Consequently, predictor-only mean splitting is **adaptive to predictor geometry**, not a local curvature detector. The same width can be adequate on a flat portion of \(f\) and produce substantial approximation error near a sharp change. More refinement may help, but the splitting rule does not itself identify where the approximation error is largest.
+### Linear interpolation of local response means
 
-Joint partitioning uses both coordinates and therefore responds to the observed joint geometry. In regression, dependence-selected order can also assign different resolution to different regressors. These are distinct mechanisms: response-sensitive joint regions, dimension-specific order, and location-dependent predictor widths should not be conflated.
+Suppose two regression-point centers bracket an interior query \(x\):
 
-This distinction makes the bandwidth interpretation useful for diagnostics. Inspect both the realized cell widths and counts, and evaluate predictive error rather than assuming that every narrow cell corresponds to a region of high signal curvature.
+\[
+c_-\le x\le c_+,
+\qquad
+r_- = \frac1{N_-}\sum_{i:X_i\in B_-}Y_i,
+\qquad
+r_+ = \frac1{N_+}\sum_{i:X_i\in B_+}Y_i,
+\]
+
+where \(B_-\) and \(B_+\) are the predictor intervals represented by those centers. The linear interpolation weights are
+
+\[
+\lambda_- = \frac{c_+-x}{c_+-c_-},
+\qquad
+\lambda_+ = \frac{x-c_-}{c_+-c_-},
+\qquad \lambda_-+\lambda_+=1.
+\]
+
+At an interior query, both weights lie in \([0,1]\), and the interpolated estimate is
+
+\[
+\hat f_n^{\mathrm{lin}}(x)
+=\lambda_-r_-+\lambda_+r_+.
+\]
+
+Thus linear interpolation **does not create a new response measurement**. It combines two already estimated response centers. Expressed directly in observation weights,
+
+\[
+\hat f_n^{\mathrm{lin}}(x)=\sum_iw_{ni}^{\mathrm{lin}}(x)Y_i,
+\quad
+w_{ni}^{\mathrm{lin}}(x)
+=\frac{\lambda_-}{N_-}\mathbf1\{X_i\in B_-\}
++\frac{\lambda_+}{N_+}\mathbf1\{X_i\in B_+\}.
+\]
+
+If the two cells are disjoint, these weights are nonnegative and sum to one. The resulting predictor is still a local average, but its **effective neighborhood is the union** of the contributing cells rather than solely the one containing \(x\).
+
+Define its prediction reach by
+
+\[
+r_n^{\mathrm{pred}}(x)=
+\max_{i:w_{ni}^{\mathrm{lin}}(x)>0}\|X_i-x\|.
+\]
+
+A smaller diameter for one cell need not improve prediction if interpolation gives appreciable weight to a response center whose underlying observations remain far from \(x\). Conversely, if both contributing cells shrink around \(x\), both response means concentrate around \(f(x)\), and convex interpolation preserves that convergence.
+
+Under the assumptions of Chapter 18, the following is sufficient: with probability approaching one, the two bracketing regression points represent intervals whose observed reaches from \(x\) vanish and whose occupancies divided by \(\log n\) diverge. Uniform rectangular concentration makes each response mean consistent; the convex combination is then also consistent. This is the connection between **partition bandwidth** and **prediction bandwidth** needed for the complete univariate mean-reducer predictor.
+
+### Effective sample size of interpolation
+
+When the cell means use independent noise conditional on an \(X\)-chosen partition, the variance of an interpolated estimate with disjoint constituent cells is controlled by
+
+\[
+\operatorname{Var}(\hat f_n^{\mathrm{lin}}(x)\mid X)
+\le\sigma^2\left(\frac{\lambda_-^2}{N_-}
++\frac{\lambda_+^2}{N_+}\right)
+\]
+
+if the conditional noise variances are bounded by \(\sigma^2\). This suggests the diagnostic effective sample size
+
+\[
+n_{\mathrm{eff}}(x)
+=\left(\frac{\lambda_-^2}{N_-}
++\frac{\lambda_+^2}{N_+}\right)^{-1}.
+\]
+
+For response-selected cells, the displayed conditional variance calculation must **not** be applied as though the selected groups were independent of their own noise. The weight formula remains an algebraic description, but uniform concentration over the eligible cell family is the rigorous tool used above. Effective sample size is still informative as a measure of dispersion of prediction weights; it is not a substitute for the selection-aware proof.
+
+### Endpoints, extrapolation, and alternative smoothing
+
+The current univariate `NNS.reg` code adds regression points at the minimum and maximum observed predictor values. Their response coordinates use the selected reducer on observations sharing the endpoint predictor. For distinct continuous predictors these endpoint groups are usually singletons. They are useful interpolation anchors, but provide no averaging-based noise suppression on their own.
+
+At a fixed interior query, sufficiently local, well-supported bracketing points may eventually make the endpoint anchors irrelevant. At a boundary query, and certainly outside the training predictor range, a theorem about interior convex interpolation does not automatically apply. The implementation extends the first or last line segment to extrapolate; outside the bracketing interval, linear extrapolation coefficients need not be nonnegative and can magnify noise. An optional smoothing spline (`smooth = TRUE`) also has its own weight and regularity properties, and requires separate analysis.
+
+Consequently, the statement "NNS has a dynamic bandwidth" is accurate only after specifying **which stage** of the estimator is meant. The partition creates the local representative scale; the final prediction rule determines the actual influence of those representatives at a query.
 
 ---
 
-## Consistency Conditions Re-Read Through the Bandwidth Lens
+## Why Neither Extreme Guarantees Statistical Consistency
 
-Under the other assumptions of the predictor-only mean-reducer proposition in Chapter 18, two sufficient localization conditions are:
+The 2018 Vinod-Viole paper, *Nonparametric Regression Using Clusters* (published online in 2017), stresses a genuine geometric feature: as order increases, NNS can represent increasingly fine structure and, in a sufficiently refined limit, connect all observed points. Its discussion also cautions that excessive order can be undesirable in noisy data. The following examples explain both observations mathematically.
 
-\[
-\operatorname{diam}(A_n(x)) \to 0
-\qquad\text{and}\qquad
-N_{n,x}\to\infty.
-\]
+### Bounded order: an approximation floor
 
-Under the bandwidth interpretation, these become directly analogous to the standard kernel consistency conditions
+The current automatic `NNS.reg` order is dependence-selected but bounded above by 10. For a numeric X-only order \(O\), the partitioner supplies at most \(2^{O-1}\) regression-point centers, and the univariate regression-point builder adds the two observed predictor endpoints. At \(O\le10\), the fitted curve therefore has at most 513 linear pieces.
+
+Consider noiseless data from \(f(x)=x^2\) with a predictor distributed uniformly on \([0,1]\). Regardless of where those pieces are placed, the best integrated squared approximation error of an affine function on an interval of length \(\ell\) is \(\ell^5/180\). By convexity, the best possible piecewise-affine approximation with at most \(m\) pieces has integrated squared error at least
 
 \[
-h_n(x)\to 0
-\qquad\text{and}\qquad
-n_{\text{eff}}(x)\to\infty.
+\frac{1}{180m^4}.
 \]
 
-The first condition says the local neighborhood must shrink, so that the estimator becomes localized and bias vanishes.
-
-The second says the number of observations used in the local average must grow, so that variance vanishes.
-
-This is the same bias–variance logic used in classical nonparametric smoothing. It is not an automatic transfer of every kernel theorem: kernel weights, partition selection, response-dependent tuning, and additional prediction stages have their own conditions. In particular, fixed occupancy cutoffs do not make local sample sizes diverge, and a fixed or bounded maximum order need not make the bandwidth shrink.
-
-In this sense, Chapter 18 can be re-read entirely through the bandwidth lens:
-
-- shrinking cell diameter = shrinking bandwidth,
-- growing occupancy = growing effective local sample size.
-
-The bias–variance decomposition becomes
+With \(m\le513\), that gives
 
 \[
-\hat f_n(x)-f(x)
-=
-\bigl(\hat f_n(x)-\bar f_n(x)\bigr)
-+
-\bigl(\bar f_n(x)-f(x)\bigr),
+\int_0^1\{\hat f_n(x)-x^2\}^2\,dx
+\ge\frac{1}{180(513)^4}>0.
 \]
 
-where \(\bar f_n(x)\) is the average of \(f(X_i)\) over the nonempty cell. For predictor-only partition selection, the conditional variance term is controlled by occupancy and the bias term by \(h_n(x)\) together with regularity of \(f\). Selecting the same cell using its response noise requires additional analysis.
+The bound is extremely small, but strictly positive independent of sample size. An adaptive *placement* of finitely many line segments cannot guarantee asymptotically zero error for every curved regression function. The issue is not that the NNS architecture lacks increasing-resolution capability; it is that **the bounded default order does not implement an order sequence growing without bound**.
+
+### Maximum order: a noise floor
+
+At the opposite extreme, consider evenly spaced predictors \(X_i=i/(n+1)\), even \(n\), and independent responses \(Y_i=\varepsilon_i\) with mean zero and variance \(\sigma^2>0\). The true regression function is \(f(x)=0\). With mean reduction and `order = "max"`, each distinct predictor is its own regression point.
+
+At \(x=1/2\), midway between two observations, the linear interpolant is
+
+\[
+\hat f_n(1/2)=\frac{\varepsilon_{n/2}+\varepsilon_{n/2+1}}2,
+\]
+
+and hence
+
+\[
+E[(\hat f_n(1/2)-f(1/2))^2]=\frac{\sigma^2}{2},
+\]
+
+for every even \(n\). The fitted values interpolate the training responses perfectly, yet the error at a new interior point does not vanish. In bandwidth language, the prediction neighborhood shrinks, but its effective sample size stays at two.
+
+### The positive noiseless interpolation limit
+
+The maximum-order construction does have a genuine positive approximation theorem. Suppose \(f\) is continuous on a compact interval and we observe its noiseless values on increasingly dense predictor meshes. When the maximal gap between successive predictors tends to zero, the linear interpolant through those observations converges uniformly to \(f\).
+
+Indeed, if \(\delta_n\) is the largest observed gap and \(\omega_f\) is the modulus of continuity of \(f\), then on the range covered by the observed endpoints,
+
+\[
+\sup_x|\hat f_n^{\mathrm{max}}(x)-f(x)|
+\le\omega_f(\delta_n)\longrightarrow0.
+\]
+
+This recovers the structural intuition of the 2018 paper: increasingly fine line segments approximate a continuous *noiseless* function. It must not be confused with statistical recovery of \(f(x)=E[Y\mid X=x]\) in the presence of observation noise. For noisy data, consistency requires a sequence that shrinks neighborhoods **without reducing the effective number of observations to a fixed small value**.
 
 ---
 
-## Local Averaging Interpretation
+## Arithmetic Means, Gravity, and the Target of Estimation
 
-The bandwidth interpretation also clarifies what the estimator is doing pointwise.
-
-For any \(x\), the recursive mean-split estimator averages over the region \(A_n(x)\):
+The preceding consistency statements concern the conditional arithmetic mean
 
 \[
-\hat f_n(x)
-=
-E_n[Y\mid X\in A_n(x)],
+f(x)=E[Y\mid X=x].
 \]
 
-where \(E_n\) denotes the empirical average.
+Under `noise.reduction = "mean"`, each regression point's response coordinate is an arithmetic average of the observations assigned to its group. This makes the connection to ordinary conditional-mean regression exact at the local-representative level. It is the appropriate setting for the theorems in Chapter 18 and the bandwidth analysis above.
 
-Thus \(\hat f_n(x)\) is the empirical conditional mean over a neighborhood whose diameter is \(h_n(x)\).
+The current package default is different: `noise.reduction = "off"` uses `NNS.gravity`, a blend of mean, median, quartile midpoint and a histogram-based modal component. Gravity can be a valuable alternative central tendency, but generally targets a different functional of a conditional response distribution.
 
-This is exactly analogous to a local averaging estimator with adaptive window width.
+To see why reducer choice matters independently of bandwidth, suppose \(Y\) is Bernoulli with \(P(Y=1\mid X=x)=0.2\), constant in \(x\). Its conditional mean is 0.2. In sufficiently large local samples, the median, modal component, and quartile midpoint approach 0 while the mean approaches 0.2. Gravity therefore approaches 0.05 in this example, rather than 0.2. Even perfect localization and growing occupancy need not make the default gravity response center a consistent estimator of the conditional *arithmetic mean*.
 
-The distinction is that the "window" need not be symmetric, fixed-width, or Euclidean in the simplistic kernel sense.
-It is determined by recursive partition membership.
-
-This yields two useful perspectives.
-
-### Piecewise-constant view
-
-The estimator is constant within each terminal cell.
-So the partition defines a locally constant regression surface.
-
-### Piecewise-linear view
-
-As Chapter 18 emphasized, connecting regression points by line segments yields a piecewise-linear representation.
-This can be interpreted as smoothing the cellwise local averages into a continuous interpolation while preserving the same adaptive partition geometry.
-
-Cell diameter describes the localization of each representative. Interpolation and averaging across representatives can add a wider effective prediction neighborhood, so it does not fully describe the final smoother by itself.
+This observation does not make gravity an invalid estimator. It means that any consistency assertion must **name the estimand**. Median, mode, gravity, and arithmetic mean are not interchangeable for asymmetric conditional distributions. Similarly, `type = "CLASS"` is a classification workflow and should not be treated as the arithmetic mean regression path merely because its responses may be coded numerically. When demonstrating numeric regression for a two-valued response, use `type = "REG"` explicitly.
 
 ---
 
-## Comparison with Kernel Regression
+## Multivariate Dynamic Bandwidth and the RPM
 
-Kernel regression and recursive mean-split estimation share an essential principle:
+For predictors \(X_i\in\mathbb R^d\), NNS computes per-regressor partition representatives and forms joint group memberships. The multivariate implementation uses the resulting predictor-coordinate representative locations to form interval IDs, then combines the IDs across dimensions. Thus the **actual RPM group cells**, rather than an assumed copy of every standalone `NNS.part` terminal quadrant, are the appropriate cells to analyze when assessing the complete multivariate regression procedure.
 
-**both estimate \(f(x)\) by averaging responses from a local neighborhood around \(x\).**
+### Coordinatewise and joint scale
 
-But they differ in how that neighborhood is defined.
+Write \(A_n^{(j)}(x_j)\) for the interval associated with predictor coordinate \(j\) and a given RPM group. The intersected group cell is a rectangle of the form
+
+\[
+A_n^{\mathrm{joint}}(x)
+=\prod_{j=1}^d A_n^{(j)}(x_j),
+\]
+
+with coordinatewise widths \(h_{nj}(x_j)\). When all coordinate widths tend to zero, the Euclidean diameter of this rectangle also tends to zero. But **local joint occupancy is not determined by the marginal widths alone**. Correlated predictors, thin supports and sparse intersections can produce few or no observations in many product cells.
+
+If the per-regressor label counts are \(K_1,\ldots,K_d\), the number of occupied RPM groups satisfies
+
+\[
+K_{\mathrm{RPM}}\le
+\min\left(n,\prod_{j=1}^d K_j\right).
+\]
+
+The product, rather than a sum, matters. Even modest refinement in every coordinate can create many joint groups. The method simplifies the construction of the marginal partitions, but does not remove the need for sufficient observations in the occupied intersections.
+
+### A third scale: neighbor reach
+
+The RPM stores representative predictor coordinates and response centers. Multivariate prediction then selects and weights nearby rows according to the configured distance and `n.best` rules. As a result, a query may receive influence from **multiple group cells**.
+
+For a nonnegative, normalized observation-weight representation \(\hat f_n(x)=\sum_iw_{ni}(x)Y_i\), a useful locality diagnostic is the nonlocal weight
+
+\[
+W_n(x,\delta)=\sum_{i=1}^n
+w_{ni}(x)\mathbf1\{\|X_i-x\|>\delta\}.
+\]
+
+The condition \(W_n(x,\delta)\to0\) for every fixed \(\delta>0\) expresses local concentration of prediction weight. Unlike the largest nonzero-weight distance, it can still vanish when distant observations receive weights tending to zero. Effective sample size can be recorded as
+
+\[
+n_{\mathrm{eff}}(x)=\frac1{\sum_iw_{ni}(x)^2},
+\]
+
+when the observation weights are nonnegative and sum to one. Neither formula by itself handles every implementation detail; for example, the k=1 exact-nearest-distance-tie path uses gravity to combine tied RPM responses, and optional dimension reduction changes the metric space in which locality is measured. Those paths require their own target- and geometry-aware checks.
+
+A sufficient route to multivariate mean consistency is for RPM rows carrying nonnegligible prediction weight to represent uniformly local rectangular groups with sufficiently increasing occupancies, while the final aggregation remains stable. Chapter 18 states this as a conditional sufficient principle. A generic neighbor-count default, fixed dimension by itself, or high training fit does not establish it automatically.
+
+### Dimensionality and rates
+
+In a regular \(d\)-dimensional design, halving the width of every coordinate reduces the volume of a rectangular neighborhood by a factor near \(2^d\). Thus the number of observations available to estimate a local response mean can fall quickly as dimension increases. This is the ordinary dimensionality cost of local estimation. NNS can adapt to occupied geometry, avoid spending representatives on empty intersections, and compress groups when multiple observations share them. These advantages do not prove a dimension-free convergence rate or universal avoidance of the curse of dimensionality.
+
+The practical diagnostics are the per-coordinate widths, actual joint-group counts, occupied RPM rows, and neighbor-weight distribution at the prediction point.
+
+---
+
+## Comparison with Other Partition and Smoothing Methods
 
 ### Kernel regression
 
-Neighborhood influence is determined by weights
+A kernel method supplies weights through distances to the query and a selected bandwidth; a cell-mean NNS partition supplies uniform weights over a data-generated cell. Both can be local smoothers, and both can be tuned too coarsely or too finely. Some kernels have compact support; others assign positive weight at every distance. Adaptive bandwidth and cross-validation are available to kernel methods too, so the distinction is **how the neighborhood is constructed**, not that only NNS can adapt.
 
-\[
-K\!\left(\frac{x-X_i}{h}\right),
-\]
+For `NNS.reg`, interpolation changes the weighting beyond a pure cell indicator. When comparing methods, the meaningful comparison is between the complete prediction weights and their effective local support, not just between a kernel's global bandwidth and the width of one NNS cell.
 
-with a user-specified bandwidth \(h\).
+### Fixed-grid and partitioning-based series estimators
 
-### Recursive mean-split estimation
+A fixed grid chooses boundaries without looking at the observed predictor distribution. Recursive mean splitting instead places cuts at local centers of occupied regions. Both may use piecewise-constant or piecewise-polynomial approximations, and both require complexity and localization conditions for consistency.
 
-Neighborhood influence is determined by membership in the terminal cell \(A_n(x)\), whose effective width is
+The partitioning-based least-squares series framework developed by Cattaneo, Farrell, and Feng (2020) helps interpret resolution, local basis functions and approximation bias. Its principal asymptotic statements do not automatically prove the full response-selected NNS interpolation procedure. Nobel's (1996) histogram-regression theory is the more direct general precedent for **data-dependent response-selected partitions**; Chapter 18 supplies the elementary fixed-dimensional rectangle argument for NNS-style cell means.
 
-\[
-h_n(x)=\operatorname{diam}(A_n(x)).
-\]
+### CART and regression trees
 
-The contrast is important.
+CART typically selects boundaries to improve an impurity or prediction-error criterion. NNS mean splits instead use the local central benchmark, without a greedy search for the split that best reduces squared error. Both produce partitions with locally varying cell sizes, but their adaptivity is driven by different rules. For a fixed predictor sample and fixed order, mean-based X-only splits do not relocate in response to a change in \(Y\), whereas regression-tree splits ordinarily can.
 
-#### External versus endogenous smoothing
-
-Kernel regression requires an externally chosen bandwidth.
-
-Recursive mean splitting generates its bandwidth from the data.
-
-#### Global versus local scale
-
-Kernel bandwidth is often global, unless one explicitly uses variable-bandwidth methods.
-
-Recursive mean splitting is inherently variable-bandwidth because cell sizes differ across locations.
-
-#### Weight decay versus region membership
-
-Many kernel methods use continuously decaying weights; uniform kernels use constant weights within their support.
-Partition methods use discrete inclusion within a cell.
-
-#### Interpolation
-
-Both kernel and partition methods can interpolate under suitable conditions. A compactly supported kernel with sufficiently small bandwidth can isolate distinct training predictors. A predictor-only partition can do the same if refinement is allowed to continue and its prediction rule interpolates the resulting points.
-
-Neither method can reproduce different responses at an identical predictor using a single-valued prediction function. The package's occupancy and depth controls may stop numeric-order refinement before singleton cells are reached. The order parameter therefore offers a smoothing-control path, with exact interpolation only where the data and settings permit it.
+This explains why two methods may both have stochastic bandwidths without making the same predictions or satisfying the same convergence assumptions.
 
 ---
 
-## Comparison with Fixed-Grid Estimators
+## A Simple Illustration of Partition and Prediction Bandwidth
 
-Fixed-grid partition methods divide the predictor space into prespecified intervals or cells.
-
-These methods have a bandwidth analogue as well: the grid width.
-
-But they suffer from a major limitation:
-
-**the grid is chosen before seeing the geometry of the data.**
-
-As a result:
-
-- dense regions may be oversmoothed,
-- sparse regions may be undersmoothed,
-- boundaries may cut across important nonlinear structure.
-
-Recursive mean-split estimation avoids this problem by generating the partition from the observed sample.
-
-So while both methods can be written as local averages over cells, only the recursive mean-split approach makes the bandwidth
-
-- stochastic,
-- endogenous,
-- responsive to observed predictor geometry (and to response geometry for joint splitting).
-
-This is why the phrase **dynamic bandwidth** is appropriate: the smoothing scale changes with the data, the location, and the recursive structure of the estimator.
-
----
-
-## Comparison with CART and Tree-Based Methods
-
-CART and related tree methods also induce adaptive partitions.
-
-This makes them the closest classical relatives of recursive mean-split estimation.
-
-But the source of adaptivity differs.
-
-### CART
-
-Splits are selected greedily to optimize impurity reduction or squared-error reduction, usually followed by pruning or complexity penalties.
-
-### Recursive mean splitting
-
-Splits are anchored to the **local mean structure** of the data itself.
-
-This distinction matters because it changes the meaning of the induced bandwidth.
-
-In CART, cell size reflects the outcome of a greedy optimization path under a chosen impurity criterion.
-
-In recursive mean splitting, cell size reflects repeated partitioning around benchmark-relative local means. The bandwidth is therefore connected to the same directional benchmark logic developed throughout the book.
-
-Both methods construct adaptive partitions, but neither acquires consistency merely from that classification. Their actual selection and stopping rules need to satisfy the relevant assumptions. Recursive mean-split bandwidth is tied to the directional benchmark rule rather than an impurity search.
-
----
-
-## A Simple Illustrative Example
-
-Consider the univariate sample
+Consider the six observations
 
 \[
 (X,Y)=
-(1,2), (2,3), (3,3), (6,8), (7,9), (8,9).
+(1,2),(2,3),(3,3),(6,8),(7,9),(8,9).
 \]
 
-Suppose the first split occurs at the predictor mean
+The initial predictor mean is
 
 \[
-\bar X = \frac{1+2+3+6+7+8}{6}=4.5.
+\bar X=\frac{1+2+3+6+7+8}{6}=4.5.
 \]
 
-This creates two predictor regions:
-
-- left cell: \(X \le 4.5\),
-- right cell: \(X > 4.5\).
-
-The cellwise means are
+An X-only mean split produces a left region with \(X\in\{1,2,3\}\) and a right region with \(X\in\{6,7,8\}\). Their regression-point centers are
 
 \[
-\hat f_{\text{left}} = \frac{2+3+3}{3}=\frac{8}{3},
+(c_L,r_L)=\left(2,\frac83\right),
 \qquad
-\hat f_{\text{right}} = \frac{8+9+9}{3}=\frac{26}{3}.
+(c_R,r_R)=\left(7,\frac{26}{3}\right).
 \]
 
-At this stage, the within-cell observed predictor spans are:
+If the predictor domain is restricted to \([1,8]\), the geometric widths of the two cells formed at the first split are each 3.5. Their *observed spans* are each 2. These are different ways of describing the same realized partition, but only the support-restricted geometric width is the actual interval diameter.
+
+As a piecewise-constant estimator, the left interval gives \(\hat f^{\mathrm{cell}}(3)=8/3\). If the two regression-point means are connected with a straight segment, the interpolated value at \(x=3\) is instead
 
 \[
-\operatorname{span}_{\text{left}} = 3-1 = 2,
-\qquad
-\operatorname{span}_{\text{right}} = 8-6 = 2.
+\hat f^{\mathrm{lin}}(3)
+=\frac45\frac83+\frac15\frac{26}{3}
+=\frac{58}{15}.
 \]
 
-These spans are useful empirical diagnostics, but they differ from the mathematical cell diameters. Restricting the predictor domain to \([1,8]\), the split cells have diameter 3.5 each; without a bounded domain the two outer cells extend indefinitely.
+The right-hand group contributes one fifth of that prediction, even though its predictor observations lie to the right of the first partition boundary. This is an explicit example in which the **prediction neighborhood extends beyond the query's own cell**.
 
-If the next recursion level and occupancy controls permit refinement, both eligible cells are split again at their predictor means. The resulting widths cannot increase. This follows from partition refinement, not from a comparison of local response curvature.
+The following R code reproduces the X-only partition and asks `NNS.reg` for arithmetic-mean regression estimates at specified points. The explicit `type = "REG"` requests numeric regression, while the two `noise.reduction = "mean"` settings align the examples with the conditional-mean theory.
 
-The estimate in that region becomes more local.
+```r
+library(NNS)
 
-This simple example illustrates the principle:
+x <- c(1, 2, 3, 6, 7, 8)
+y <- c(2, 3, 3, 8, 9, 9)
 
-**a nontrivial refinement can reduce the localization scale in the affected region.**
+part <- NNS.part(
+  x, y,
+  type = "XONLY", order = 2,
+  obs.req = 0, min.obs.stop = FALSE,
+  noise.reduction = "mean"
+)
+part$regression.points
 
-Unlike a kernel estimator, which changes smoothness by altering a global numeric parameter \(h\), the recursive mean-split estimator changes smoothness by refining the partition itself.
+fit <- NNS.reg(
+  x, y,
+  type = "REG", order = 2,
+  noise.reduction = "mean",
+  point.est = c(3, 4.5),
+  plot = FALSE, ncores = 1
+)
+fit$regression.points
+fit$Point.est
+```
 
----
+With the current univariate numeric-order architecture, regression points at the observed predictor endpoints are also included. The code is therefore an illustration of the **actual package prediction path**, not a claim that its result must always equal the two-center illustrative calculation above at every depth or under every stopping rule.
 
-## The Order Parameter as Global Smoothing Control
-
-Although the bandwidth is local and stochastic, the order parameter \(O\) still plays an important global role.
-
-Increasing \(O\):
-
-- increases the number of potential regions,
-- decreases typical cell diameter,
-- often reduces approximation bias while increasing sampling variance,
-- permits increasingly detailed fits, potentially including interpolation when predictors and stopping controls allow it.
-
-So \(O\) functions as a global control on the *capacity* of the partition, while the realized bandwidths \(h_n(x)\) provide the local smoothing scales.
-
-This is an important distinction.
-
-- \(O\) is not itself the bandwidth.
-- Rather, \(O\) regulates how small the bandwidths are allowed to become.
-
-In that sense, the recursive mean-split estimator combines
-
-- a **global refinement control** through \(O\), and
-- **local adaptive smoothing** through \(h_n(x)=\operatorname{diam}(A_n(x))\).
-
-In `NNS.reg`, `order = NULL` assigns a bounded order separately to each regressor from its directional dependence with the response. This is dimension-specific, response-dependent resolution; it does not select a separate curvature-based order at every predictor location. The standalone `NNS.part` default uses sample size instead. Neither default by itself is the sample-size-dependent tuning sequence required by an asymptotic consistency theorem.
-
-This dual structure helps explain why the method can be both flexible and interpretable.
+A second exercise is to vary the sample size while recording the realized order, widths and occupancies. This supplies a direct empirical check of whether a chosen tuning schedule achieves the simultaneous refinement and averaging demanded by the theory; a rising number of regression points alone is not conclusive.
 
 ---
 
-## Multivariate Interpretation
+## A Practical Consistency Diagnostic
 
-The implementation constructs per-regressor boundaries and then combines their memberships into joint groups, as described in Chapters 18 and 22. For predictor-only splits, define coordinatewise widths
+For a specified regression configuration, distinguish three quantities:
 
-\[
-h_n^{(j)}(x^{(j)})=\operatorname{diam}(A_n^{(j)}(x^{(j)})),
-\qquad j=1,\ldots,d.
-\]
+| Diagnostic | Meaning | Why it matters |
+|---|---|---|
+| Partition radius or diameter | Localization of each underlying predictor cell | Controls approximation bias when \(f\) is continuous |
+| Cell occupancy or effective sample size | Amount of independent response information being averaged | Controls sampling noise, subject to selection-aware analysis |
+| Prediction reach and nonlocal weight | The actual observation influence after interpolation/RPM weighting | Determines whether the complete predictor stays local |
 
-These widths describe individual coordinates. Occupancy of their intersections depends on the **joint** predictor distribution. If regressor \(j\) has \(K_j\) labels, the RPM has at most \(\min(n,\prod_jK_j)\) occupied joint groups, not a sum of the per-regressor counts.
+The relevant asymptotic checks are:
 
-As dimensions or orders increase, intersections can become sparse even when every marginal interval contains many observations. In the singleton limit the RPM has \(n\) rows and the group centers provide no noise reduction through averaging. Per-regressor boundary construction therefore simplifies the algorithm without proving that joint sparsity or the curse of dimensionality disappears.
+1. **Localization:** at an interior query, contributing predictor cells or weighted observation neighborhoods become local.
+2. **Increasing support:** cells carrying substantive weight average enough observations; a local count growing faster than \(\log n\) is one explicit sufficient requirement for response-adaptively selected fixed-dimensional rectangles.
+3. **Controlled selection:** the admissible partition class has the requisite complexity, as axis-aligned rectangles do for fixed dimension.
+4. **Prediction stability:** interpolation weights or neighbor combinations do not continue to give material influence to unstable or distant representatives.
+5. **Target alignment:** arithmetic means estimate conditional means; gravity, median and mode require their own estimands and convergence arguments.
 
-Where joint groups contain multiple observations, local representatives can compress and smooth the sample before neighbor prediction. The relevant diagnostics include coordinatewise widths, joint-group occupancies, number of RPM rows, and the neighborhood used for the final prediction.
-
----
-
-## Advantages of the Dynamic Bandwidth View
-
-Interpreting recursive mean-split estimation through bandwidth offers several conceptual advantages.
-
-### It links NNS to classical smoothing theory
-
-The estimator is not an isolated procedure.
-Its mean-reducer building block belongs to the family of local averaging methods studied in nonparametric regression. The connection identifies which assumptions need to be checked; it is not a blanket consistency result for the full implementation.
-
-### It clarifies the consistency proof
-
-Shrinking diameter controls localization error, and growing occupancy controls averaging noise under the conditions of Chapter 18. Response-selected partitions and the final prediction rule require separate justification.
-
-### It explains adaptivity
-
-Because the bandwidth is generated by the data, smoothing automatically varies across regions.
-
-### It avoids arbitrary external tuning in the classical sense
-
-Rather than choosing a bandwidth directly, the analyst controls partition refinement and occupancy, while the local smoothing scale emerges endogenously.
-
-### It preserves interpretability
-
-Each bandwidth corresponds to an actual region of the observed data, not merely to a tuning number in a weighting formula.
-
-### It clarifies the multivariate architecture
-
-Per-regressor widths distinguish simple boundary construction from potentially sparse joint intersections. Compression and denoising are benefits when group occupancies support them, not guarantees that hold for every dimension and order.
+The same diagnostics can guide finite-sample validation, but asymptotic consistency and predictive accuracy at a given sample size remain different questions. Cross-validation may help choose resolution, yet it is not a substitute for a theorem showing that the *chosen tuning sequence* meets those conditions.
 
 ---
 
 ## Structural Interpretation within NNS
 
-This chapter completes an important conceptual arc in the book.
+The dynamic-bandwidth view connects the probability and estimation parts of the NNS framework without replacing their original motivation.
 
-Earlier chapters showed that directional deviation operators generate:
+Earlier chapters defined directional deviations and partial moments relative to benchmarks. Chapter 18 converted local benchmark geometry into recursive partitions and regression points. This chapter shows that the resulting regions are also **local smoothing neighborhoods**, each with its own stochastic size and occupancy. Mean splitting places their boundaries at locally balanced first-order partial moments, and the chosen prediction rule converts the corresponding response centers into a regression function.
 
-- cumulative distribution functions,
-- classical moments,
-- nonlinear dependence measures,
-- benchmark-relative probability statements.
+This is also the appropriate place to reconcile the historical NNS papers. Vinod and Viole (2018) established the significance of connecting local cluster means by line segments, including the exact limiting interpolation of noiseless observed functions. Viole (2021) recognized the iterative partitioning device as an adaptive bandwidth mechanism and linked it to the broader partition-estimation literature. The present chapter supplies the explicit statistical separation that complements those contributions: **increasing approximation resolution is not equivalent to suppressing observation noise**. Both effects must be controlled when the target is a conditional mean.
 
-Chapter 18 showed how recursive splitting uses benchmark-relative geometry to define local representatives, and supplied a conditional consistency result for a predictor-only mean-reducer estimator.
-
-This chapter adds the final interpretation:
-
-**those same deviation-defined regions induce a stochastic bandwidth.**
-
-So the NNS estimator is not merely a partition rule.
-
-It is a family of data-dependent smoothing procedures whose local representation scale is generated by recursive benchmark-relative decomposition. Consistency is a property to establish for a specified sequence of partitions, reducers, and prediction rules.
-
-The structural message is therefore unified:
-
-- directional deviations define probability mass,
-- directional deviations decompose moments,
-- directional deviations reveal dependence,
-- directional deviations generate estimation regions,
-- and those regions determine the local smoothing scale.
-
-Bandwidth, in this framework, is not an external input.
-
-It is an emergent property of the directional partition itself.
+The contribution remains distinctive: directional-benchmark geometry generates data-adaptive representation scales without requiring the analyst to specify a kernel bandwidth as the primitive tuning parameter. But order, occupancy, choice of center and the ultimate prediction weights still matter. Bandwidth has become **implicit**, not irrelevant.
 
 ---
 
 ## Summary
 
-The main ideas of this chapter are:
+Recursive mean splitting admits a direct bandwidth interpretation, but the full interpretation has two levels.
 
-- Classical nonparametric methods smooth by averaging over neighborhoods whose size is controlled by a bandwidth or bin width.
-- The recursive mean-split estimator is also a local averaging estimator, but its neighborhood is the terminal partition cell \(A_n(x)\).
-- The natural bandwidth analogue is the cell diameter
+- The **partition bandwidth** is the size of the predictor cell represented by an NNS local center. It is stochastic, location-dependent, and controlled by the realized partition geometry.
+- The **prediction bandwidth** is the actual neighborhood contributing to a fitted value after interpolation or multivariate RPM weighting. It can span more than one partition cell.
+- In the arithmetic-mean setting, the cell-mean estimator is a local-constant smoother. Response-adaptive selection does not itself prevent consistency: for fixed-dimensional rectangular cells, shrinking local reach and occupancy growing faster than \(\log n\) suffice under the bounded-response and continuity assumptions of Chapter 18.
+- Consistent interpolation additionally requires that the response centers receiving appreciable weight are local and adequately supported. Endpoints, extrapolation, and optional smoothing must be treated separately.
+- Maximum-order interpolation is an exact *sample-fit* limit, and for noiseless continuous functions on dense meshes it gives uniform approximation. With noisy responses, singleton points can preserve nonvanishing sampling error.
+- Conversely, a bounded maximum order can preserve nonvanishing approximation bias for curved regression functions. The current dependence-selected `NNS.reg` default is bounded, even though the general NNS architecture allows larger numeric orders.
+- The default gravity reducer need not estimate the conditional arithmetic mean. The relevant target must be specified before making a consistency claim.
+- In several dimensions, the sizes of factorwise partitions do not determine occupancy of joint RPM groups. Final neighbor weights create another layer of effective prediction scale.
 
-\[
-h_n(x)=\operatorname{diam}(A_n(x)).
-\]
+**The coherent conclusion of Chapters 18 and 19 is that NNS with arithmetic-mean reduction is a consistency-capable data-adaptive partition architecture. Its consistency arises from a sequence that both localizes and continues to average enough observations, not from a perfect fit or a particular bounded default order alone.**
 
-- This bandwidth is **stochastic, location-dependent, and endogenous**.
-- Predictor-only boundaries at a fixed order adapt to the predictor distribution, not local response curvature. Joint splits and dependence-selected orders introduce different forms of response adaptation.
-- Shrinking diameter and growing occupancy express the same localization and averaging goals as shrinking bandwidth and growing effective sample size. They are sufficient here only with the additional assumptions stated in Chapter 18 and must be checked for the tuning sequence used.
-- Per-regressor widths combine into joint groups whose occupancy depends on the joint predictor distribution. The RPM can compress and smooth those groups, but can also contain one row per observation.
-
-Chapter 21 turns to one of the practical consequences of recursive partitioning: **clustering**. If recursive partitioning can define local estimation neighborhoods, it can also define groups of structurally similar observations.
+Chapter 21 develops clustering as another consequence of recursive partition geometry, and Chapter 22 uses the regression-point matrix to construct complete multivariate predictors.
 
 ---
 
 ## References
 
-- Stone, C. J. (1977). Consistent nonparametric regression. *Annals of Statistics*, 5(4), 595–620.
+- Stone, C. J. (1977). Consistent nonparametric regression. *Annals of Statistics*, 5(4), 595-620.
 
-- Lugosi, G., & Nobel, A. (1996). Consistency of data-driven histogram methods for density estimation and classification. *Annals of Statistics*, 24(2), 687–706.
+- Nobel, A. (1996). Histogram regression estimation using data-dependent partitions. *Annals of Statistics*, 24(3), 1084-1105. https://doi.org/10.1214/aos/1032526958
+
+- Lugosi, G., & Nobel, A. (1996). Consistency of data-driven histogram methods for density estimation and classification. *Annals of Statistics*, 24(2), 687-706.
+
+- Cattaneo, M. D., Farrell, M. H., & Feng, Y. (2020). Large sample properties of partitioning-based series estimators. *Annals of Statistics*, 48(3), 1718-1741. https://doi.org/10.1214/19-AOS1865
 
 - Györfi, L., Kohler, M., Krzyżak, A., & Walk, H. (2002). *A Distribution-Free Theory of Nonparametric Regression*. Springer.
 
 - Wand, M. P., & Jones, M. C. (1995). *Kernel Smoothing*. Chapman and Hall.
 
 - Fan, J., & Gijbels, I. (1996). *Local Polynomial Modelling and Its Applications*. Chapman and Hall.
+
+- Breiman, L., Friedman, J. H., Olshen, R. A., & Stone, C. J. (1984). *Classification and Regression Trees*. Wadsworth.
+
+- Vinod, H. D., & Viole, F. (2018). Nonparametric regression using clusters. *Computational Economics*, 52, 1317-1334 (published online June 19, 2017). https://doi.org/10.1007/s10614-017-9713-5
+
+- Viole, F. (2021, April 22). *Partitional Estimation Using Partial Moments*. Working paper.
+
+- Stone, H. (1961). Approximation of curves by line segments. *Mathematics of Computation*, 15(73), 40-47.
