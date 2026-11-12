@@ -190,7 +190,7 @@ dy.d_ <- function(x, y, wrt, eval.points = "obs", mixed = FALSE, messages = TRUE
   if (messages) message("Generating local NNS.reg finite-difference estimates...Regressor ", wrt)
   lengths <- vapply(queries, nrow, integer(1))
   query <- do.call(rbind, queries); colnames(query) <- colnames(x)
-  predicted <- as.numeric(NNS.reg(x, y, type = "REG", point.est = query, plot = FALSE, ncores = 1)$Point.est)
+  predicted <- as.numeric(NNS.reg(x, y, type = "REG", point.est = query, plot = FALSE, ncores = 1, point.only = TRUE)$Point.est)
   offsets <- c(0L, cumsum(lengths))
   part <- function(index) predicted[seq.int(offsets[index] + 1L, offsets[index + 1L])]
   first <- second <- matrix(NA_real_, length(points), length(widths))

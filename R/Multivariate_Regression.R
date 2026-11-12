@@ -431,7 +431,12 @@ NNS.M.reg <- function(X_n, Y, factor.2.dummy = TRUE, order = NULL,
   # rows share one reduced regression point.  Reuse those values directly
   # instead of performing nrow(X) x nrow(RPM) distance comparisons merely to
   # rediscover the identity mapping.
-  if (identical(order, "max") && k == 1L) {
+  # The fitted values are only needed for the fit table and for intervals;
+  # predicting every training row is most of a large fit's time.
+  need.fitted <- !point.only || !is.null(confidence.interval)
+  if (!need.fitted) {
+    fitted.pred <- NULL
+  } else if (identical(order, "max") && k == 1L) {
     if (!anyDuplicated(prepared$ids)) {
       fitted.pred <- y
     } else {
@@ -458,26 +463,14 @@ NNS.M.reg <- function(X_n, Y, factor.2.dummy = TRUE, order = NULL,
   
   if (is.class) {
     observed <- sort(unique(y))
-    fitted.pred <- .nns_reg_snap_class(fitted.pred, observed)
+    if (need.fitted) fitted.pred <- .nns_reg_snap_class(fitted.pred, observed)
     if (!is.null(point.pred)) point.pred <- .nns_reg_snap_class(point.pred, observed)
   }
   
-  fitted <- as.data.frame(X, stringsAsFactors = FALSE)
-  fitted$y <- y
-  fitted$y.hat <- fitted.pred
-  fitted$NNS.ID <- partition$ids
-  fitted$residuals <- fitted.pred - y
-  
-  metric <- if (is.class) mean(fitted.pred == y) else
-    .nns_reg_r2(y, fitted.pred)
   intervals <- .nns_reg_intervals(
     y, fitted.pred, point.pred, confidence.interval,
     is.class, if (is.class) sort(unique(y)) else NULL
   )
-  if (!is.null(intervals$conf.lower)) {
-    fitted$conf.int.neg <- intervals$conf.lower
-    fitted$conf.int.pos <- intervals$conf.upper
-  }
   
   if (point.only) {
     return(list(
@@ -491,6 +484,19 @@ NNS.M.reg <- function(X_n, Y, factor.2.dummy = TRUE, order = NULL,
       dist = dist,
       class.levels = task$class.levels
     ))
+  }
+  
+  fitted <- as.data.frame(X, stringsAsFactors = FALSE)
+  fitted$y <- y
+  fitted$y.hat <- fitted.pred
+  fitted$NNS.ID <- partition$ids
+  fitted$residuals <- fitted.pred - y
+  
+  metric <- if (is.class) mean(fitted.pred == y) else
+    .nns_reg_r2(y, fitted.pred)
+  if (!is.null(intervals$conf.lower)) {
+    fitted$conf.int.neg <- intervals$conf.lower
+    fitted$conf.int.pos <- intervals$conf.upper
   }
   
   if (plot && ncol(X) == 2L) {
