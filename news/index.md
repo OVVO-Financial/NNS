@@ -178,3 +178,35 @@ CRAN release: 2026-10-30
   refitting. Add revised editable companions for the historical PDFs,
   preserve originals, and record that the original editable sources were
   not recovered.
+
+### Speed
+
+- The same results, faster. Every output of the 130-case reference run
+  over all exported functions is identical to the previous build, as are
+  1,500 random `NNS.reg` calls, 11,000 random partitions, 4,000 random
+  copulas and 24,000 random multivariate prediction problems (x86-64
+  Linux; other platforms run the same arithmetic in the same order).
+  Across the 77 reference cases that take at least 20 ms the median
+  speedup is 1.7x on one thread.
+- `NNS.part` (3-5x): each cell is a range of one index array over
+  presorted values, split by a binary search, instead of every
+  observation being relabelled and every cell re-sorted at every level.
+  `NNS.dep` and `NNS.norm` gain about 2x from it.
+- `NNS.copula` computes its dependence in one compiled call. It runs
+  twice per regressor in the default `order` of `NNS.reg`, which was
+  most of a short series’ regression time: single-predictor `NNS.reg` is
+  2-4x faster, `NNS.ARMA` and `NNS.ARMA.optim` 1.8-2.5x, `NNS.VAR` 2.2x,
+  and regression with `NNS.stack` 1.3-2.9x and `NNS.boost` 1.7-1.9x.
+- Multivariate `NNS.reg` finds each point’s nearest regression points
+  without measuring its distance to all of them, and no longer predicts
+  every training row when only the `point.est` estimates are returned
+  (`point.only = TRUE`, which `NNS.stack`’s final fits and `dy.d_` now
+  use). On 20,000 rows a full fit is 1.1x (2 predictors) to 2x (5
+  predictors) faster, and point estimates alone 4x to 14x (32x with
+  `n.best = 1`).
+- `NNS.reg` and `NNS.part` no longer build fitted values, tables, sorted
+  copies and axis labels that the call does not return.
+- Removed internal code that nothing called: the compiled
+  `fast_lm_mult`, `is.fcl`, `downSample`, `upSample`,
+  `NNS_reg_points_cpp`, `NNS_mreg_reduce_cpp`, `NNS_distance_path_cpp`
+  and `NNS_distance_bulk_cpp`, and the R helper `.grouped_gravity`.

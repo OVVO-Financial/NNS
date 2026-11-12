@@ -83,6 +83,18 @@
 <li>Fix target hazard evaluation, stochastic-dominance cluster ordering, residual clusters, efficient-set order dependence, and caller column-name mutation.</li>
 <li>Replace unsupported example rankings and inference claims with explicit targets and corrected executable workflows. Forecast examples reserve test outcomes; fitted-contrast uncertainty includes model refitting. Add revised editable companions for the historical PDFs, preserve originals, and record that the original editable sources were not recovered.</li>
 </ul></div>
+<div class="section level3">
+<h3 id="speed-13-3">Speed<a class="anchor" aria-label="anchor" href="#speed-13-3"></a></h3>
+<ul><li>The same results, faster. Every output of the 130-case reference run over all exported functions is identical to the previous build, as are 1,500 random <code>NNS.reg</code> calls, 11,000 random partitions, 4,000 random copulas and 24,000 random multivariate prediction problems (x86-64 Linux; other platforms run the same arithmetic in the same order). Across the 77 reference cases that take at least 20 ms the median speedup is 1.7x on one thread.</li>
+<li>
+<code>NNS.part</code> (3-5x): each cell is a range of one index array over presorted values, split by a binary search, instead of every observation being relabelled and every cell re-sorted at every level. <code>NNS.dep</code> and <code>NNS.norm</code> gain about 2x from it.</li>
+<li>
+<code>NNS.copula</code> computes its dependence in one compiled call. It runs twice per regressor in the default <code>order</code> of <code>NNS.reg</code>, which was most of a short series’ regression time: single-predictor <code>NNS.reg</code> is 2-4x faster, <code>NNS.ARMA</code> and <code>NNS.ARMA.optim</code> 1.8-2.5x, <code>NNS.VAR</code> 2.2x, and regression with <code>NNS.stack</code> 1.3-2.9x and <code>NNS.boost</code> 1.7-1.9x.</li>
+<li>Multivariate <code>NNS.reg</code> finds each point’s nearest regression points without measuring its distance to all of them, and no longer predicts every training row when only the <code>point.est</code> estimates are returned (<code>point.only = TRUE</code>, which <code>NNS.stack</code>’s final fits and <code>dy.d_</code> now use). On 20,000 rows a full fit is 1.1x (2 predictors) to 2x (5 predictors) faster, and point estimates alone 4x to 14x (32x with <code>n.best = 1</code>).</li>
+<li>
+<code>NNS.reg</code> and <code>NNS.part</code> no longer build fitted values, tables, sorted copies and axis labels that the call does not return.</li>
+<li>Removed internal code that nothing called: the compiled <code>fast_lm_mult</code>, <code>is.fcl</code>, <code>downSample</code>, <code>upSample</code>, <code>NNS_reg_points_cpp</code>, <code>NNS_mreg_reduce_cpp</code>, <code>NNS_distance_path_cpp</code> and <code>NNS_distance_bulk_cpp</code>, and the R helper <code>.grouped_gravity</code>.</li>
+</ul></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
