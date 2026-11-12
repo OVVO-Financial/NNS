@@ -39,10 +39,9 @@ NNS.copula <- function (
   
   if(any(class(X)%in%c("tbl","data.table"))) X <- as.data.frame(X)
   
-  if(is.null(colnames(X))) colnames(X) <- paste0("Var ", seq_len(n))
-  
   if((plot||independence.overlay) && n == 3){
     .nns_require_rgl()
+    if(is.null(colnames(X))) colnames(X) <- paste0("Var ", seq_len(n))
     rgl::plot3d(x = X[ , 1], y = X[ , 2], z = X[ , 3], box = FALSE, size = 3,
                 col=ifelse((X[ , 1] <= mean(X[ , 1])) & (X[ , 2] <= mean(X[ , 2])) & (X[ , 3] <= mean(X[ , 3])), 'red' ,
                            ifelse((X[ , 1] > mean(X[ , 1])) & (X[ , 2] > mean(X[ , 2])) & (X[ , 3] > mean(X[ , 3])), 'green',
@@ -73,65 +72,11 @@ NNS.copula <- function (
   
   if(is.null(target)) target <- colMeans(X)
   
-  # A constant margin is independent of the rest and has no degree-1 lower share
-  vary <- vapply(seq_len(n), function(j) length(unique(X[ , j])) > 1L, logical(1))
-  if(!all(vary)){
-    if(sum(vary) < 2) return(0)
-    X <- X[ , vary, drop = FALSE]
-    target <- target[vary]
-    n <- ncol(X)
-  }
-  
-  # Pairwise  
-  discrete_pm_cov <- PM.matrix(LPM_degree = 0, UPM_degree = 0, target = target, variable = X, pop_adj = FALSE)
-  utr <- upper.tri(discrete_pm_cov$cupm, diag = FALSE)
-  discrete_Co_pm <- sum(discrete_pm_cov$cupm[utr]) + sum(discrete_pm_cov$clpm[utr]) 
-  # Perfect dependence: every pair fully concordant (1) or fully discordant (0).
-  # A margin with every observation on one side of its target makes that trivially true.
-  lower_share <- vapply(seq_len(n), function(j) LPM(0, target[j], X[ , j]), numeric(1))
-  # Normalized region shares have no informative contrast at this target.
-  if(all(lower_share == 0 | lower_share == 1)) return(0)
-  pair_Co_pm <- discrete_pm_cov$cupm[utr] + discrete_pm_cov$clpm[utr]
-  if(all(lower_share > 0 & lower_share < 1) &&
-     all(abs(pair_Co_pm - 1) < 1e-9 | abs(pair_Co_pm) < 1e-9)) return(1)
-  
-  
-  if(continuous){
-    continuous_pm_cov <- PM.matrix(LPM_degree = 1, UPM_degree = 1, target = target, variable = X, pop_adj = TRUE, norm = TRUE)
-  } else {
-    continuous_pm_cov <- discrete_pm_cov
-  }
-  
-
-  # Isolate the upper triangles from each of the partial moment matrices
-  discrete_D_pm <- sum(discrete_pm_cov$dupm[utr]) + sum(discrete_pm_cov$dlpm[utr])
-  
-  continuous_Co_pm <- sum(continuous_pm_cov$cupm[utr]) + sum(continuous_pm_cov$clpm[utr]) 
-  continuous_D_pm <- sum(continuous_pm_cov$dupm[utr]) + sum(continuous_pm_cov$dlpm[utr]) 
-  
-  # Independence anchors from each margin's own lower-tail share, so they hold at any target
-  indep_anchors <- function(p) list(Co = sum((outer(p, p) + outer(1 - p, 1 - p))[utr]), D = 1 - prod(p) - prod(1 - p))
-  discrete_indep <- indep_anchors(lower_share)
-  continuous_indep <- if(continuous) indep_anchors(vapply(seq_len(n), function(j) LPM.ratio(1, target[j], X[ , j]), numeric(1))) else discrete_indep
-  # A boundary target can zero an anchor; an observed 0 then matches it exactly
-  rel_dev <- function(obs, indep) if(obs == indep) 0 else abs(obs - indep)/indep
-  
-  discrete_dep <- rel_dev(discrete_Co_pm, discrete_indep$Co)
-  continuous_dep <- rel_dev(continuous_Co_pm, continuous_indep$Co)
-  
-   
-  discrete_dep <- min(max(discrete_dep, 0), 1)
-  continuous_dep <- min(max(continuous_dep, 0), 1)
-
-  # n-dimensional
-  discrete_D_pm <- DPM_nD(data = X, target = target, degree = 0, norm = TRUE)
-  if(continuous) continuous_D_pm <- DPM_nD(data = X, target = target, degree = 1, norm = TRUE) else continuous_D_pm <- discrete_D_pm
-  
-  n_dim_discrete_dep <- rel_dev(discrete_D_pm, discrete_indep$D)
-  n_dim_continuous_dep <- rel_dev(continuous_D_pm, continuous_indep$D)
-  n_dim_discrete_dep <- min(n_dim_discrete_dep, 1)
-  n_dim_continuous_dep <- min(n_dim_continuous_dep, 1)
-
-
-  return(mean(c(discrete_dep, continuous_dep, n_dim_discrete_dep, n_dim_continuous_dep))^(1/2))
+  # The dependence itself is computed in one compiled call (src/NNS_copula.cpp):
+  # the pairwise degree-0 and degree-1 co-partial moments about the target and
+  # the n-dimensional divergent moment, each measured against its independence
+  # anchor from the margins' own lower-tail shares.
+  if(is.data.frame(X)) X <- as.matrix(X)
+  if(!is.double(X)) storage.mode(X) <- "double"
+  NNS_copula_cpp(X, as.numeric(target), if(continuous) TRUE else FALSE)
 }

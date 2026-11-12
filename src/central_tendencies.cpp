@@ -14,11 +14,11 @@ static inline double frac_part(double x) {
   return x - std::floor(x);
 }
 
-static inline double mean_vec(const std::vector<double>& v) {
-  if (v.empty()) return NA_REAL;
+static inline double mean_vec(const double* v, std::size_t n) {
+  if (n == 0) return NA_REAL;
   long double s = 0.0L;
-  for (double x : v) s += x;
-  return static_cast<double>(s / v.size());
+  for (std::size_t i = 0; i < n; ++i) s += v[i];
+  return static_cast<double>(s / n);
 }
 
 static inline double nearest_int_half_up(double x) {
@@ -86,13 +86,13 @@ static void quartiles_like_R_code(const std::vector<double>& xs, double& q1, dou
 static constexpr std::int64_t kMaxEmptyRun = 16;
 static constexpr double kMaxBinIndex = 4503599627370496.0;  // 2^52
 
-static void simple_bin_counts(const std::vector<double>& xs, double width, double origin,
+static void simple_bin_counts(const double* xs, std::size_t n_xs, double width, double origin,
                               std::vector<double>& bin_names, std::vector<int>& counts) {
   bin_names.clear();
   counts.clear();
-  if (xs.empty()) return;
+  if (n_xs == 0) return;
 
-  const double xmax = xs.back();
+  const double xmax = xs[n_xs - 1];
   double last = std::floor((xmax - origin) / width + 1e-12);
   if (!(last < kMaxBinIndex)) {
     width = (xmax - origin) / kMaxBinIndex;
@@ -100,7 +100,7 @@ static void simple_bin_counts(const std::vector<double>& xs, double width, doubl
     if (!(last < kMaxBinIndex)) last = kMaxBinIndex;
   }
   const std::int64_t nbins = (last >= 0.0) ? static_cast<std::int64_t>(last) + 1 : 1;
-  const std::int64_t cap = static_cast<std::int64_t>(xs.size()) * (kMaxEmptyRun + 1) + kMaxEmptyRun;
+  const std::int64_t cap = static_cast<std::int64_t>(n_xs) * (kMaxEmptyRun + 1) + kMaxEmptyRun;
   bin_names.reserve(static_cast<std::size_t>(std::min(nbins, cap)));
   counts.reserve(static_cast<std::size_t>(std::min(nbins, cap)));
 
@@ -123,7 +123,8 @@ static void simple_bin_counts(const std::vector<double>& xs, double width, doubl
   // xs is sorted, so bin indices are non-decreasing.
   const double top = static_cast<double>(nbins - 1);
   std::int64_t prev = -1;
-  for (double v : xs) {
+  for (std::size_t t = 0; t < n_xs; ++t) {
+    const double v = xs[t];
     const double q = std::floor((v - origin) / width);
     const std::int64_t k = (q < 0.0) ? 0 : (q >= top ? nbins - 1 : static_cast<std::int64_t>(q));
     if (k == prev) {
@@ -140,51 +141,42 @@ static void simple_bin_counts(const std::vector<double>& xs, double width, doubl
 // ---------- NNS.gravity ----------
 
 // R's default quantile (type 7) of sorted xs: position 1 + (n - 1) p.
-static inline double quantile_type7(const std::vector<double>& xs, double p) {
-  const int n = (int)xs.size();
+static inline double quantile_type7(const double* xs, int n, double p) {
   const double h = (n - 1) * p;
   const int lo = (int)std::floor(h);
   const int hi = std::min(lo + 1, n - 1);
   return xs[lo] + (h - lo) * (xs[hi] - xs[lo]);
 }
 
-// Core gravity computation operating on a vector of finite values.
-// Shared by NNS_gravity_cpp and the NNS.reg regression-point builder.  The
-// result depends only on the set of values (x is sorted internally), so input
-// order is irrelevant.
-double gravity_value(std::vector<double> x, bool discrete) {
-  const int l = (int)x.size();
+// Gravity of l finite values sorted ascending. Every caller reaches this one
+// implementation, so a cell of a sorted partition and a plain vector give
+// bit-identical results.
+double gravity_sorted(const double* x, int l, bool discrete) {
   if (l == 0) return NA_REAL;
   if (l <= 3) {
     // median(x)
-    std::vector<double> t = x;
-    std::sort(t.begin(), t.end());
-    double med = (l % 2 ? t[l/2] : 0.5*(t[l/2 - 1] + t[l/2]));
+    double med = (l % 2 ? x[l/2] : 0.5*(x[l/2 - 1] + x[l/2]));
     if (discrete) return nearest_int_half_up(med);
     return med;
   }
 
-  bool all_eq = true;
-  for (int i = 1; i < l; ++i) if (x[i] != x[0]) { all_eq = false; break; }
-  if (all_eq) return x[0];
-
-  std::sort(x.begin(), x.end());
-  double range = std::fabs(x.back() - x.front());
-  if (range == 0.0) return x.front();
+  // Sorted, so the ends agree only when every value does.
+  if (x[0] == x[l - 1]) return x[0];
+  double range = std::fabs(x[l - 1] - x[0]);
 
   // The usual median and quartiles (#117): the floor-position order
   // statistics used before took the lower middle value for even n, so
   // gravity sat below the centre of symmetric data.
-  const double q1 = quantile_type7(x, 0.25);
-  const double q2 = quantile_type7(x, 0.50);
-  const double q3 = quantile_type7(x, 0.75);
+  const double q1 = quantile_type7(x, l, 0.25);
+  const double q2 = quantile_type7(x, l, 0.50);
+  const double q3 = quantile_type7(x, l, 0.75);
 
   double width = (q3 - q1) * std::pow((double)l, -0.5);
   if (!(width > 0.0) || !R_finite(width)) width = range / 128.0;
 
   std::vector<double> z_names;
   std::vector<int> counts;
-  simple_bin_counts(x, width, x.front(), z_names, counts);
+  simple_bin_counts(x, (std::size_t)l, width, x[0], z_names, counts);
   const int lz = (int)counts.size();
 
   // If unique max, use neighborhood; else use all bins
@@ -211,12 +203,33 @@ double gravity_value(std::vector<double> x, bool discrete) {
   for (int t = a; t < e; ++t) num += (long double)x[t];
   double m = (e > a) ? (double)(num / (long double)(e - a)) : z_names[ (lo+hi)/2 ];
 
-  double mu = mean_vec(x);
+  double mu = mean_vec(x, (std::size_t)l);
   double mid = 0.25 * ( q2 + m + mu + 0.5*(q1 + q3) );
 
   double out = R_finite(mid) ? mid : q2;
   if (discrete) out = nearest_int_half_up(out);
   return out;
+}
+
+// Gravity of the finite values in x, which is sorted in place. The result
+// depends only on the set of values, so input order is irrelevant.
+double gravity_inplace(std::vector<double>& x, bool discrete) {
+  const int l = (int)x.size();
+  if (l == 0) return NA_REAL;
+  if (l > 3) {
+    // All equal: the first value as supplied (which keeps its sign of zero).
+    bool all_eq = true;
+    for (int i = 1; i < l; ++i) if (x[i] != x[0]) { all_eq = false; break; }
+    if (all_eq) return x[0];
+  }
+  std::sort(x.begin(), x.end());
+  return gravity_sorted(x.data(), l, discrete);
+}
+
+// Core gravity computation operating on a vector of finite values.
+// Shared by NNS_gravity_cpp and the NNS.reg regression-point builder.
+double gravity_value(std::vector<double> x, bool discrete) {
+  return gravity_inplace(x, discrete);
 }
 
 // [[Rcpp::export]]
@@ -438,7 +451,7 @@ SEXP NNS_mode_cpp(SEXP xSEXP, bool discrete, bool multi) {
   // Histogram
   std::vector<double> z_names;   // left edge of each bin
   std::vector<int> counts;       // histogram counts
-  simple_bin_counts(xnum, width, xnum.front(), z_names, counts);
+  simple_bin_counts(xnum.data(), xnum.size(), width, xnum.front(), z_names, counts);
   const int lz = (int)counts.size();
   if (lz == 0) return Rf_ScalarReal(NA_REAL);
 

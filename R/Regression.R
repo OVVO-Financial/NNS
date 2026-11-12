@@ -34,11 +34,12 @@
     stop("[type = 'REG'] requires a numeric response.", call. = FALSE)
   }
   
-  auto.class <- is.factor(y) || is.character(y) || is.logical(y) ||
-    (is.numeric(y) && length(unique(y)) == 2L &&
-       setequal(sort(unique(as.numeric(y))), c(0, 1)))
-  
-  is.class <- identical(type, "class") || (is.null(type) && auto.class)
+  # The automatic test hashes y, so it only runs when no type was given.
+  is.class <- identical(type, "class") ||
+    (is.null(type) &&
+       (is.factor(y) || is.character(y) || is.logical(y) ||
+          (is.numeric(y) && length(unique(y)) == 2L &&
+             setequal(sort(unique(as.numeric(y))), c(0, 1)))))
   is.xonly <- identical(type, "xonly")
   
   if (is.factor(y)) {
@@ -268,12 +269,24 @@
   factor.2.dummy <- .nns_reg_scalar_logical(factor.2.dummy, "factor.2.dummy")
   # A plain numeric vector is the single numeric predictor "x", as
   # data.frame(x = x) below names it; building that data frame was most of the
-  # encoding time for short series.
-  if (is.null(point.est) && is.numeric(x) && is.null(dim(x)) &&
-      is.null(oldClass(x)) && length(x) && all(is.finite(x))) {
+  # encoding time for short series. Plain numeric points are its values.
+  if (is.numeric(x) && is.null(dim(x)) && is.null(oldClass(x)) &&
+      length(x) && all(is.finite(x)) &&
+      (is.null(point.est) ||
+         (is.numeric(point.est) && is.null(dim(point.est)) &&
+            is.null(oldClass(point.est))))) {
+    point.matrix <- NULL
+    if (!is.null(point.est)) {
+      if (any(!is.finite(point.est))) {
+        stop("[point.est] predictor 'x' must contain only finite numeric values.",
+             call. = FALSE)
+      }
+      point.matrix <- matrix(as.numeric(point.est), ncol = 1L,
+                             dimnames = list(NULL, "x"))
+    }
     return(list(
       x = matrix(as.numeric(x), ncol = 1L, dimnames = list(NULL, "x")),
-      point.est = NULL,
+      point.est = point.matrix,
       raw.names = "x",
       encoded.names = "x",
       metadata = list(list(name = "x", categorical = FALSE, levels = NULL))
@@ -406,15 +419,24 @@
   }, numeric(1L))
 }
 
+# A vector with fewer than two distinct values, as length(unique(z)) < 2L but
+# without hashing every value.
+.nns_constant <- function(z) {
+  if (length(z) < 2L) return(TRUE)
+  if (anyNA(z)) return(length(unique(z)) < 2L)
+  all(z == z[1L])
+}
+
 .nns_reg_dependence <- function(x, y) {
-  if (length(unique(x)) < 2L || length(unique(y)) < 2L) return(0.1)
+  if (.nns_constant(x) || .nns_constant(y)) return(0.1)
   # The order heuristic needs a fine-scale signal-to-noise reading, which the
   # local measure gives; NNS.dep's multi-level measure would also count
   # dependence between coarse cells and over-partition noisy data (#95).
   d1 <- tryCatch(.nns_dep_local(x, y, asym = TRUE),
                  error = function(e) NA_real_)
   d2 <- tryCatch({
-    m <- cbind(NNS.rescale(x, 0, 1), NNS.rescale(x, 0, 1), NNS.rescale(y, 0, 1))
+    rescaled.x <- NNS.rescale(x, 0, 1)
+    m <- cbind(rescaled.x, rescaled.x, NNS.rescale(y, 0, 1), deparse.level = 0)
     reflected <- m
     reflected[, 3L] <- 1 - reflected[, 3L]
     # Model complexity should not depend on the sign chosen for the response.
@@ -461,9 +483,12 @@
   rx <- rx[keep]
   ry <- ry[keep]
   if (!length(rx)) stop("NNS regression produced no finite regression points.", call. = FALSE)
-  o <- order(rx, method = "radix")
-  rx <- rx[o]
-  ry <- ry[o]
+  # The order of strictly increasing values is the identity.
+  if (is.unsorted(rx, strictly = TRUE)) {
+    o <- order(rx, method = "radix")
+    rx <- rx[o]
+    ry <- ry[o]
+  }
   # Equal x values (after the character rounding split() applies) share one
   # reduced point.
   merge.ties <- function() {
@@ -505,11 +530,19 @@
   }
   run <- diff(rp$x)
   slope <- ifelse(run == 0, 0, diff(rp$y) / run)
-  data.frame(
+  .nns_plain_df(list(
     Coefficient = slope,
-    X.Lower.Range = head(rp$x, -1L),
-    X.Upper.Range = tail(rp$x, -1L)
-  )
+    X.Lower.Range = rp$x[-nrow(rp)],
+    X.Upper.Range = rp$x[-1L]
+  ))
+}
+
+# A data frame of equal-length, unnamed plain vectors (at least one row),
+# exactly as data.frame() builds it, without data.frame()'s per-column
+# coercion and name checks.
+.nns_plain_df <- function(columns) {
+  structure(columns, class = "data.frame",
+            row.names = c(NA_integer_, -length(columns[[1L]])))
 }
 
 .nns_reg_predict_univariate <- function(xout, rp, smooth = FALSE,
@@ -722,8 +755,7 @@
   pred <- .nns_reg_predict_univariate(as.numeric(test_x), rp, smooth = FALSE,
                                       is.class = is.class,
                                       class.values = class.values)
-  list(prediction = pred, regression.points = rp,
-       order = if (is.null(order)) .nns_reg_default_order(as.numeric(train_x), as.numeric(train_y)) else order)
+  list(prediction = pred, regression.points = rp)
 }
 
 
@@ -887,8 +919,9 @@ NNS.reg <- function(x, y,
   # Capture the original calls before x and y are validated/coerced/reassigned.
   # Calling substitute(y) after y has been overwritten deparses the full numeric
   # response vector and produces the wall of vertical axis text seen in vignettes.
-  x.label <- paste(deparse(substitute(x)), collapse = " ")
-  y.label <- paste(deparse(substitute(y)), collapse = " ")
+  # They are only deparsed when a plot is drawn.
+  x.expr <- substitute(x)
+  y.expr <- substitute(y)
   
   factor.2.dummy <- .nns_reg_scalar_logical(factor.2.dummy, "factor.2.dummy")
   return.values <- .nns_reg_scalar_logical(return.values, "return.values")
@@ -995,7 +1028,7 @@ NNS.reg <- function(x, y,
   actual.order <- as.integer(actual.order)
   
   if (multivariate.call) {
-    return(.NNS.df(rp[, c("x", "y"), drop = FALSE]))
+    return(.NNS.df(.nns_plain_df(list(x = rp$x, y = rp$y))))
   }
   
   # Restore the original NNS smoothing rule: the smoothing parameter is tied
@@ -1011,43 +1044,22 @@ NNS.reg <- function(x, y,
     )
   }
   
-  fitted.pred <- .nns_reg_predict_univariate(
-    ux, rp, smooth = smooth.condition, is.class = task$is.class,
-    class.values = task$class.values, smooth.fit = smooth.fit
-  )
+  # The fitted values are only needed for the fit table and for intervals.
+  fitted.pred <- if (point.only && is.null(confidence.interval)) NULL else
+    .nns_reg_predict_univariate(
+      ux, rp, smooth = smooth.condition, is.class = task$is.class,
+      class.values = task$class.values, smooth.fit = smooth.fit
+    )
   point.pred <- if (is.null(up)) NULL else .nns_reg_predict_univariate(
     up, rp, smooth = smooth.condition, is.class = task$is.class,
     class.values = task$class.values, smooth.fit = smooth.fit
   )
   
   derivative <- .nns_reg_derivative(rp)
-  ids <- findInterval(ux, rp$x, left.open = FALSE, rightmost.closed = TRUE)
-  ids <- pmax(1L, pmin(ids, nrow(rp)))
-  grad.idx <- findInterval(ux, derivative$X.Lower.Range,
-                           left.open = FALSE, rightmost.closed = TRUE)
-  grad.idx <- pmax(1L, pmin(grad.idx, nrow(derivative)))
-  
-  fitted <- data.frame(
-    x = ux,
-    y = y.numeric,
-    y.hat = fitted.pred,
-    NNS.ID = ids,
-    gradient = derivative$Coefficient[grad.idx],
-    residuals = fitted.pred - y.numeric,
-    stringsAsFactors = FALSE
-  )
-  
-  metric <- if (task$is.class) mean(fitted.pred == y.numeric) else
-    .nns_reg_r2(y.numeric, fitted.pred)
-  se <- sqrt(mean((fitted.pred - y.numeric)^2))
   intervals <- .nns_reg_intervals(
     y.numeric, fitted.pred, point.pred, confidence.interval,
     task$is.class, task$class.values
   )
-  if (!is.null(intervals$conf.lower)) {
-    fitted$conf.int.neg <- intervals$conf.lower
-    fitted$conf.int.pos <- intervals$conf.upper
-  }
   
   if (point.only) {
     out <- list(
@@ -1066,6 +1078,29 @@ NNS.reg <- function(x, y,
     return(out)
   }
   
+  ids <- findInterval(ux, rp$x, left.open = FALSE, rightmost.closed = TRUE)
+  ids <- pmax(1L, pmin(ids, nrow(rp)))
+  grad.idx <- findInterval(ux, derivative$X.Lower.Range,
+                           left.open = FALSE, rightmost.closed = TRUE)
+  grad.idx <- pmax(1L, pmin(grad.idx, nrow(derivative)))
+  
+  fitted <- .nns_plain_df(list(
+    x = ux,
+    y = y.numeric,
+    y.hat = fitted.pred,
+    NNS.ID = ids,
+    gradient = derivative$Coefficient[grad.idx],
+    residuals = fitted.pred - y.numeric
+  ))
+  
+  metric <- if (task$is.class) mean(fitted.pred == y.numeric) else
+    .nns_reg_r2(y.numeric, fitted.pred)
+  se <- sqrt(mean((fitted.pred - y.numeric)^2))
+  if (!is.null(intervals$conf.lower)) {
+    fitted$conf.int.neg <- intervals$conf.lower
+    fitted$conf.int.pos <- intervals$conf.upper
+  }
+  
   if (plot) {
     xlim <- range(c(ux, up), finite = TRUE)
     ylim <- range(c(y.numeric, fitted.pred, point.pred, rp$y,
@@ -1079,8 +1114,8 @@ NNS.reg <- function(x, y,
       ux, y.numeric,
       pch = 1, lwd = 2, col = "steelblue",
       xlim = xlim, ylim = ylim,
-      xlab = if (is.null(dim.red.method)) x.label else "Synthetic X*",
-      ylab = y.label,
+      xlab = if (is.null(dim.red.method)) paste(deparse(x.expr), collapse = " ") else "Synthetic X*",
+      ylab = paste(deparse(y.expr), collapse = " "),
       main = paste0("NNS Order = ", plot.order),
       mgp = c(2.5, 0.5, 0),
       cex.lab = 1.5,

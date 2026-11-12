@@ -1693,6 +1693,8 @@ NNS.stack <- function(IVs.train,
       n.best <- reg_best_k
     }
     
+    # Only the point estimates, their interval and the RPM are read from the
+    # final fit, all of which a point-only fit returns.
     if (ncol(train_design) == 1L) {
       reg_final_fit <- suppressWarnings(
         NNS.reg(
@@ -1706,7 +1708,7 @@ NNS.stack <- function(IVs.train,
           factor.2.dummy = FALSE,
           dist = dist,
           ncores = ncores,
-          point.only = FALSE,
+          point.only = TRUE,
           confidence.interval = pred.int
         )
       )
@@ -1732,7 +1734,7 @@ NNS.stack <- function(IVs.train,
             factor.2.dummy = FALSE,
             dist = dist,
             ncores = ncores,
-            point.only = FALSE,
+            point.only = TRUE,
             confidence.interval = pred.int
           )
         )
@@ -1758,7 +1760,7 @@ NNS.stack <- function(IVs.train,
             factor.2.dummy = FALSE,
             dist = dist,
             ncores = ncores,
-            point.only = FALSE,
+            point.only = TRUE,
             confidence.interval = pred.int
           )
         )

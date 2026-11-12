@@ -148,89 +148,31 @@ inline std::vector<double> ensemble_weights(const std::vector<double>& d) {
 
 namespace {
 
-inline void row_distances(const NumericMatrix& rpm_x, const NumericMatrix& Xtest,
-                          int r, int dist_code,
-                          const std::vector<int>& active,
-                          const std::vector<double>& col_range,
-                          std::vector<double>& d) {
-  const int n = rpm_x.nrow(), p = rpm_x.ncol();
-  if (dist_code == 3) {
-    for (int i = 0; i < n; ++i) {
-      double mismatches = 0.0;
-      for (int j = 0; j < p; ++j)
-        if (rpm_x(i, j) != Xtest(r, j)) mismatches += 1.0;
-      d[i] = mismatches / static_cast<double>(p);
-    }
-  } else if (active.empty()) {
-    std::fill(d.begin(), d.end(), 0.0);
-  } else if (dist_code == 2) {
-    for (int i = 0; i < n; ++i) {
-      double acc = 0.0;
-      for (std::size_t a = 0; a < active.size(); ++a) {
-        const int j = active[a];
-        acc += std::fabs((rpm_x(i, j) - Xtest(r, j)) / col_range[a]);
-      }
-      d[i] = acc;
-    }
-  } else if (dist_code == 0) {
-    for (int i = 0; i < n; ++i) {
-      double acc = 0.0;
-      for (std::size_t a = 0; a < active.size(); ++a) {
-        const int j = active[a];
-        const double z = (rpm_x(i, j) - Xtest(r, j)) / col_range[a];
-        acc += std::fabs(z) + z * z;
-      }
-      d[i] = acc;
-    }
-  } else if (dist_code == 1) {
-    for (int i = 0; i < n; ++i) {
-      double acc = 0.0;
-      for (std::size_t a = 0; a < active.size(); ++a) {
-        const int j = active[a];
-        const double z = (rpm_x(i, j) - Xtest(r, j)) / col_range[a];
-        acc += z * z;
-      }
-      d[i] = std::sqrt(acc);
-    }
-  } else {
-    stop("Unknown NNS multivariate distance code");
-  }
-}
-
-inline double aggregate_min_ties(const std::vector<double>& d,
-                                 const NumericVector& yhat,
-                                 bool is_class) {
-  const int n = static_cast<int>(d.size());
-  double dmin = d[0];
-  for (int i = 1; i < n; ++i) if (d[i] < dmin) dmin = d[i];
-  std::vector<double> tied;
-  for (int i = 0; i < n; ++i) if (d[i] == dmin) tied.push_back(yhat[i]);
-  if (is_class) {
-    std::vector<double> ones(tied.size(), 1.0);
-    return weighted_mode(tied, ones);
-  }
-  std::vector<double> finite_tied;
-  finite_tied.reserve(tied.size());
-  for (double v : tied) if (R_finite(v)) finite_tied.push_back(v);
-  return gravity_value(finite_tied, false);
-}
-
-inline void active_columns(const NumericVector& mins, const NumericVector& maxs,
-                           std::vector<int>& active, std::vector<double>& col_range) {
-  const int p = mins.size();
-  for (int j = 0; j < p; ++j) {
-    const double range = maxs[j] - mins[j];
-    if (R_finite(range) && range > 0.0) {
-      active.push_back(j);
-      col_range.push_back(range);
-    }
-  }
-}
-
 inline void validate_dist_code(int dist_code) {
   if (dist_code < 0 || dist_code > 3) {
     stop("Unknown NNS multivariate distance code");
   }
+}
+
+// A neighbour under the kernel's total order: distance, then original row.
+struct Near { double d; int idx; };
+inline bool near_less(const Near& a, const Near& b) {
+  return a.d < b.d || (a.d == b.d && a.idx < b.idx);
+}
+
+// Largest sum of squares whose square root does not exceed s. sqrt() is
+// monotone, so a running sum above it has a strictly larger distance.
+inline double l2_raw_limit(double s) {
+  if (!R_finite(s)) return R_PosInf;
+  double c = s * s;
+  if (!R_finite(c)) return R_PosInf;
+  for (int it = 0; it < 64 && std::sqrt(c) > s; ++it) c = std::nextafter(c, 0.0);
+  if (std::sqrt(c) > s) return R_PosInf;
+  for (int it = 0; it < 64; ++it) {
+    const double up = std::nextafter(c, R_PosInf);
+    if (std::sqrt(up) <= s) c = up; else return c;
+  }
+  return R_PosInf;  // bound not established: no pruning
 }
 
 }  // namespace
@@ -371,6 +313,22 @@ struct PredictPathWorker : public Worker {
   int axis = -1;
   std::vector<double> sc;   // RPM coordinate sorted ascending
   std::vector<int> so;      // original indices for the sorted order
+  // Neighbour search for the range-normalised metrics: the active coordinates
+  // of every RPM row, stored row by row. With enough queries to repay the
+  // sort, the rows are in ascending order of one coordinate (the walk axis),
+  // so a query visits them outward from its own position.
+  bool search = false;
+  int pa = 0;                    // active columns
+  int walk = -1;                 // walk axis as a position in `active`, or -1
+  std::vector<double> rows;      // n x pa, row-major, in visiting order
+  std::vector<int> row_id;       // original row of each stored row
+  std::vector<double> axis_val;  // walk-axis coordinate of each stored row
+
+  struct Search {
+    std::vector<Near> best;
+    std::vector<int> ties;
+    std::vector<double> q;
+  };
 
   PredictPathWorker(const NumericMatrix& rpm_x_, const NumericVector& yhat_,
                     const NumericMatrix& Xtest_, int kmax_, int dist_code_,
@@ -408,6 +366,167 @@ struct PredictPathWorker : public Worker {
         for (int i = 0; i < n; ++i) sc[i] = coordv[so[i]];
       }
     }
+    if (!is_1d && dist_code != 3 && !active.empty()) {
+      search = true;
+      pa = static_cast<int>(active.size());
+      std::vector<int> ord(n);
+      for (int i = 0; i < n; ++i) ord[i] = i;
+      if (Xtest.nrow() >= 4 && n >= 64) {
+        // Walk along the coordinate most spread out relative to its range:
+        // its term rules out the most rows.
+        double best_spread = 0.0;
+        for (int a = 0; a < pa; ++a) {
+          const int j = active[a];
+          bool finite = true;
+          double mu = 0.0;
+          for (int i = 0; i < n && finite; ++i) {
+            finite = R_finite(rpm_x(i, j));
+            mu += rpm_x(i, j) / n;
+          }
+          if (!finite) continue;
+          double spread = 0.0;
+          for (int i = 0; i < n; ++i) {
+            const double u = (rpm_x(i, j) - mu) / col_range[a];
+            spread += u * u;
+          }
+          if (spread > best_spread) { best_spread = spread; walk = a; }
+        }
+        if (walk >= 0) {
+          const int j = active[walk];
+          std::sort(ord.begin(), ord.end(), [this, j](int x, int y) {
+            const double vx = rpm_x(x, j), vy = rpm_x(y, j);
+            return vx < vy || (vx == vy && x < y);
+          });
+        }
+      }
+      rows.resize(static_cast<std::size_t>(n) * pa);
+      for (int s = 0; s < n; ++s) {
+        double* x = rows.data() + static_cast<std::size_t>(s) * pa;
+        for (int a = 0; a < pa; ++a) x[a] = rpm_x(ord[s], active[a]);
+      }
+      row_id.swap(ord);
+      if (walk >= 0) {
+        axis_val.resize(n);
+        for (int s = 0; s < n; ++s) axis_val[s] = rows[static_cast<std::size_t>(s) * pa + walk];
+      }
+    }
+  }
+
+  // Query r's `keep` nearest RPM rows under (distance, row), nearest first in
+  // S.best, and, when `ties` is set, every row at the smallest distance in
+  // S.ties, ascending. Each visited row's distance is accumulated over the
+  // columns exactly as distance() does. Candidates collect in a buffer that
+  // is cut back to the `keep` best whenever it doubles; the worst of those
+  // bounds every later row. A row strictly beyond that bound cannot enter,
+  // and along the walk axis neither can any row further out than `reach`:
+  // that coordinate's own term already exceeds the bound, and the terms only
+  // add up.
+  void neighbours(std::size_t r, int keep, bool ties, Search& S) const {
+    const int P = pa;
+    double* q = S.q.data();
+    for (int a = 0; a < P; ++a) q[a] = Xtest(r, active[a]);
+    const double* range = col_range.data();
+    const double* data = rows.data();
+    std::vector<Near>& best = S.best;
+    best.clear();
+    S.ties.clear();
+    const bool all = keep >= n;  // every row is kept: nothing to rule out
+    const std::size_t cap = static_cast<std::size_t>(keep) * 2 + 32;
+    bool seen = false;
+    double limit = R_PosInf;     // a sum above this cannot matter
+    double bound = R_PosInf;     // the distance `limit` was derived from
+    double reach = R_PosInf;     // walk-axis gap beyond which no row matters
+    double dmin = R_PosInf;
+    const double rg = walk >= 0 ? range[walk] : 1.0;
+
+    auto set_bound = [&](double b) {
+      if (b == bound) return;
+      bound = b;
+      limit = dist_code == 1 ? l2_raw_limit(b) : b;
+      if (walk >= 0 && limit < R_PosInf) {
+        // The largest normalised gap whose own term stays within the limit,
+        // widened well past rounding; the floor keeps gaps whose term would
+        // underflow.
+        const double zmax = dist_code == 0 ? (std::sqrt(1.0 + 4.0 * limit) - 1.0) / 2.0
+                          : dist_code == 2 ? limit : std::sqrt(limit);
+        reach = std::max(zmax * rg * (1.0 + 1e-9), rg * 1e-150);
+      }
+    };
+    auto cut = [&]() {
+      std::nth_element(best.begin(), best.begin() + (keep - 1), best.end(), near_less);
+      best.resize(keep);
+    };
+    auto visit = [&](int s) {
+      const double* x = data + static_cast<std::size_t>(s) * P;
+      double acc = 0.0;
+      if (dist_code == 0) {
+        for (int a = 0; a < P; ++a) {
+          const double z = (x[a] - q[a]) / range[a];
+          acc += std::fabs(z) + z * z;
+        }
+      } else if (dist_code == 2) {
+        for (int a = 0; a < P; ++a) {
+          const double z = (x[a] - q[a]) / range[a];
+          acc += std::fabs(z);
+        }
+      } else {
+        for (int a = 0; a < P; ++a) {
+          const double z = (x[a] - q[a]) / range[a];
+          acc += z * z;
+        }
+      }
+      if (acc > limit) return;
+      const double d = dist_code == 1 ? std::sqrt(acc) : acc;
+      const int id = row_id[s];
+      if (ties) {
+        if (!seen || d < dmin) { dmin = d; S.ties.clear(); seen = true; }
+        if (d == dmin) S.ties.push_back(id);
+        // With ties alone, only rows at the smallest distance matter.
+        if (keep == 0) set_bound(dmin);
+      }
+      if (keep > 0) {
+        best.push_back(Near{d, id});
+        if (!all && best.size() >= cap) {
+          cut();
+          set_bound(best[keep - 1].d);
+        }
+      }
+    };
+
+    if (walk < 0 || (keep > 0 && cap >= static_cast<std::size_t>(n))) {
+      // No walk axis, or a buffer that never fills: every row is visited.
+      for (int s = 0; s < n; ++s) visit(s);
+    } else {
+      const double t = q[walk];
+      int hi = static_cast<int>(std::lower_bound(axis_val.begin(), axis_val.end(), t) -
+                                axis_val.begin());
+      int lo = hi - 1;
+      // The rows nearest along the axis first, until they set a bound.
+      while (!(limit < R_PosInf) && (lo >= 0 || hi < n)) {
+        const bool go_left = hi >= n || (lo >= 0 && (t - axis_val[lo]) <= (axis_val[hi] - t));
+        if (go_left) visit(lo--); else visit(hi++);
+      }
+      for (; lo >= 0 && (t - axis_val[lo]) <= reach; --lo) visit(lo);
+      for (; hi < n && (axis_val[hi] - t) <= reach; ++hi) visit(hi);
+    }
+    if (keep > 0) {
+      if (!all && static_cast<int>(best.size()) > keep) cut();
+      std::sort(best.begin(), best.end(), near_less);
+    }
+    if (ties) std::sort(S.ties.begin(), S.ties.end());
+  }
+
+  // The k = 1 estimate from the rows tied at the smallest distance.
+  double ties_value(const std::vector<int>& ids, std::vector<double>& tied,
+                    std::vector<double>& weights) const {
+    tied.clear();
+    for (std::size_t i = 0; i < ids.size(); ++i)
+      if (R_finite(yhat[ids[i]])) tied.push_back(yhat[ids[i]]);
+    if (is_class) {
+      weights.assign(tied.size(), 1.0);
+      return weighted_mode(tied, weights);
+    }
+    return gravity_value(tied, false);
   }
 
   // Range-normalised distance of training row i to query r. The 1-D path uses
@@ -493,8 +612,16 @@ struct PredictPathWorker : public Worker {
   }
 
   void operator()(std::size_t begin, std::size_t end) {
-    std::vector<double> d(n), dk(kmax), yk(kmax), tied, one_weights;
-    std::vector<int> idx(n), tk;
+    // The full distance vector is only needed without a neighbour search
+    // (Hamming distances, or no active column).
+    const bool scan = !is_1d && !search;
+    std::vector<double> d(scan ? n : 0), dk(kmax), yk(kmax), tied, one_weights;
+    std::vector<int> idx(scan ? n : 0), tk;
+    Search S;
+    if (search) {
+      S.q.resize(pa);
+      S.best.reserve(std::min(static_cast<std::size_t>(kmax) * 2 + 33, static_cast<std::size_t>(n) + 1));
+    }
     std::vector<double> student(kmax), inverse(kmax), normal(kmax), rbf(kmax), total(kmax);
     std::vector<double> cls(kmax), cls_totals(kmax);
     // Total-order comparator (distance, then original index) so partial
@@ -528,7 +655,34 @@ struct PredictPathWorker : public Worker {
         }
         continue;
       }
+      if (search) {
+        if (only_k == 1 || kmax == 1) {
+          neighbours(r, 0, true, S);
+          out(r, 0) = ties_value(S.ties, tied, one_weights);
+        } else if (only_k > 0) {
+          neighbours(r, only_k, false, S);
+          for (int i = 0; i < only_k; ++i) { dk[i] = S.best[i].d; yk[i] = yhat[S.best[i].idx]; }
+          out(r, 0) = predict_sorted_k_noalloc(dk, yk, only_k, is_class, rank,
+                                               student, inverse, normal, rbf,
+                                               total, cls, cls_totals);
+        } else {
+          neighbours(r, kmax, true, S);
+          out(r, 0) = ties_value(S.ties, tied, one_weights);
+          for (int i = 0; i < kmax; ++i) { dk[i] = S.best[i].d; yk[i] = yhat[S.best[i].idx]; }
+          for (int k = 2; k <= kmax; ++k) {
+            out(r, k - 1) = predict_sorted_k_noalloc(dk, yk, k, is_class, rank,
+                                                     student, inverse, normal, rbf,
+                                                     total, cls, cls_totals);
+          }
+        }
+        continue;
+      }
       distances_for_row(r, d);
+      if (only_k == 1 || kmax == 1) {
+        // One neighbour is every row tied at the smallest distance.
+        out(r, 0) = min_ties(d, tied, one_weights);
+        continue;
+      }
       for (int i = 0; i < n; ++i) idx[i] = i;
       // Retain only the kmax nearest rows: O(n + kmax log kmax) instead of a
       // full O(n log n) sort.

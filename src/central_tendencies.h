@@ -18,6 +18,13 @@ SEXP NNS_gravity_cpp(SEXP xSEXP, bool discrete);
 /// produce bit-identical results.
 double gravity_value(std::vector<double> x, bool discrete);
 
+/// The same statistic for a vector that may be reordered: x is sorted in
+/// place, which saves the copy gravity_value() makes.
+double gravity_inplace(std::vector<double>& x, bool discrete);
+
+/// The same statistic for l finite values already sorted ascending.
+double gravity_sorted(const double* x, int l, bool discrete);
+
 /// Compute the mode (or modal class) depending on the supplied flags.
 ///
 /// @param xSEXP Input vector supplied from R.

@@ -155,15 +155,3 @@ print.NNS.matrix <- function(x, n = 6L, tailn = n, ...) {
   
   invisible(x)
 }
-
-
-# Grouped gravity consolidation helper: returns gravity(y) within each x group,
-# broadcast back in original order (drop-in for ave(y, x, FUN = gravity)).
-# Fast path: when every x is unique, gravity() of each singleton group is the
-# value itself, so the per-group C-call gravity work is skipped entirely --
-# the common case for regression points, making consolidation faster than the
-# previous data.table path which still invoked gravity per group.
-.grouped_gravity <- function(x, y) {
-  if (!anyDuplicated(x)) return(y)
-  ave(y, x, FUN = gravity)
-}
