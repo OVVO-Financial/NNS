@@ -289,25 +289,10 @@ NNS.dep.matrix <- function(x, asym = FALSE){
   
   x <- data.matrix(x)
   
-  upper_lower <- function(x, y, asym){
-    basic_dep <- NNS.dep(x, y, print.map = FALSE, asym = asym)
-    if(asym){
-      asym_dep <- NNS.dep(y, x, print.map = FALSE, asym = asym)
-      return(list("Upper_cor" = basic_dep$Correlation,
-                  "Upper_dep" = basic_dep$Dependence,
-                  "Lower_cor" = asym_dep$Correlation,
-                  "Lower_dep" = asym_dep$Dependence))
-    } else {
-      return(list("Upper_cor" = basic_dep$Correlation,
-                  "Upper_dep" = basic_dep$Dependence,
-                  "Lower_cor" = basic_dep$Correlation,
-                  "Lower_dep" = basic_dep$Dependence))
-    }
-  }
-  
-  # Each column's own split is the same in every pair it enters, so it is
-  # computed once; only the joint quadrants belong to a pair. Values NNS.dep
-  # would stop on, and the R partition path, go pair by pair as before.
+  # NNS.dep of column i with column b. Each column's own split and its tie
+  # flag are the same in every pair it enters, so they are found once; only
+  # the joint quadrants belong to a pair. Values NNS.dep would stop on, and
+  # the R partition path, go through NNS.dep pair by pair as before.
   if (isTRUE(getOption("NNS.native", TRUE)) && is.numeric(x) &&
       !anyNA(x) && !any(is.infinite(x))) {
     part <- .nns_dep_part(nrow(x))
@@ -316,18 +301,20 @@ NNS.dep.matrix <- function(x, asym = FALSE){
     pair <- function(i, b) {
       .nns_dep_native(x[, i], x[, b], own[[i]], own[[b]], asym, part, ties[i], ties[b])
     }
-    upper_lower <- function(i, b, asym) {
-      basic_dep <- pair(i, b)
-      asym_dep <- if (asym) pair(b, i) else basic_dep
-      list("Upper_cor" = basic_dep$Correlation,
-           "Upper_dep" = basic_dep$Dependence,
-           "Lower_cor" = asym_dep$Correlation,
-           "Lower_dep" = asym_dep$Dependence)
-    }
-    raw.both <- lapply(1 : (n-1), function(i) sapply((i + 1) : n, function(b) upper_lower(i, b, asym = asym)))
   } else {
-    raw.both <- lapply(1 : (n-1), function(i) sapply((i + 1) : n, function(b) upper_lower(x[ , i], x[ , b], asym = asym)))
+    pair <- function(i, b) NNS.dep(x[, i], x[, b], print.map = FALSE, asym = asym)
   }
+  
+  upper_lower <- function(i, b){
+    basic_dep <- pair(i, b)
+    asym_dep <- if(asym) pair(b, i) else basic_dep
+    list("Upper_cor" = basic_dep$Correlation,
+         "Upper_dep" = basic_dep$Dependence,
+         "Lower_cor" = asym_dep$Correlation,
+         "Lower_dep" = asym_dep$Dependence)
+  }
+  
+  raw.both <- lapply(1 : (n-1), function(i) sapply((i + 1) : n, function(b) upper_lower(i, b)))
   
   
   raw.both <- unlist(raw.both)
