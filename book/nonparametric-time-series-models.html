@@ -1077,7 +1077,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
             <section class="normal" id="section-">
 <div id="nonparametric-time-series-models" class="section level1 hasAnchor" number="25">
 <h1><span class="header-section-number">Chapter 25</span> Nonparametric Time Series Models<a href="nonparametric-time-series-models.html#nonparametric-time-series-models" class="anchor-section" aria-label="Anchor link to header"></a></h1>
-<p>Part VII turns the directional framework toward <strong>time</strong>.</p>
+<p>This chapter turns the directional framework toward <strong>time</strong>.</p>
 <p>Previous chapters developed nonparametric estimation, clustering, regression, classification, and ensemble learning using recursive partitioning, local averaging, and benchmark-relative structure. Those methods treated observations as unordered or cross-sectional. Time-series analysis adds a new constraint:</p>
 <p><strong>the observations arrive in sequence, and that ordering matters.</strong></p>
 <p>A time series is not merely a set of values. It is a structured sequence in which the past may influence the future, seasonal patterns may recur, and dependence may change across time.</p>
@@ -1088,7 +1088,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li>explicit stationarity requirements,</li>
 <li>and model identification choices that must be imposed before estimation.</li>
 </ul>
-<p>The NNS framework approaches time series differently.</p>
+<p>The Nonlinear Nonparametric Statistics (NNS) framework approaches time series differently.</p>
 <p>At its heart, time-series modeling is treated as a <strong>subset regression problem</strong>: a sequence is decomposed into lagged component series, and future values are forecast by applying the same nonlinear nonparametric regression logic developed earlier in the book to those components. In this view, autoregression is not abandoned. It is generalized.</p>
 <p>Rather than beginning with a linear dynamic equation, NNS begins with a simpler principle:</p>
 <p><strong>forecast the future by learning the structure of the past without imposing a parametric law for that structure.</strong></p>
@@ -1113,7 +1113,7 @@ X_t = \phi_1 X_{t-1} + \cdots + \phi_p X_{t-p} + \varepsilon_t,
 X_t = f(X_{t-1}, X_{t-2}, \dots) + \varepsilon_t.
 \]</span></p>
 <p>The task is then to estimate the unknown dynamic map <span class="math inline">\(f\)</span> nonparametrically.</p>
-<p>This places time-series analysis inside the same framework developed in Chapters 19–24:</p>
+<p>This places time-series analysis inside the same framework developed in Chapters 18–19 and 21–24:</p>
 <ul>
 <li>identify informative local structure,</li>
 <li>partition or decompose the data,</li>
@@ -1349,7 +1349,7 @@ X_{j+km}=g_{j,m}(k)+\varepsilon_{j,k}.
 <li>later values cannot influence earlier ones,</li>
 <li>and positive versus negative deviations may propagate differently across time.</li>
 </ul>
-<p>Within the broader NNS framework, this suggests a temporal analogue of the co-partial-moment decomposition developed in Chapters 11, 12, and 14. For a lag <span class="math inline">\(\tau \ge 1\)</span>, one can study lagged co-partial moments formed from aligned pairs such as <span class="math inline">\((X_{t-\tau}, X_t)\)</span>, separating concordant movement from divergent movement across time.</p>
+<p>Within the broader NNS framework, this suggests a temporal analogue of the co-partial-moment decomposition developed in Chapters 9–10 and 14. For a lag <span class="math inline">\(\tau \ge 1\)</span>, one can study lagged co-partial moments formed from aligned pairs such as <span class="math inline">\((X_{t-\tau}, X_t)\)</span>, separating concordant movement from divergent movement across time.</p>
 <p>In that interpretation, one class of lagged moments captures persistence in the same directional regime, while another captures reversals between periods. The distinction is useful because many time series are dynamically asymmetric even when their unconditional summaries appear mild.</p>
 <p>For example:</p>
 <ul>
@@ -1414,7 +1414,7 @@ X_{j+km}=g_{j,m}(k)+\varepsilon_{j,k}.
 <span id="cb102-2"><a href="nonparametric-time-series-models.html#cb102-2" tabindex="-1"></a><span class="im">from</span> nns <span class="im">import</span> nns_seas, nns_arma_optim</span>
 <span id="cb102-3"><a href="nonparametric-time-series-models.html#cb102-3" tabindex="-1"></a></span>
 <span id="cb102-4"><a href="nonparametric-time-series-models.html#cb102-4" tabindex="-1"></a><span class="co"># Univariate nonlinear ARMA</span></span>
-<span id="cb102-5"><a href="nonparametric-time-series-models.html#cb102-5" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng()</span>
+<span id="cb102-5"><a href="nonparametric-time-series-models.html#cb102-5" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">123</span>)</span>
 <span id="cb102-6"><a href="nonparametric-time-series-models.html#cb102-6" tabindex="-1"></a>raw_series <span class="op">=</span> np.sin(np.arange(<span class="dv">1</span>, <span class="dv">481</span>) <span class="op">/</span> <span class="dv">8</span>) <span class="op">+</span> rng.normal(scale<span class="op">=</span><span class="fl">0.35</span>, size<span class="op">=</span><span class="dv">480</span>)</span>
 <span id="cb102-7"><a href="nonparametric-time-series-models.html#cb102-7" tabindex="-1"></a></span>
 <span id="cb102-8"><a href="nonparametric-time-series-models.html#cb102-8" tabindex="-1"></a><span class="co"># Estimate scaling and select periods from the training prefix</span></span>
@@ -1440,8 +1440,8 @@ to one does not make its Gini dispersion one. The optimizer’s score is interna
 validation, not an independent final test.</p>
 <center>
 <div class="float">
-<img src="images/ch25_uni_ts.png" alt="Figure 25.1. Current sine-series example, with scaling and period selection fitted at the internal validation origin. Dashed predictions cover the internal validation suffix; the solid extension is the 48-step forecast. The shaded residual-quantile bands require a separate future-coverage assessment." />
-<div class="figcaption">Figure 25.1. Current sine-series example, with scaling and period selection fitted at the internal validation origin. Dashed predictions cover the internal validation suffix; the solid extension is the 48-step forecast. The shaded residual-quantile bands require a separate future-coverage assessment.</div>
+<img src="images/ch25_uni_ts.png" alt="Current sine-series example, with scaling and period selection fitted at the internal validation origin. Dashed predictions cover the internal validation suffix; the solid extension is the 48-step forecast. The shaded residual-quantile bands require a separate future-coverage assessment." />
+<div class="figcaption">Current sine-series example, with scaling and period selection fitted at the internal validation origin. Dashed predictions cover the internal validation suffix; the solid extension is the 48-step forecast. The shaded residual-quantile bands require a separate future-coverage assessment.</div>
 </div>
 </center>
 <hr />
@@ -1682,10 +1682,7 @@ NNS learns a predictive architecture from subset behavior.</p>
 <p><strong>Further Reading / Examples</strong></p>
 </blockquote>
 <blockquote>
-<p>For forecasting applications, including the tidal data example, see the <a href="https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/README.md#4-time-series-forecasting">NNS Time-Series Forecasting Examples</a>. This behavior is illustrated in the <a href="https://htmlpreview.github.io/?https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/tides.html">tidal forecasting example</a>, where the seasonal decomposition captures the dominant 12-month cycle.</p>
-</blockquote>
-<blockquote>
-<p>For prediction-interval calibration under nonstationarity — <code>NNS.ARMA.optim</code> benchmarked against conformal-prediction methods on coverage and the Winkler interval score — see the <a href="https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/nns_arma_conformal_benchmark_report.md">time-series prediction-interval benchmark</a>.</p>
+<p>For forecasting applications, including the tidal data example, see the <a href="https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/index.md#time-series-forecasting">NNS Time-Series Forecasting Examples</a>. This behavior is illustrated in the <a href="https://ovvo-financial.github.io/NNS/examples/tides.html">historical tidal forecasting example</a>. Its archived output has not been regenerated under the current validation protocol; see the <a href="https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/example-corrections.md">reproducibility notes</a> before drawing numerical conclusions.</p>
 </blockquote>
 
 </div>

@@ -1313,15 +1313,30 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb93-7"><a href="clustering.html#cb93-7" tabindex="-1"></a>g <span class="op">=</span> <span class="dv">6</span></span>
 <span id="cb93-8"><a href="clustering.html#cb93-8" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(g)</span>
 <span id="cb93-9"><a href="clustering.html#cb93-9" tabindex="-1"></a>n <span class="op">=</span> <span class="dv">100</span></span>
-<span id="cb93-10"><a href="clustering.html#cb93-10" tabindex="-1"></a>x <span class="op">=</span> np.concatenate([rng.normal(rng.uniform() <span class="op">*</span> i<span class="op">**</span><span class="dv">2</span>, <span class="dv">1</span>, n <span class="op">//</span> g) <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, g <span class="op">+</span> <span class="dv">1</span>)])</span>
-<span id="cb93-11"><a href="clustering.html#cb93-11" tabindex="-1"></a>y <span class="op">=</span> np.concatenate([rng.normal(rng.uniform() <span class="op">*</span> i<span class="op">**</span><span class="dv">2</span>, <span class="dv">1</span>, n <span class="op">//</span> g) <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, g <span class="op">+</span> <span class="dv">1</span>)])</span>
-<span id="cb93-12"><a href="clustering.html#cb93-12" tabindex="-1"></a>d <span class="op">=</span> np.column_stack((x, y))</span>
-<span id="cb93-13"><a href="clustering.html#cb93-13" tabindex="-1"></a></span>
-<span id="cb93-14"><a href="clustering.html#cb93-14" tabindex="-1"></a>km <span class="op">=</span> KMeans(n_clusters<span class="op">=</span><span class="dv">3</span>, n_init<span class="op">=</span><span class="st">&quot;auto&quot;</span>).fit(d)</span>
-<span id="cb93-15"><a href="clustering.html#cb93-15" tabindex="-1"></a>km.labels_, km.cluster_centers_</span>
-<span id="cb93-16"><a href="clustering.html#cb93-16" tabindex="-1"></a></span>
-<span id="cb93-17"><a href="clustering.html#cb93-17" tabindex="-1"></a>part <span class="op">=</span> nns_part(x, y, order<span class="op">=</span><span class="dv">3</span>, obs_req<span class="op">=</span><span class="dv">0</span>)</span>
-<span id="cb93-18"><a href="clustering.html#cb93-18" tabindex="-1"></a>plot_nns_part(part)   <span class="co"># Voronoi view of the directional partition</span></span></code></pre></div>
+<span id="cb93-10"><a href="clustering.html#cb93-10" tabindex="-1"></a></span>
+<span id="cb93-11"><a href="clustering.html#cb93-11" tabindex="-1"></a>x <span class="op">=</span> np.concatenate(</span>
+<span id="cb93-12"><a href="clustering.html#cb93-12" tabindex="-1"></a>    [</span>
+<span id="cb93-13"><a href="clustering.html#cb93-13" tabindex="-1"></a>        rng.normal(rng.uniform() <span class="op">*</span> i<span class="op">**</span><span class="dv">2</span>, <span class="dv">1</span>, n <span class="op">//</span> g)</span>
+<span id="cb93-14"><a href="clustering.html#cb93-14" tabindex="-1"></a>        <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, g <span class="op">+</span> <span class="dv">1</span>)</span>
+<span id="cb93-15"><a href="clustering.html#cb93-15" tabindex="-1"></a>    ]</span>
+<span id="cb93-16"><a href="clustering.html#cb93-16" tabindex="-1"></a>)</span>
+<span id="cb93-17"><a href="clustering.html#cb93-17" tabindex="-1"></a></span>
+<span id="cb93-18"><a href="clustering.html#cb93-18" tabindex="-1"></a>y <span class="op">=</span> np.concatenate(</span>
+<span id="cb93-19"><a href="clustering.html#cb93-19" tabindex="-1"></a>    [</span>
+<span id="cb93-20"><a href="clustering.html#cb93-20" tabindex="-1"></a>        rng.normal(rng.uniform() <span class="op">*</span> i<span class="op">**</span><span class="dv">2</span>, <span class="dv">1</span>, n <span class="op">//</span> g)</span>
+<span id="cb93-21"><a href="clustering.html#cb93-21" tabindex="-1"></a>        <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, g <span class="op">+</span> <span class="dv">1</span>)</span>
+<span id="cb93-22"><a href="clustering.html#cb93-22" tabindex="-1"></a>    ]</span>
+<span id="cb93-23"><a href="clustering.html#cb93-23" tabindex="-1"></a>)</span>
+<span id="cb93-24"><a href="clustering.html#cb93-24" tabindex="-1"></a></span>
+<span id="cb93-25"><a href="clustering.html#cb93-25" tabindex="-1"></a>d <span class="op">=</span> np.column_stack((x, y))</span>
+<span id="cb93-26"><a href="clustering.html#cb93-26" tabindex="-1"></a></span>
+<span id="cb93-27"><a href="clustering.html#cb93-27" tabindex="-1"></a><span class="co"># K-means clustering</span></span>
+<span id="cb93-28"><a href="clustering.html#cb93-28" tabindex="-1"></a>km <span class="op">=</span> KMeans(n_clusters<span class="op">=</span><span class="dv">3</span>, n_init<span class="op">=</span><span class="st">&quot;auto&quot;</span>).fit(d)</span>
+<span id="cb93-29"><a href="clustering.html#cb93-29" tabindex="-1"></a><span class="bu">print</span>(km.labels_, km.cluster_centers_)</span>
+<span id="cb93-30"><a href="clustering.html#cb93-30" tabindex="-1"></a></span>
+<span id="cb93-31"><a href="clustering.html#cb93-31" tabindex="-1"></a><span class="co"># NNS directional partitioning</span></span>
+<span id="cb93-32"><a href="clustering.html#cb93-32" tabindex="-1"></a>part <span class="op">=</span> nns_part(x, y, order<span class="op">=</span><span class="dv">3</span>, obs_req<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb93-33"><a href="clustering.html#cb93-33" tabindex="-1"></a>plot_nns_part(part)</span></code></pre></div>
 <center>
 <div class="float">
 <img src="images/ch21_kmeans_comp.png" alt="Figure 21.1. k-means (top) with analyst-specified K=3 versus NNS.part (bottom) with data-determined clusters. The directional partition uses a depth and occupancy rule without a prespecified count; k-means assigns observations to three centroid-based Voronoi regions." />

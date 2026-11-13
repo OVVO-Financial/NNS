@@ -1077,7 +1077,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
             <section class="normal" id="section-">
 <div id="classification" class="section level1 hasAnchor" number="23">
 <h1><span class="header-section-number">Chapter 23</span> Classification<a href="classification.html#classification" class="anchor-section" aria-label="Anchor link to header"></a></h1>
-<p>Chapter 21 developed nonparametric regression in the NNS framework as conditional expectation estimation by recursive partitioning. There, the response variable was numeric, and the objective was to recover a conditional mean surface.</p>
+<p>Chapter 22 developed nonparametric regression in the Nonlinear Nonparametric Statistics (NNS) framework as conditional expectation estimation by recursive partitioning. There, the response variable was numeric, and the objective was to recover a conditional mean surface.</p>
 <p>This chapter turns to <strong>classification</strong>.</p>
 <p>In classification problems, the response is not a number to be predicted directly, but a <strong>category to be assigned</strong>. The task is to determine, from observed predictor variables, which class label is most appropriate for a new observation.</p>
 <p>Classical classification methods such as <strong>logistic regression</strong>, <strong>linear discriminant analysis</strong>, <strong>support vector machines</strong>, and <strong>random forests</strong> are widely used and often effective. But they inherit many of the structural limitations discussed throughout this book:</p>
@@ -1156,7 +1156,7 @@ g^*(x) = \arg\max_{c \in \mathcal{C}} P(Y=c \mid X=x).
 </div>
 <div id="directional-decision-regions" class="section level2 hasAnchor" number="23.3">
 <h2><span class="header-section-number">23.3</span> Directional Decision Regions<a href="classification.html#directional-decision-regions" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>The NNS approach to classification begins from the recursive partition machinery introduced in Chapters 18–20.</p>
+<p>The NNS approach to classification begins with the recursive partitions introduced in Chapter 18, given a dynamic-bandwidth interpretation in Chapter 19, and subsequently applied to clustering in Chapter 21.</p>
 <p>Suppose the predictor space is partitioned into cells</p>
 <p><span class="math display">\[
 A_1, A_2, \dots, A_M.
@@ -1179,11 +1179,11 @@ A_1, A_2, \dots, A_M.
 <p><span class="math display">\[
 \hat p_1(x) = \hat p_2(x).
 \]</span></p>
-<p>Equivalently,</p>
+<p>Equivalently, the <strong>estimated</strong> class-probability difference is zero:</p>
 <p><span class="math display">\[
-P(Y=1 \mid X=x) - P(Y=2 \mid X=x) = 0.
+\hat p_1(x) - \hat p_2(x) = 0.
 \]</span></p>
-<p>Within NNS, this boundary is not imposed in advance. It emerges from the partition structure.</p>
+<p>The population Bayes boundary instead satisfies <span class="math inline">\(P(Y=1\mid X=x)=P(Y=2\mid X=x)\)</span>. The two boundaries need not coincide in a finite sample. Within NNS, the fitted boundary is not imposed in advance; it follows from the estimated probability surface and its partition structure.</p>
 <hr />
 </div>
 <div id="binary-classification" class="section level2 hasAnchor" number="23.4">
@@ -1269,8 +1269,7 @@ Y \in \{1,2,\dots,K\}
 </div>
 <div id="refinement-interpretation" class="section level3 hasAnchor" number="23.6.3">
 <h3><span class="header-section-number">23.6.3</span> Refinement interpretation<a href="classification.html#refinement-interpretation" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<p>Where class mixing remains high, further partitioning can sharpen the local probability estimate. Where classes are already well separated, coarser regions suffice.</p>
-<p>Thus the classifier adapts its complexity to the structure of the data.</p>
+<p>Further partitioning <em>can</em> sharpen estimated class probabilities in mixed cells, but doing so also reduces the local sample size. The current mean-split rule does not explicitly choose boundaries by maximizing class purity or splitting only where classes are mixed. Resolution is controlled by the selected order, the data-dependent split geometry, and occupancy stopping rules.</p>
 <hr />
 </div>
 </div>
@@ -1379,7 +1378,7 @@ x \mapsto \hat g(x)
 <p><span class="math display">\[
 \hat p_c^{\text{stack}}(x)
 \]</span></p>
-<p>through a weighted combination, then classifies by the largest combined probability.</p>
+<p>through optimized combination, then classifies by the largest combined probability.</p>
 <p>In the NNS setting, stacking is especially natural because class probabilities are already interpretable directional quantities. The second-stage learner therefore combines probability surfaces, not merely hard labels.</p>
 <p>These ensemble procedures preserve the core NNS strengths:</p>
 <ul>
@@ -1403,18 +1402,20 @@ x \mapsto \hat g(x)
 <span id="cb99-3"><a href="classification.html#cb99-3" tabindex="-1"></a></span>
 <span id="cb99-4"><a href="classification.html#cb99-4" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">123</span>)</span>
 <span id="cb99-5"><a href="classification.html#cb99-5" tabindex="-1"></a>X_train <span class="op">=</span> rng.normal(size<span class="op">=</span>(<span class="dv">200</span>, <span class="dv">4</span>))</span>
-<span id="cb99-6"><a href="classification.html#cb99-6" tabindex="-1"></a>y_train <span class="op">=</span> (X_train[:, <span class="dv">0</span>] <span class="op">+</span> X_train[:, <span class="dv">1</span>] <span class="op">**</span> <span class="dv">2</span> <span class="op">&gt;</span> <span class="dv">1</span>).astype(<span class="bu">int</span>) <span class="op">+</span> <span class="dv">1</span>   <span class="co"># labels 1/2</span></span>
-<span id="cb99-7"><a href="classification.html#cb99-7" tabindex="-1"></a>X_test <span class="op">=</span> rng.normal(size<span class="op">=</span>(<span class="dv">50</span>, <span class="dv">4</span>))</span>
-<span id="cb99-8"><a href="classification.html#cb99-8" tabindex="-1"></a></span>
-<span id="cb99-9"><a href="classification.html#cb99-9" tabindex="-1"></a><span class="co"># Boosted classification</span></span>
-<span id="cb99-10"><a href="classification.html#cb99-10" tabindex="-1"></a>boosted <span class="op">=</span> nns_boost(X_train, y_train, X_test, <span class="bu">type</span><span class="op">=</span><span class="st">&quot;CLASS&quot;</span>,</span>
-<span id="cb99-11"><a href="classification.html#cb99-11" tabindex="-1"></a>                    learner_trials<span class="op">=</span><span class="dv">100</span>, status<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb99-12"><a href="classification.html#cb99-12" tabindex="-1"></a>boosted[<span class="st">&quot;results&quot;</span>]             <span class="co"># predicted class labels</span></span>
-<span id="cb99-13"><a href="classification.html#cb99-13" tabindex="-1"></a>boosted[<span class="st">&quot;feature.weights&quot;</span>]     <span class="co"># feature-stability weights</span></span>
-<span id="cb99-14"><a href="classification.html#cb99-14" tabindex="-1"></a></span>
-<span id="cb99-15"><a href="classification.html#cb99-15" tabindex="-1"></a><span class="co"># Stacked classification</span></span>
-<span id="cb99-16"><a href="classification.html#cb99-16" tabindex="-1"></a>stacked <span class="op">=</span> nns_stack(X_train, y_train, X_test, <span class="bu">type</span><span class="op">=</span><span class="st">&quot;CLASS&quot;</span>, status<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb99-17"><a href="classification.html#cb99-17" tabindex="-1"></a>stacked[<span class="st">&quot;stack&quot;</span>]               <span class="co"># combined out-of-sample predictions</span></span></code></pre></div>
+<span id="cb99-6"><a href="classification.html#cb99-6" tabindex="-1"></a>y_train <span class="op">=</span> (</span>
+<span id="cb99-7"><a href="classification.html#cb99-7" tabindex="-1"></a>    X_train[:, <span class="dv">0</span>] <span class="op">+</span> X_train[:, <span class="dv">1</span>] <span class="op">**</span> <span class="dv">2</span> <span class="op">&gt;</span> <span class="dv">1</span></span>
+<span id="cb99-8"><a href="classification.html#cb99-8" tabindex="-1"></a>).astype(<span class="bu">int</span>) <span class="op">+</span> <span class="dv">1</span>  <span class="co"># class labels 1/2</span></span>
+<span id="cb99-9"><a href="classification.html#cb99-9" tabindex="-1"></a>X_test <span class="op">=</span> rng.normal(size<span class="op">=</span>(<span class="dv">50</span>, <span class="dv">4</span>))</span>
+<span id="cb99-10"><a href="classification.html#cb99-10" tabindex="-1"></a></span>
+<span id="cb99-11"><a href="classification.html#cb99-11" tabindex="-1"></a><span class="co"># Boosted classification</span></span>
+<span id="cb99-12"><a href="classification.html#cb99-12" tabindex="-1"></a>boosted <span class="op">=</span> nns_boost(X_train, y_train, X_test, <span class="bu">type</span><span class="op">=</span><span class="st">&quot;CLASS&quot;</span>,</span>
+<span id="cb99-13"><a href="classification.html#cb99-13" tabindex="-1"></a>                    learner_trials<span class="op">=</span><span class="dv">100</span>, status<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb99-14"><a href="classification.html#cb99-14" tabindex="-1"></a>boosted[<span class="st">&quot;results&quot;</span>]             <span class="co"># predicted class labels</span></span>
+<span id="cb99-15"><a href="classification.html#cb99-15" tabindex="-1"></a>boosted[<span class="st">&quot;feature.weights&quot;</span>]     <span class="co"># feature-stability weights</span></span>
+<span id="cb99-16"><a href="classification.html#cb99-16" tabindex="-1"></a></span>
+<span id="cb99-17"><a href="classification.html#cb99-17" tabindex="-1"></a><span class="co"># Stacked classification</span></span>
+<span id="cb99-18"><a href="classification.html#cb99-18" tabindex="-1"></a>stacked <span class="op">=</span> nns_stack(X_train, y_train, X_test, <span class="bu">type</span><span class="op">=</span><span class="st">&quot;CLASS&quot;</span>, status<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb99-19"><a href="classification.html#cb99-19" tabindex="-1"></a>stacked[<span class="st">&quot;stack&quot;</span>]               <span class="co"># combined out-of-sample predictions</span></span></code></pre></div>
 <p>The cell frequencies implement the local probability construction. Interpolation, neighbor weighting, class-specific synthetic indices, resampling, and blend selection are additional estimation steps whose predictive performance and calibration must be checked on held-out data.</p>
 <hr />
 </div>
@@ -1607,8 +1608,8 @@ F_1 = 2\frac{\text{Precision}\cdot\text{Recall}}
 <h2><span class="header-section-number">23.16</span> Conceptual Interpretation<a href="classification.html#conceptual-interpretation-1" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>This chapter completes a natural progression.</p>
 <ul>
-<li>Chapter 20 used recursive partitions for <strong>unsupervised grouping</strong>.</li>
-<li>Chapter 21 used them for <strong>numeric prediction</strong>.</li>
+<li>Chapter 21 used recursive partitions for <strong>unsupervised grouping</strong>.</li>
+<li>Chapter 22 used them for <strong>numeric prediction</strong>.</li>
 <li>This chapter uses them for <strong>categorical prediction</strong>.</li>
 </ul>
 <p>The same partition machinery supports all three.</p>
@@ -1638,13 +1639,13 @@ P(Y=c \mid X=x),
 <p>Third, it distinguished <strong>binary and multiclass classification</strong>, showing that both arise from the same local probability logic.</p>
 <p>Fourth, it developed the idea of <strong>directional decision boundaries</strong>, emphasizing benchmark-relative and locally adaptive separation rather than a single global separating equation.</p>
 <p>Fifth, it clarified the <strong>package implementation bridge</strong>: in applied NNS usage, classification is most naturally invoked through <code>NNS.boost(..., type = "CLASS")</code> and <code>NNS.stack(..., type = "CLASS")</code>, which operationalize the partition-based classifier in stabilized ensemble form. These ensemble routines are developed in Chapter 24, where their resampling and aggregation mechanics are treated in detail.</p>
-<p>Sixth, it introduced <strong>boosting and stacking</strong> as natural ensemble extensions of the NNS classifier, improving robustness and predictive accuracy while preserving directional interpretability.</p>
+<p>Sixth, it introduced <strong>boosting and stacking</strong> as ensemble extensions of the NNS classifier that may improve robustness and predictive accuracy, subject to appropriate held-out evaluation.</p>
 <p>Seventh, it compared the NNS approach with <strong>random forests and support vector machines</strong>, highlighting the distinctive combination of nonlinear flexibility, local class-probability interpretation, and benchmark-relative partition geometry.</p>
 <p>Taken together, these results show that classification in the NNS framework is not a separate machine-learning module bolted onto the theory. It is another direct consequence of the same directional primitive that generated distribution theory, dependence, clustering, and regression.</p>
-<p>The next part of the book turns from machine learning toward broader applications and synthesis, showing how these directional tools combine in practice.</p>
+<p>Chapter 24 develops <strong>ensemble methods</strong>, including the boosting and stacking mechanisms introduced here. Chapters 25 and 26 then extend the NNS framework to time-series models and multivariate forecasting.</p>
 <blockquote>
 <p><strong>Further Reading / Examples</strong>
-For machine learning applications, including the MNIST classification example, see the <a href="https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/README.md#3-machine-learning">NNS Machine Learning Examples</a>.</p>
+For machine learning applications, including the MNIST classification example, see the <a href="https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/index.md#machine-learning">NNS Machine Learning Examples</a>.</p>
 </blockquote>
 
 </div>

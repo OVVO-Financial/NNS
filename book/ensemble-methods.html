@@ -1077,7 +1077,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
             <section class="normal" id="section-">
 <div id="ensemble-methods" class="section level1 hasAnchor" number="24">
 <h1><span class="header-section-number">Chapter 24</span> Ensemble Methods<a href="ensemble-methods.html#ensemble-methods" class="anchor-section" aria-label="Anchor link to header"></a></h1>
-<p>Chapters 21–23 developed the machine-learning side of the NNS framework from three complementary angles.</p>
+<p>Chapters 21–23 developed the machine-learning side of the Nonlinear Nonparametric Statistics (NNS) framework from three complementary angles.</p>
 <ul>
 <li>Chapter 21 treated recursive partitions as an unsupervised clustering device.</li>
 <li>Chapter 22 used those same partitions for conditional expectation estimation.</li>
@@ -1214,10 +1214,8 @@ The second level stabilizes that geometry across feature subsets, folds, and can
 <p>A stacked model does not choose one of them. It treats them as a new feature vector</p>
 <p><span class="math display">\[z(x)=\bigl(\hat y^{(1)}(x),\dots,\hat y^{(K)}(x)\bigr)\]</span></p>
 <p>and then selects a second-stage combination. In the current two-component implementation, the rule is a convex blend</p>
-<p><span class="math display">\[\hat y_{\mathrm{stack}}(x)=w\hat y^{(1)}(x)+(1-w)\hat y^{(2)}(x).\]</span></p>
-<p>For regression, the weight is selected from <span class="math inline">\(w\in\{0,.01,\ldots,1\}\)</span> on pooled out-of-fold predictions. Classification blends the class-probability vectors before making the label decision, weighting each component by its squared out-of-fold objective score <span class="math inline">\(S_k\)</span> (inverse squares for a minimized objective):</p>
-<p><span class="math display">\[w=\frac{S_1^2}{S_1^2+S_2^2}.\]</span></p>
-<p>Two components with nearly equal scores are therefore blended nearly equally, rather than one taking all the weight because it classified one more held-out observation correctly. This is a restricted meta-model, not an arbitrary fitted function <span class="math inline">\(G\)</span>.</p>
+<p><span class="math display">\[\hat y_{\mathrm{stack}}(x)=w\hat y^{(1)}(x)+(1-w)\hat y^{(2)}(x),\qquad w\in\{0,.01,\ldots,1\},\]</span></p>
+<p>with the weight selected on pooled out-of-fold predictions. Classification blends the class-probability vectors before making the label decision. This is a restricted meta-model, not an arbitrary fitted function <span class="math inline">\(G\)</span>.</p>
 <p>In the NNS setting, the base learners come from two main sources documented in the function interface:</p>
 <ul>
 <li><strong>Method 1</strong>: direct <code>NNS.reg</code> prediction, which in the multivariate case operates as regression-point nearest-neighbor search over a compressed set of local conditional means (as developed in Chapter 22) — not a piecewise-linear surface.</li>
@@ -1400,7 +1398,7 @@ The second level stabilizes that geometry across feature subsets, folds, and can
 </div>
 <div id="class-imbalance" class="section level3 hasAnchor" number="24.10.3">
 <h3><span class="header-section-number">24.10.3</span> Class imbalance<a href="ensemble-methods.html#class-imbalance" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<p>When classes are imbalanced, raw accuracy may be misleading. The <code>balance</code> option in both routines helps address this by combining down-sampling and up-sampling when classification is requested. A more complete treatment of this imbalance-handling ensemble workflow appears in Chapter 25, where multivariate forecasting workflows use the same up/down-sampling logic under skewed classification-style targets.</p>
+<p>When classes are imbalanced, raw accuracy may be misleading. The <code>balance</code> option in both routines helps address this by combining down-sampling and up-sampling when classification is requested. For the classification context, class imbalance, and evaluation metrics, see Chapter 23. The ensemble balancing controls are described in the present chapter; Chapter 25 instead covers nonparametric time-series models.</p>
 </div>
 <div id="missing-data" class="section level3 hasAnchor" number="24.10.4">
 <h3><span class="header-section-number">24.10.4</span> Missing data<a href="ensemble-methods.html#missing-data" class="anchor-section" aria-label="Anchor link to header"></a></h3>
@@ -1444,13 +1442,13 @@ The second level stabilizes that geometry across feature subsets, folds, and can
 <h2><span class="header-section-number">24.12</span> Conceptual Summary<a href="ensemble-methods.html#conceptual-summary" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>This chapter completes the machine-learning progression.</p>
 <ul>
-<li>Chapter 20 used recursive partitions for <strong>unsupervised grouping</strong>.</li>
+<li>Chapter 21 used recursive partitions for <strong>unsupervised grouping</strong>.</li>
 <li>Chapter 22 used them for <strong>numeric prediction</strong>, with regression-point nearest-neighbor search in the multivariate case.</li>
-<li>Chapter 22 used them for <strong>categorical prediction</strong>.</li>
+<li>Chapter 23 used them for <strong>categorical prediction</strong>.</li>
 <li>This chapter uses them in <strong>aggregated form</strong> to improve predictive stability and performance, with cross-validated optimization of the neighbor count <span class="math inline">\(k\)</span> as a central mechanism.</li>
 </ul>
 <p>The conceptual thread is unbroken.</p>
-<p>The same directional primitive that generated partial moments, dependence measures, causation, clustering, regression, and classification also supports ensemble learning — and the <span class="math inline">\(k\)</span> optimization in <code>NNS.stack</code> is a direct consequence of the regression-point nearest-neighbor prediction mechanism established in Chapter 21. Once prediction is understood as a nearest-neighbor search over compressed local conditional means rather than a piecewise-linear surface, it becomes natural that the ensemble layer would need to determine the right localization scale for that search.</p>
+<p>The same directional primitive that generated partial moments, dependence measures, causation, clustering, regression, and classification also supports ensemble learning — and the <span class="math inline">\(k\)</span> optimization in <code>NNS.stack</code> is a direct consequence of the regression-point nearest-neighbor prediction mechanism established in Chapter 22. Once prediction is understood as a nearest-neighbor search over compressed local conditional means rather than a piecewise-linear surface, it becomes natural that the ensemble layer would need to determine the right localization scale for that search.</p>
 <hr />
 </div>
 <div id="summary-18" class="section level2 hasAnchor" number="24.13">

@@ -1077,7 +1077,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
             <section class="normal" id="section-">
 <div id="multivariate-forecasting" class="section level1 hasAnchor" number="26">
 <h1><span class="header-section-number">Chapter 26</span> Multivariate Forecasting<a href="multivariate-forecasting.html#multivariate-forecasting" class="anchor-section" aria-label="Anchor link to header"></a></h1>
-<p>Chapter 25 developed the NNS approach to univariate forecasting. A single series is partitioned into phase-specific component series, each regressed against its occurrence index and extrapolated using linear or directional nonparametric fits. The multivariate extension retains those univariate forecasts as its first stage.</p>
+<p>Chapter 25 developed the Nonlinear Nonparametric Statistics (NNS) approach to univariate forecasting. A single series is partitioned into phase-specific component series, each regressed against its occurrence index and extrapolated using linear or directional nonparametric fits. The multivariate extension retains those univariate forecasts as its first stage.</p>
 <p>But many forecasting problems are not univariate.</p>
 <p>Macroeconomic indicators move together.<br />
 Financial variables transmit shocks across markets.<br />
@@ -1085,7 +1085,7 @@ Operational systems contain multiple indicators observed at different frequencie
 In all such cases, the future of one variable depends not only on its own past, but also on the lagged history of other variables.</p>
 <p>This chapter extends the forecasting framework from one time series to a <strong>system of time series</strong>.</p>
 <p>The package implementation is <code>NNS.VAR</code>, a <strong>nonparametric vector autoregressive model incorporating <code>NNS.ARMA</code> estimates of variables into <code>NNS.reg</code> for a multivariate time-series forecast</strong>. Its purpose is explicit: combine univariate nonlinear time-series forecasting with multivariate nonlinear regression so that each series can borrow information from the others while still retaining its own temporal structure.</p>
-<p>Whenever this chapter appeals to mean-split regression behavior (local refinement with occupancy control), the theoretical reference point is Chapter 18: the consistency conditions for recursive mean-split estimation under shrinking local diameters and growing local sample support.</p>
+<p>Whenever this chapter appeals to mean-split regression behavior (local refinement with occupancy control), the theoretical reference point is Chapter 18: the consistency conditions for recursive mean-split estimation under shrinking local diameters and growing local sample support. Chapter 22 explains the implemented multivariate regression-point matrix and prediction rule, while Chapter 24 develops the ensemble methods employed here.</p>
 <p>A second implementation, <code>NNS.nowcast</code>, wraps this framework for mixed-frequency macroeconomic forecasting and nowcasting, using a built-in panel of Federal Reserve style indicators and passing them to <code>NNS.VAR</code> with monthly alignment and a 12-lag structure.</p>
 <p>The key ideas of the chapter are therefore:</p>
 <ul>
@@ -1197,19 +1197,21 @@ X_t = c + A_1 X_{t-1} + A_2 X_{t-2} + \cdots + A_k X_{t-k} + \varepsilon_t,
 <span id="cb103-4"><a href="multivariate-forecasting.html#cb103-4" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">123</span>)</span>
 <span id="cb103-5"><a href="multivariate-forecasting.html#cb103-5" tabindex="-1"></a>n <span class="op">=</span> <span class="dv">200</span></span>
 <span id="cb103-6"><a href="multivariate-forecasting.html#cb103-6" tabindex="-1"></a>x1 <span class="op">=</span> np.cumsum(rng.normal(size<span class="op">=</span>n))</span>
-<span id="cb103-7"><a href="multivariate-forecasting.html#cb103-7" tabindex="-1"></a>x2 <span class="op">=</span> <span class="fl">0.5</span> <span class="op">*</span> np.roll(x1, <span class="dv">3</span>) <span class="op">+</span> rng.normal(size<span class="op">=</span>n)</span>
-<span id="cb103-8"><a href="multivariate-forecasting.html#cb103-8" tabindex="-1"></a>variables <span class="op">=</span> np.column_stack((x1, x2))</span>
-<span id="cb103-9"><a href="multivariate-forecasting.html#cb103-9" tabindex="-1"></a></span>
-<span id="cb103-10"><a href="multivariate-forecasting.html#cb103-10" tabindex="-1"></a>out <span class="op">=</span> nns_var(variables, h<span class="op">=</span><span class="dv">12</span>, tau<span class="op">=</span><span class="dv">12</span>, naive_weights<span class="op">=</span><span class="va">True</span>, status<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb103-11"><a href="multivariate-forecasting.html#cb103-11" tabindex="-1"></a></span>
-<span id="cb103-12"><a href="multivariate-forecasting.html#cb103-12" tabindex="-1"></a>out[<span class="st">&quot;interpolated_and_extrapolated&quot;</span>]   <span class="co"># completed panel</span></span>
-<span id="cb103-13"><a href="multivariate-forecasting.html#cb103-13" tabindex="-1"></a>out[<span class="st">&quot;relevant_variables&quot;</span>]              <span class="co"># selected lagged predictors per target</span></span>
-<span id="cb103-14"><a href="multivariate-forecasting.html#cb103-14" tabindex="-1"></a>out[<span class="st">&quot;univariate&quot;</span>]                      <span class="co"># standalone NNS.ARMA forecasts</span></span>
-<span id="cb103-15"><a href="multivariate-forecasting.html#cb103-15" tabindex="-1"></a>out[<span class="st">&quot;multivariate&quot;</span>]                    <span class="co"># nonlinear multivariate forecasts</span></span>
-<span id="cb103-16"><a href="multivariate-forecasting.html#cb103-16" tabindex="-1"></a>out[<span class="st">&quot;ensemble&quot;</span>]                        <span class="co"># combined forecast</span></span>
-<span id="cb103-17"><a href="multivariate-forecasting.html#cb103-17" tabindex="-1"></a></span>
-<span id="cb103-18"><a href="multivariate-forecasting.html#cb103-18" tabindex="-1"></a><span class="co"># Mixed-frequency nowcasting path (NNS.nowcast&#39;s core call)</span></span>
-<span id="cb103-19"><a href="multivariate-forecasting.html#cb103-19" tabindex="-1"></a><span class="co"># out = nns_var(econ_variables, h=12, tau=12, nowcast=True)</span></span></code></pre></div>
+<span id="cb103-7"><a href="multivariate-forecasting.html#cb103-7" tabindex="-1"></a>lag3_x1 <span class="op">=</span> np.concatenate((np.repeat(x1[<span class="dv">0</span>], <span class="dv">3</span>), x1[:<span class="op">-</span><span class="dv">3</span>]))</span>
+<span id="cb103-8"><a href="multivariate-forecasting.html#cb103-8" tabindex="-1"></a>x2 <span class="op">=</span> <span class="fl">0.5</span> <span class="op">*</span> lag3_x1 <span class="op">+</span> rng.normal(size<span class="op">=</span>n)</span>
+<span id="cb103-9"><a href="multivariate-forecasting.html#cb103-9" tabindex="-1"></a>variables <span class="op">=</span> np.column_stack((x1, x2))</span>
+<span id="cb103-10"><a href="multivariate-forecasting.html#cb103-10" tabindex="-1"></a></span>
+<span id="cb103-11"><a href="multivariate-forecasting.html#cb103-11" tabindex="-1"></a>out <span class="op">=</span> nns_var(variables, h<span class="op">=</span><span class="dv">12</span>, tau<span class="op">=</span><span class="dv">12</span>, naive_weights<span class="op">=</span><span class="va">True</span>, status<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb103-12"><a href="multivariate-forecasting.html#cb103-12" tabindex="-1"></a></span>
+<span id="cb103-13"><a href="multivariate-forecasting.html#cb103-13" tabindex="-1"></a>out[<span class="st">&quot;interpolated_and_extrapolated&quot;</span>]   <span class="co"># completed panel</span></span>
+<span id="cb103-14"><a href="multivariate-forecasting.html#cb103-14" tabindex="-1"></a>out[<span class="st">&quot;relevant_variables&quot;</span>]              <span class="co"># selected lagged predictors per target</span></span>
+<span id="cb103-15"><a href="multivariate-forecasting.html#cb103-15" tabindex="-1"></a>out[<span class="st">&quot;univariate&quot;</span>]                      <span class="co"># standalone NNS.ARMA forecasts</span></span>
+<span id="cb103-16"><a href="multivariate-forecasting.html#cb103-16" tabindex="-1"></a>out[<span class="st">&quot;multivariate&quot;</span>]                    <span class="co"># nonlinear multivariate forecasts</span></span>
+<span id="cb103-17"><a href="multivariate-forecasting.html#cb103-17" tabindex="-1"></a>out[<span class="st">&quot;ensemble&quot;</span>]                        <span class="co"># combined forecast</span></span>
+<span id="cb103-18"><a href="multivariate-forecasting.html#cb103-18" tabindex="-1"></a></span>
+<span id="cb103-19"><a href="multivariate-forecasting.html#cb103-19" tabindex="-1"></a><span class="co"># For an already aligned mixed-frequency panel:</span></span>
+<span id="cb103-20"><a href="multivariate-forecasting.html#cb103-20" tabindex="-1"></a><span class="co"># out = nns_var(econ_variables, h=12, tau=12, nowcast=True)</span></span>
+<span id="cb103-21"><a href="multivariate-forecasting.html#cb103-21" tabindex="-1"></a><span class="co"># The Python flag is for API compatibility; it does not download the panel.</span></span></code></pre></div>
 <hr />
 </div>
 </div>
