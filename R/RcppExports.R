@@ -41,6 +41,14 @@ NNS_distance_path_single_parallel_cpp <- function(RPM, yhat, Xtest, k, is_class,
     .Call(`_NNS_NNS_distance_path_single_parallel_cpp`, RPM, yhat, Xtest, k, is_class, nthreads)
 }
 
+NNS_meboot_rho_cpp <- function(replicates, aligned, anti, target_centered, target_norm, rho, spearman) {
+    .Call(`_NNS_NNS_meboot_rho_cpp`, replicates, aligned, anti, target_centered, target_norm, rho, spearman)
+}
+
+NNS_sort_columns_cpp <- function(x) {
+    .Call(`_NNS_NNS_sort_columns_cpp`, x)
+}
+
 NNS_mreg_predict_path_v2_cpp <- function(rpm_x, yhat, Xtest, kmax, dist_code, mins, maxs, is_class, nthreads) {
     .Call(`_NNS_NNS_mreg_predict_path_v2_cpp`, rpm_x, yhat, Xtest, kmax, dist_code, mins, maxs, is_class, nthreads)
 }

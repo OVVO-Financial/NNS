@@ -197,7 +197,10 @@ NNS.meboot <- function(x,
     NNS.meboot.part(xx, n, z, xmin, xmax, desintxb, reachbnd)
   )
   if (is.null(dim(res_mat))) dim(res_mat) <- c(n, reps)
-  qseq <- apply(res_mat, 2, sort)
+  # Each column sorted, compiled; NULL when a value is not finite, which
+  # sort() would drop.
+  qseq <- NNS_sort_columns_cpp(res_mat)
+  if (is.null(qseq)) qseq <- apply(res_mat, 2, sort)
   res_mat[ordxx, ] <- qseq
   
   # ===== Optional dependence targeting ρ in residual space (per replicate, time-aligned) =====
@@ -240,7 +243,20 @@ NNS.meboot <- function(x,
       sum(xc * target_centered) / (xn * target_norm)
     }
 
-    for (i in 1:reps) {
+    # The correlation targets are solved in compiled code, replicate by
+    # replicate, with the arithmetic of the loop below. The loop keeps the
+    # NNS.dep targets and the replicates the kernel flags, where optimize()
+    # would warn.
+    todo <- seq_len(reps)
+    if (use_corr_path) {
+      solved <- NNS_meboot_rho_cpp(res_mat, r_o_idx, r_anti_idx,
+                                   as.numeric(target_centered), target_norm,
+                                   as.numeric(rho_vec), use_spearman)
+      res_mat <- solved$replicates
+      todo <- which(solved$redo)
+    }
+
+    for (i in todo) {
       res_sorted <- sort(res_mat[, i])
       e <- res_sorted[r_o_idx]     # aligned with ranks of orig_res
       m <- res_sorted[r_anti_idx]  # anti-aligned
