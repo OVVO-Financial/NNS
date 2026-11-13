@@ -210,3 +210,33 @@ CRAN release: 2026-10-30
   `fast_lm_mult`, `is.fcl`, `downSample`, `upSample`,
   `NNS_reg_points_cpp`, `NNS_mreg_reduce_cpp`, `NNS_distance_path_cpp`
   and `NNS_distance_bulk_cpp`, and the R helper `.grouped_gravity`.
+- A second pass moved the remaining interpreted loops into compiled
+  code, again with identical results: 3,000 random classification fits,
+  12,000 random `LPM.VaR` / `UPM.VaR` calls, 1,500 random `NNS.ANOVA`
+  calls, 1,000 random `dy.d_` calls, 5,000 random `NNS.meboot` /
+  `NNS.MC` calls, 4,000 random `NNS.dep` calls and 260 random
+  `NNS.stack` / `NNS.boost` runs match the previous build, including
+  their warnings and random number use. The compiled code repeats R’s
+  own arithmetic: `sum`, `mean`, `var`, `cumsum`, `rowSums` and
+  `colMeans` accumulate in long double as R’s do, the weighted class
+  shares use the BLAS call `crossprod` makes, and the root finder and
+  minimizer are R’s `uniroot` and `optimize` algorithms.
+- Classification: the class-probability prediction loop is compiled.
+  `NNS.reg` with a class response is 6-12x faster, `NNS.stack`
+  classification 1.8-4.4x and `NNS.boost` classification 2.8x.
+- `LPM.VaR` and `UPM.VaR` solve integer degrees 1 to 4 in compiled code.
+  `NNS.ANOVA(robust = TRUE)` is 6.6x faster and `dy.d_`, which also
+  builds the stencils of all its evaluation points together, 2.5-10x.
+- `NNS.meboot` solves its `rho` targets in compiled code: `NNS.meboot`
+  and `NNS.MC` are 4-5x faster, `NNS.SS` with a confidence interval 3.1x
+  and `NNS.ARMA` prediction intervals 7x.
+- `NNS.dep` groups cell labels instead of sorting them, and on a matrix
+  or with `p.value = TRUE` splits each variable once rather than once
+  per pair: matrices are 2.2x faster (2.9x with `asym = TRUE`), p-values
+  2.1x, and a pair of 100,000 observations 1.6x. `NNS.norm` gains 2.2x.
+- `ncores = NULL` in multivariate `NNS.reg` now uses the machine’s cores
+  less one, as documented, once a prediction is large enough to repay
+  the threads (it ran on one thread); small fits still use one.
+  Estimates do not depend on the number of cores. Under `R CMD check`’s
+  core limit `NNS.reg` and `NNS.stack` use two at most. The package now
+  links the BLAS that R uses.

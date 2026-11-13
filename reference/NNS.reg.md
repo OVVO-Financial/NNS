@@ -198,7 +198,9 @@ NNS.reg(
 
   integer; value specifying the number of cores to be used in the
   parallelized procedure. If NULL (default), the number of cores to be
-  used is equal to the number of cores of the machine - 1.
+  used is equal to the number of cores of the machine - 1 for
+  multivariate regression predictions large enough to repay them, and
+  one otherwise. The estimates do not depend on the number of cores.
 
 - point.only:
 

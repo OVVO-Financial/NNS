@@ -94,6 +94,16 @@
 <li>
 <code>NNS.reg</code> and <code>NNS.part</code> no longer build fitted values, tables, sorted copies and axis labels that the call does not return.</li>
 <li>Removed internal code that nothing called: the compiled <code>fast_lm_mult</code>, <code>is.fcl</code>, <code>downSample</code>, <code>upSample</code>, <code>NNS_reg_points_cpp</code>, <code>NNS_mreg_reduce_cpp</code>, <code>NNS_distance_path_cpp</code> and <code>NNS_distance_bulk_cpp</code>, and the R helper <code>.grouped_gravity</code>.</li>
+<li>A second pass moved the remaining interpreted loops into compiled code, again with identical results: 3,000 random classification fits, 12,000 random <code>LPM.VaR</code> / <code>UPM.VaR</code> calls, 1,500 random <code>NNS.ANOVA</code> calls, 1,000 random <code>dy.d_</code> calls, 5,000 random <code>NNS.meboot</code> / <code>NNS.MC</code> calls, 4,000 random <code>NNS.dep</code> calls and 260 random <code>NNS.stack</code> / <code>NNS.boost</code> runs match the previous build, including their warnings and random number use. The compiled code repeats R’s own arithmetic: <code>sum</code>, <code>mean</code>, <code>var</code>, <code>cumsum</code>, <code>rowSums</code> and <code>colMeans</code> accumulate in long double as R’s do, the weighted class shares use the BLAS call <code>crossprod</code> makes, and the root finder and minimizer are R’s <code>uniroot</code> and <code>optimize</code> algorithms.</li>
+<li>Classification: the class-probability prediction loop is compiled. <code>NNS.reg</code> with a class response is 6-12x faster, <code>NNS.stack</code> classification 1.8-4.4x and <code>NNS.boost</code> classification 2.8x.</li>
+<li>
+<code>LPM.VaR</code> and <code>UPM.VaR</code> solve integer degrees 1 to 4 in compiled code. <code>NNS.ANOVA(robust = TRUE)</code> is 6.6x faster and <code>dy.d_</code>, which also builds the stencils of all its evaluation points together, 2.5-10x.</li>
+<li>
+<code>NNS.meboot</code> solves its <code>rho</code> targets in compiled code: <code>NNS.meboot</code> and <code>NNS.MC</code> are 4-5x faster, <code>NNS.SS</code> with a confidence interval 3.1x and <code>NNS.ARMA</code> prediction intervals 7x.</li>
+<li>
+<code>NNS.dep</code> groups cell labels instead of sorting them, and on a matrix or with <code>p.value = TRUE</code> splits each variable once rather than once per pair: matrices are 2.2x faster (2.9x with <code>asym = TRUE</code>), p-values 2.1x, and a pair of 100,000 observations 1.6x. <code>NNS.norm</code> gains 2.2x.</li>
+<li>
+<code>ncores = NULL</code> in multivariate <code>NNS.reg</code> now uses the machine’s cores less one, as documented, once a prediction is large enough to repay the threads (it ran on one thread); small fits still use one. Estimates do not depend on the number of cores. Under <code>R CMD check</code>’s core limit <code>NNS.reg</code> and <code>NNS.stack</code> use two at most. The package now links the BLAS that R uses.</li>
 </ul></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
