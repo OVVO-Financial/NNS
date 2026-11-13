@@ -1077,7 +1077,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
             <section class="normal" id="section-">
 <div id="clustering" class="section level1 hasAnchor" number="21">
 <h1><span class="header-section-number">Chapter 21</span> Clustering<a href="clustering.html#clustering" class="anchor-section" aria-label="Anchor link to header"></a></h1>
-<p>Chapters 19–20 developed the recursive mean-split estimator as a partition-based method for nonparametric estimation and showed that its induced cell geometry behaves like a dynamic bandwidth. Those results focused on <strong>supervised estimation</strong>, where a response variable <span class="math inline">\(Y\)</span> is observed and the objective is to recover a conditional mean function.</p>
+<p>Chapters 18–19 developed the recursive mean-split estimator as a partition-based method for nonparametric estimation and showed that its induced cell geometry behaves like a dynamic bandwidth. Those results focused on <strong>supervised estimation</strong>, where a response variable <span class="math inline">\(Y\)</span> is observed and the objective is to recover a conditional mean function.</p>
 <p>This chapter turns to <strong>unsupervised learning</strong>.</p>
 <p>In unsupervised learning there is no designated response variable. The goal is instead to discover <strong>structure within the data itself</strong>. Among the most fundamental unsupervised tasks is <strong>clustering</strong>: partitioning observations into groups whose members are more similar to one another than to members of other groups.</p>
 <p>Classical clustering methods such as <strong>k-means</strong> and <strong>hierarchical clustering</strong> are widely used, but they inherit familiar limitations:</p>
@@ -1090,7 +1090,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>The directional framework developed throughout this book suggests a different perspective.</p>
 <p>Rather than defining similarity purely by geometric distance, we can define it through <strong>directional behavior relative to local benchmarks</strong>. In this view, clustering is not merely grouping by proximity. It is grouping by <strong>shared directional structure</strong>.</p>
 <p>Critically, the number of clusters that emerges from this procedure is <strong>determined by the data</strong>, not prescribed by the analyst. This is not a minor implementation detail. It is a fundamental departure from methods that require <span class="math inline">\(K\)</span> to be chosen before any structure has been examined — and it means, in particular, that the number of clusters need not equal, and in general will not equal, the number of class labels in any downstream supervised problem.</p>
-<p>This chapter develops that idea using the partition machinery introduced in Chapters 19–20 and connects it to the NNS clustering procedure.</p>
+<p>This chapter develops that idea using the partition machinery introduced in Chapters 18–19 and connects it to the NNS clustering procedure.</p>
 <hr />
 <div id="what-clustering-seeks-to-recover" class="section level2 hasAnchor" number="21.1">
 <h2><span class="header-section-number">21.1</span> What Clustering Seeks to Recover<a href="clustering.html#what-clustering-seeks-to-recover" class="anchor-section" aria-label="Anchor link to header"></a></h2>
