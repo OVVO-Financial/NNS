@@ -10,6 +10,19 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// NNS_LPM_VaR_integer_cpp
+SEXP NNS_LPM_VaR_integer_cpp(const NumericVector& percentile, int degree, const NumericVector& x);
+RcppExport SEXP _NNS_NNS_LPM_VaR_integer_cpp(SEXP percentileSEXP, SEXP degreeSEXP, SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericVector& >::type percentile(percentileSEXP);
+    Rcpp::traits::input_parameter< int >::type degree(degreeSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(NNS_LPM_VaR_integer_cpp(percentile, degree, x));
+    return rcpp_result_gen;
+END_RCPP
+}
 // NNS_class_predict_cpp
 List NNS_class_predict_cpp(const NumericMatrix& centres, const NumericMatrix& shares, const NumericMatrix& points, const IntegerVector& ks, int dist_code, const NumericVector& minimums, const NumericVector& maximums);
 RcppExport SEXP _NNS_NNS_class_predict_cpp(SEXP centresSEXP, SEXP sharesSEXP, SEXP pointsSEXP, SEXP ksSEXP, SEXP dist_codeSEXP, SEXP minimumsSEXP, SEXP maximumsSEXP) {
@@ -769,6 +782,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_NNS_NNS_LPM_VaR_integer_cpp", (DL_FUNC) &_NNS_NNS_LPM_VaR_integer_cpp, 3},
     {"_NNS_NNS_class_predict_cpp", (DL_FUNC) &_NNS_NNS_class_predict_cpp, 7},
     {"_NNS_NNS_group_means_cpp", (DL_FUNC) &_NNS_NNS_group_means_cpp, 3},
     {"_NNS_NNS_copula_cpp", (DL_FUNC) &_NNS_NNS_copula_cpp, 3},

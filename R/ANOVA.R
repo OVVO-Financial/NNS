@@ -258,10 +258,15 @@ NNS.ANOVA <- function(
       LPM_ratio <- sapply(1:n, function(b) LPM.ratio(1, mean.of.means, na.omit(unlist(A[, b]))))
     }
     
-    lower.25.target  <- mean(sapply(1:n, function(i) LPM.VaR(.25,  1, na.omit(unlist(A[,i])))))
-    upper.25.target  <- mean(sapply(1:n, function(i) UPM.VaR(.25,  1, na.omit(unlist(A[,i])))))
-    lower.125.target <- mean(sapply(1:n, function(i) LPM.VaR(.125, 1, na.omit(unlist(A[,i])))))
-    upper.125.target <- mean(sapply(1:n, function(i) UPM.VaR(.125, 1, na.omit(unlist(A[,i])))))
+    # UPM.VaR(p, 1, x) is LPM.VaR(1 - p, 1, x), and LPM.VaR solves its
+    # percentiles one by one, so one call per group gives all four thresholds.
+    group.var <- vapply(1:n, function(i) {
+      LPM.VaR(c(.25, .75, .125, .875), 1, na.omit(unlist(A[,i])))
+    }, numeric(4L))
+    lower.25.target  <- mean(group.var[1L, ])
+    upper.25.target  <- mean(group.var[2L, ])
+    lower.125.target <- mean(group.var[3L, ])
+    upper.125.target <- mean(group.var[4L, ])
     
     raw.certainties <- vector("list", n - 1)
     for (i in 1:(n - 1)) {
