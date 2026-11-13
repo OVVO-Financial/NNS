@@ -1,6 +1,6 @@
 # Clustering
 
-Chapters 19–20 developed the recursive mean-split estimator as a partition-based method for nonparametric estimation and showed that its induced cell geometry behaves like a dynamic bandwidth. Those results focused on **supervised estimation**, where a response variable $Y$ is observed and the objective is to recover a conditional mean function.
+Chapters 18–19 developed the recursive mean-split estimator as a partition-based method for nonparametric estimation and showed that its induced cell geometry behaves like a dynamic bandwidth. Those results focused on **supervised estimation**, where a response variable $Y$ is observed and the objective is to recover a conditional mean function.
 
 This chapter turns to **unsupervised learning**.
 
@@ -19,7 +19,7 @@ Rather than defining similarity purely by geometric distance, we can define it t
 
 Critically, the number of clusters that emerges from this procedure is **determined by the data**, not prescribed by the analyst. This is not a minor implementation detail. It is a fundamental departure from methods that require $K$ to be chosen before any structure has been examined — and it means, in particular, that the number of clusters need not equal, and in general will not equal, the number of class labels in any downstream supervised problem.
 
-This chapter develops that idea using the partition machinery introduced in Chapters 19–20 and connects it to the NNS clustering procedure.
+This chapter develops that idea using the partition machinery introduced in Chapters 18–19 and connects it to the NNS clustering procedure.
 
 ---
 
