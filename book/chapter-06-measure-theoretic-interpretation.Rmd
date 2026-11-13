@@ -342,4 +342,4 @@ Operationally, this means the directional framework can be used without replacin
 
 The next part of the book turns from theoretical foundations to **descriptive statistics derived from directional partial moments**.
 
-Part II develops descriptive statistics that retain the directional information preserved by this refined measurable structure. Rather than collapsing deviations into symmetric aggregates, these measures describe distributions in terms of their directional behavior relative to meaningful benchmarks.
+Chapter 7 develops descriptive statistics that retain the directional information preserved by this refined measurable structure. Rather than collapsing deviations into symmetric aggregates, these measures describe distributions in terms of their directional behavior relative to meaningful benchmarks.

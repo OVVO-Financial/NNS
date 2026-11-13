@@ -101,7 +101,7 @@ Upper-tail analog of `LPM.VaR`, used for right-tail threshold selection and inte
 
 ## Directional Decision Regions Crosswalk (Classical → NNS)
 
-To maintain continuity with Chapter 22's directional decision-region framing, the table below maps common classical statistics and procedures to their directional NNS counterparts.
+To maintain continuity with Chapter 23's directional decision-region framing, the table below maps common classical statistics and procedures to their directional NNS counterparts.
 
 | Classical statistic / workflow | Typical classical role | Directional NNS counterpart | Reference chapter | Notes |
 |---|---|---|---|---|
@@ -110,7 +110,7 @@ To maintain continuity with Chapter 22's directional decision-region framing, th
 | Upper-tail quantile threshold | Right-tail risk/opportunity cutoff | `UPM.VaR(alpha, degree, x)` *(degree-dependent)* | Chapter 16 | Upper-tail analog to `LPM.VaR` for asymmetric interval construction. |
 | Classical ANOVA (mean-comparison test) | Group-level location comparison | `NNS.ANOVA(...)` *(degree-dependent CDF benchmarking)* | Chapter 15 | Agreement certainty is benchmarked through directional CDF-style deviations. |
 | Linear Granger-style directional inference | Lead-lag direction under linear structure | `NNS.caus(x, y)` | Chapter 14 | Measures directional lagged association; does not by itself identify a structural cause or condition on own-history dynamics. |
-| Copula / Joint Tail Dependency | Joint probability of concurrent outcomes | `Co.LPM(degree_lpm, x, y, target_x, target_y)` / `Co.UPM(degree_upm, x, y, target_x, target_y)` | Chapter 4 | Degree zero counts joint events; positive degrees measure joint directional magnitudes, with the requisite finite moments. |
+| Copula / Joint Tail Dependency | Joint probability of concurrent outcomes | `Co.LPM(degree_lpm, x, y, target_x, target_y)` / `Co.UPM(degree_upm, x, y, target_x, target_y)` | Chapters 10 and 13 | Degree zero counts joint events; positive degrees measure joint directional magnitudes, with the requisite finite moments. |
 | Mean-variance interval heuristics | Uncertainty bands under Gaussian assumptions | `LPM.VaR(...)` + `UPM.VaR(...)` *(degree-dependent bounds)* | Chapter 17 | Constructs directional thresholds without selecting a normal family; coverage requires a separate sampling and calibration argument. |
 
 

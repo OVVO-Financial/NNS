@@ -1,6 +1,6 @@
 # Multivariate Forecasting
 
-Chapter 25 developed the NNS approach to univariate forecasting. A single series is partitioned into phase-specific component series, each regressed against its occurrence index and extrapolated using linear or directional nonparametric fits. The multivariate extension retains those univariate forecasts as its first stage.
+Chapter 25 developed the Nonlinear Nonparametric Statistics (NNS) approach to univariate forecasting. A single series is partitioned into phase-specific component series, each regressed against its occurrence index and extrapolated using linear or directional nonparametric fits. The multivariate extension retains those univariate forecasts as its first stage.
 
 But many forecasting problems are not univariate.
 
@@ -13,7 +13,7 @@ This chapter extends the forecasting framework from one time series to a **syste
 
 The package implementation is `NNS.VAR`, a **nonparametric vector autoregressive model incorporating `NNS.ARMA` estimates of variables into `NNS.reg` for a multivariate time-series forecast**. Its purpose is explicit: combine univariate nonlinear time-series forecasting with multivariate nonlinear regression so that each series can borrow information from the others while still retaining its own temporal structure.
 
-Whenever this chapter appeals to mean-split regression behavior (local refinement with occupancy control), the theoretical reference point is Chapter 18: the consistency conditions for recursive mean-split estimation under shrinking local diameters and growing local sample support.
+Whenever this chapter appeals to mean-split regression behavior (local refinement with occupancy control), the theoretical reference point is Chapter 18: the consistency conditions for recursive mean-split estimation under shrinking local diameters and growing local sample support. Chapter 22 explains the implemented multivariate regression-point matrix and prediction rule, while Chapter 24 develops the ensemble methods employed here.
 
 A second implementation, `NNS.nowcast`, wraps this framework for mixed-frequency macroeconomic forecasting and nowcasting, using a built-in panel of Federal Reserve style indicators and passing them to `NNS.VAR` with monthly alignment and a 12-lag structure.
 
@@ -148,7 +148,8 @@ from nns import nns_var
 rng = np.random.default_rng(123)
 n = 200
 x1 = np.cumsum(rng.normal(size=n))
-x2 = 0.5 * np.roll(x1, 3) + rng.normal(size=n)
+lag3_x1 = np.concatenate((np.repeat(x1[0], 3), x1[:-3]))
+x2 = 0.5 * lag3_x1 + rng.normal(size=n)
 variables = np.column_stack((x1, x2))
 
 out = nns_var(variables, h=12, tau=12, naive_weights=True, status=False)
@@ -159,8 +160,9 @@ out["univariate"]                      # standalone NNS.ARMA forecasts
 out["multivariate"]                    # nonlinear multivariate forecasts
 out["ensemble"]                        # combined forecast
 
-# Mixed-frequency nowcasting path (NNS.nowcast's core call)
+# For an already aligned mixed-frequency panel:
 # out = nns_var(econ_variables, h=12, tau=12, nowcast=True)
+# The Python flag is for API compatibility; it does not download the panel.
 ```
 
 ---

@@ -1,6 +1,6 @@
 # Distribution Comparison
 
-Previous chapters developed the directional framework for describing distributions, dependence, and conditional probability. Distribution estimation in Chapter 8 showed how empirical partial moments provide nonparametric estimates of entire distributions, while Chapters 9–13 demonstrated how directional moments reveal dependence, conditional probability, and causal structure.
+Previous chapters developed the directional framework for describing distributions, dependence, and conditional probability. Distribution estimation in Chapter 8 showed how empirical partial moments provide nonparametric estimates of entire distributions, while Chapters 9–14 demonstrated how directional moments reveal dependence, conditional probability, and causal structure.
 
 A natural next question is how to **compare distributions**.
 

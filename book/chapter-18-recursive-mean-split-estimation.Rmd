@@ -1,6 +1,6 @@
 # Recursive Mean-Split Estimation
 
-Part V of the book turns from probability representation and inference to **nonparametric estimation**.
+This chapter turns from probability representation and inference to **nonparametric estimation**.
 The goal of estimation is to recover unknown functional relationships from data without imposing a predetermined parametric form.
 
 A central object in many statistical problems is the **conditional mean function**

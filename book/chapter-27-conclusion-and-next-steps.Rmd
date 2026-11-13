@@ -4,10 +4,10 @@ The previous chapters developed the NNS framework from first principles to opera
 
 A useful way to summarize the full arc is:
 
-1. **Directional building blocks** (Chapters 1–3): partial moments preserve sign and magnitude information that symmetric summaries discard.
-2. **Dependence and causation** (Part III): directional co-moments, copulas, and recursive decomposition expose asymmetric relationships and lead/lag structure.
-3. **Inference and comparison** (Part IV): degree-one ratios describe a continuous, severity-weighted distribution distinct from degree-zero event frequencies; the chosen estimand guides distributional comparisons.
-4. **Estimation and forecasting** (Part V): recursive nonparametric systems turn the same directional primitives into predictive tools without restrictive parametric assumptions.
+1. **Directional foundations and distribution theory** (Chapters 1–8): partial moments retain directional structure, recover classical moments and distribution functions, and support numerical integration and descriptive estimation.
+2. **Dependence and causation** (Chapters 9–14): directional co-moments, copulas, and recursive decomposition expose asymmetric relationships and lead/lag structure.
+3. **Inference and comparison** (Chapters 15–17): degree-one ratios describe a continuous, severity-weighted distribution distinct from degree-zero event frequencies; the chosen estimand guides distributional comparisons.
+4. **Estimation and forecasting** (Chapters 18–26): recursive nonparametric systems turn the same directional primitives into predictive tools without restrictive parametric assumptions.
 
 Taken together, these results support the book's unifying claim: **one directional probability language can connect theory, diagnostics, and implementation across tasks that are often taught separately.**
 

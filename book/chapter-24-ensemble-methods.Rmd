@@ -1,6 +1,6 @@
 # Ensemble Methods
 
-Chapters 21–23 developed the machine-learning side of the NNS framework from three complementary angles.
+Chapters 21–23 developed the machine-learning side of the Nonlinear Nonparametric Statistics (NNS) framework from three complementary angles.
 
 - Chapter 21 treated recursive partitions as an unsupervised clustering device.
 - Chapter 22 used those same partitions for conditional expectation estimation.
@@ -188,13 +188,9 @@ $$z(x)=\bigl(\hat y^{(1)}(x),\dots,\hat y^{(K)}(x)\bigr)$$
 
 and then selects a second-stage combination. In the current two-component implementation, the rule is a convex blend
 
-$$\hat y_{\mathrm{stack}}(x)=w\hat y^{(1)}(x)+(1-w)\hat y^{(2)}(x).$$
+$$\hat y_{\mathrm{stack}}(x)=w\hat y^{(1)}(x)+(1-w)\hat y^{(2)}(x),\qquad w\in\{0,.01,\ldots,1\},$$
 
-For regression, the weight is selected from $w\in\{0,.01,\ldots,1\}$ on pooled out-of-fold predictions. Classification blends the class-probability vectors before making the label decision, weighting each component by its squared out-of-fold objective score $S_k$ (inverse squares for a minimized objective):
-
-$$w=\frac{S_1^2}{S_1^2+S_2^2}.$$
-
-Two components with nearly equal scores are therefore blended nearly equally, rather than one taking all the weight because it classified one more held-out observation correctly. This is a restricted meta-model, not an arbitrary fitted function $G$.
+with the weight selected on pooled out-of-fold predictions. Classification blends the class-probability vectors before making the label decision. This is a restricted meta-model, not an arbitrary fitted function $G$.
 
 In the NNS setting, the base learners come from two main sources documented in the function interface:
 
@@ -423,7 +419,7 @@ In small dimensions, `NNS.boost` can evaluate all subsets deterministically. In 
 
 ### Class imbalance
 
-When classes are imbalanced, raw accuracy may be misleading. The `balance` option in both routines helps address this by combining down-sampling and up-sampling when classification is requested. A more complete treatment of this imbalance-handling ensemble workflow appears in Chapter 25, where multivariate forecasting workflows use the same up/down-sampling logic under skewed classification-style targets.
+When classes are imbalanced, raw accuracy may be misleading. The `balance` option in both routines helps address this by combining down-sampling and up-sampling when classification is requested. For the classification context, class imbalance, and evaluation metrics, see Chapter 23. The ensemble balancing controls are described in the present chapter; Chapter 25 instead covers nonparametric time-series models.
 
 ### Missing data
 
@@ -470,14 +466,14 @@ That is often the right trade in nonlinear settings.
 
 This chapter completes the machine-learning progression.
 
-- Chapter 20 used recursive partitions for **unsupervised grouping**.
+- Chapter 21 used recursive partitions for **unsupervised grouping**.
 - Chapter 22 used them for **numeric prediction**, with regression-point nearest-neighbor search in the multivariate case.
-- Chapter 22 used them for **categorical prediction**.
+- Chapter 23 used them for **categorical prediction**.
 - This chapter uses them in **aggregated form** to improve predictive stability and performance, with cross-validated optimization of the neighbor count $k$ as a central mechanism.
 
 The conceptual thread is unbroken.
 
-The same directional primitive that generated partial moments, dependence measures, causation, clustering, regression, and classification also supports ensemble learning — and the $k$ optimization in `NNS.stack` is a direct consequence of the regression-point nearest-neighbor prediction mechanism established in Chapter 21. Once prediction is understood as a nearest-neighbor search over compressed local conditional means rather than a piecewise-linear surface, it becomes natural that the ensemble layer would need to determine the right localization scale for that search.
+The same directional primitive that generated partial moments, dependence measures, causation, clustering, regression, and classification also supports ensemble learning — and the $k$ optimization in `NNS.stack` is a direct consequence of the regression-point nearest-neighbor prediction mechanism established in Chapter 22. Once prediction is understood as a nearest-neighbor search over compressed local conditional means rather than a piecewise-linear surface, it becomes natural that the ensemble layer would need to determine the right localization scale for that search.
 
 ---
 

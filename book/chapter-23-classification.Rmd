@@ -1,6 +1,6 @@
 # Classification
 
-Chapter 21 developed nonparametric regression in the NNS framework as conditional expectation estimation by recursive partitioning. There, the response variable was numeric, and the objective was to recover a conditional mean surface.
+Chapter 22 developed nonparametric regression in the Nonlinear Nonparametric Statistics (NNS) framework as conditional expectation estimation by recursive partitioning. There, the response variable was numeric, and the objective was to recover a conditional mean surface.
 
 This chapter turns to **classification**.
 
@@ -105,7 +105,7 @@ These limitations echo the broader theme of the book:
 
 ## Directional Decision Regions
 
-The NNS approach to classification begins from the recursive partition machinery introduced in Chapters 18–20.
+The NNS approach to classification begins with the recursive partitions introduced in Chapter 18, given a dynamic-bandwidth interpretation in Chapter 19, and subsequently applied to clustering in Chapter 21.
 
 Suppose the predictor space is partitioned into cells
 
@@ -140,13 +140,13 @@ In the binary case, the decision boundary is the set of points where the estimat
 \hat p_1(x) = \hat p_2(x).
 \]
 
-Equivalently,
+Equivalently, the **estimated** class-probability difference is zero:
 
 \[
-P(Y=1 \mid X=x) - P(Y=2 \mid X=x) = 0.
+\hat p_1(x) - \hat p_2(x) = 0.
 \]
 
-Within NNS, this boundary is not imposed in advance. It emerges from the partition structure.
+The population Bayes boundary instead satisfies \(P(Y=1\mid X=x)=P(Y=2\mid X=x)\). The two boundaries need not coincide in a finite sample. Within NNS, the fitted boundary is not imposed in advance; it follows from the estimated probability surface and its partition structure.
 
 ---
 
@@ -258,9 +258,7 @@ For the ideal cellwise classifier, boundaries lie on partition edges separating 
 
 ### Refinement interpretation
 
-Where class mixing remains high, further partitioning can sharpen the local probability estimate. Where classes are already well separated, coarser regions suffice.
-
-Thus the classifier adapts its complexity to the structure of the data.
+Further partitioning *can* sharpen estimated class probabilities in mixed cells, but doing so also reduces the local sample size. The current mean-split rule does not explicitly choose boundaries by maximizing class purity or splitting only where classes are mixed. Resolution is controlled by the selected order, the data-dependent split geometry, and occupancy stopping rules.
 
 ---
 
@@ -397,7 +395,7 @@ are probability estimates from different base learners, a stacked classifier for
 \hat p_c^{\text{stack}}(x)
 \]
 
-through a weighted combination, then classifies by the largest combined probability.
+through optimized combination, then classifies by the largest combined probability.
 
 In the NNS setting, stacking is especially natural because class probabilities are already interpretable directional quantities. The second-stage learner therefore combines probability surfaces, not merely hard labels.
 
@@ -426,7 +424,9 @@ from nns import nns_boost, nns_stack
 
 rng = np.random.default_rng(123)
 X_train = rng.normal(size=(200, 4))
-y_train = (X_train[:, 0] + X_train[:, 1] ** 2 > 1).astype(int) + 1   # labels 1/2
+y_train = (
+    X_train[:, 0] + X_train[:, 1] ** 2 > 1
+).astype(int) + 1  # class labels 1/2
 X_test = rng.normal(size=(50, 4))
 
 # Boosted classification
@@ -657,8 +657,8 @@ These limitations do not negate the method. They simply clarify where care is ne
 
 This chapter completes a natural progression.
 
-- Chapter 20 used recursive partitions for **unsupervised grouping**.
-- Chapter 21 used them for **numeric prediction**.
+- Chapter 21 used recursive partitions for **unsupervised grouping**.
+- Chapter 22 used them for **numeric prediction**.
 - This chapter uses them for **categorical prediction**.
 
 The same partition machinery supports all three.
@@ -703,13 +703,13 @@ Fourth, it developed the idea of **directional decision boundaries**, emphasizin
 
 Fifth, it clarified the **package implementation bridge**: in applied NNS usage, classification is most naturally invoked through `NNS.boost(..., type = "CLASS")` and `NNS.stack(..., type = "CLASS")`, which operationalize the partition-based classifier in stabilized ensemble form. These ensemble routines are developed in Chapter 24, where their resampling and aggregation mechanics are treated in detail.
 
-Sixth, it introduced **boosting and stacking** as natural ensemble extensions of the NNS classifier, improving robustness and predictive accuracy while preserving directional interpretability.
+Sixth, it introduced **boosting and stacking** as ensemble extensions of the NNS classifier that may improve robustness and predictive accuracy, subject to appropriate held-out evaluation.
 
 Seventh, it compared the NNS approach with **random forests and support vector machines**, highlighting the distinctive combination of nonlinear flexibility, local class-probability interpretation, and benchmark-relative partition geometry.
 
 Taken together, these results show that classification in the NNS framework is not a separate machine-learning module bolted onto the theory. It is another direct consequence of the same directional primitive that generated distribution theory, dependence, clustering, and regression.
 
-The next part of the book turns from machine learning toward broader applications and synthesis, showing how these directional tools combine in practice.
+Chapter 24 develops **ensemble methods**, including the boosting and stacking mechanisms introduced here. Chapters 25 and 26 then extend the NNS framework to time-series models and multivariate forecasting.
 
 > **Further Reading / Examples**
-> For machine learning applications, including the MNIST classification example, see the [NNS Machine Learning Examples](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/README.md#3-machine-learning).
+> For machine learning applications, including the MNIST classification example, see the [NNS Machine Learning Examples](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/index.md#machine-learning).

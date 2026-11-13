@@ -722,7 +722,7 @@ NNS avoids prescribing a fixed numerical bandwidth and creates location-dependen
 
 The next chapter turns from numeric responses to **classification**, where conditional class probabilities and discrete decisions introduce additional prediction and calibration questions.
 
-> **Further reading and examples.** See the NNS repository's [regression examples](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/README.md#2-regression). For the package's implemented arguments and return values, consult the current `R/Regression.R` and `R/Multivariate_Regression.R` sources; for Python, consult `src/nns/_public_reg.py` and `src/nns/_reg_engine.py` in NNS-Python.
+> **Further reading and examples.** See the NNS repository's [regression examples](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/index.md#regression). For the package's implemented arguments and return values, consult the current `R/Regression.R` and `R/Multivariate_Regression.R` sources; for Python, consult `src/nns/_public_reg.py` and `src/nns/_reg_engine.py` in NNS-Python.
 
 ---
 

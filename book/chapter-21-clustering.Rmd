@@ -307,15 +307,30 @@ from nns.plotting import plot_nns_part
 g = 6
 rng = np.random.default_rng(g)
 n = 100
-x = np.concatenate([rng.normal(rng.uniform() * i**2, 1, n // g) for i in range(1, g + 1)])
-y = np.concatenate([rng.normal(rng.uniform() * i**2, 1, n // g) for i in range(1, g + 1)])
+
+x = np.concatenate(
+    [
+        rng.normal(rng.uniform() * i**2, 1, n // g)
+        for i in range(1, g + 1)
+    ]
+)
+
+y = np.concatenate(
+    [
+        rng.normal(rng.uniform() * i**2, 1, n // g)
+        for i in range(1, g + 1)
+    ]
+)
+
 d = np.column_stack((x, y))
 
+# K-means clustering
 km = KMeans(n_clusters=3, n_init="auto").fit(d)
-km.labels_, km.cluster_centers_
+print(km.labels_, km.cluster_centers_)
 
+# NNS directional partitioning
 part = nns_part(x, y, order=3, obs_req=0)
-plot_nns_part(part)   # Voronoi view of the directional partition
+plot_nns_part(part)
 ```
 
 <center>

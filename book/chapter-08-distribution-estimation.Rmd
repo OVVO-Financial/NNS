@@ -352,4 +352,4 @@ First, the empirical distribution function is the empirical degree-zero lower pa
 
 While the empirical distribution function provides a complete description of the distribution, applied analysis also requires understanding how distributions interact across variables and across states of the sample space.
 
-The next chapter begins Part III on dependence by showing why classical correlation can fail under nonlinear and asymmetric structures, motivating directional dependence measures built from the same partial-moment foundation.
+The next chapter begins the study of dependence by showing why classical correlation can fail under nonlinear and asymmetric structures, motivating directional dependence measures built from the same partial-moment foundation.

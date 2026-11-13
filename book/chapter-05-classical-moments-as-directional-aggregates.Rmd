@@ -311,4 +311,4 @@ Partial moments therefore provide a structural foundation from which several fam
 
 Seen from this perspective, symmetric statistics summarize directional information that is already present in the distribution.
 
-Chapter 6 develops the measure-theoretic foundation for this framework, and Part II extends the analysis to descriptive statistics derived from the directional perspective introduced here.
+Chapter 6 develops the measure-theoretic foundation for this framework, and Chapter 7 extends the analysis to descriptive statistics derived from the directional perspective introduced here.

@@ -101,7 +101,7 @@ Variance alone cannot distinguish these cases.
 
 Directional variance reveals whether volatility arises primarily from **upside movements** or **downside movements**.
 
-This distinction is particularly important in finance, economics, and risk management where negative deviations are often evaluated differently than positive ones (a topic developed more fully in Part VIII).
+This distinction is particularly important in finance, economics, and risk management where negative deviations are often evaluated differently than positive ones (a topic developed more fully in Chapter 16).
 
 ---
 
