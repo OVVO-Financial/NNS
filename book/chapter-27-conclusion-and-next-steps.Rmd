@@ -30,16 +30,21 @@ These capabilities matter most in real data settings where asymmetry, tail risk,
 
 ## Further Resources
 
-To continue beyond this book, the official implementation resources are maintained in three complementary locations:
+To continue beyond this book, the **R reference implementation** and its **Python companion** provide complementary resources:
 
-- **CRAN package**: <https://cran.r-project.org/package=NNS>
-- **Vignettes and method walkthroughs**: <https://ovvo-financial.github.io/NNS/articles/index.html>
-- **Hands-on examples in the GitHub repository**: <https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/index.md>
+- **R package on CRAN**: <https://cran.r-project.org/package=NNS>
+- **R vignettes and method walkthroughs**: <https://ovvo-financial.github.io/NNS/articles/index.html>
+- **Canonical examples and R/Python companion links**: <https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/index.md>
+- **Python package on PyPI (`ovvo-nns`)**: <https://pypi.org/project/ovvo-nns/>
+- **Python documentation, installation, and API reference**: <https://ovvo-financial.github.io/NNS-python/>
+- **Python source code and numbered vignette examples**: <https://github.com/OVVO-Financial/NNS-python>
+
+The Python distribution installs with `pip install ovvo-nns` and is imported as `nns`. It is a native Python implementation, not an R runtime wrapper. The R package remains the reference implementation for NNS statistical behavior and the canonical vignette curriculum; consult the [Python API status](https://ovvo-financial.github.io/NNS-python/api_status/) for implementation coverage and documented differences.
 
 A practical workflow is:
 
-1. Install and review the CRAN package documentation for function references and stable release behavior.
-2. Work through the vignette set for topic-focused application patterns.
-3. Use the GitHub examples index for extended, concrete scripts that can be adapted to your own data.
+1. Install the R package `NNS` from CRAN or the Python distribution `ovvo-nns` from PyPI, and consult the relevant API documentation.
+2. Work through the canonical R vignettes or their numbered Python companions, following the corresponding sections in the examples index.
+3. Adapt the example scripts to your data, check the documented behavior and parity limitations where relevant, and evaluate results under your domain constraints.
 
 Together, these resources provide deeper coverage of specialized applications, additional implementation detail, and more end-to-end examples than can be included in a single volume.
