@@ -137,7 +137,9 @@ test_that("the default thread count does not change multivariate estimates", {
   one <- NNS.reg(x, y, point.est = x[1:50, ], plot = FALSE, ncores = 1)
   default <- NNS.reg(x, y, point.est = x[1:50, ], plot = FALSE)
   expect_identical(default$Point.est, one$Point.est)
-  expect_identical(default$Fitted.xy, one$Fitted.xy)
+  # Floating-point reductions may differ by a few ulps across thread counts.
+  # Match the tolerance used by the compiled multivariate-kernel parity tests.
+  expect_equal(default$Fitted.xy, one$Fitted.xy, tolerance = 1e-12)
   withr::with_envvar(c("_R_CHECK_LIMIT_CORES_" = "TRUE"),
                      expect_lte(.nns_default_cores(), 2L))
   expect_gte(.nns_default_cores(), 1L)
