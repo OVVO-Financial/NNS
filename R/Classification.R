@@ -61,11 +61,12 @@
       findInterval(X[, j], boundaries[[j]], rightmost.closed = TRUE)
   })
   ids <- do.call(paste, c(id.parts, sep = "."))
-  groups <- split(seq_len(nrow(X)), ids)
-  centres <- do.call(rbind, lapply(groups, function(g) colMeans(X[g, , drop = FALSE])))
-  shares <- do.call(rbind, lapply(groups, function(g) colMeans(probabilities[g, , drop = FALSE])))
-  colnames(centres) <- colnames(X)
-  colnames(shares) <- colnames(probabilities)
+  # Each cell's colMeans(), the cells in the order split() gives them.
+  cells <- as.factor(ids)
+  centres <- NNS_group_means_cpp(X, as.integer(cells), nlevels(cells))
+  shares <- NNS_group_means_cpp(probabilities, as.integer(cells), nlevels(cells))
+  dimnames(centres) <- list(levels(cells), colnames(X))
+  dimnames(shares) <- list(levels(cells), colnames(probabilities))
   prior <- colMeans(probabilities)
   k <- if (identical(n.best, "all")) nrow(centres) else if (!is.null(n.best)) n.best else
     if (identical(order, "max") || categorical) 1L else
@@ -94,35 +95,23 @@
       colnames(ans) <- colnames(shares)
       return(rep(list(.nns_class_normalize(ans, prior)), length(ks)))
     }
-    out <- lapply(unique.ks, function(kk) {
-      matrix(0, nrow(points), ncol(shares), dimnames = list(NULL, colnames(shares)))
-    })
-    rank.terms <- vector("list", nrow(centres))
-    for (i in seq_len(nrow(points))) {
-      d <- .nns_mreg_distance_vector(centres, points[i, ], dist, x.min, x.max)
-      # Exact matches retain their empirical class frequencies.
-      exact <- which(d == 0)
-      if (length(exact)) {
-        v <- colMeans(shares[exact, , drop = FALSE])
-        for (a in seq_along(unique.ks)) out[[a]][i, ] <- v
-        next
-      }
-      # The k nearest cells, with every cell tied at the k-th distance.
-      # Equal-distance cells share their rank weight.
-      o <- order(d)
-      ds <- d[o]
-      for (a in seq_along(unique.ks)) {
-        m <- sum(ds <= ds[unique.ks[a]])
-        near <- ds[seq_len(m)]
-        if (m > 1L && is.null(rank.terms[[m]])) rank.terms[[m]] <- .nns_mreg_rank_weights(m)
-        weights <- .nns_mreg_ensemble_weights(near, if (m > 1L) rank.terms[[m]])
-        for (v in unique(near[duplicated(near)])) {
-          tied <- which(near == v)
-          weights[tied] <- mean(weights[tied])
-        }
-        out[[a]][i, ] <- as.numeric(crossprod(weights, shares[o[seq_len(m)], , drop = FALSE]))
-      }
+    if (any(!is.finite(points))) {
+      stop("[point.est] contains missing or nonfinite values.", call. = FALSE)
     }
+    # For each point, compiled: the distance to every cell (as
+    # .nns_mreg_distance_vector measures it); an exact match keeps its own
+    # class frequencies; otherwise the k nearest cells, with every cell tied
+    # at the k-th distance, are weighted by .nns_mreg_ensemble_weights, cells
+    # at equal distance sharing their mean weight.
+    out <- NNS_class_predict_cpp(
+      centres, shares, points, unique.ks,
+      match(dist, c("NNS", "L2", "L1", "FACTOR"), nomatch = 2L) - 1L,
+      as.numeric(x.min), as.numeric(x.max)
+    )
+    out <- lapply(out, function(m) {
+      dimnames(m) <- list(NULL, colnames(shares))
+      m
+    })
     lapply(out, .nns_class_normalize, prior = prior)[match(ks, unique.ks)]
   }
   list(fitted = if (need.fitted) predict(X)[[1L]] else NULL,
@@ -132,10 +121,14 @@
        k = k, strength = strength)
 }
 
+# `coef.cache` is an environment in which a caller fitting the same design
+# and response repeatedly (NNS.stack, once per predictor count) keeps each
+# class's dimension-reduction coefficients.
 .nns_reg_classify <- function(encoded, task, order, n.best, dist, ncores,
                               dim.red.method = NULL, tau = NULL, threshold = 0,
                               dim.count = NULL, plot = FALSE,
-                              point.only = FALSE, confidence.interval = NULL) {
+                              point.only = FALSE, confidence.interval = NULL,
+                              coef.cache = NULL) {
   X <- encoded$x
   Q <- encoded$point.est
   values <- task$class.values
@@ -161,8 +154,13 @@
     # Each nominal class has its own signed NNS indicator index. A single
     # index fitted to numeric class codes would impose an arbitrary ordering.
     models <- lapply(seq_along(values), function(j) {
-      coef <- .nns_reg_dimred_coefficients(X, indicators[, j], dim.red.method,
-                                          tau, class.threshold[j])
+      key <- as.character(j)
+      coef <- if (is.null(coef.cache)) NULL else coef.cache[[key]]
+      if (is.null(coef)) {
+        coef <- .nns_reg_dimred_coefficients(X, indicators[, j], dim.red.method,
+                                            tau, class.threshold[j])
+        if (!is.null(coef.cache)) coef.cache[[key]] <- coef
+      }
       if (!is.null(dim.count) && dim.count < length(coef)) {
         keep <- order(abs(coef), decreasing = TRUE)[seq_len(dim.count)]
         coef[-keep] <- 0

@@ -10,6 +10,36 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// NNS_class_predict_cpp
+List NNS_class_predict_cpp(const NumericMatrix& centres, const NumericMatrix& shares, const NumericMatrix& points, const IntegerVector& ks, int dist_code, const NumericVector& minimums, const NumericVector& maximums);
+RcppExport SEXP _NNS_NNS_class_predict_cpp(SEXP centresSEXP, SEXP sharesSEXP, SEXP pointsSEXP, SEXP ksSEXP, SEXP dist_codeSEXP, SEXP minimumsSEXP, SEXP maximumsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type centres(centresSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type shares(sharesSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type points(pointsSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type ks(ksSEXP);
+    Rcpp::traits::input_parameter< int >::type dist_code(dist_codeSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type minimums(minimumsSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type maximums(maximumsSEXP);
+    rcpp_result_gen = Rcpp::wrap(NNS_class_predict_cpp(centres, shares, points, ks, dist_code, minimums, maximums));
+    return rcpp_result_gen;
+END_RCPP
+}
+// NNS_group_means_cpp
+NumericMatrix NNS_group_means_cpp(const NumericMatrix& X, const IntegerVector& codes, int groups);
+RcppExport SEXP _NNS_NNS_group_means_cpp(SEXP XSEXP, SEXP codesSEXP, SEXP groupsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type codes(codesSEXP);
+    Rcpp::traits::input_parameter< int >::type groups(groupsSEXP);
+    rcpp_result_gen = Rcpp::wrap(NNS_group_means_cpp(X, codes, groups));
+    return rcpp_result_gen;
+END_RCPP
+}
 // NNS_copula_cpp
 double NNS_copula_cpp(NumericMatrix X, NumericVector target, bool continuous);
 RcppExport SEXP _NNS_NNS_copula_cpp(SEXP XSEXP, SEXP targetSEXP, SEXP continuousSEXP) {
@@ -739,6 +769,8 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_NNS_NNS_class_predict_cpp", (DL_FUNC) &_NNS_NNS_class_predict_cpp, 7},
+    {"_NNS_NNS_group_means_cpp", (DL_FUNC) &_NNS_NNS_group_means_cpp, 3},
     {"_NNS_NNS_copula_cpp", (DL_FUNC) &_NNS_NNS_copula_cpp, 3},
     {"_NNS_NNS_dep_pair_cpp", (DL_FUNC) &_NNS_NNS_dep_pair_cpp, 6},
     {"_NNS_NNS_dep_levels_cpp", (DL_FUNC) &_NNS_NNS_dep_levels_cpp, 3},

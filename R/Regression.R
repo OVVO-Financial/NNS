@@ -656,10 +656,16 @@
     stop("[threshold] must be a single finite nonnegative number.", call. = FALSE)
   }
   
-  cor.coef <- vapply(seq_len(p), function(j) {
-    z <- suppressWarnings(stats::cor(x[, j], y, method = "spearman"))
-    if (is.finite(z)) z else 0
-  }, numeric(1L))
+  # Spearman's correlation is the correlation of the ranks, as stats::cor
+  # computes it; the response is ranked once for every predictor. Only the
+  # methods that use it compute it.
+  cor.coef <- function() {
+    y.rank <- rank(y, na.last = "keep")
+    vapply(seq_len(p), function(j) {
+      z <- suppressWarnings(stats::cor(rank(x[, j], na.last = "keep"), y.rank))
+      if (is.finite(z)) z else 0
+    }, numeric(1L))
+  }
   
   dep.coef <- function() vapply(seq_len(p), function(j) {
     z <- tryCatch(NNS.dep(x[, j], y, print.map = FALSE, asym = TRUE)$Dependence,
@@ -683,10 +689,10 @@
   }
   
   coef <- switch(method,
-                 cor = cor.coef,
+                 cor = cor.coef(),
                  nns.dep = dep.coef(),
                  nns.caus = caus.coef(),
-                 all = rowMeans(cbind(caus.coef(), dep.coef(), cor.coef,
+                 all = rowMeans(cbind(caus.coef(), dep.coef(), cor.coef(),
                                       rep(1, p))),
                  equal = rep(1, p),
                  numeric = as.numeric(dim.red.method))
