@@ -3,7 +3,7 @@
 
 
 
-[![packageversion](https://img.shields.io/badge/NNS%20version-13.2-blue.svg?style=flat-square)](https://github.com/OVVO-Financial/NNS/commits/NNS-Beta-Version)   [![Licence](https://img.shields.io/badge/licence-GPL--3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html)
+[![packageversion](https://img.shields.io/badge/NNS%20version-14.0-blue.svg?style=flat-square)](https://github.com/OVVO-Financial/NNS/commits/NNS-Beta-Version)   [![Licence](https://img.shields.io/badge/licence-GPL--3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html)
 
 <h2 style="margin: 0; padding: 0; border: none; height: 40px;"></h2>
 
@@ -27,6 +27,8 @@ Companion R-package and datasets to:
 #### Viole, F. and Nawrocki, D. (2013) "*Nonlinear Nonparametric Statistics: Using Partial Moments*" (ISBN: 1490523995)
 
 2nd edition available here: https://ovvo-financial.github.io/NNS/book/
+
+[Watch the chapter-by-chapter NNS video series](https://www.youtube.com/playlist?list=PLIcjK7rT4IwM&si=Qo1H872wzbEIZrjX): A pedagogical introduction to the intuition, mathematics, and applications of NNS.
 
 
 #### For a direct quantitative finance implementation of NNS, see [OVVO Labs](https://ovvolabs.com/)
@@ -56,7 +58,7 @@ Please see https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/
     title = {NNS: Nonlinear Nonparametric Statistics},
     author = {Fred Viole},
     year = {2016},
-    note = {R package version 13.2},
+    note = {R package version 14.0},
     url = {https://CRAN.R-project.org/package=NNS},
   }
 ```
