@@ -17,8 +17,8 @@ NNS_copula_cpp <- function(X, target, continuous) {
     .Call(`_NNS_NNS_copula_cpp`, X, target, continuous)
 }
 
-NNS_dep_pair_cpp <- function(x, y, quad_xy, quad_yx, quad_joint, asym = FALSE) {
-    .Call(`_NNS_NNS_dep_pair_cpp`, x, y, quad_xy, quad_yx, quad_joint, asym)
+NNS_dep_pair_cpp <- function(x, y, quad_xy, quad_yx, quad_joint, asym = FALSE, x_ties_known = NA_integer_, y_ties_known = NA_integer_) {
+    .Call(`_NNS_NNS_dep_pair_cpp`, x, y, quad_xy, quad_yx, quad_joint, asym, x_ties_known, y_ties_known)
 }
 
 NNS_dep_levels_cpp <- function(x, y, quad_xy) {

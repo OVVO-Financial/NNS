@@ -67,8 +67,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // NNS_dep_pair_cpp
-List NNS_dep_pair_cpp(NumericVector x, NumericVector y, CharacterVector quad_xy, CharacterVector quad_yx, CharacterVector quad_joint, bool asym);
-RcppExport SEXP _NNS_NNS_dep_pair_cpp(SEXP xSEXP, SEXP ySEXP, SEXP quad_xySEXP, SEXP quad_yxSEXP, SEXP quad_jointSEXP, SEXP asymSEXP) {
+List NNS_dep_pair_cpp(NumericVector x, NumericVector y, CharacterVector quad_xy, CharacterVector quad_yx, CharacterVector quad_joint, bool asym, int x_ties_known, int y_ties_known);
+RcppExport SEXP _NNS_NNS_dep_pair_cpp(SEXP xSEXP, SEXP ySEXP, SEXP quad_xySEXP, SEXP quad_yxSEXP, SEXP quad_jointSEXP, SEXP asymSEXP, SEXP x_ties_knownSEXP, SEXP y_ties_knownSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -78,7 +78,9 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< CharacterVector >::type quad_yx(quad_yxSEXP);
     Rcpp::traits::input_parameter< CharacterVector >::type quad_joint(quad_jointSEXP);
     Rcpp::traits::input_parameter< bool >::type asym(asymSEXP);
-    rcpp_result_gen = Rcpp::wrap(NNS_dep_pair_cpp(x, y, quad_xy, quad_yx, quad_joint, asym));
+    Rcpp::traits::input_parameter< int >::type x_ties_known(x_ties_knownSEXP);
+    Rcpp::traits::input_parameter< int >::type y_ties_known(y_ties_knownSEXP);
+    rcpp_result_gen = Rcpp::wrap(NNS_dep_pair_cpp(x, y, quad_xy, quad_yx, quad_joint, asym, x_ties_known, y_ties_known));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -814,7 +816,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_NNS_NNS_class_predict_cpp", (DL_FUNC) &_NNS_NNS_class_predict_cpp, 7},
     {"_NNS_NNS_group_means_cpp", (DL_FUNC) &_NNS_NNS_group_means_cpp, 3},
     {"_NNS_NNS_copula_cpp", (DL_FUNC) &_NNS_NNS_copula_cpp, 3},
-    {"_NNS_NNS_dep_pair_cpp", (DL_FUNC) &_NNS_NNS_dep_pair_cpp, 6},
+    {"_NNS_NNS_dep_pair_cpp", (DL_FUNC) &_NNS_NNS_dep_pair_cpp, 8},
     {"_NNS_NNS_dep_levels_cpp", (DL_FUNC) &_NNS_NNS_dep_levels_cpp, 3},
     {"_NNS_NNS_dep_local_cpp", (DL_FUNC) &_NNS_NNS_dep_local_cpp, 5},
     {"_NNS_NNS_distance_cpp", (DL_FUNC) &_NNS_NNS_distance_cpp, 5},
