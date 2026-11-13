@@ -343,6 +343,24 @@
   min(k, rpm.rows)
 }
 
+# The default for ncores = NULL: the machine's cores less one, as documented,
+# and two at most when R CMD check limits cores. The count is detected once
+# per session.
+.nns_core_cache <- new.env(parent = emptyenv())
+
+.nns_default_cores <- function() {
+  detected <- .nns_core_cache$detected
+  if (is.null(detected)) {
+    detected <- suppressWarnings(parallel::detectCores())
+    if (!is.finite(detected)) detected <- 2L
+    .nns_core_cache$detected <- detected
+  }
+  cores <- max(1L, as.integer(detected) - 1L)
+  limited <- tolower(Sys.getenv("_R_CHECK_LIMIT_CORES_", ""))
+  if (nzchar(limited) && limited != "false") cores <- min(cores, 2L)
+  cores
+}
+
 .nns_mreg_validate_cores <- function(ncores) {
   if (is.null(ncores)) return(1L)
   if (!is.numeric(ncores) || length(ncores) != 1L || !is.finite(ncores) ||
@@ -373,6 +391,7 @@ NNS.M.reg <- function(X_n, Y, factor.2.dummy = TRUE, order = NULL,
   dist <- .nns_reg_validate_dist(dist)
   noise.reduction <- .nns_reg_validate_noise(noise.reduction)
   confidence.interval <- .nns_reg_validate_ci(confidence.interval)
+  auto.cores <- is.null(ncores)
   ncores <- .nns_mreg_validate_cores(ncores)
   
   if (!is.null(type) && (!is.character(type) || length(type) != 1L ||
@@ -426,6 +445,17 @@ NNS.M.reg <- function(X_n, Y, factor.2.dummy = TRUE, order = NULL,
   }
   k <- max(1L, k)
   
+  # Threads for a prediction of `rows` points. An explicit ncores is used as
+  # given. The default uses the machine's cores less one once the prediction
+  # is large enough to repay starting them (about 20 ms on one thread: each
+  # point searches the regression points and weights its k neighbours), and
+  # one thread below that. The estimates do not depend on the thread count.
+  threads <- function(rows) {
+    if (!auto.cores) return(ncores)
+    work <- as.numeric(rows) * (2 * as.numeric(nrow(rpm)) * ncol(X) + 150 * k)
+    if (work >= 2e7) .nns_default_cores() else 1L
+  }
+  
   # Maximum order with the default k = 1 fit is an exact limit condition.
   # Every unique training row is already its own regression point; duplicate
   # rows share one reduced regression point.  Reuse those values directly
@@ -451,14 +481,14 @@ NNS.M.reg <- function(X_n, Y, factor.2.dummy = TRUE, order = NULL,
     }
   } else {
     fitted.pred <- .nns_mreg_predict(
-      X, rpm, k, dist, minimums, maximums, is.class, ncores
+      X, rpm, k, dist, minimums, maximums, is.class, threads(nrow(X))
     )
   }
 
   # External point estimates still require the repaired distance rule.  With
   # point.est = NULL this returns immediately.
   point.pred <- .nns_mreg_predict(
-    Xpoint, rpm, k, dist, minimums, maximums, is.class, ncores
+    Xpoint, rpm, k, dist, minimums, maximums, is.class, threads(NROW(Xpoint))
   )
   
   if (is.class) {

@@ -10,6 +10,49 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// NNS_LPM_VaR_integer_cpp
+SEXP NNS_LPM_VaR_integer_cpp(const NumericVector& percentile, int degree, const NumericVector& x);
+RcppExport SEXP _NNS_NNS_LPM_VaR_integer_cpp(SEXP percentileSEXP, SEXP degreeSEXP, SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericVector& >::type percentile(percentileSEXP);
+    Rcpp::traits::input_parameter< int >::type degree(degreeSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(NNS_LPM_VaR_integer_cpp(percentile, degree, x));
+    return rcpp_result_gen;
+END_RCPP
+}
+// NNS_class_predict_cpp
+List NNS_class_predict_cpp(const NumericMatrix& centres, const NumericMatrix& shares, const NumericMatrix& points, const IntegerVector& ks, int dist_code, const NumericVector& minimums, const NumericVector& maximums);
+RcppExport SEXP _NNS_NNS_class_predict_cpp(SEXP centresSEXP, SEXP sharesSEXP, SEXP pointsSEXP, SEXP ksSEXP, SEXP dist_codeSEXP, SEXP minimumsSEXP, SEXP maximumsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type centres(centresSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type shares(sharesSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type points(pointsSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type ks(ksSEXP);
+    Rcpp::traits::input_parameter< int >::type dist_code(dist_codeSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type minimums(minimumsSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type maximums(maximumsSEXP);
+    rcpp_result_gen = Rcpp::wrap(NNS_class_predict_cpp(centres, shares, points, ks, dist_code, minimums, maximums));
+    return rcpp_result_gen;
+END_RCPP
+}
+// NNS_group_means_cpp
+NumericMatrix NNS_group_means_cpp(const NumericMatrix& X, const IntegerVector& codes, int groups);
+RcppExport SEXP _NNS_NNS_group_means_cpp(SEXP XSEXP, SEXP codesSEXP, SEXP groupsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type codes(codesSEXP);
+    Rcpp::traits::input_parameter< int >::type groups(groupsSEXP);
+    rcpp_result_gen = Rcpp::wrap(NNS_group_means_cpp(X, codes, groups));
+    return rcpp_result_gen;
+END_RCPP
+}
 // NNS_copula_cpp
 double NNS_copula_cpp(NumericMatrix X, NumericVector target, bool continuous);
 RcppExport SEXP _NNS_NNS_copula_cpp(SEXP XSEXP, SEXP targetSEXP, SEXP continuousSEXP) {
@@ -24,8 +67,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // NNS_dep_pair_cpp
-List NNS_dep_pair_cpp(NumericVector x, NumericVector y, CharacterVector quad_xy, CharacterVector quad_yx, CharacterVector quad_joint, bool asym);
-RcppExport SEXP _NNS_NNS_dep_pair_cpp(SEXP xSEXP, SEXP ySEXP, SEXP quad_xySEXP, SEXP quad_yxSEXP, SEXP quad_jointSEXP, SEXP asymSEXP) {
+List NNS_dep_pair_cpp(NumericVector x, NumericVector y, CharacterVector quad_xy, CharacterVector quad_yx, CharacterVector quad_joint, bool asym, int x_ties_known, int y_ties_known);
+RcppExport SEXP _NNS_NNS_dep_pair_cpp(SEXP xSEXP, SEXP ySEXP, SEXP quad_xySEXP, SEXP quad_yxSEXP, SEXP quad_jointSEXP, SEXP asymSEXP, SEXP x_ties_knownSEXP, SEXP y_ties_knownSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -35,7 +78,9 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< CharacterVector >::type quad_yx(quad_yxSEXP);
     Rcpp::traits::input_parameter< CharacterVector >::type quad_joint(quad_jointSEXP);
     Rcpp::traits::input_parameter< bool >::type asym(asymSEXP);
-    rcpp_result_gen = Rcpp::wrap(NNS_dep_pair_cpp(x, y, quad_xy, quad_yx, quad_joint, asym));
+    Rcpp::traits::input_parameter< int >::type x_ties_known(x_ties_knownSEXP);
+    Rcpp::traits::input_parameter< int >::type y_ties_known(y_ties_knownSEXP);
+    rcpp_result_gen = Rcpp::wrap(NNS_dep_pair_cpp(x, y, quad_xy, quad_yx, quad_joint, asym, x_ties_known, y_ties_known));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -111,6 +156,34 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< bool >::type is_class(is_classSEXP);
     Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
     rcpp_result_gen = Rcpp::wrap(NNS_distance_path_single_parallel_cpp(RPM, yhat, Xtest, k, is_class, nthreads));
+    return rcpp_result_gen;
+END_RCPP
+}
+// NNS_meboot_rho_cpp
+List NNS_meboot_rho_cpp(const NumericMatrix& replicates, const IntegerVector& aligned, const IntegerVector& anti, const NumericVector& target_centered, double target_norm, const NumericVector& rho, bool spearman);
+RcppExport SEXP _NNS_NNS_meboot_rho_cpp(SEXP replicatesSEXP, SEXP alignedSEXP, SEXP antiSEXP, SEXP target_centeredSEXP, SEXP target_normSEXP, SEXP rhoSEXP, SEXP spearmanSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type replicates(replicatesSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type aligned(alignedSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type anti(antiSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type target_centered(target_centeredSEXP);
+    Rcpp::traits::input_parameter< double >::type target_norm(target_normSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type rho(rhoSEXP);
+    Rcpp::traits::input_parameter< bool >::type spearman(spearmanSEXP);
+    rcpp_result_gen = Rcpp::wrap(NNS_meboot_rho_cpp(replicates, aligned, anti, target_centered, target_norm, rho, spearman));
+    return rcpp_result_gen;
+END_RCPP
+}
+// NNS_sort_columns_cpp
+SEXP NNS_sort_columns_cpp(const NumericMatrix& x);
+RcppExport SEXP _NNS_NNS_sort_columns_cpp(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(NNS_sort_columns_cpp(x));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -739,13 +812,18 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_NNS_NNS_LPM_VaR_integer_cpp", (DL_FUNC) &_NNS_NNS_LPM_VaR_integer_cpp, 3},
+    {"_NNS_NNS_class_predict_cpp", (DL_FUNC) &_NNS_NNS_class_predict_cpp, 7},
+    {"_NNS_NNS_group_means_cpp", (DL_FUNC) &_NNS_NNS_group_means_cpp, 3},
     {"_NNS_NNS_copula_cpp", (DL_FUNC) &_NNS_NNS_copula_cpp, 3},
-    {"_NNS_NNS_dep_pair_cpp", (DL_FUNC) &_NNS_NNS_dep_pair_cpp, 6},
+    {"_NNS_NNS_dep_pair_cpp", (DL_FUNC) &_NNS_NNS_dep_pair_cpp, 8},
     {"_NNS_NNS_dep_levels_cpp", (DL_FUNC) &_NNS_NNS_dep_levels_cpp, 3},
     {"_NNS_NNS_dep_local_cpp", (DL_FUNC) &_NNS_NNS_dep_local_cpp, 5},
     {"_NNS_NNS_distance_cpp", (DL_FUNC) &_NNS_NNS_distance_cpp, 5},
     {"_NNS_NNS_distance_path_parallel_cpp", (DL_FUNC) &_NNS_NNS_distance_path_parallel_cpp, 6},
     {"_NNS_NNS_distance_path_single_parallel_cpp", (DL_FUNC) &_NNS_NNS_distance_path_single_parallel_cpp, 6},
+    {"_NNS_NNS_meboot_rho_cpp", (DL_FUNC) &_NNS_NNS_meboot_rho_cpp, 7},
+    {"_NNS_NNS_sort_columns_cpp", (DL_FUNC) &_NNS_NNS_sort_columns_cpp, 1},
     {"_NNS_NNS_mreg_predict_path_v2_cpp", (DL_FUNC) &_NNS_NNS_mreg_predict_path_v2_cpp, 9},
     {"_NNS_NNS_mreg_predict_path_cpp", (DL_FUNC) &_NNS_NNS_mreg_predict_path_cpp, 8},
     {"_NNS_NNS_mreg_predict_v2_cpp", (DL_FUNC) &_NNS_NNS_mreg_predict_v2_cpp, 9},

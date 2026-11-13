@@ -95,7 +95,25 @@ NNS.dep <- function(x,
   # ---- matrix / p.value path ------------------------------------------------
   if (is.null(y)) {
     if (p.value) {
-      nns.mc <- apply(x, 2L, function(g) NNS.dep(x[, 1L], g, asym = asym))
+      nns.mc <- if (isTRUE(getOption("NNS.native", TRUE))) {
+        # NNS.dep(x[, 1], g) for every column g. A gravity split on one
+        # variable places equal values in the same cell, so the cells of a
+        # permuted y are the permuted cells of y, and x's own are shared.
+        part <- .nns_dep_part(nrow(x))
+        own.x <- part(x[, 1L], x[, 1L], "XONLY")
+        own.y <- part(x[, 2L], x[, 2L], "XONLY")
+        ties.x <- anyDuplicated(x[, 1L]) > 0L
+        ties.y <- anyDuplicated(x[, 2L]) > 0L
+        columns <- lapply(seq_len(ncol(x)), function(g) {
+          own.g <- if (g == 1L) own.x else if (g == 2L) own.y else own.y[y_p[, g - 2L]]
+          .nns_dep_native(x[, 1L], x[, g], own.x, own.g, asym, part,
+                          ties.x, if (g == 1L) ties.x else ties.y)
+        })
+        names(columns) <- colnames(x)
+        columns
+      } else {
+        apply(x, 2L, function(g) NNS.dep(x[, 1L], g, asym = asym))
+      }
       cors   <- unlist(lapply(nns.mc, `[[`, "Correlation"))
       deps   <- unlist(lapply(nns.mc, `[[`, "Dependence"))
       
@@ -173,7 +191,9 @@ NNS.dep <- function(x,
     }
     return(NNS_dep_pair_cpp(x = as.numeric(x), y = as.numeric(y),
                             quad_xy = qxy, quad_yx = qyx, quad_joint = qj,
-                            asym = isTRUE(asym)))
+                            asym = isTRUE(asym),
+                            x_ties_known = as.integer(anyDuplicated(x) > 0L),
+                            y_ties_known = as.integer(anyDuplicated(y) > 0L)))
   }
 
   PART_xy <- suppressWarnings(
@@ -228,6 +248,36 @@ NNS.dep <- function(x,
 }
 
 
+# The cell labels NNS.dep's native path reads, for l observations: the
+# recursive gravity split of a on its own (type "XONLY") or the joint quadrants
+# of (a, b) (type NULL), at NNS.part's default order.
+.nns_dep_part <- function(l) {
+  obs <- max(8L, as.integer(l / 8L))
+  ord <- max(ceiling(log(l, 2)), 1L)
+  function(a, b, type) {
+    as.character(NNS_part_cpp(a, b, type = type, order_in = as.integer(ord),
+                              obs_req = as.integer(obs), min_obs_stop = FALSE,
+                              noise_reduction = "off", quadrants_only = TRUE)$quadrant)
+  }
+}
+
+# NNS.dep(x, y) on its native path, given each variable's own split and
+# whether it has repeated values. Neither depends on the other variable, so a
+# caller pairing a variable with many others finds them once.
+.nns_dep_native <- function(x, y, own.x, own.y, asym, part, ties.x, ties.y) {
+  x <- as.numeric(x); y <- as.numeric(y)
+  if (isTRUE(asym)) {
+    NNS_dep_pair_cpp(x = x, y = y, quad_xy = own.x, quad_yx = character(0),
+                     quad_joint = character(0), asym = TRUE,
+                     x_ties_known = as.integer(ties.x), y_ties_known = as.integer(ties.y))
+  } else {
+    NNS_dep_pair_cpp(x = x, y = y, quad_xy = own.x, quad_yx = own.y,
+                     quad_joint = part(x, y, NULL), asym = FALSE,
+                     x_ties_known = as.integer(ties.x), y_ties_known = as.integer(ties.y))
+  }
+}
+
+
 NNS.dep.matrix <- function(x, asym = FALSE){
   
   n <- ncol(x)
@@ -239,23 +289,32 @@ NNS.dep.matrix <- function(x, asym = FALSE){
   
   x <- data.matrix(x)
   
-  upper_lower <- function(x, y, asym){
-    basic_dep <- NNS.dep(x, y, print.map = FALSE, asym = asym)
-    if(asym){
-      asym_dep <- NNS.dep(y, x, print.map = FALSE, asym = asym)
-      return(list("Upper_cor" = basic_dep$Correlation,
-                  "Upper_dep" = basic_dep$Dependence,
-                  "Lower_cor" = asym_dep$Correlation,
-                  "Lower_dep" = asym_dep$Dependence))
-    } else {
-      return(list("Upper_cor" = basic_dep$Correlation,
-                  "Upper_dep" = basic_dep$Dependence,
-                  "Lower_cor" = basic_dep$Correlation,
-                  "Lower_dep" = basic_dep$Dependence))
+  # NNS.dep of column i with column b. Each column's own split and its tie
+  # flag are the same in every pair it enters, so they are found once; only
+  # the joint quadrants belong to a pair. Values NNS.dep would stop on, and
+  # the R partition path, go through NNS.dep pair by pair as before.
+  if (isTRUE(getOption("NNS.native", TRUE)) && is.numeric(x) &&
+      !anyNA(x) && !any(is.infinite(x))) {
+    part <- .nns_dep_part(nrow(x))
+    own <- lapply(seq_len(n), function(j) part(x[, j], x[, j], "XONLY"))
+    ties <- vapply(seq_len(n), function(j) anyDuplicated(x[, j]) > 0L, logical(1L))
+    pair <- function(i, b) {
+      .nns_dep_native(x[, i], x[, b], own[[i]], own[[b]], asym, part, ties[i], ties[b])
     }
+  } else {
+    pair <- function(i, b) NNS.dep(x[, i], x[, b], print.map = FALSE, asym = asym)
   }
   
-  raw.both <- lapply(1 : (n-1), function(i) sapply((i + 1) : n, function(b) upper_lower(x[ , i], x[ , b], asym = asym)))
+  upper_lower <- function(i, b){
+    basic_dep <- pair(i, b)
+    asym_dep <- if(asym) pair(b, i) else basic_dep
+    list("Upper_cor" = basic_dep$Correlation,
+         "Upper_dep" = basic_dep$Dependence,
+         "Lower_cor" = asym_dep$Correlation,
+         "Lower_dep" = asym_dep$Dependence)
+  }
+  
+  raw.both <- lapply(1 : (n-1), function(i) sapply((i + 1) : n, function(b) upper_lower(i, b)))
   
   
   raw.both <- unlist(raw.both)

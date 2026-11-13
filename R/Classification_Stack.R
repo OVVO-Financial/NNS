@@ -100,12 +100,25 @@
       best <- if (objective == "min") which.min(losses) else which.max(losses)
       return(records[[best]])
     }
+    # A fold's design and each class's coefficients are the same for every
+    # predictor count, so each fold encodes and ranks them once.
+    prepared <- vector("list", length(splits))
     records <- lapply(candidates, function(candidate) {
       total <- matrix(0, n, K); count <- integer(n)
       for (b in seq_along(splits)) {
         s <- splits[[b]]; tr <- s$train[balanced[[b]]]; va <- s$validation
-        fitted <- fit(x[tr, , drop = FALSE], y[tr], x[va, , drop = FALSE],
-                      component, candidate, select.count)
+        if (is.null(prepared[[b]])) {
+          prepared[[b]] <<- list(
+            encoded = design(x[tr, , drop = FALSE], y[tr], x[va, , drop = FALSE],
+                             component, select.count),
+            cache = new.env(parent = emptyenv()))
+        }
+        fitted <- .nns_reg_classify(
+          prepared[[b]]$encoded,
+          list(y = y[tr], class.values = values, class.levels = labels),
+          order, NULL, dist, ncores, dim.red.method, tau = tau,
+          dim.count = candidate, point.only = TRUE,
+          coef.cache = prepared[[b]]$cache)
         total[va, ] <- total[va, , drop = FALSE] + as.matrix(fitted$Point.probabilities)
         count[va] <- count[va] + 1L
       }

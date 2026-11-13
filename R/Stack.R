@@ -345,9 +345,7 @@ NNS.stack <- function(IVs.train,
   }
   
   if (is.null(ncores)) {
-    detected <- suppressWarnings(parallel::detectCores())
-    if (!is.finite(detected)) detected <- 2L
-    ncores <- max(1L, as.integer(detected) - 1L)
+    ncores <- .nns_default_cores()
   } else {
     ncores <- .scalar_integer(ncores, "ncores", minimum = 1L)
   }

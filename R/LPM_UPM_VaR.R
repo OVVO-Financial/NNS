@@ -131,7 +131,19 @@ UPM.VaR <- function(percentile, degree, x) {
 #   Vectorize(percentile) -> optimize() -> repeated full LPM.ratio / UPM.ratio scans.
 # ------------------------------------------------------------------------------
 
+# The compiled kernel does this computation with the same arithmetic. It
+# returns NULL for the calls it leaves to the R implementation below: values
+# that are not finite, a missing percentile, or a root search in which
+# uniroot() would warn or stop.
+# Both callers pass percentiles already limited to [0, 1].
 .NNS_LPM_VaR_integer <- function(percentile, degree, x) {
+  out <- NNS_LPM_VaR_integer_cpp(percentile, degree, x)
+  if (is.null(out)) .NNS_LPM_VaR_integer_R(percentile, degree, x) else out
+}
+
+
+
+.NNS_LPM_VaR_integer_R <- function(percentile, degree, x) {
   p <- pmin(pmax(as.numeric(percentile), 0), 1)
   
   n <- length(x)
@@ -199,9 +211,8 @@ UPM.VaR <- function(percentile, degree, x) {
 
 
 .NNS_UPM_VaR_integer <- function(percentile, degree, x) {
-  percentile <- pmin(pmax(as.numeric(percentile), 0), 1)
-  
-  # UPM.ratio(t) = p is equivalent to LPM.ratio(t) = 1 - p.
+  # UPM.ratio(t) = p is equivalent to LPM.ratio(t) = 1 - p. UPM.VaR has
+  # already limited the percentile to [0, 1].
   .NNS_LPM_VaR_integer(1 - percentile, degree, x)
 }
 

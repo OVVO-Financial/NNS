@@ -310,12 +310,75 @@ static inline bool same_prefix(const Label& a, const Label& b, std::size_t len) 
   return la == lb && std::memcmp(a.p, b.p, la) == 0;
 }
 
-static std::vector<Label> as_labels(const CharacterVector& q) {
-  std::vector<Label> out(q.size());
-  for (R_xlen_t i = 0; i < q.size(); ++i) {
-    out[i].p = CHAR(STRING_ELT(q, i));
-    out[i].n = std::strlen(out[i].p);
+// The rows in label order with ties in row order, as a stable sort by label
+// gives them, and each distinct label with the start of its run.
+struct LabelOrder {
+  std::vector<int> ord;
+  std::vector<Label> distinct;  // ascending
+  std::vector<int> start;       // run starts in ord, then the row count
+  std::size_t longest;          // longest label, at least 1
+};
+
+// A partition has few distinct labels, and equal R strings share one cached
+// CHARSXP. So the rows are grouped by string pointer, only the distinct labels
+// are compared as strings, and a counting sort lays the rows out: the order a
+// stable sort of all the labels would give, without comparing every pair.
+static LabelOrder order_labels(const CharacterVector& q) {
+  const int n = static_cast<int>(q.size());
+  LabelOrder out;
+  std::vector<SEXP> seen;
+  std::vector<int> code(n);
+  // Open addressing on the pointer; the table stays at most half full.
+  std::size_t mask = 63;
+  std::vector<int> slot(mask + 1, -1);
+  for (int i = 0; i < n; ++i) {
+    const SEXP s = STRING_ELT(q, i);
+    std::size_t h = (reinterpret_cast<std::uintptr_t>(s) >> 4) * static_cast<std::size_t>(0x9E3779B1u);
+    h &= mask;
+    while (slot[h] >= 0 && seen[slot[h]] != s) h = (h + 1) & mask;
+    if (slot[h] < 0) {
+      slot[h] = static_cast<int>(seen.size());
+      seen.push_back(s);
+      code[i] = slot[h];
+      if (seen.size() * 2 > mask) {
+        mask = mask * 2 + 1;
+        slot.assign(mask + 1, -1);
+        for (std::size_t d = 0; d < seen.size(); ++d) {
+          std::size_t g = (reinterpret_cast<std::uintptr_t>(seen[d]) >> 4) * static_cast<std::size_t>(0x9E3779B1u);
+          g &= mask;
+          while (slot[g] >= 0) g = (g + 1) & mask;
+          slot[g] = static_cast<int>(d);
+        }
+      }
+    } else {
+      code[i] = slot[h];
+    }
   }
+
+  const int found = static_cast<int>(seen.size());
+  std::vector<Label> label(found);
+  out.longest = 1;
+  for (int d = 0; d < found; ++d) {
+    label[d].p = CHAR(seen[d]);
+    label[d].n = static_cast<std::size_t>(LENGTH(seen[d]));
+    out.longest = std::max(out.longest, label[d].n);
+  }
+  std::vector<int> by(found);
+  std::iota(by.begin(), by.end(), 0);
+  std::sort(by.begin(), by.end(), [&](int a, int b) { return label[a] < label[b]; });
+  // Two strings with the same bytes would be one label.
+  std::vector<int> rank(found);
+  for (int r = 0; r < found; ++r) {
+    if (r == 0 || !(label[by[r]] == label[by[r - 1]])) out.distinct.push_back(label[by[r]]);
+    rank[by[r]] = static_cast<int>(out.distinct.size()) - 1;
+  }
+  const int groups = static_cast<int>(out.distinct.size());
+  out.start.assign(groups + 1, 0);
+  for (int i = 0; i < n; ++i) ++out.start[rank[code[i]] + 1];
+  for (int g = 0; g < groups; ++g) out.start[g + 1] += out.start[g];
+  std::vector<int> next(out.start.begin(), out.start.end() - 1);
+  out.ord.resize(n);
+  for (int i = 0; i < n; ++i) out.ord[next[rank[code[i]]]++] = i;
   return out;
 }
 
@@ -334,16 +397,14 @@ static std::vector<Label> as_labels(const CharacterVector& q) {
 // by construction, so it carries no information and scores 0.
 static LevelBest best_level(const std::vector<double>& u,
                             const std::vector<double>& v,
-                            const std::vector<Label>& lab,
+                            const LabelOrder& lab,
                             double between_sign, PartitionKind kind,
                             bool u_ties, bool v_ties,
                             std::vector<double>* levels = nullptr) {
   const int n = static_cast<int>(u.size());
-  std::vector<int> ord(n);
-  std::iota(ord.begin(), ord.end(), 0);
-  std::stable_sort(ord.begin(), ord.end(), [&](int i, int j) { return lab[i] < lab[j]; });
-  size_t L = 1;
-  for (const auto& s : lab) L = std::max(L, s.size());
+  const std::vector<int>& ord = lab.ord;
+  const int groups = static_cast<int>(lab.distinct.size());
+  const size_t L = lab.longest;
 
   std::vector<int> v_counts;
   std::vector<double> p0_cache;
@@ -357,11 +418,12 @@ static LevelBest best_level(const std::vector<double>& u,
   std::vector<double> uq, vq;
   std::vector<int> starts;
   for (size_t len = 1; len <= L; ++len) {
-    // Cells at this level are runs of equal prefixes in label order.
+    // Cells at this level are runs of equal prefixes in label order, so they
+    // begin where a distinct label's prefix differs from the one before it.
     starts.clear();
     starts.push_back(0);
-    for (int k = 1; k < n; ++k) {
-      if (!same_prefix(lab[ord[k]], lab[ord[k - 1]], len)) starts.push_back(k);
+    for (int g = 1; g < groups; ++g) {
+      if (!same_prefix(lab.distinct[g], lab.distinct[g - 1], len)) starts.push_back(lab.start[g]);
     }
     const int cells = static_cast<int>(starts.size());
     if (cells == prev_cells) continue;  // nested partition unchanged: same value
@@ -406,13 +468,17 @@ static bool has_ties(std::vector<double> v) {
   return std::adjacent_find(v.begin(), v.end()) != v.end();
 }
 
+// x_ties / y_ties: whether the variable has repeated values, when the caller
+// already knows (NA to have it found here).
 // [[Rcpp::export]]
 List NNS_dep_pair_cpp(NumericVector x,
                       NumericVector y,
                       CharacterVector quad_xy,
                       CharacterVector quad_yx,
                       CharacterVector quad_joint,
-                      bool asym = false) {
+                      bool asym = false,
+                      int x_ties_known = NA_INTEGER,
+                      int y_ties_known = NA_INTEGER) {
   const int n = x.size();
   if (y.size() != n || quad_xy.size() != n) {
     stop("x, y and quad_xy must all have the same length");
@@ -448,19 +514,20 @@ List NNS_dep_pair_cpp(NumericVector x,
   const double cov_tol = 1e-12 * cov_abs;
   const double between_sign = (cov > cov_tol) ? 1.0 : (cov < -cov_tol) ? -1.0 : 0.0;
 
-  const bool x_ties = has_ties(xv), y_ties = has_ties(yv);
+  const bool x_ties = x_ties_known == NA_INTEGER ? has_ties(xv) : x_ties_known != 0;
+  const bool y_ties = y_ties_known == NA_INTEGER ? has_ties(yv) : y_ties_known != 0;
 
   // y on x: the partition on x.
-  LevelBest best = best_level(xv, yv, as_labels(quad_xy), between_sign, CONDITIONAL,
+  LevelBest best = best_level(xv, yv, order_labels(quad_xy), between_sign, CONDITIONAL,
                               x_ties, y_ties);
   if (!asym) {
     // Symmetric: the strongest of the joint quadrants of (x, y), which carry
     // relations such as a circle or y = x * noise, and the two conditional
     // partitions, which carry functions of either variable. The joint
     // partition wins ties.
-    LevelBest joint = best_level(xv, yv, as_labels(quad_joint), between_sign, JOINT,
+    LevelBest joint = best_level(xv, yv, order_labels(quad_joint), between_sign, JOINT,
                                  x_ties, y_ties);
-    LevelBest on_y = best_level(yv, xv, as_labels(quad_yx), between_sign, CONDITIONAL,
+    LevelBest on_y = best_level(yv, xv, order_labels(quad_yx), between_sign, CONDITIONAL,
                                 y_ties, x_ties);
     LevelBest out = joint;
     if (best.dependence > out.dependence) out = best;
@@ -483,7 +550,7 @@ NumericVector NNS_dep_levels_cpp(NumericVector x, NumericVector y, CharacterVect
   for (int i = 1; i < n; ++i) { if (xv[i] != xv[0]) cx = false; if (yv[i] != yv[0]) cy = false; }
   if (n < 2 || cx || cy) return NumericVector::create(0.0);
   std::vector<double> levels;
-  best_level(xv, yv, as_labels(quad_xy), 0.0, CONDITIONAL, has_ties(xv), has_ties(yv), &levels);
+  best_level(xv, yv, order_labels(quad_xy), 0.0, CONDITIONAL, has_ties(xv), has_ties(yv), &levels);
   return wrap(levels);
 }
 
@@ -523,7 +590,7 @@ static int count_unique(std::vector<double> v) {
 }
 
 static double local_dep_dir(const std::vector<double>& u, const std::vector<double>& v,
-                            const std::vector<Label>& lab,
+                            const LabelOrder& lab,
                             bool u_ties, bool v_ties) {
   const int n = static_cast<int>(u.size());
   auto root = [](double inner) { return (inner >= 0.0 ? 1.0 : -1.0) * std::sqrt(std::abs(inner)); };
@@ -537,21 +604,19 @@ static double local_dep_dir(const std::vector<double>& u, const std::vector<doub
   double global = cell_value(u, v);
   if (!std::isfinite(global)) global = 0.0;
 
-  std::vector<int> ord(n);
-  std::iota(ord.begin(), ord.end(), 0);
-  std::stable_sort(ord.begin(), ord.end(), [&](int i, int j) { return lab[i] < lab[j]; });
+  // Each finest cell is one distinct label's run of rows.
+  const std::vector<int>& ord = lab.ord;
+  const int groups = static_cast<int>(lab.distinct.size());
   double dep = 0.0;
   std::vector<double> uq, vq;
-  for (int lo = 0; lo < n;) {
-    int hi = lo + 1;
-    while (hi < n && lab[ord[hi]] == lab[ord[lo]]) ++hi;
+  for (int g = 0; g < groups; ++g) {
+    const int lo = lab.start[g], hi = lab.start[g + 1];
     const int m = hi - lo;
     uq.resize(m); vq.resize(m);
     for (int k = 0; k < m; ++k) { uq[k] = u[ord[lo + k]]; vq[k] = v[ord[lo + k]]; }
     double val = cell_value(uq, vq);
     if (!std::isfinite(val)) val = global;
     dep += val * static_cast<double>(m) / static_cast<double>(n);
-    lo = hi;
   }
   return std::max(0.0, dep);
 }
@@ -567,11 +632,13 @@ double NNS_dep_local_cpp(NumericVector x, NumericVector y,
   bool cx = true, cy = true;
   for (int i = 1; i < n; ++i) { if (xv[i] != xv[0]) cx = false; if (yv[i] != yv[0]) cy = false; }
   if (n < 2 || cx || cy) return 0.0;
-  const bool x_ties = has_ties(xv), y_ties = has_ties(yv);
-  double dep = local_dep_dir(xv, yv, as_labels(quad_xy), x_ties, y_ties);
-  if (!asym) dep = std::max(dep, local_dep_dir(yv, xv, as_labels(quad_yx), y_ties, x_ties));
+  // One sort per variable gives its distinct count, and so whether it has ties.
+  const int x_unique = count_unique(xv), y_unique = count_unique(yv);
+  const bool x_ties = x_unique < n, y_ties = y_unique < n;
+  double dep = local_dep_dir(xv, yv, order_labels(quad_xy), x_ties, y_ties);
+  if (!asym) dep = std::max(dep, local_dep_dir(yv, xv, order_labels(quad_yx), y_ties, x_ties));
   const double rn = std::sqrt(static_cast<double>(n));
-  if (count_unique(xv) < rn && count_unique(yv) < rn) {
+  if (x_unique < rn && y_unique < rn) {
     double disc = copula_degree0_unsigned(xv, yv);
     if (!std::isfinite(disc)) disc = dep;
     dep = 0.5 * (dep + disc);

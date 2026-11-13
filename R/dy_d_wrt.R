@@ -22,31 +22,55 @@
   as.numeric(solve(powers, rhs)) / scale^degree
 }
 
-.nns_dy_stencil <- function(col, at, probability.width) {
+# The stencil at each point in [at] for each probability width, as
+# stencils[[width]][[point]]. The sorted support and each point's lower share
+# do not depend on the width, and LPM.VaR evaluates its percentiles one by
+# one, so a single call returns every window quantile. LPM.ratio is still
+# called per point: with many targets it sums in a different order.
+.nns_dy_stencils <- function(col, at, probability.widths) {
   support <- sort(unique(col))
   lower <- support[1L]; upper <- tail(support, 1L)
-  if (!is.finite(at) || at < lower || at > upper)
+  if (any(!is.finite(at) | at < lower | at > upper))
     stop("Derivative evaluation points must lie inside the observed coordinate support.")
-  if (length(support) < 2L) return(list(nodes = at, first = NA_real_, second = NA_real_))
+  points <- seq_along(at)
+  finish <- function(nodes, a) list(nodes = nodes, first = .nns_fd_weights(nodes, a, 1L),
+                                    second = .nns_fd_weights(nodes, a, 2L))
+  if (length(support) < 2L) {
+    one <- lapply(points, function(i) list(nodes = at[i], first = NA_real_, second = NA_real_))
+    return(rep(list(one), length(probability.widths)))
+  }
   if (length(support) == 2L) {
-    nodes <- support
-  } else {
-    share <- LPM.ratio(1, at, col)
-    lo <- LPM.VaR(max(0, share - probability.width), 1, col)
-    hi <- LPM.VaR(min(1, share + probability.width), 1, col)
+    one <- lapply(points, function(i) finish(support, at[i]))
+    return(rep(list(one), length(probability.widths)))
+  }
+  share <- vapply(points, function(i) LPM.ratio(1, at[i], col), numeric(1L))
+  m <- length(at)
+  windows <- length(probability.widths)
+  quantiles <- LPM.VaR(
+    c(unlist(lapply(probability.widths, function(w) pmax(0, share - w))),
+      unlist(lapply(probability.widths, function(w) pmin(1, share + w)))),
+    1, col)
+  lapply(seq_len(windows), function(b) lapply(points, function(i) {
+    lo <- quantiles[(b - 1L) * m + i]
+    hi <- quantiles[(windows + b - 1L) * m + i]
+    a <- at[i]
     # A local half-window, never an entire-support extrapolation step.
     h <- min((hi - lo) / 2, (upper - lower) / 4)
     if (!is.finite(h) || h <= 0) h <- min(diff(support))
-    if (at == lower) {
-      nodes <- at + c(0, h, 2 * h)
-    } else if (at == upper) {
-      nodes <- at - c(2 * h, h, 0)
+    nodes <- if (a == lower) {
+      a + c(0, h, 2 * h)
+    } else if (a == upper) {
+      a - c(2 * h, h, 0)
     } else {
-      nodes <- c(max(lower, at - h), at, min(upper, at + h))
+      c(max(lower, a - h), a, min(upper, a + h))
     }
-  }
-  list(nodes = nodes, first = .nns_fd_weights(nodes, at, 1L),
-       second = .nns_fd_weights(nodes, at, 2L))
+    finish(nodes, a)
+  }))
+}
+
+# One point, one width.
+.nns_dy_stencil <- function(col, at, probability.width) {
+  .nns_dy_stencils(col, at, probability.width)[[1L]][[1L]]
 }
 
 #' Partial Derivative dy/d_[wrt]
@@ -161,9 +185,10 @@ dy.d_ <- function(x, y, wrt, eval.points = "obs", mixed = FALSE, messages = TRUE
   widths <- pmin(.25, c(base / 2, base))
   if (.nns_dep_local(x[, wrt], y, asym = FALSE) < .5) widths <- pmin(.25, 2 * widths)
   queries <- list(); specifications <- list()
+  stencils <- .nns_dy_stencils(x[, wrt], points, widths)
   for (b in seq_along(widths)) for (i in seq_along(contexts)) {
     context <- contexts[[i]]
-    stencil <- .nns_dy_stencil(x[, wrt], points[i], widths[b])
+    stencil <- stencils[[b]][[i]]
     nodes <- lapply(stencil$nodes, function(value) {
       z <- context; z[, wrt] <- value; z
     })
@@ -173,10 +198,11 @@ dy.d_ <- function(x, y, wrt, eval.points = "obs", mixed = FALSE, messages = TRUE
   }
   mixed.spec <- list()
   if (mixed && ncol(x) == 2L && !marginal) {
+    first.stencils <- .nns_dy_stencils(x[, 1], ev[, 1], widths)
+    second.stencils <- .nns_dy_stencils(x[, 2], ev[, 2], widths)
     for (b in seq_along(widths)) for (i in seq_along(contexts)) {
-      at <- contexts[[i]][1, ]
-      s1 <- .nns_dy_stencil(x[, 1], at[1], widths[b])
-      s2 <- .nns_dy_stencil(x[, 2], at[2], widths[b])
+      s1 <- first.stencils[[b]][[i]]
+      s2 <- second.stencils[[b]][[i]]
       grid <- as.matrix(expand.grid(s1$nodes, s2$nodes))
       colnames(grid) <- colnames(x)
       index <- length(queries) + 1L

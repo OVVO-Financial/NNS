@@ -656,10 +656,16 @@
     stop("[threshold] must be a single finite nonnegative number.", call. = FALSE)
   }
   
-  cor.coef <- vapply(seq_len(p), function(j) {
-    z <- suppressWarnings(stats::cor(x[, j], y, method = "spearman"))
-    if (is.finite(z)) z else 0
-  }, numeric(1L))
+  # Spearman's correlation is the correlation of the ranks, as stats::cor
+  # computes it; the response is ranked once for every predictor. Only the
+  # methods that use it compute it.
+  cor.coef <- function() {
+    y.rank <- rank(y, na.last = "keep")
+    vapply(seq_len(p), function(j) {
+      z <- suppressWarnings(stats::cor(rank(x[, j], na.last = "keep"), y.rank))
+      if (is.finite(z)) z else 0
+    }, numeric(1L))
+  }
   
   dep.coef <- function() vapply(seq_len(p), function(j) {
     z <- tryCatch(NNS.dep(x[, j], y, print.map = FALSE, asym = TRUE)$Dependence,
@@ -683,10 +689,10 @@
   }
   
   coef <- switch(method,
-                 cor = cor.coef,
+                 cor = cor.coef(),
                  nns.dep = dep.coef(),
                  nns.caus = caus.coef(),
-                 all = rowMeans(cbind(caus.coef(), dep.coef(), cor.coef,
+                 all = rowMeans(cbind(caus.coef(), dep.coef(), cor.coef(),
                                       rep(1, p))),
                  equal = rep(1, p),
                  numeric = as.numeric(dim.red.method))
@@ -783,7 +789,7 @@
 #' @param smooth logical; \code{FALSE} (default) Applies a smoothing spline instead of local linear fit to regression points.
 #' @param noise.reduction the method of determining regression points options: ("mean", "median", "mode", "off"); In low signal:noise situations,\code{(noise.reduction = "mean")}  uses means for \link{NNS.dep} restricted partitions, \code{(noise.reduction = "median")} uses medians instead of means for \link{NNS.dep} restricted partitions, while \code{(noise.reduction = "mode")}  uses modes instead of means for \link{NNS.dep} restricted partitions.  \code{(noise.reduction = "off")} uses an overall central tendency measure for partitions.
 #' @param dist options:(NULL, "NNS", "L1", "L2", "FACTOR") the method of distance calculation. \code{dist = NULL} is the default and selects the native blended NNS distance, \eqn{sum(abs(z) + z^2)}, over range-normalized coordinates. \code{dist = "NNS"} is an explicit alias for the default. \code{dist = "L2"} selects Euclidean distance; \code{dist = "L1"} selects Manhattan distance; \code{dist = "FACTOR"} uses a frequency.
-#' @param ncores integer; value specifying the number of cores to be used in the parallelized  procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.
+#' @param ncores integer; value specifying the number of cores to be used in the parallelized  procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1 for multivariate regression predictions large enough to repay them, and one otherwise.  The estimates do not depend on the number of cores.
 #' @param multivariate.call Internal argument for multivariate regressions.
 #' @param point.only Internal argument for abbreviated output.
 #' @return UNIVARIATE REGRESSION RETURNS THE FOLLOWING VALUES:

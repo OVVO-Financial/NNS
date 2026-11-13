@@ -31,10 +31,14 @@ NNS.ANOVA.bin <- function(control, treatment,
   
   # Calculate partial moment targets if not provided
   if(is.null(upper.25.target) && is.null(lower.25.target)) {
-    upper.25.target <- mean(c(UPM.VaR(0.25, 1, control), UPM.VaR(0.25, 1, treatment)))
-    lower.25.target <- mean(c(LPM.VaR(0.25, 1, control), LPM.VaR(0.25, 1, treatment)))
-    upper.125.target <- mean(c(UPM.VaR(0.125, 1, control), UPM.VaR(0.125, 1, treatment)))
-    lower.125.target <- mean(c(LPM.VaR(0.125, 1, control), LPM.VaR(0.125, 1, treatment)))
+    # UPM.VaR(p, 1, x) is LPM.VaR(1 - p, 1, x), and LPM.VaR solves its
+    # percentiles one by one, so one call per group gives all four thresholds.
+    control.var <- LPM.VaR(c(0.75, 0.25, 0.875, 0.125), 1, control)
+    treatment.var <- LPM.VaR(c(0.75, 0.25, 0.875, 0.125), 1, treatment)
+    upper.25.target <- mean(c(control.var[1L], treatment.var[1L]))
+    lower.25.target <- mean(c(control.var[2L], treatment.var[2L]))
+    upper.125.target <- mean(c(control.var[3L], treatment.var[3L]))
+    lower.125.target <- mean(c(control.var[4L], treatment.var[4L]))
   }
   
   # Calculate partial moment ratios
