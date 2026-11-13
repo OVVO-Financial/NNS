@@ -1102,17 +1102,21 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 <div id="further-resources" class="section level2 hasAnchor" number="27.2">
 <h2><span class="header-section-number">27.2</span> Further Resources<a href="conclusion-and-next-steps.html#further-resources" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>To continue beyond this book, the official implementation resources are maintained in three complementary locations:</p>
+<p>To continue beyond this book, the <strong>R reference implementation</strong> and its <strong>Python companion</strong> provide complementary resources:</p>
 <ul>
-<li><strong>CRAN package</strong>: <a href="https://cran.r-project.org/package=NNS" class="uri">https://cran.r-project.org/package=NNS</a></li>
-<li><strong>Vignettes and method walkthroughs</strong>: <a href="https://ovvo-financial.github.io/NNS/articles/index.html" class="uri">https://ovvo-financial.github.io/NNS/articles/index.html</a></li>
-<li><strong>Hands-on examples in the GitHub repository</strong>: <a href="https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/index.md" class="uri">https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/index.md</a></li>
+<li><strong>R package on CRAN</strong>: <a href="https://cran.r-project.org/package=NNS" class="uri">https://cran.r-project.org/package=NNS</a></li>
+<li><strong>R vignettes and method walkthroughs</strong>: <a href="https://ovvo-financial.github.io/NNS/articles/index.html" class="uri">https://ovvo-financial.github.io/NNS/articles/index.html</a></li>
+<li><strong>Canonical examples and R/Python companion links</strong>: <a href="https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/index.md" class="uri">https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/index.md</a></li>
+<li><strong>Python package on PyPI (<code>ovvo-nns</code>)</strong>: <a href="https://pypi.org/project/ovvo-nns/" class="uri">https://pypi.org/project/ovvo-nns/</a></li>
+<li><strong>Python documentation, installation, and API reference</strong>: <a href="https://ovvo-financial.github.io/NNS-python/" class="uri">https://ovvo-financial.github.io/NNS-python/</a></li>
+<li><strong>Python source code and numbered vignette examples</strong>: <a href="https://github.com/OVVO-Financial/NNS-python" class="uri">https://github.com/OVVO-Financial/NNS-python</a></li>
 </ul>
+<p>The Python distribution installs with <code>pip install ovvo-nns</code> and is imported as <code>nns</code>. It is a native Python implementation, not an R runtime wrapper. The R package remains the reference implementation for NNS statistical behavior and the canonical vignette curriculum; consult the <a href="https://ovvo-financial.github.io/NNS-python/api_status/">Python API status</a> for implementation coverage and documented differences.</p>
 <p>A practical workflow is:</p>
 <ol style="list-style-type: decimal">
-<li>Install and review the CRAN package documentation for function references and stable release behavior.</li>
-<li>Work through the vignette set for topic-focused application patterns.</li>
-<li>Use the GitHub examples index for extended, concrete scripts that can be adapted to your own data.</li>
+<li>Install the R package <code>NNS</code> from CRAN or the Python distribution <code>ovvo-nns</code> from PyPI, and consult the relevant API documentation.</li>
+<li>Work through the canonical R vignettes or their numbered Python companions, following the corresponding sections in the examples index.</li>
+<li>Adapt the example scripts to your data, check the documented behavior and parity limitations where relevant, and evaluate results under your domain constraints.</li>
 </ol>
 <p>Together, these resources provide deeper coverage of specialized applications, additional implementation detail, and more end-to-end examples than can be included in a single volume.</p>
 
