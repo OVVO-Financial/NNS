@@ -19,11 +19,11 @@ This book presents the **Nonlinear Nonparametric Statistics (NNS)** framework as
 The chapters are organized to move from foundational concepts to practical modeling workflows:
 
 - first principles of nonlinear dependence and directional relationships,
-- nonparametric methods for regression, classification, and density-based tasks,
+- nonparametric methods for distribution estimation, clustering, regression, and classification,
 - time-series forecasting frameworks for univariate and multivariate settings,
 - and implementation guidance for applied research and production analytics.
 
-The central theme is consistent throughout: when data are asymmetric, heavy-tailed, nonlinear, or regime-sensitive, useful structure can still be extracted directly from the data-generating process using directional and nonparametric methods.
+The central theme is consistent throughout: when data are asymmetric, heavy-tailed, nonlinear, or regime-sensitive, useful structure can still be examined in observed data using directional and nonparametric methods.
 
 ## Executive Summary {-}
 
@@ -32,9 +32,9 @@ This book is designed for readers who want mathematically grounded methods that 
 At a high level, the NNS framework emphasizes:
 
 - **distribution-agnostic modeling** rather than strict parametric family selection,
-- **directional dependence and causation diagnostics** instead of purely symmetric association summaries,
+- **directional dependence and lagged-association diagnostics** beyond purely symmetric association summaries, with causal interpretation requiring additional identification assumptions,
 - **nonlinear predictive systems** that can adapt to heterogeneous signal structures,
-- and **modular workflows in R** so methods can be combined for exploratory analysis, forecasting, and risk assessment.
+- and **modular workflows in R and Python** so methods can be combined for exploratory analysis, forecasting, and risk assessment.
 
 Readers can use the text in two ways:
 
@@ -54,7 +54,7 @@ The repository is organized as a practical application layer. Conceptual and the
 A useful way to navigate both resources together is:
 
 1. Read the chapter for the theoretical framework and notation.
-2. Open the matching section in `examples/README.md` for runnable code patterns.
+2. Open the matching section in `examples/index.md` for runnable code patterns.
 3. Adapt those scripts to your own data and evaluate with your domain constraints.
 
 The examples repository is intended for hands-on implementation, not as a substitute for the proofs and derivations developed in the text. Keep the repository disclaimer in mind when applying any script directly to production or policy settings; examples are instructional templates and should be validated, stress-tested, and context-calibrated before operational use.
@@ -73,13 +73,18 @@ pip install ovvo-nns
 import nns
 ```
 
-Source code and documentation live in the companion repository:
+The Python implementation has its own distribution, documentation, and examples:
 
-- <https://github.com/OVVO-Financial/NNS-python>
+- **Python package (PyPI):** <https://pypi.org/project/ovvo-nns/>
+- **Python documentation:** <https://ovvo-financial.github.io/NNS-python/>
+- **API status and known differences:** <https://ovvo-financial.github.io/NNS-python/api_status/>
+- **Source code and numbered Python vignette companions:** <https://github.com/OVVO-Financial/NNS-python>
+
+The R package remains the reference implementation and source of truth for the NNS statistical definitions and canonical examples. The Python package is native and does not call R at runtime. The [canonical examples index](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/index.md) links the R vignettes to their Python companions.
 
 Conventions used by the Python code in this book:
 
-- **Naming.** R's dot-separated names become snake_case: `NNS.dep` is `nns_dep`, `LPM.VaR` is `lpm_var`, `Co.LPM` is `co_lpm`, `PM.matrix` is `pm_matrix`, and so on. Argument names follow the same rule (`seasonal.factor` becomes `seasonal_factor`).
+- **Naming.** R function names generally map to snake_case in Python: `NNS.dep` is `nns_dep`, `LPM.VaR` is `lpm_var`, `Co.LPM` is `co_lpm`, `PM.matrix` is `pm_matrix`, and so on. Argument names follow the same rule (`seasonal.factor` becomes `seasonal_factor`).
 - **Inputs and outputs.** Functions accept NumPy arrays and return NumPy arrays, Python scalars, or plain dictionaries keyed by the same names as the R list elements (for example `fit["Point.est"]`).
-- **Randomness.** NumPy's `default_rng` replaces `set.seed`; because the generators differ, seeded Python runs reproduce the *structure* of the R examples, not their bit-identical draws. Many `nns` functions also accept an explicit `random_seed` argument.
+- **Randomness.** Example scripts that use NumPy's `default_rng` do not generally reproduce draws from R's `set.seed`. Separately, supported stochastic NNS-Python functions use an explicit `random_seed` argument to reproduce corresponding R seeded behavior where parity is documented. Consult the Python parity documentation before assuming exact equivalence.
 - **Plotting.** Where an R example's purpose is a figure, the Python workflow either passes `plot=True` or calls the matching helper from `nns.plotting` (for example `plot_nns_part`, `plot_nns_reg`).
