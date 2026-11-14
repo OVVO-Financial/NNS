@@ -1088,20 +1088,20 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>The chapters are organized to move from foundational concepts to practical modeling workflows:</p>
 <ul>
 <li>first principles of nonlinear dependence and directional relationships,</li>
-<li>nonparametric methods for regression, classification, and density-based tasks,</li>
+<li>nonparametric methods for distribution estimation, clustering, regression, and classification,</li>
 <li>time-series forecasting frameworks for univariate and multivariate settings,</li>
 <li>and implementation guidance for applied research and production analytics.</li>
 </ul>
-<p>The central theme is consistent throughout: when data are asymmetric, heavy-tailed, nonlinear, or regime-sensitive, useful structure can still be extracted directly from the data-generating process using directional and nonparametric methods.</p>
+<p>The central theme is consistent throughout: when data are asymmetric, heavy-tailed, nonlinear, or regime-sensitive, useful structure can still be examined in observed data using directional and nonparametric methods.</p>
 <div id="executive-summary" class="section level2 unnumbered hasAnchor">
 <h2>Executive Summary<a href="index.html#executive-summary" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>This book is designed for readers who want mathematically grounded methods that remain practical in real-world settings where classical assumptions can fail.</p>
 <p>At a high level, the NNS framework emphasizes:</p>
 <ul>
 <li><strong>distribution-agnostic modeling</strong> rather than strict parametric family selection,</li>
-<li><strong>directional dependence and causation diagnostics</strong> instead of purely symmetric association summaries,</li>
+<li><strong>directional dependence and lagged-association diagnostics</strong> beyond purely symmetric association summaries, with causal interpretation requiring additional identification assumptions,</li>
 <li><strong>nonlinear predictive systems</strong> that can adapt to heterogeneous signal structures,</li>
-<li>and <strong>modular workflows in R</strong> so methods can be combined for exploratory analysis, forecasting, and risk assessment.</li>
+<li>and <strong>modular workflows in R and Python</strong> so methods can be combined for exploratory analysis, forecasting, and risk assessment.</li>
 </ul>
 <p>Readers can use the text in two ways:</p>
 <ol style="list-style-type: decimal">
@@ -1120,7 +1120,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>A useful way to navigate both resources together is:</p>
 <ol style="list-style-type: decimal">
 <li>Read the chapter for the theoretical framework and notation.</li>
-<li>Open the matching section in <code>examples/README.md</code> for runnable code patterns.</li>
+<li>Open the matching section in <code>examples/index.md</code> for runnable code patterns.</li>
 <li>Adapt those scripts to your own data and evaluate with your domain constraints.</li>
 </ol>
 <p>The examples repository is intended for hands-on implementation, not as a substitute for the proofs and derivations developed in the text. Keep the repository disclaimer in mind when applying any script directly to production or policy settings; examples are instructional templates and should be validated, stress-tested, and context-calibrated before operational use.</p>
@@ -1131,15 +1131,19 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>The distribution package is <strong><code>ovvo-nns</code></strong> and the import package is <strong><code>nns</code></strong>:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="index.html#cb1-1" tabindex="-1"></a><span class="ex">pip</span> install ovvo-nns</span></code></pre></div>
 <div class="sourceCode" id="cb2"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="index.html#cb2-1" tabindex="-1"></a><span class="im">import</span> nns</span></code></pre></div>
-<p>Source code and documentation live in the companion repository:</p>
+<p>The Python implementation has its own distribution, documentation, and examples:</p>
 <ul>
-<li><a href="https://github.com/OVVO-Financial/NNS-python" class="uri">https://github.com/OVVO-Financial/NNS-python</a></li>
+<li><strong>Python package (PyPI):</strong> <a href="https://pypi.org/project/ovvo-nns/" class="uri">https://pypi.org/project/ovvo-nns/</a></li>
+<li><strong>Python documentation:</strong> <a href="https://ovvo-financial.github.io/NNS-python/" class="uri">https://ovvo-financial.github.io/NNS-python/</a></li>
+<li><strong>API status and known differences:</strong> <a href="https://ovvo-financial.github.io/NNS-python/api_status/" class="uri">https://ovvo-financial.github.io/NNS-python/api_status/</a></li>
+<li><strong>Source code and numbered Python vignette companions:</strong> <a href="https://github.com/OVVO-Financial/NNS-python" class="uri">https://github.com/OVVO-Financial/NNS-python</a></li>
 </ul>
+<p>The R package remains the reference implementation and source of truth for the NNS statistical definitions and canonical examples. The Python package is native and does not call R at runtime. The <a href="https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/index.md">canonical examples index</a> links the R vignettes to their Python companions.</p>
 <p>Conventions used by the Python code in this book:</p>
 <ul>
-<li><strong>Naming.</strong> R’s dot-separated names become snake_case: <code>NNS.dep</code> is <code>nns_dep</code>, <code>LPM.VaR</code> is <code>lpm_var</code>, <code>Co.LPM</code> is <code>co_lpm</code>, <code>PM.matrix</code> is <code>pm_matrix</code>, and so on. Argument names follow the same rule (<code>seasonal.factor</code> becomes <code>seasonal_factor</code>).</li>
+<li><strong>Naming.</strong> R function names generally map to snake_case in Python: <code>NNS.dep</code> is <code>nns_dep</code>, <code>LPM.VaR</code> is <code>lpm_var</code>, <code>Co.LPM</code> is <code>co_lpm</code>, <code>PM.matrix</code> is <code>pm_matrix</code>, and so on. Argument names follow the same rule (<code>seasonal.factor</code> becomes <code>seasonal_factor</code>).</li>
 <li><strong>Inputs and outputs.</strong> Functions accept NumPy arrays and return NumPy arrays, Python scalars, or plain dictionaries keyed by the same names as the R list elements (for example <code>fit["Point.est"]</code>).</li>
-<li><strong>Randomness.</strong> NumPy’s <code>default_rng</code> replaces <code>set.seed</code>; because the generators differ, seeded Python runs reproduce the <em>structure</em> of the R examples, not their bit-identical draws. Many <code>nns</code> functions also accept an explicit <code>random_seed</code> argument.</li>
+<li><strong>Randomness.</strong> Example scripts that use NumPy’s <code>default_rng</code> do not generally reproduce draws from R’s <code>set.seed</code>. Separately, supported stochastic NNS-Python functions use an explicit <code>random_seed</code> argument to reproduce corresponding R seeded behavior where parity is documented. Consult the Python parity documentation before assuming exact equivalence.</li>
 <li><strong>Plotting.</strong> Where an R example’s purpose is a figure, the Python workflow either passes <code>plot=True</code> or calls the matching helper from <code>nns.plotting</code> (for example <code>plot_nns_part</code>, <code>plot_nns_reg</code>).</li>
 </ul>
 
