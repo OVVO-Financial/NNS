@@ -54,9 +54,9 @@ third-moment
 fourth-moment
 standardized-skewness-and-kurtosis
 information-loss-in-symmetric-aggregation-1
-measure-theoretic-interpretation
+moments-measure-theoretic-interpretation
 implications
-measure-theoretic-interpretation-1
+measure-theoretic-interpretation
 probability-spaces
 benchmark-induced-partitions
 positive-and-negative-function-decomposition
