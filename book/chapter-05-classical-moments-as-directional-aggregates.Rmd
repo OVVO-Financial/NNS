@@ -256,7 +256,7 @@ Once aggregated, the original directional information cannot generally be recove
 
 ---
 
-## Measure-Theoretic Interpretation
+## Measure-Theoretic Interpretation {#moments-measure-theoretic-interpretation}
 
 The directional decomposition follows naturally from the partition of the sample space induced by the benchmark \(t\):
 
