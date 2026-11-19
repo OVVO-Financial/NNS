@@ -7,7 +7,7 @@
 LPM(degree, target, variable, excess_ret = FALSE)
 }
 \arguments{
-\item{degree}{numeric; \code{(degree = 0)} is frequency, \code{(degree = 1)} is area.}
+\item{degree}{numeric; \code{(degree = 0)} is frequency, \code{(degree = 1)} is area. At \code{degree = 0} an observation equal to the target is counted (\code{variable <= target}).}
 
 \item{target}{numeric; Set to \code{target = mean(variable)} for classical equivalences, but does not have to be.
 When \code{excess_ret = FALSE}, this can be a scalar or a vectorized target for the standard partial moment calculation.

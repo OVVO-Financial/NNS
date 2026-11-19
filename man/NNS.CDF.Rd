@@ -21,7 +21,7 @@ NNS.CDF(variable, degree = 0, target = NULL, type = "CDF", plot = TRUE)
 Returns:
 \itemize{
  \item{\code{"Function"}} a data.frame (class \code{NNS.data.frame}) containing the observations and the resulting function of the variable.
- \item{\code{"target.value"}} value from the \code{target} argument.
+ \item{\code{"target.value"}} value of the function at the \code{target} argument.
 }
 }
 \description{

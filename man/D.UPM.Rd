@@ -24,7 +24,8 @@ Numeric vector of divergent UPM values.
 }
 \description{
 Computes the divergent upper partial moment (upper‑left quadrant 2)
-  between two equal‑length numeric vectors.
+  between two equal‑length numeric vectors. \code{degree_lpm} applies to \code{x}
+  (below \code{target_x}) and \code{degree_upm} to \code{y} (above \code{target_y}).
 }
 \examples{
   set.seed(123)

@@ -11,7 +11,7 @@ DPM_nD(data, target, degree = 0, norm = TRUE)
 
 \item{target}{A numeric vector, length equal to ncol(data).}
 
-\item{degree}{numeric; degree for upper deviations (0 = frequency, 1 = area).}
+\item{degree}{numeric; degree for lower and upper deviations (0 = frequency, 1 = area).}
 
 \item{norm}{logical; if \code{TRUE} (default) divide by the sum of the co-lower, co-upper and divergent nD partial moments at the same degree and target (→ [0,1]), otherwise return the raw moment. \code{norm} is ignored at \code{degree = 0}.}
 }

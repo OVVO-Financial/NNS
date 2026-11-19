@@ -7,7 +7,7 @@
 Co.UPM(degree_upm, x, y, target_x, target_y, degree_y = NULL)
 }
 \arguments{
-\item{degree_upm}{numeric; degree for x ("degree_x"). degree = 0 gives frequency, degree = 1 gives area.}
+\item{degree_upm}{numeric; degree for x ("degree_x"). degree = 0 gives frequency, degree = 1 gives area. At degree 0 an observation equal to its target is not counted (\code{x > target_x}, \code{y > target_y}).}
 
 \item{x}{numeric vector of observations.}
 

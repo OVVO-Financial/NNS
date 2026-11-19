@@ -61,13 +61,13 @@ cop
 # set.seed(123); x = rnorm(100); y = rnorm(100); z = expand.grid(x, y)
 # 
 # # Plot
-# rgl::plot3d(z[,1], z[,2], Co.LPM(0, z[,1], z[,2], z[,1], z[,2]), col = "red")
+# rgl::plot3d(z[,1], z[,2], Co.LPM(0, x, y, z[,1], z[,2]), col = "red")
 # 
 # # Uniform values
 # u_x = LPM.ratio(0, x, x); u_y = LPM.ratio(0, y, y); z = expand.grid(u_x, u_y)
 # 
 # # Plot
-# rgl::plot3d(z[,1], z[,2], Co.LPM(0, z[,1], z[,2], z[,1], z[,2]), col = "blue")
+# rgl::plot3d(z[,1], z[,2], Co.LPM(0, u_x, u_y, z[,1], z[,2]), col = "blue")
 
 ## -----------------------------------------------------------------------------
 # NNS.norm scales by ratios of column means, so the columns need positive means.
