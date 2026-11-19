@@ -210,3 +210,19 @@ test_that(
     expect_equal(B$target.value, numeric(0), tolerance=1e-5)
   }
 )
+test_that("factor data is an error, not its level codes", {
+  f <- factor(c(10, 20, 30)); y <- c(5, 1, 3)
+  for (fn in list(LPM, UPM, LPM.ratio, UPM.ratio)) expect_error(fn(1, 15, f), "not a factor")
+  for (fn in list(LPM, UPM)) expect_error(fn(1, factor(15), y), "not a factor")
+  # the target is still evaluated before the data
+  set.seed(1); t <- rnorm(1); v <- rnorm(3)
+  for (fn in list(LPM, UPM)) { set.seed(1); expect_identical(fn(1, rnorm(1), rnorm(3)), fn(1, t, v)) }
+  for (fn in list(Co.LPM, Co.UPM)) {
+    expect_error(fn(1, f, y, NULL, NULL), "not a factor")
+    expect_error(fn(1, y, f, NULL, NULL), "not a factor")
+  }
+  for (fn in list(D.LPM, D.UPM)) {
+    expect_error(fn(1, 1, f, y, NULL, NULL), "not a factor")
+    expect_error(fn(1, 1, y, f, NULL, NULL), "not a factor")
+  }
+})

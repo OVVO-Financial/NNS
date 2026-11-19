@@ -20,6 +20,7 @@
 NNS.TSD <- function(x, y, plot = TRUE){
 
   to_numeric_vector <- function(v, arg_name){
+    if(is.factor(v)) stop(sprintf("%s must be numeric, not a factor.", arg_name))
     if(any(class(v)%in%c("tbl","data.table")) || is.data.frame(v) || is.matrix(v) || any(class(v) %in% c("xts", "zoo"))){
       if(!is.null(dim(v)) && ncol(v) > 1){
         stop(sprintf("%s must be a single-column object or numeric vector.", arg_name))
