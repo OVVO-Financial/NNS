@@ -767,7 +767,7 @@ $$
 
 with strict inequality for at least one $t$.
 
-Equivalently, $X$ dominates $Y$ in the first order if every non-decreasing utility function with finite expectations assigns at least as high an expected value to $X$ as to $Y$, and at least one assigns a higher value to $X$.
+Equivalently, $X$ dominates $Y$ in the first order if and only if every non-decreasing utility function with finite expectations assigns at least as high an expected value to $X$ as to $Y$, and at least one assigns a higher value to $X$.
 
 For empirical distributions, $X \succ_1 Y$ if its quantiles are at least as high as $Y$'s at every probability and higher at some probability.
 
