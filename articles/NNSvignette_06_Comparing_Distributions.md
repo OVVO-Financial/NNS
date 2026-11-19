@@ -18,12 +18,12 @@ The output from
 **[`NNS.ANOVA()`](https://OVVO-Financial.github.io/NNS/reference/NNS.ANOVA.md)**
 includes a descriptive `Certainty` statistic. `means.only = TRUE`
 compares group means through their directional area balance,
-`means.only = FALSE` compares profiles over shared quantiles, and
-`medians = TRUE` compares median targets. Agreement in one mode does not
-establish equality for the other targets. The finite-sample adjustment
-can make the maximum less than one. Certainty is not a calibrated
-p-value or power; inferential calibration must match the target and
-sampling design.
+`means.only = FALSE` compares profiles over shared deviation-area
+benchmarks, and `medians = TRUE` compares median targets. Agreement in
+one mode does not establish equality for the other targets. The
+finite-sample adjustment can make the maximum less than one. Certainty
+is not a calibrated p-value or power; inferential calibration must match
+the target and sampling design.
 
 ### Test if Same Population
 

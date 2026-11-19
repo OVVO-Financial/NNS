@@ -318,7 +318,7 @@ x = seq(0, 1, .001) ; y = x ^ 2
 For the total area, not just the definite integral, simply sum the
 partial moments and multiply by $`[b - a]`$:
 ``` math
-[UPM(1,0,f(x))+LPM(1,0,f(x))] *[b-a]\asymp\left\lvert{\int_{a}^{b} f(x)dx}\right\rvert
+[UPM(1,0,f(x))+LPM(1,0,f(x))] *[b-a]\asymp\int_{a}^{b} \left\lvert{f(x)}\right\rvert dx
 ```
 
 ### Bayes’ Theorem

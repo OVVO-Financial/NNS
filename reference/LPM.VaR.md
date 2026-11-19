@@ -13,11 +13,12 @@ LPM.VaR(percentile, degree, x)
 
 - percentile:
 
-  numeric \[0, 1\]; The percentile for left-tail VaR.
+  numeric \[0, 1\]; The percentile for left-tail VaR. Values outside
+  \[0, 1\] are clamped to it.
 
 - degree:
 
-  integer; `(degree = 0)` gives the interpolated empirical quantile
+  numeric; `(degree = 0)` gives the interpolated empirical quantile
   (`quantile(x, percentile, type = 7)`), which on tied data need not be
   an exact inverse of `LPM.ratio(0, ., x)`. Use it for probability
   statements, such as a VaR exceeded with a given frequency.

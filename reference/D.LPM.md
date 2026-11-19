@@ -1,7 +1,8 @@
 # Divergent‑Lower Partial Moment
 
 Computes the divergent lower partial moment (lower‑right quadrant 3)
-between two equal‑length numeric vectors.
+between two equal‑length numeric vectors. `degree_upm` applies to `x`
+(above `target_x`) and `degree_lpm` to `y` (below `target_y`).
 
 ## Usage
 

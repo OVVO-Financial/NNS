@@ -1,7 +1,8 @@
 # Divergent‑Upper Partial Moment
 
 Computes the divergent upper partial moment (upper‑left quadrant 2)
-between two equal‑length numeric vectors.
+between two equal‑length numeric vectors. `degree_lpm` applies to `x`
+(below `target_x`) and `degree_upm` to `y` (above `target_y`).
 
 ## Usage
 

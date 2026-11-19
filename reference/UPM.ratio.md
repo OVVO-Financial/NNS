@@ -13,7 +13,9 @@ UPM.ratio(degree, target, variable)
 
 - degree:
 
-  numeric; degree = 0 gives frequency, degree = 1 gives area.
+  numeric; degree = 0 gives frequency, degree = 1 gives area. At degree
+  0 an observation equal to the target is not counted
+  (`variable > target`).
 
 - target:
 

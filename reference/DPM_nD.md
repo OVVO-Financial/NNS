@@ -21,7 +21,8 @@ DPM_nD(data, target, degree = 0, norm = TRUE)
 
 - degree:
 
-  numeric; degree for upper deviations (0 = frequency, 1 = area).
+  numeric; degree for lower and upper deviations (0 = frequency, 1 =
+  area).
 
 - norm:
 

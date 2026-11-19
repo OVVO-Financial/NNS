@@ -49,11 +49,11 @@
 
 
 <dl><dt id="arg-percentile">percentile<a class="anchor" aria-label="anchor" href="#arg-percentile"></a></dt>
-<dd><p>numeric [0, 1]; The percentile for right-tail VaR.</p></dd>
+<dd><p>numeric [0, 1]; The percentile for right-tail VaR.  Values outside [0, 1] are clamped to it.</p></dd>
 
 
 <dt id="arg-degree">degree<a class="anchor" aria-label="anchor" href="#arg-degree"></a></dt>
-<dd><p>integer; <code>(degree = 0)</code> gives the interpolated empirical quantile (<code>quantile(x, 1 - percentile, type = 7)</code>), which on tied data need not be an exact inverse of <code>UPM.ratio(0, ., x)</code>. Use it for probability statements.  <code>(degree = 1)</code> gives an area-weighted (severity-weighted) threshold, the (1 - <code>percentile</code>)-expectile of <code>x</code> (Newey and Powell 1987): <code>percentile</code> of the area of deviations, not of the observations, lies above it, so it is not a quantile of <code>x</code>.  Higher degrees weight large deviations more.</p></dd>
+<dd><p>numeric; <code>(degree = 0)</code> gives the interpolated empirical quantile (<code>quantile(x, 1 - percentile, type = 7)</code>), which on tied data need not be an exact inverse of <code>UPM.ratio(0, ., x)</code>. Use it for probability statements.  <code>(degree = 1)</code> gives an area-weighted (severity-weighted) threshold, the (1 - <code>percentile</code>)-expectile of <code>x</code> (Newey and Powell 1987): <code>percentile</code> of the area of deviations, not of the observations, lies above it, so it is not a quantile of <code>x</code>.  Higher degrees weight large deviations more.</p></dd>
 
 
 <dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>

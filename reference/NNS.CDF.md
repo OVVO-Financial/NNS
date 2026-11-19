@@ -62,7 +62,7 @@ Returns:
 - `"Function"` a data.frame (class `NNS.data.frame`) containing the
   observations and the resulting function of the variable.
 
-- `"target.value"` value from the `target` argument.
+- `"target.value"` value of the function at the `target` argument.
 
 ## References
 

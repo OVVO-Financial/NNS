@@ -13,7 +13,9 @@ LPM(degree, target, variable, excess_ret = FALSE)
 
 - degree:
 
-  numeric; `(degree = 0)` is frequency, `(degree = 1)` is area.
+  numeric; `(degree = 0)` is frequency, `(degree = 1)` is area. At
+  `degree = 0` an observation equal to the target is counted
+  (`variable <= target`).
 
 - target:
 
