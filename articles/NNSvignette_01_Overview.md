@@ -22,23 +22,23 @@ Time series & forecasting 8. Simulation (max‑entropy) & Monte Carlo 9.
 Portfolio & stochastic dominance
 
 **Notation.** For a random variable $`X`$ and threshold/target $`t`$,
-the population $`k`$‑th **partial moments** are defined as:
+the population $`n`$‑th **partial moments** are defined as:
 
 ``` math
-\operatorname{LPM}(k,t,X) 
-= \int_{-\infty}^{t} (t-x)^{k} \, dF_X(x),
+\operatorname{LPM}(n,t,X) 
+= \int_{-\infty}^{t} (t-x)^{n} \, dF_X(x),
 \qquad
-\operatorname{UPM}(k,t,X) 
-= \int_{t}^{\infty} (x-t)^{k} \, dF_X(x).
+\operatorname{UPM}(n,t,X) 
+= \int_{t}^{\infty} (x-t)^{n} \, dF_X(x).
 ```
 
 The **empirical** estimators replace $`F_X`$ with the empirical CDF
 $`\hat F_n`$ (or, equivalently, use indicator functions):
 
 ``` math
-\widehat{\operatorname{LPM}}_k(t;X) = \frac{1}{n} \sum_{i=1}^n (t-x_i)^k \, \mathbf{1}_{\{x_i \le t\}},
+\widehat{\operatorname{LPM}}_n(t;X) = \frac{1}{n} \sum_{i=1}^n (t-x_i)^n \, \mathbf{1}_{\{x_i \le t\}},
 \qquad
-\widehat{\operatorname{UPM}}_k(t;X) = \frac{1}{n} \sum_{i=1}^n (x_i-t)^k \, \mathbf{1}_{\{x_i > t\}}.
+\widehat{\operatorname{UPM}}_n(t;X) = \frac{1}{n} \sum_{i=1}^n (x_i-t)^n \, \mathbf{1}_{\{x_i > t\}}.
 ```
 
 These correspond to integrals over the measurable subsets
@@ -163,8 +163,8 @@ NNS.mode(multimodal,multi = TRUE)
 - `LPM.ratio(degree = 0, target, variable)` (empirical CDF when
   `degree=0`)
 - `UPM.ratio(degree = 0, target, variable)`
-- `LPM.VaR(percentile, degree, x)` (quantiles when `degree=0`)
-- `UPM.VaR(percentile, degree, x)`
+- `LPM.VaR(p, degree, variable)` (quantiles via partial‑moment CDFs)
+- `UPM.VaR(p, degree, variable)`
 
 ``` r
 
@@ -200,7 +200,7 @@ structure.
 
 - `Co.LPM(degree_lpm, x, y, target_x, target_y, degree_y)` /
   `Co.UPM(...)` (co‑partial moments)
-- `PM.matrix(LPM_degree, UPM_degree, target, variable, pop_adj)`
+- `PM.matrix(LPM_degree, UPM_degree, target=NULL, variable, pop_adj=TRUE)`
 - `NNS.dep(x, y)` (scalar dependence coefficient)
 - `NNS.copula(X, target=NULL, continuous=TRUE, plot=FALSE, independence.overlay=FALSE)`
 
@@ -276,13 +276,13 @@ cop
 set.seed(123); x = rnorm(100); y = rnorm(100); z = expand.grid(x, y)
 
 # Plot
-rgl::plot3d(z[,1], z[,2], Co.LPM(0, x, y, z[,1], z[,2]), col = "red")
+rgl::plot3d(z[,1], z[,2], Co.LPM(0, z[,1], z[,2], z[,1], z[,2]), col = "red")
 
 # Uniform values
 u_x = LPM.ratio(0, x, x); u_y = LPM.ratio(0, y, y); z = expand.grid(u_x, u_y)
 
 # Plot
-rgl::plot3d(z[,1], z[,2], Co.LPM(0, u_x, u_y, z[,1], z[,2]), col = "blue")
+rgl::plot3d(z[,1], z[,2], Co.LPM(0, z[,1], z[,2], z[,1], z[,2]), col = "blue")
 ```
 
 **Interpretation.** `NNS.dep` remains high for curved relationships;
@@ -417,11 +417,9 @@ NNS.ANOVA(control=A, means.only=TRUE, plot=FALSE)
     ## Certainty 
     ## 0.6876008
 
-**Math sketch.** At the grand mean $`t`$, compare each group’s
-`LPM.ratio(1, t, •)` with 0.5 (`LPM.ratio(0, t, •)` at the grand median
-when `medians = TRUE`). `means.only = FALSE` adds the degree‑1 ratios at
-four shared `LPM.VaR`/`UPM.VaR` targets (25% and 12.5%). Aggregate the
-deviations to a certainty score.
+**Math sketch.** For each quantile/threshold $`t`$, compare CDFs built
+from `LPM.ratio(0, t, •)` (possibly with one‑sided tails). Aggregate
+across $`t`$ to a certainty score.
 
 ### 5.3 Stochastic Superiority
 
@@ -1066,29 +1064,28 @@ Section 1.
 - `UPM(degree, target, variable)` — upper partial moment of order
   `degree` at `target`.
 - `LPM.ratio(degree, target, variable)`; `UPM.ratio(...)` — normalized
-  shares; `degree=0` gives the CDF (`LPM.ratio`) and survival function
-  (`UPM.ratio`).
-- `LPM.VaR(percentile, degree, x)` — partial-moment quantile at
-  probability `percentile` when `degree=0`.
+  shares; `degree=0` gives CDF.
+- `LPM.VaR(p, degree, variable)` — partial-moment quantile at
+  probability `p`.
 - `Co.LPM(degree_lpm, x, y, target_x, target_y, degree_y)` — co-lower
   partial moment between two variables.
 - `Co.UPM(degree_upm, x, y, target_x, target_y, degree_y)` — co-upper
   partial moment between two variables.
-- `D.LPM(degree_lpm, degree_upm, x, y, target_x, target_y)` — divergent
-  lower partial moment between two variables.
-- `D.UPM(degree_lpm, degree_upm, x, y, target_x, target_y)` — divergent
-  upper partial moment between two variables.
-- `NNS.CDF(variable, degree = 0, target = NULL, type = "CDF", plot = TRUE)`
-  — CDF from partial moments.
+- `D.LPM(degree, target, variable)` — divergent lower partial moment
+  (away from `target`).
+- `D.UPM(degree, target, variable)` — divergent upper partial moment
+  (away from `target`).
+- `NNS.CDF(x, target = NULL, points = NULL, plot = TRUE/FALSE)` — CDF
+  from partial moments.
 - `NNS.moments(x)` — mean/var/skew/kurtosis via partial moments.
 
 ### 2. Descriptive Statistics & Distributions
 
 - `NNS.mode(x, multi = FALSE)` — nonparametric mode(s).
-- `PM.matrix(LPM_degree, UPM_degree, target, variable, pop_adj)` —
+- `PM.matrix(l_degree, u_degree, target, variable, pop_adj)` —
   co-/divergent partial-moment matrices.
-- `NNS.gravity(x, discrete = FALSE)` — partial-moment weighted location
-  (gravity center).
+- `NNS.gravity(x, w = NULL)` — partial-moment weighted location (gravity
+  center).
 
 See NNS Vignette: [Getting Started with NNS: Partial
 Moments](https://OVVO-Financial.github.io/NNS/articles/NNSvignette_02_Partial_Moments.md)

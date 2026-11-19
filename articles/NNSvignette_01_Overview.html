@@ -85,24 +85,24 @@ dominance</p>
 and threshold/target
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>,
 the population
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>‑th
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>‑th
 <strong>partial moments</strong> are defined as:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">LPM</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mi>k</mi><mo>,</mo><mi>t</mi><mo>,</mo><mi>X</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msubsup><mo>∫</mo><mrow><mi>−</mi><mi>∞</mi></mrow><mi>t</mi></msubsup><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo>−</mo><mi>x</mi><msup><mo stretchy="false" form="postfix">)</mo><mi>k</mi></msup><mspace width="0.167em"></mspace><mi>d</mi><msub><mi>F</mi><mi>X</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo>,</mo><mspace width="2.0em"></mspace><mrow><mi mathvariant="normal">UPM</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mi>k</mi><mo>,</mo><mi>t</mi><mo>,</mo><mi>X</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msubsup><mo>∫</mo><mi>t</mi><mi>∞</mi></msubsup><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo>−</mo><mi>t</mi><msup><mo stretchy="false" form="postfix">)</mo><mi>k</mi></msup><mspace width="0.167em"></mspace><mi>d</mi><msub><mi>F</mi><mi>X</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mi>.</mi></mrow><annotation encoding="application/x-tex">
-\operatorname{LPM}(k,t,X) 
-= \int_{-\infty}^{t} (t-x)^{k} \, dF_X(x),
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">LPM</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mi>n</mi><mo>,</mo><mi>t</mi><mo>,</mo><mi>X</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msubsup><mo>∫</mo><mrow><mi>−</mi><mi>∞</mi></mrow><mi>t</mi></msubsup><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo>−</mo><mi>x</mi><msup><mo stretchy="false" form="postfix">)</mo><mi>n</mi></msup><mspace width="0.167em"></mspace><mi>d</mi><msub><mi>F</mi><mi>X</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo>,</mo><mspace width="2.0em"></mspace><mrow><mi mathvariant="normal">UPM</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mi>n</mi><mo>,</mo><mi>t</mi><mo>,</mo><mi>X</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msubsup><mo>∫</mo><mi>t</mi><mi>∞</mi></msubsup><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo>−</mo><mi>t</mi><msup><mo stretchy="false" form="postfix">)</mo><mi>n</mi></msup><mspace width="0.167em"></mspace><mi>d</mi><msub><mi>F</mi><mi>X</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\operatorname{LPM}(n,t,X) 
+= \int_{-\infty}^{t} (t-x)^{n} \, dF_X(x),
 \qquad
-\operatorname{UPM}(k,t,X) 
-= \int_{t}^{\infty} (x-t)^{k} \, dF_X(x).
+\operatorname{UPM}(n,t,X) 
+= \int_{t}^{\infty} (x-t)^{n} \, dF_X(x).
 </annotation></semantics></math></p>
 <p>The <strong>empirical</strong> estimators replace
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>F</mi><mi>X</mi></msub><annotation encoding="application/x-tex">F_X</annotation></semantics></math>
 with the empirical CDF
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>F</mi><mo accent="true">̂</mo></mover><mi>n</mi></msub><annotation encoding="application/x-tex">\hat F_n</annotation></semantics></math>
 (or, equivalently, use indicator functions):</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi mathvariant="normal">LPM</mi><mo accent="true">̂</mo></mover><mi>k</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo>;</mo><mi>X</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mfrac><mn>1</mn><mi>n</mi></mfrac><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo>−</mo><msub><mi>x</mi><mi>i</mi></msub><msup><mo stretchy="false" form="postfix">)</mo><mi>k</mi></msup><mspace width="0.167em"></mspace><msub><mn>𝟏</mn><mrow><mo stretchy="false" form="prefix">{</mo><msub><mi>x</mi><mi>i</mi></msub><mo>≤</mo><mi>t</mi><mo stretchy="false" form="postfix">}</mo></mrow></msub><mo>,</mo><mspace width="2.0em"></mspace><msub><mover><mi mathvariant="normal">UPM</mi><mo accent="true">̂</mo></mover><mi>k</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo>;</mo><mi>X</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mfrac><mn>1</mn><mi>n</mi></mfrac><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mo stretchy="false" form="prefix">(</mo><msub><mi>x</mi><mi>i</mi></msub><mo>−</mo><mi>t</mi><msup><mo stretchy="false" form="postfix">)</mo><mi>k</mi></msup><mspace width="0.167em"></mspace><msub><mn>𝟏</mn><mrow><mo stretchy="false" form="prefix">{</mo><msub><mi>x</mi><mi>i</mi></msub><mo>&gt;</mo><mi>t</mi><mo stretchy="false" form="postfix">}</mo></mrow></msub><mi>.</mi></mrow><annotation encoding="application/x-tex">
-\widehat{\operatorname{LPM}}_k(t;X) = \frac{1}{n} \sum_{i=1}^n (t-x_i)^k \, \mathbf{1}_{\{x_i \le t\}},
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi mathvariant="normal">LPM</mi><mo accent="true">̂</mo></mover><mi>n</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo>;</mo><mi>X</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mfrac><mn>1</mn><mi>n</mi></mfrac><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo>−</mo><msub><mi>x</mi><mi>i</mi></msub><msup><mo stretchy="false" form="postfix">)</mo><mi>n</mi></msup><mspace width="0.167em"></mspace><msub><mn>𝟏</mn><mrow><mo stretchy="false" form="prefix">{</mo><msub><mi>x</mi><mi>i</mi></msub><mo>≤</mo><mi>t</mi><mo stretchy="false" form="postfix">}</mo></mrow></msub><mo>,</mo><mspace width="2.0em"></mspace><msub><mover><mi mathvariant="normal">UPM</mi><mo accent="true">̂</mo></mover><mi>n</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo>;</mo><mi>X</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mfrac><mn>1</mn><mi>n</mi></mfrac><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mo stretchy="false" form="prefix">(</mo><msub><mi>x</mi><mi>i</mi></msub><mo>−</mo><mi>t</mi><msup><mo stretchy="false" form="postfix">)</mo><mi>n</mi></msup><mspace width="0.167em"></mspace><msub><mn>𝟏</mn><mrow><mo stretchy="false" form="prefix">{</mo><msub><mi>x</mi><mi>i</mi></msub><mo>&gt;</mo><mi>t</mi><mo stretchy="false" form="postfix">}</mo></mrow></msub><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\widehat{\operatorname{LPM}}_n(t;X) = \frac{1}{n} \sum_{i=1}^n (t-x_i)^n \, \mathbf{1}_{\{x_i \le t\}},
 \qquad
-\widehat{\operatorname{UPM}}_k(t;X) = \frac{1}{n} \sum_{i=1}^n (x_i-t)^k \, \mathbf{1}_{\{x_i &gt; t\}}.
+\widehat{\operatorname{UPM}}_n(t;X) = \frac{1}{n} \sum_{i=1}^n (x_i-t)^n \, \mathbf{1}_{\{x_i &gt; t\}}.
 </annotation></semantics></math></p>
 <p>These correspond to integrals over the measurable subsets
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">{</mo><mi>X</mi><mo>≤</mo><mi>t</mi><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">\{X \le t\}</annotation></semantics></math>
@@ -230,9 +230,9 @@ assumptions.</p>
 when <code>degree=0</code>)</li>
 <li><code>UPM.ratio(degree = 0, target, variable)</code></li>
 <li>
-<code>LPM.VaR(percentile, degree, x)</code> (quantiles when
-<code>degree=0</code>)</li>
-<li><code>UPM.VaR(percentile, degree, x)</code></li>
+<code>LPM.VaR(p, degree, variable)</code> (quantiles via
+partial‑moment CDFs)</li>
+<li><code>UPM.VaR(p, degree, variable)</code></li>
 </ul>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">qgrid</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/LPM.VaR.html">LPM.VaR</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0.05</span>,<span class="fl">0.95</span>,<span class="fl">.1</span><span class="op">)</span>,<span class="fl">0</span>,<span class="va">z</span><span class="op">)</span> <span class="co"># equivalent to quantile(z,probs = seq(0.05,0.95,by=0.1))</span></span>
@@ -269,7 +269,7 @@ such structure.</p>
 <li>
 <code>Co.LPM(degree_lpm, x, y, target_x, target_y, degree_y)</code>
 / <code>Co.UPM(...)</code> (co‑partial moments)</li>
-<li><code>PM.matrix(LPM_degree, UPM_degree, target, variable, pop_adj)</code></li>
+<li><code>PM.matrix(LPM_degree, UPM_degree, target=NULL, variable, pop_adj=TRUE)</code></li>
 <li>
 <code>NNS.dep(x, y)</code> (scalar dependence coefficient)</li>
 <li><code>NNS.copula(X, target=NULL, continuous=TRUE, plot=FALSE, independence.overlay=FALSE)</code></li>
@@ -333,13 +333,13 @@ such structure.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span>; <span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span>; <span class="va">y</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span>; <span class="va">z</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html" class="external-link">expand.grid</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Plot</span></span>
-<span><span class="fu">rgl</span><span class="fu">::</span><span class="fu"><a href="https://dmurdoch.github.io/rgl/dev/reference/plot3d.html" class="external-link">plot3d</a></span><span class="op">(</span><span class="va">z</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span>, <span class="va">z</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span>, <span class="fu"><a href="../reference/Co.LPM.html">Co.LPM</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">x</span>, <span class="va">y</span>, <span class="va">z</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span>, <span class="va">z</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span><span class="op">)</span>, col <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span></span>
+<span><span class="fu">rgl</span><span class="fu">::</span><span class="fu"><a href="https://dmurdoch.github.io/rgl/dev/reference/plot3d.html" class="external-link">plot3d</a></span><span class="op">(</span><span class="va">z</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span>, <span class="va">z</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span>, <span class="fu"><a href="../reference/Co.LPM.html">Co.LPM</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">z</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span>, <span class="va">z</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span>, <span class="va">z</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span>, <span class="va">z</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span><span class="op">)</span>, col <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Uniform values</span></span>
 <span><span class="va">u_x</span> <span class="op">=</span> <span class="fu"><a href="../reference/LPM.ratio.html">LPM.ratio</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">x</span>, <span class="va">x</span><span class="op">)</span>; <span class="va">u_y</span> <span class="op">=</span> <span class="fu"><a href="../reference/LPM.ratio.html">LPM.ratio</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">y</span>, <span class="va">y</span><span class="op">)</span>; <span class="va">z</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html" class="external-link">expand.grid</a></span><span class="op">(</span><span class="va">u_x</span>, <span class="va">u_y</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Plot</span></span>
-<span><span class="fu">rgl</span><span class="fu">::</span><span class="fu"><a href="https://dmurdoch.github.io/rgl/dev/reference/plot3d.html" class="external-link">plot3d</a></span><span class="op">(</span><span class="va">z</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span>, <span class="va">z</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span>, <span class="fu"><a href="../reference/Co.LPM.html">Co.LPM</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">u_x</span>, <span class="va">u_y</span>, <span class="va">z</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span>, <span class="va">z</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span><span class="op">)</span>, col <span class="op">=</span> <span class="st">"blue"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">rgl</span><span class="fu">::</span><span class="fu"><a href="https://dmurdoch.github.io/rgl/dev/reference/plot3d.html" class="external-link">plot3d</a></span><span class="op">(</span><span class="va">z</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span>, <span class="va">z</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span>, <span class="fu"><a href="../reference/Co.LPM.html">Co.LPM</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">z</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span>, <span class="va">z</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span>, <span class="va">z</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span>, <span class="va">z</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span><span class="op">)</span>, col <span class="op">=</span> <span class="st">"blue"</span><span class="op">)</span></span></code></pre></div>
 <p><strong>Interpretation.</strong> <code>NNS.dep</code> remains high
 for curved relationships; <code>PM.matrix</code> collects co‑partial
 moments across variables; <code>NNS.copula</code> summarizes
@@ -463,14 +463,12 @@ certainty</em> (not a p‑value) for equality of populations or means.</p>
 <span><span class="fu"><a href="../reference/NNS.ANOVA.html">NNS.ANOVA</a></span><span class="op">(</span>control<span class="op">=</span><span class="va">A</span>, means.only<span class="op">=</span><span class="cn">TRUE</span>, plot<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Certainty </span></span>
 <span><span class="co">## 0.6876008</span></span></code></pre>
-<p><strong>Math sketch.</strong> At the grand mean
+<p><strong>Math sketch.</strong> For each quantile/threshold
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>,
-compare each group’s <code>LPM.ratio(1, t, •)</code> with 0.5
-(<code>LPM.ratio(0, t, •)</code> at the grand median when
-<code>medians = TRUE</code>). <code>means.only = FALSE</code> adds the
-degree‑1 ratios at four shared <code>LPM.VaR</code>/<code>UPM.VaR</code>
-targets (25% and 12.5%). Aggregate the deviations to a certainty
-score.</p>
+compare CDFs built from <code>LPM.ratio(0, t, •)</code> (possibly with
+one‑sided tails). Aggregate across
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>
+to a certainty score.</p>
 </div>
 <div class="section level3">
 <h3 id="stochastic-superiority">5.3 Stochastic Superiority<a class="anchor" aria-label="anchor" href="#stochastic-superiority"></a>
@@ -1090,12 +1088,10 @@ order <code>degree</code> at <code>target</code>.</li>
 <li>
 <code>LPM.ratio(degree, target, variable)</code>;
 <code>UPM.ratio(...)</code> — normalized shares; <code>degree=0</code>
-gives the CDF (<code>LPM.ratio</code>) and survival function
-(<code>UPM.ratio</code>).</li>
+gives CDF.</li>
 <li>
-<code>LPM.VaR(percentile, degree, x)</code> — partial-moment
-quantile at probability <code>percentile</code> when
-<code>degree=0</code>.</li>
+<code>LPM.VaR(p, degree, variable)</code> — partial-moment quantile
+at probability <code>p</code>.</li>
 <li>
 <code>Co.LPM(degree_lpm, x, y, target_x, target_y, degree_y)</code>
 — co-lower partial moment between two variables.</li>
@@ -1103,13 +1099,13 @@ quantile at probability <code>percentile</code> when
 <code>Co.UPM(degree_upm, x, y, target_x, target_y, degree_y)</code>
 — co-upper partial moment between two variables.</li>
 <li>
-<code>D.LPM(degree_lpm, degree_upm, x, y, target_x, target_y)</code>
-— divergent lower partial moment between two variables.</li>
+<code>D.LPM(degree, target, variable)</code> — divergent lower
+partial moment (away from <code>target</code>).</li>
 <li>
-<code>D.UPM(degree_lpm, degree_upm, x, y, target_x, target_y)</code>
-— divergent upper partial moment between two variables.</li>
+<code>D.UPM(degree, target, variable)</code> — divergent upper
+partial moment (away from <code>target</code>).</li>
 <li>
-<code>NNS.CDF(variable, degree = 0, target = NULL, type = "CDF", plot = TRUE)</code>
+<code>NNS.CDF(x, target = NULL, points = NULL, plot = TRUE/FALSE)</code>
 — CDF from partial moments.</li>
 <li>
 <code>NNS.moments(x)</code> — mean/var/skew/kurtosis via partial
@@ -1124,11 +1120,11 @@ moments.</li>
 <code>NNS.mode(x, multi = FALSE)</code> — nonparametric
 mode(s).</li>
 <li>
-<code>PM.matrix(LPM_degree, UPM_degree, target, variable, pop_adj)</code>
+<code>PM.matrix(l_degree, u_degree, target, variable, pop_adj)</code>
 — co-/divergent partial-moment matrices.</li>
 <li>
-<code>NNS.gravity(x, discrete = FALSE)</code> — partial-moment
-weighted location (gravity center).</li>
+<code>NNS.gravity(x, w = NULL)</code> — partial-moment weighted
+location (gravity center).</li>
 </ul>
 <p>See NNS Vignette: <a href="NNSvignette_02_Partial_Moments.html">Getting Started with NNS:
 Partial Moments</a></p>
