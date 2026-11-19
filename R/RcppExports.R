@@ -157,8 +157,8 @@ force.clt <- function(x, ensemble) {
     .Call(`_NNS_force_clt`, x, ensemble)
 }
 
-CoLPM_nD_batch_RCPP <- function(data, targets, degree = 0.0, norm = TRUE) {
-    .Call(`_NNS_CoLPM_nD_batch_RCPP`, data, targets, degree, norm)
+CoLPM_nD_batch_RCPP <- function(data, targets, degree = 0.0, norm = TRUE, strict = FALSE) {
+    .Call(`_NNS_CoLPM_nD_batch_RCPP`, data, targets, degree, norm, strict)
 }
 
 LPM_CPv <- function(degree, target, variable) {

@@ -4,7 +4,7 @@
 \alias{Co.LPM_nD.batch}
 \title{Batched Co-Lower Partial Moment nD}
 \usage{
-Co.LPM_nD.batch(data, targets, degree = 0, norm = TRUE)
+Co.LPM_nD.batch(data, targets, degree = 0, norm = TRUE, strict = FALSE)
 }
 \arguments{
 \item{data}{A numeric matrix with observations in rows and variables in columns.}
@@ -14,6 +14,8 @@ Co.LPM_nD.batch(data, targets, degree = 0, norm = TRUE)
 \item{degree}{numeric; degree for lower deviations.}
 
 \item{norm}{logical; normalize result.}
+
+\item{strict}{logical; count only rows strictly below the target in the degree-0 share.}
 }
 \value{
 Numeric vector, one value per row of targets.

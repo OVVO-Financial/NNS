@@ -17,7 +17,7 @@ PM.matrix(LPM_degree, UPM_degree, target, variable, pop_adj, norm = FALSE)
 
 \item{pop_adj}{logical; \code{TRUE} applies the sample adjustment \code{n / (n - 1)} to the co-/divergent moments (with both degrees 1, \code{target = NULL} and \code{norm = FALSE}, the covariance matrix then equals \code{cov()}). It is ignored when either degree is 0.}
 
-\item{norm}{logical; default FALSE. If TRUE, each quadrant matrix is cell-wise normalized so their sum is 1 at each (i,j).}
+\item{norm}{logical; default FALSE. If TRUE, each quadrant matrix is cell-wise normalized so their sum is 1 at each (i,j). A cell whose four moments are all 0, as when a column is constant at its target, takes the degree-0 values.}
 }
 \value{
 A list: $cupm, $dupm, $dlpm, $clpm, $cov.matrix.

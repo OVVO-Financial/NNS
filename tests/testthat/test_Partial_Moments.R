@@ -210,3 +210,68 @@ test_that(
     expect_equal(B$target.value, numeric(0), tolerance=1e-5)
   }
 )
+test_that("factor data is an error, not its level codes", {
+  f <- factor(c(10, 20, 30)); y <- c(5, 1, 3)
+  for (fn in list(LPM, UPM, LPM.ratio, UPM.ratio)) expect_error(fn(1, 15, f), "not a factor")
+  for (fn in list(LPM, UPM)) expect_error(fn(1, factor(15), y), "not a factor")
+  # the target is still evaluated before the data
+  set.seed(1); t <- rnorm(1); v <- rnorm(3)
+  for (fn in list(LPM, UPM)) { set.seed(1); expect_identical(fn(1, rnorm(1), rnorm(3)), fn(1, t, v)) }
+  for (fn in list(Co.LPM, Co.UPM)) {
+    expect_error(fn(1, f, y, NULL, NULL), "not a factor")
+    expect_error(fn(1, y, f, NULL, NULL), "not a factor")
+  }
+  for (fn in list(D.LPM, D.UPM)) {
+    expect_error(fn(1, 1, f, y, NULL, NULL), "not a factor")
+    expect_error(fn(1, 1, y, f, NULL, NULL), "not a factor")
+  }
+})
+
+test_that("nD partial moments use the degree-0 values when the total is 0", {
+  set.seed(2); a <- rnorm(20)
+  X <- cbind(a, b = 5)
+  t <- c(0, 5)
+  for (d in c(0.5, 1, 2)) {
+    expect_identical(Co.LPM_nD(X, t, d), Co.LPM_nD(X, t, 0))
+    expect_identical(Co.UPM_nD(X, t, d), Co.UPM_nD(X, t, 0))
+    expect_identical(DPM_nD(X, t, d), DPM_nD(X, t, 0))
+  }
+  expect_equal(c(Co.LPM_nD(X, t, 1), Co.UPM_nD(X, t, 1), DPM_nD(X, t, 1)), c(0.4, 0, 0.6))
+
+  # A nonzero total is unchanged
+  Y <- cbind(c(1, 2, 3, 4), c(4, 1, 3, 2))
+  expect_identical(c(Co.LPM_nD(Y, c(2.5, 2.5), 1), Co.UPM_nD(Y, c(2.5, 2.5), 1), DPM_nD(Y, c(2.5, 2.5), 1)),
+                   c(0.1875, 0.0625, 0.75))
+})
+
+test_that("multivariate NNS.CDF at degree > 0 uses the degree-0 values when the total is 0", {
+  set.seed(2); a <- rnorm(20)
+  X <- cbind(a, b = 5)
+  expect_equal(NNS.CDF(X, degree = 1, target = c(0, 5), plot = FALSE)$target.value, 0.4)
+  F1 <- NNS.CDF(X, degree = 1, plot = FALSE)$Function
+  F0 <- NNS.CDF(X, degree = 0, plot = FALSE)$Function
+  expect_identical(F1$CDF, F0$CDF)
+  expect_identical(F1$CDF, apply(X, 1, function(t) Co.LPM_nD(X, t, 1)))
+  S1 <- NNS.CDF(X, degree = 1, type = "survival", plot = FALSE)$Function
+  expect_identical(S1$CDF, apply(X, 1, function(t) Co.UPM_nD(X, t, 1)))
+
+  Y <- cbind(c(1, 2, 3, 4), c(4, 1, 3, 2))
+  expect_identical(NNS.CDF(Y, degree = 1, target = c(2.5, 2.5), plot = FALSE)$target.value, 0.1875)
+  expect_identical(NNS.CDF(Y, degree = 1, target = c(2.5, 2.5), type = "survival", plot = FALSE)$target.value, 0.0625)
+})
+
+test_that("PM.matrix(norm = TRUE) uses the degree-0 cell when the total is 0", {
+  set.seed(2); a <- rnorm(20)
+  X <- cbind(a, b = 5)
+  p1 <- PM.matrix(1, 1, NULL, X, pop_adj = FALSE, norm = TRUE)
+  p0 <- PM.matrix(0, 0, NULL, X, pop_adj = FALSE, norm = TRUE)
+  for (q in names(p1)) expect_identical(p1[[q]][, "b"], p0[[q]][, "b"])
+  expect_identical(p1$dlpm["b", ], p0$dlpm["b", ])
+  expect_equal(unname(p1$cupm + p1$dupm + p1$dlpm + p1$clpm), matrix(1, 2, 2))
+  expect_equal(as.vector(p1$cov.matrix), c(1, 0.1, 0.1, 1))
+
+  Y <- cbind(c(1, 2, 3, 4), c(4, 1, 3, 2))
+  pY <- PM.matrix(1, 1, c(2.5, 2.5), Y, pop_adj = FALSE, norm = TRUE)
+  expect_identical(c(pY$cupm[1, 2], pY$dupm[1, 2], pY$dlpm[1, 2], pY$clpm[1, 2], pY$clpm[1, 1], pY$cupm[1, 1]),
+                   c(0.0625, 0.5625, 0.1875, 0.1875, 0.5, 0.5))
+})

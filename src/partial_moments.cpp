@@ -270,6 +270,7 @@ double clpm_nD_cpp(const NumericMatrix& data,
     double cupm_un = cupm_nD_cpp(data, target, degree, false);
     double dpm_un  = dpm_nD_cpp(data, target, degree, false);
     double norm_const = clpm_un + cupm_un + dpm_un;
+    if (norm_const == 0.0) return clpm_nD_cpp(data, target, 0.0, false);
     result = norm_const > 0.0 ? (clpm_un / norm_const) : 0.0;
   }
   return result;
@@ -301,6 +302,7 @@ double cupm_nD_cpp(const NumericMatrix& data,
     double clpm_un = clpm_nD_cpp(data, target, degree, false);
     double dpm_un  = dpm_nD_cpp(data, target, degree, false);
     double norm_const = clpm_un + cupm_un + dpm_un;
+    if (norm_const == 0.0) return cupm_nD_cpp(data, target, 0.0, false);
     result = norm_const > 0.0 ? (cupm_un / norm_const) : 0.0;
   }
   return result;
@@ -332,6 +334,7 @@ double dpm_nD_cpp(const NumericMatrix& data,
     double clpm_un = clpm_nD_cpp(data, target, degree, false);
     double cupm_un = cupm_nD_cpp(data, target, degree, false);
     double norm_const = clpm_un + cupm_un + dpm_un;
+    if (norm_const == 0.0) return dpm_nD_cpp(data, target, 0.0, false);
     result = norm_const > 0.0 ? (dpm_un / norm_const) : 0.0;
   }
   return result;
@@ -349,13 +352,15 @@ double dpm_nD_cpp(const NumericMatrix& data,
 // Semantics match clpm_nD_cpp():
 //   degree == 0 returns the raw lower-count probability, regardless of norm.
 //   degree  > 0 returns raw CLPM if norm = false.
-//   degree  > 0 returns CLPM / (CLPM + CUPM + DPM) if norm = true.
+//   degree  > 0 returns CLPM / (CLPM + CUPM + DPM) if norm = true, or the
+//   degree-0 value when that total is 0.
 
 struct CoLPMnDBatchWorker : public Worker {
   const RMatrix<double> data;
   const RMatrix<double> targets;
   const double degree;
   const bool norm;
+  const bool strict;
   const bool degree_is_int;
   RVector<double> output;
   
@@ -363,13 +368,36 @@ struct CoLPMnDBatchWorker : public Worker {
                      const NumericMatrix& targets_,
                      double degree_,
                      bool norm_,
+                     bool strict_,
                      NumericVector& output_)
     : data(data_),
       targets(targets_),
       degree(degree_),
       norm(norm_),
+      strict(strict_),
       degree_is_int(isInteger(degree_)),
       output(output_) {}
+  
+  double lower_share(std::size_t r) const {
+    const std::size_t n_obs = data.nrow();
+    const std::size_t d = data.ncol();
+    double count = 0.0;
+    
+    for (std::size_t i = 0; i < n_obs; ++i) {
+      bool below_all = true;
+      
+      for (std::size_t j = 0; j < d; ++j) {
+        if (strict ? data(i, j) >= targets(r, j) : data(i, j) > targets(r, j)) {
+          below_all = false;
+          break;
+        }
+      }
+      
+      if (below_all) count += 1.0;
+    }
+    
+    return count / static_cast<double>(n_obs);
+  }
   
   void operator()(std::size_t begin, std::size_t end) override {
     const std::size_t n_obs = data.nrow();
@@ -380,22 +408,7 @@ struct CoLPMnDBatchWorker : public Worker {
       // Match clpm_nD_cpp degree == 0 behavior:
       // it returns raw count probability and does not apply norm.
       if (degree == 0.0) {
-        double count = 0.0;
-        
-        for (std::size_t i = 0; i < n_obs; ++i) {
-          bool below_all = true;
-          
-          for (std::size_t j = 0; j < d; ++j) {
-            if (data(i, j) > targets(r, j)) {
-              below_all = false;
-              break;
-            }
-          }
-          
-          if (below_all) count += 1.0;
-        }
-        
-        output[r] = count / static_cast<double>(n_obs);
+        output[r] = lower_share(r);
         continue;
       }
       
@@ -447,7 +460,8 @@ struct CoLPMnDBatchWorker : public Worker {
         const double dpm_un  = dpm_sum  * inv_n;
         const double norm_const = clpm_un + cupm_un + dpm_un;
         
-        output[r] = norm_const > 0.0 ? clpm_un / norm_const : 0.0;
+        if (norm_const == 0.0) output[r] = lower_share(r);
+        else output[r] = norm_const > 0.0 ? clpm_un / norm_const : 0.0;
       }
     }
   }
@@ -458,7 +472,8 @@ struct CoLPMnDBatchWorker : public Worker {
 NumericVector CoLPM_nD_batch_RCPP(const NumericMatrix& data,
                                   const NumericMatrix& targets,
                                   double degree = 0.0,
-                                  bool norm = true) {
+                                  bool norm = true,
+                                  bool strict = false) {
   nns_check_degree(degree, "degree");
   if (data.ncol() != targets.ncol()) {
     stop("`targets` must have the same number of columns as `data`");
@@ -470,7 +485,7 @@ NumericVector CoLPM_nD_batch_RCPP(const NumericMatrix& data,
   
   NumericVector output(targets.nrow());
   
-  CoLPMnDBatchWorker worker(data, targets, degree, norm, output);
+  CoLPMnDBatchWorker worker(data, targets, degree, norm, strict, output);
   nns_parallel_for(0, targets.nrow(), worker,
                    double(targets.nrow()) * double(data.nrow()) * double(data.ncol()));
   
@@ -976,6 +991,7 @@ List PMMatrix_CPv(
   // 6. Apply cellular normalization adjustments if requested.
   // Preserve the same cross-transpose relationship for DUPM and DLPM.
   if (norm) {
+    List pm0;
     for (size_t i = 0; i < variable_cols; ++i) {
       for (size_t j = i; j < variable_cols; ++j) {
         double cupm_ij = coUpm(i, j);
@@ -989,6 +1005,13 @@ List PMMatrix_CPv(
           dupm_ij /= total;
           dlpm_ij /= total;
           clpm_ij /= total;
+        } else if (total == 0.0) {
+          // A column constant at its target zeroes the total: use the degree-0 cell.
+          if (pm0.size() == 0) pm0 = PMMatrix_CPv(0.0, 0.0, target, variable, false, true);
+          cupm_ij = as<NumericMatrix>(pm0["cupm"])(i, j);
+          dupm_ij = as<NumericMatrix>(pm0["dupm"])(i, j);
+          dlpm_ij = as<NumericMatrix>(pm0["dlpm"])(i, j);
+          clpm_ij = as<NumericMatrix>(pm0["clpm"])(i, j);
         } else {
           cupm_ij = 0.0;
           dupm_ij = 0.0;
