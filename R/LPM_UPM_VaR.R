@@ -75,11 +75,9 @@ UPM.VaR <- function(percentile, degree, x) {
 # ==============================================================================
 
 .NNS_prepare_VaR_x <- function(x) {
-  if (inherits(x, c("tbl", "data.table"))) {
-    # unlist() keeps a factor column a factor, and as.numeric() would give its codes.
-    if (any(vapply(x, is.factor, logical(1)))) stop("`x` must be numeric, not a factor.")
-    x <- as.numeric(unlist(x))
-  }
+  # unlist() and as.numeric() would both turn a factor column into its codes.
+  if (is.data.frame(x) && any(vapply(x, is.factor, logical(1)))) stop("`x` must be numeric, not a factor.")
+  if (inherits(x, c("tbl", "data.table"))) x <- as.numeric(unlist(x))
   if (is.factor(x)) stop("`x` must be numeric, not a factor.")
   
   x <- as.numeric(x)
