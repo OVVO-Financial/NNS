@@ -186,7 +186,7 @@ DLPM_{1,1}
 DUPM_{1,1}.
 \]
 
-For general benchmarks the same sum is \(E[(X-t_X)(Y-t_Y)] = Cov(X,Y) + (\mu_X-t_X)(\mu_Y-t_Y)\). With \(X\) and \(Y\) independent on \(\{9, 11\}\) and both benchmarks at 0, the sum is 100 while the covariance is 0.
+For general benchmarks the same sum is \(E[(X-t_X)(Y-t_Y)] = Cov(X,Y) + (\mu_X-t_X)(\mu_Y-t_Y)\). Suppose each variable independently takes 9 or 11 with equal probability. With both benchmarks at zero, the signed sum is 100 and the covariance is zero.
 
 Correlation further standardizes covariance.
 

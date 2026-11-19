@@ -398,7 +398,7 @@ Formally:
 
 - **Frequentist path**: empirical law \(\hat{P}_n = \frac{1}{n}\sum_{i=1}^n \delta_{X_i}\) → compute \(L_n(t;\,X)\), \(U_n(t;\,X)\) with \(X \sim \hat{P}_n\).
 
-Because both pipelines reduce to the same partial-moment operators applied to different input distributions, **any two models that agree on the distribution of \(X\) will produce identical partial moments** — not just the normalized degree-one weights, but all partial moments of all degrees. The formula stays the same; only the input distribution changes. This is the formal sense in which partial moments are a practical lingua franca between Bayesian and frequentist workflows.
+At the same targets, models that agree on the distribution of \(X\) give the same univariate partial moments at every degree. For co-partial moments and joint weights, agreement on the joint distribution gives the same results wherever those quantities are defined.
 
 The directional formulation of Bayes' theorem in Sections 13.5–13.6 is therefore paradigm-agnostic: it holds whether the joint distribution is constructed from a posterior predictive, an empirical distribution, or any other probability measure fed into the co-partial moment operators.
 
@@ -414,6 +414,6 @@ Conditional probability and Bayes' theorem arise naturally and completely from t
 - **Bayes' theorem follows directly from co-partial moment identities**, holds symmetrically in both the lower and upper tails, and requires no distributional assumptions.
 - **Bayesian updating corresponds to renormalizing the four-quadrant probability partition** after conditioning on one marginal.
 - **Degree-one co-partial moments are distributional generators**: the mixed second derivative of the hinge surface recovers the joint CDF at all continuity points, and the mixed fourth derivative recovers the joint density when it exists. Degree zero, the joint CDF, is already complete; degree one is a continuous complete representation with the stated derivative qualifications.
-- **Partial moments are law-invariant**: they depend only on the induced distribution of \(X\), making them identical across Bayesian and frequentist pipelines whenever those pipelines agree on the distribution of outcomes.
+- **Partial moments are law-invariant**. Univariate moments depend on the distribution of \(X\). Co-partial moments and joint weights depend on the joint distribution.
 
 The next chapter extends these conditional-probability tools to directional causation — asking not merely how probability mass is distributed across variables, but which variable is doing the driving.

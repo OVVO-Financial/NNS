@@ -767,9 +767,9 @@ $$
 
 with strict inequality for at least one $t$.
 
-Equivalently, $X$ dominates $Y$ in the first order if and only if every non-decreasing utility function assigns at least as high an expected value to $X$ as to $Y$. This means any decision-maker who prefers more to less will prefer $X$.
+Equivalently, $X$ dominates $Y$ in the first order if every non-decreasing utility function with finite expectations assigns at least as high an expected value to $X$ as to $Y$, and at least one assigns a higher value to $X$.
 
-In terms of the empirical CDF, $X \succ_1 Y$ whenever the distribution of $X$ lies entirely to the right of the distribution of $Y$ across all quantiles.
+For empirical distributions, $X \succ_1 Y$ if its quantiles are at least as high as $Y$'s at every probability and higher at some probability.
 
 #### Second-Order Stochastic Dominance
 
@@ -804,7 +804,7 @@ $$
 LPM_0(t, X) \le LPM_0(t, Y) \quad \text{for all } t.
 $$
 
-Because $LPM_0(t, X) = F_X(t)$, this is the direct CDF criterion.
+The inequality must be strict for at least one threshold. Because $LPM_0(t, X) = F_X(t)$, this is the direct CDF criterion.
 
 Second-order dominance can be expressed through the degree-one lower partial moment:
 
@@ -832,7 +832,7 @@ $$
 \hat F_X(t) \le \hat F_Y(t)
 $$
 
-holds for all evaluation points $t$ in the combined support of the data. If the condition holds everywhere, $X$ first-order stochastically dominates $Y$. If it fails at some points, the distributions intersect and neither dominates at the first order.
+holds for all evaluation points $t$ in the combined support of the data, with strict inequality at least once. The test also checks the reverse ordering. If the ordering changes direction or the CDFs are identical, neither sample dominates.
 
 Second- and third-order tests replace the empirical CDF with degree-one and degree-two lower partial moments. The implementation also checks between-knot extrema where required and enforces the TSD mean condition; checking support endpoints alone is not sufficient for every piecewise-polynomial criterion.
 

@@ -187,14 +187,7 @@ Skew(X) =
 {(U_2(\mu;X)+L_2(\mu;X))^{3/2}}.
 \]
 
-A useful intuition follows immediately from this expression.  
-If a distribution has a longer right tail than left tail, large positive deviations dominate so that
-
-\[
-U_3(\mu;X) \gg L_3(\mu;X),
-\]
-
-producing positive skewness.
+Skewness is positive when the upper third partial moment about the mean exceeds the lower one. Both the sizes and the frequencies of deviations matter.
 
 Similarly, kurtosis is
 
