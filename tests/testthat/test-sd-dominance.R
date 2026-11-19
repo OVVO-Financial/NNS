@@ -100,9 +100,12 @@ test_that("adding a constant to both samples keeps the TSD result", {
   }
 })
 
-test_that("an infinite value doesn't stop the centred comparison", {
+test_that("an infinite value is an error for SSD, TSD and continuous FSD", {
   a <- c(0, 1, Inf); b <- c(0, 1, 2)
-  expect_equal(c(NNS.SSD.uni(a, b), NNS.TSD.uni(a, b), NNS.FSD.uni(a, b, "continuous")), c(0, 0, 0))
+  expect_error(NNS.SSD.uni(a, b), "infinite values")
+  expect_error(NNS.TSD.uni(b, -a), "infinite values")
+  expect_error(NNS.FSD.uni(a, b, "continuous"), "infinite values")
+  expect_equal(c(NNS.FSD.uni(a, b), NNS.FSD.uni(b, a)), c(1, 0))
 })
 
 test_that("the efficient set does not depend on column order", {
@@ -133,4 +136,21 @@ test_that("the efficient set does not depend on column order", {
     }
   }
   expect_identical(differ, character(0))
+})
+
+test_that("the efficient set and the clusters reject infinite values, except for discrete FSD", {
+  healthy <- diff(log(c(100, 102, 99, 101, 100, 97, 99, 101)))
+  bust <- diff(log(c(100, 80, 60, 40, 20, 10, 5, 0)))
+  M <- cbind(healthy, bust)
+  for (d in 2:3) expect_error(NNS.SD.efficient.set(M, d, status = FALSE), "infinite values")
+  expect_error(NNS.SD.efficient.set(M, 1, "continuous", status = FALSE), "infinite values")
+  expect_error(NNS.SD.cluster(M, 2), "infinite values")
+  expect_equal(NNS.SD.efficient.set(M, 1, status = FALSE), "healthy")
+  expect_equal(NNS.SD.cluster(M, 1)$Clusters, list(Cluster_1 = "healthy", Cluster_2 = "bust"))
+})
+
+test_that("NNS.TSD plots the curves against the sample values", {
+  pdf(NULL); on.exit(dev.off())
+  NNS.TSD(c(10, 11, 12), c(10.5, 11.5, 13))
+  expect_gt(par("usr")[1], 9)
 })

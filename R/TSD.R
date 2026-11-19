@@ -43,10 +43,10 @@ NNS.TSD <- function(x, y, plot = TRUE){
 
 
   if(plot){
-    plot(LPM_x_sort, type = "l", lwd = 3, col = "red", main = "TSD", ylab = "Area of Cumulative Distribution",
+    plot(Combined_sort, LPM_x_sort, type = "l", lwd = 3, col = "red", main = "TSD", ylab = "Area of Cumulative Distribution",
          ylim = c(min(c(LPM_y_sort, LPM_x_sort)), max(c(LPM_y_sort, LPM_x_sort))))
 
-    lines(LPM_y_sort, type = "l", lwd =3,col = "steelblue")
+    lines(Combined_sort, LPM_y_sort, type = "l", lwd =3,col = "steelblue")
     legend("topleft", c("X","Y"), lwd = 10, col=c("red","steelblue"))
   }
     
