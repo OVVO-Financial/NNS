@@ -130,3 +130,16 @@ test_that("factor data is an error in NNS.moments, NNS.CDF and the VaR functions
   expect_error(LPM.VaR(0.5, 1, f), "not a factor")
   expect_error(UPM.VaR(0.5, 1, f), "not a factor")
 })
+
+test_that("a factor column in a tibble or data.table is an error in the VaR functions", {
+  f <- factor(c(10, 20, 30))
+  # Classed lists stand in for a tibble and a data.table, which are not dependencies.
+  for (cls in list(c("tbl_df", "tbl", "data.frame"), c("data.table", "data.frame"))) {
+    x <- structure(list(v = f), class = cls, row.names = 1:3)
+    expect_error(LPM.VaR(0.5, 1, x), "not a factor")
+    expect_error(UPM.VaR(0.5, 1, x), "not a factor")
+  }
+  x <- structure(list(v = c(10, 20, 30)), class = c("tbl_df", "tbl", "data.frame"), row.names = 1:3)
+  expect_equal(LPM.VaR(0.5, 1, x), LPM.VaR(0.5, 1, c(10, 20, 30)))
+  expect_equal(UPM.VaR(0.5, 1, x), UPM.VaR(0.5, 1, c(10, 20, 30)))
+})
