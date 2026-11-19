@@ -22,7 +22,7 @@ The R name is the canonical reference used throughout the book; the Python name 
 |---|---|---|
 | `LPM` / `UPM` | `nns.lpm` / `nns.upm` | Lower / upper partial moments |
 | `LPM.ratio` / `UPM.ratio` | `nns.lpm_ratio` / `nns.upm_ratio` | Frequency probabilities at degree zero; directional area shares at positive degrees |
-| `LPM.VaR` / `UPM.VaR` | `nns.lpm_var` / `nns.upm_var` | Lower / upper tail quantile inversion |
+| `LPM.VaR` / `UPM.VaR` | `nns.lpm_var` / `nns.upm_var` | Lower / upper tail quantiles at degree zero; severity-weighted thresholds at positive degrees |
 | `Co.LPM` / `Co.UPM` | `nns.co_lpm` / `nns.co_upm` | Concordant co-partial moments |
 | `D.LPM` / `D.UPM` | `nns.d_lpm` / `nns.d_upm` | Divergent co-partial moments |
 | `PM.matrix` | `nns.pm_matrix` | Partial-moment covariance decomposition |
@@ -79,8 +79,8 @@ The R name is the canonical reference used throughout the book; the Python name 
 | $p = P(X' > Y')$ | Directional exceedance probability for pairwise comparison | estimated by cross-sample indicator averages |
 | $\text{Certainty}_{\text{ANOVA}}$ | Descriptive target agreement with a finite-sample adjustment; not a p-value or power | `NNS.ANOVA(...)` |
 | FSD / SSD / TSD | Ordinary dominance at the stated orders; the legacy continuous FSD option instead uses Omega/expectile order | `NNS.FSD(...)`, `NNS.SSD(...)`, `NNS.TSD(...)` |
-| $Q^-_{d}(\alpha)$ | Lower degree-$d$ quantile | `LPM.VaR(alpha, degree = d, x)` |
-| $Q^+_{d}(\alpha)$ | Upper degree-$d$ quantile | `UPM.VaR(alpha, degree = d, x)` |
+| $Q^-_{d}(\alpha)$ | Lower degree-$d$ threshold | `LPM.VaR(alpha, degree = d, x)` |
+| $Q^+_{d}(\alpha)$ | Upper degree-$d$ threshold | `UPM.VaR(alpha, degree = d, x)` |
 | Directional band | $[Q^-_d(\alpha/2),Q^+_d(\alpha/2)]$: frequency target at degree zero, severity target otherwise; future coverage needs validation | `LPM.VaR(...)` + `UPM.VaR(...)` |
 
 

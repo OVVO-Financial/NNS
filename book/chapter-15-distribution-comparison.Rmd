@@ -159,17 +159,17 @@ measures the opposite directional region.
 Within the partial-moment framework, these probabilities correspond to **degree-zero divergent co-partial moments**:
 
 $$
-DUPM_{0,0}(t,t) = P(X > t,\, Y \le t),
+DLPM_{0,0}(t,t) = P(X > t,\, Y \le t),
 $$
 
 $$
-DLPM_{0,0}(t,t) = P(X \le t,\, Y > t).
+DUPM_{0,0}(t,t) = P(X \le t,\, Y > t).
 $$
 
 The difference
 
 $$
-\Delta(t) = DUPM_{0,0}(t,t) - DLPM_{0,0}(t,t)
+\Delta(t) = DLPM_{0,0}(t,t) - DUPM_{0,0}(t,t)
 $$
 
 indicates which distribution dominates relative to the benchmark.
@@ -351,11 +351,11 @@ lpm1 = np.array([lpm_ratio(1, float(np.mean(x[:i])), x[:i]) for i in range(1, x.
 
 This property has direct consequences for the comparison methods developed in the remainder of this chapter.
 
-When two samples $X$ and $Y$ are evaluated at a shared benchmark such as the grand mean $\bar{z}$, the identity above makes $F_1(\bar{z}; X) - 0.5$ the distance from $\bar{z}$ to the group mean $\bar{x}$, in units of that group's deviation area, whatever the shape of the distribution. Under the null hypothesis of identical population means, both $F_1(\bar{z}; X)$ and $F_1(\bar{z}; Y)$ scatter around 0.5 with sampling noise, and departures from 0.5 measure how far each group mean sits from the grand statistic.
+When two samples $X$ and $Y$ are evaluated at a shared benchmark such as the grand mean $\bar{z}$, the identity above makes $F_1(\bar{z}; X) - 0.5$ the distance from $\bar{z}$ to the group mean $\bar{x}$, in units of twice that group's deviation area, whatever the shape of the distribution. Under the null hypothesis of identical population means, both $F_1(\bar{z}; X)$ and $F_1(\bar{z}; Y)$ scatter around 0.5 with sampling noise, and departures from 0.5 measure how far each group mean sits from the grand statistic.
 
 The discrete CDF has no such anchor. Its value at the mean estimates $P(X \le \mu)$, which is 0.5 for a continuous distribution symmetric about its mean, but not in general, so at degree 0 a departure from 0.5 mixes skewness with separation: two identical exponential groups both sit near 0.632, not 0.5.
 
-The NNS ANOVA procedure in Section 15.4.2 is built directly on this foundation.
+The NNS ANOVA procedure in Section 15.4.3 is built directly on this foundation.
 
 ---
 
@@ -518,7 +518,7 @@ $$
 
 and that $F_1(\bar{x}; X) = 0.5$ exactly at the sample mean for every non-constant sample.
 
-This **mean-target property** provides a distribution-free anchor for comparing means across samples: under the null that two groups share a common population mean, both groups' degree-one CDFs evaluated at the grand mean scatter around 0.5, and a departure from 0.5 measures the distance between the group mean and the grand mean in units of that group's deviation area (Section 15.1.8). Because the anchor does not depend on the shape of either distribution, a skewed group is not read as a shifted one, as it would be by comparing the empirical CDF with 0.5.
+This **mean-target property** provides a distribution-free anchor for comparing means across samples: under the null that two groups share a common population mean, both groups' degree-one CDFs evaluated at the grand mean scatter around 0.5, and a departure from 0.5 measures the distance between the group mean and the grand mean in units of twice that group's deviation area (Section 15.1.8). Because the anchor does not depend on the shape of either distribution, a skewed group is not read as a shifted one, as it would be by comparing the empirical CDF with 0.5.
 
 The degree-one CDF is also continuous in $t$, unlike the empirical step function, because it encodes area-based mass rather than point counts. That smoothness is not robustness: deviations enter in proportion to their size, so a single extreme observation shifts the degree-one CDF at every $t$, while it changes the degree-zero CDF by one count. Chapter 17 gives a numerical example for the tail thresholds.
 

@@ -511,7 +511,7 @@ Directional co-partial moments reveal this structure.
 With benchmark \(t_X=0\),
 
 - \(\operatorname{CoUPM}\) captures dependence when \(X>0\) and \(Y\) is above its benchmark,
-- \(\operatorname{DUPM}\) or \(\operatorname{DLPM}\) captures the mirrored dependence when \(X<0\), depending on the benchmark chosen for \(Y\).
+- \(\operatorname{DUPM}\) or \(\operatorname{CoLPM}\) captures the mirrored dependence when \(X<0\), depending on the benchmark chosen for \(Y\).
 
 The directional matrices expose strong dependence that the aggregated covariance can cancel.
 
