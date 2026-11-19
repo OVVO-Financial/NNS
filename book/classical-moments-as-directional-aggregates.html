@@ -1102,8 +1102,7 @@ E[(X-t)^r].
 Otherwise it represents a moment relative to an arbitrary reference point.</p>
 <p>Examples include</p>
 <ul>
-<li><span class="math inline">\(r=1\)</span>: mean deviation<br />
-</li>
+<li><span class="math inline">\(r=1\)</span>: first moment about <span class="math inline">\(t\)</span> (zero when <span class="math inline">\(t=\mu\)</span>)</li>
 <li><span class="math inline">\(r=2\)</span>: variance when <span class="math inline">\(t=\mu\)</span><br />
 </li>
 <li><span class="math inline">\(r=3\)</span>: skewness-related moment<br />
@@ -1304,7 +1303,7 @@ E[(X-t)^r]
 +
 \int_{x\le t}(x-t)^r f(x)\,dx.
 \]</span></p>
-<p>These two integrals correspond exactly to the upper and lower partial moments.</p>
+<p>These two integrals are the upper partial moment <span class="math inline">\(U_r(t;X)\)</span> and the signed lower partial moment <span class="math inline">\((-1)^r L_r(t;X)\)</span>.</p>
 <p>This representation also clarifies the variance example from the previous section.<br />
 Two distributions may share the same variance while producing different values of</p>
 <p><span class="math display">\[

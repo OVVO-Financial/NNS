@@ -1358,7 +1358,7 @@ t_\alpha^{(1)}=\mathrm{LPM.VaR}(\alpha,\text{ degree }=1,X),
 t_\alpha^{(2)}=\mathrm{LPM.VaR}(\alpha,\text{ degree }=2,X).
 \]</span>
 These thresholds are chosen in a different geometry. They do not partition simple counts. Instead they partition severity-weighted directional mass. Large adverse deviations therefore influence the threshold more strongly than small ones.</p>
-<p>This leads to an important practical phenomenon. A severity-weighted threshold may occur at a milder benchmark than a frequency-based threshold, yet still produce a less severe set of threshold violations in realized use. The reason is that the rule is designed to trigger earlier, before the most extreme adverse deviations dominate the lower tail. The probability-bounds literature demonstrates this effect empirically in finance examples, but the mechanism is general and should be understood as an early-intervention property of higher-degree threshold calibration.</p>
+<p>This leads to an important practical phenomenon. A severity-weighted threshold may occur at a milder benchmark than a frequency-based threshold, yet still produce a less severe set of threshold violations in realized use. The reason is that the rule is designed to trigger earlier, before the most extreme adverse deviations dominate the lower tail. The probability-bounds literature demonstrates this effect empirically in finance examples. The mechanism is not specific to finance, though it depends on the shape of the lower tail (Chapter 16).</p>
 <p>This distinction matters in many domains:</p>
 <ul>
 <li>in forecasting, a severity-weighted threshold warns before very large misses accumulate,</li>

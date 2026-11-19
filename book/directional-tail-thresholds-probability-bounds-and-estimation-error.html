@@ -1224,14 +1224,14 @@ P(X\le g)\le \left(\frac{\theta(t,\alpha)}{t-g}\right)^\alpha.
 <p>Once higher-degree thresholds are viewed as severity-weighted quantiles, an important practical feature becomes clear.</p>
 <p>A degree-1 or degree-2 threshold can be less extreme than the degree-0 threshold and yet still produce milder realized tail behavior.</p>
 <p>This is not a contradiction. It occurs because higher-degree thresholds are calibrated in weighted directional mass, not in raw event counts.</p>
-<p>Mathematically, this makes sense. The degree-2 rule assigns much more weight to large adverse deviations than to small ones. If a 10-unit shortfall contributes <span class="math inline">\(10^2\)</span> units of quadratic severity while a 1-unit shortfall contributes only <span class="math inline">\(1^2\)</span>, then the threshold naturally shifts toward earlier intervention.</p>
+<p>Mathematically, the degree-2 rule weights large deviations far more than small ones: a 10-unit deviation contributes <span class="math inline">\(10^2\)</span> units of quadratic severity, a 1-unit deviation only <span class="math inline">\(1^2\)</span>. The weighting applies on both sides of the threshold, and typically the larger deviations lie above it, so the threshold shifts toward earlier intervention. A heavy lower tail or strong negative skew can reverse this, placing the degree-2 threshold further into the tail than the degree-0 threshold.</p>
 <p>The same logic applies across domains:</p>
 <ul>
 <li>in forecasting, the rule intervenes before very large misses accumulate,</li>
 <li>in operations, it triggers replenishment before deep shortages form,</li>
 <li>in engineering, it signals action before large safety-margin breaches dominate the lower tail.</li>
 </ul>
-<p>Thus higher-degree thresholds are best interpreted as <strong>early-intervention rules under asymmetric cost</strong>.</p>
+<p>Thus higher-degree thresholds are usually best interpreted as <strong>early-intervention rules under asymmetric cost</strong>.</p>
 <hr />
 </div>
 <div id="model-misspecification-and-robustness" class="section level2 hasAnchor" number="16.6">
