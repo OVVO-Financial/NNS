@@ -301,6 +301,12 @@ struct DomWorker : public Worker {
   }
 };
 
+// The tie tolerances scale with the largest |value|: an infinite one makes every curve a tie.
+static void check_finite(const NumericVector& v){
+  for (R_xlen_t k=0; k<v.size(); ++k) if (!R_FINITE(v[k]))
+    stop("You have some infinite values, please address.");
+}
+
 // =====================================================================
 // Export: dominance matrix in parallel (prefix-sum version)
 // =====================================================================
@@ -317,6 +323,7 @@ IntegerMatrix sd_dom_matrix_prefix_parallel(const NumericMatrix& X, int degree, 
       warning("type needs to be either discrete or continuous");
     discrete = (type != "continuous");
   }
+  if (!(degree==1 && discrete)) check_finite(X);
   
   int n = X.ncol();
   std::vector<ColPre> cols; cols.reserve(n);
@@ -450,6 +457,7 @@ int NNS_FSD_uni_cpp(const NumericVector& x, const NumericVector& y, std::string 
     stop("You have some missing values, please address.");
   std::transform(type.begin(), type.end(), type.begin(), ::tolower);
   bool discrete = (type != "continuous");
+  if (!discrete){ check_finite(x); check_finite(y); }
   ColPre X = precompute_vec(x), Y = precompute_vec(y);
   return sd_dom_pair_centred(X, Y, 1, discrete);
 }
@@ -458,6 +466,7 @@ int NNS_FSD_uni_cpp(const NumericVector& x, const NumericVector& y, std::string 
 int NNS_SSD_uni_cpp(const NumericVector& x, const NumericVector& y){
   if (is_true(any(is_na(x))) || is_true(any(is_na(y))))
     stop("You have some missing values, please address.");
+  check_finite(x); check_finite(y);
   ColPre X = precompute_vec(x), Y = precompute_vec(y);
   return sd_dom_pair_centred(X, Y, 2, true);
 }
@@ -466,6 +475,7 @@ int NNS_SSD_uni_cpp(const NumericVector& x, const NumericVector& y){
 int NNS_TSD_uni_cpp(const NumericVector& x, const NumericVector& y){
   if (is_true(any(is_na(x))) || is_true(any(is_na(y))))
     stop("You have some missing values, please address.");
+  check_finite(x); check_finite(y);
   ColPre X = precompute_vec(x), Y = precompute_vec(y);
   return sd_dom_pair_centred(X, Y, 3, true);
 }
