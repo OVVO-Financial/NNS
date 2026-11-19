@@ -29,7 +29,7 @@ Otherwise it represents a moment relative to an arbitrary reference point.
 
 Examples include
 
-- \(r=1\): mean deviation  
+- \(r=1\): first moment about \(t\) (zero when \(t=\mu\))
 - \(r=2\): variance when \(t=\mu\)  
 - \(r=3\): skewness-related moment  
 - \(r=4\): kurtosis-related moment  
@@ -273,7 +273,7 @@ E[(X-t)^r]
 \int_{x\le t}(x-t)^r f(x)\,dx.
 \]
 
-These two integrals correspond exactly to the upper and lower partial moments.
+These two integrals are the upper partial moment \(U_r(t;X)\) and the signed lower partial moment \((-1)^r L_r(t;X)\).
 
 This representation also clarifies the variance example from the previous section.  
 Two distributions may share the same variance while producing different values of

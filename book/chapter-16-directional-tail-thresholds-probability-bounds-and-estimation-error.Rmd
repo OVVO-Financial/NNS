@@ -197,7 +197,7 @@ A degree-1 or degree-2 threshold can be less extreme than the degree-0 threshold
 
 This is not a contradiction. It occurs because higher-degree thresholds are calibrated in weighted directional mass, not in raw event counts.
 
-Mathematically, this makes sense. The degree-2 rule assigns much more weight to large adverse deviations than to small ones. If a 10-unit shortfall contributes \(10^2\) units of quadratic severity while a 1-unit shortfall contributes only \(1^2\), then the threshold naturally shifts toward earlier intervention.
+Mathematically, the degree-2 rule weights large deviations far more than small ones: a 10-unit deviation contributes \(10^2\) units of quadratic severity, a 1-unit deviation only \(1^2\). The weighting applies on both sides of the threshold, and typically the larger deviations lie above it, so the threshold shifts toward earlier intervention. A heavy lower tail or strong negative skew can reverse this, placing the degree-2 threshold further into the tail than the degree-0 threshold.
 
 The same logic applies across domains:
 
@@ -205,7 +205,7 @@ The same logic applies across domains:
 - in operations, it triggers replenishment before deep shortages form,
 - in engineering, it signals action before large safety-margin breaches dominate the lower tail.
 
-Thus higher-degree thresholds are best interpreted as **early-intervention rules under asymmetric cost**.
+Thus higher-degree thresholds are usually best interpreted as **early-intervention rules under asymmetric cost**.
 
 ---
 
