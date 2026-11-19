@@ -39,7 +39,9 @@ PM.matrix(LPM_degree, UPM_degree, target, variable, pop_adj, norm = FALSE)
 - norm:
 
   logical; default FALSE. If TRUE, each quadrant matrix is cell-wise
-  normalized so their sum is 1 at each (i,j).
+  normalized so their sum is 1 at each (i,j). A cell whose four moments
+  are all 0, as when a column is constant at its target, takes the
+  degree-0 values.
 
 ## Value
 

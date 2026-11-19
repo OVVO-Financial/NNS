@@ -28,8 +28,9 @@ DPM_nD(data, target, degree = 0, norm = TRUE)
 
   logical; if `TRUE` (default) divide by the sum of the co-lower,
   co-upper and divergent nD partial moments at the same degree and
-  target (→ \[0,1\]), otherwise return the raw moment. `norm` is ignored
-  at `degree = 0`.
+  target (→ \[0,1\]), otherwise return the raw moment. If that sum is 0,
+  as when the target sits on a constant column, the degree-0 value is
+  returned. `norm` is ignored at `degree = 0`.
 
 ## Value
 

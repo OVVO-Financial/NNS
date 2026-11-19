@@ -43,13 +43,14 @@ NNS.CDF(variable, degree = 0, target = NULL, type = "CDF", plot = TRUE)
   joint density-over-survival or a coordinate-hazard definition requires
   a separate estimator, and dividing the joint CDF by survival does not
   estimate either. At `degree > 0` with two or more columns, each
-  target's co-partial moment is normalised by its own total, so the
-  "CDF" and "survival" values are generalised co-partial-moment ratios,
-  not a joint distribution function: they can assign a negative
-  probability to a rectangle. At `degree = 0`, and in one dimension at
-  any degree, they are proper distribution functions; at positive degree
-  the univariate induced law describes deviation-area balance rather
-  than the frequency law of the original variable.
+  target's co-partial moment is normalised by its own total (a zero
+  total, from a constant column at its target, gives the degree-0
+  value), so the "CDF" and "survival" values are generalised
+  co-partial-moment ratios, not a joint distribution function: they can
+  assign a negative probability to a rectangle. At `degree = 0`, and in
+  one dimension at any degree, they are proper distribution functions;
+  at positive degree the univariate induced law describes deviation-area
+  balance rather than the frequency law of the original variable.
 
 - plot:
 

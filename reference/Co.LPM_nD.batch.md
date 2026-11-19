@@ -5,7 +5,7 @@ Internal batched backend for evaluating `Co.LPM_nD` over many targets.
 ## Usage
 
 ``` r
-Co.LPM_nD.batch(data, targets, degree = 0, norm = TRUE)
+Co.LPM_nD.batch(data, targets, degree = 0, norm = TRUE, strict = FALSE)
 ```
 
 ## Arguments
@@ -26,6 +26,11 @@ Co.LPM_nD.batch(data, targets, degree = 0, norm = TRUE)
 - norm:
 
   logical; normalize result.
+
+- strict:
+
+  logical; count only rows strictly below the target in the degree-0
+  share.
 
 ## Value
 

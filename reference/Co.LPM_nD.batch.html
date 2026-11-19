@@ -41,7 +41,7 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">Co.LPM_nD.batch</span><span class="op">(</span><span class="va">data</span>, <span class="va">targets</span>, degree <span class="op">=</span> <span class="fl">0</span>, norm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">Co.LPM_nD.batch</span><span class="op">(</span><span class="va">data</span>, <span class="va">targets</span>, degree <span class="op">=</span> <span class="fl">0</span>, norm <span class="op">=</span> <span class="cn">TRUE</span>, strict <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -62,6 +62,10 @@
 
 <dt id="arg-norm">norm<a class="anchor" aria-label="anchor" href="#arg-norm"></a></dt>
 <dd><p>logical; normalize result.</p></dd>
+
+
+<dt id="arg-strict">strict<a class="anchor" aria-label="anchor" href="#arg-strict"></a></dt>
+<dd><p>logical; count only rows strictly below the target in the degree-0 share.</p></dd>
 
 </dl></div>
     <div class="section level2">
