@@ -57,7 +57,7 @@ The R name is the canonical reference used throughout the book; the Python name 
 | $(t-X)^+$ | $\max(t-X,0)$ | Deviation below benchmark $t$ | internal to `LPM(...)` |
 | $L_r(t;X)$ | $E[(t-X)_+^r]$ | Lower partial moment, degree $r$ | `LPM(r, t, X)` |
 | $U_r(t;X)$ | $E[(X-t)_+^r]$ | Upper partial moment, degree $r$ | `UPM(r, t, X)` |
-| $L_r/(L_r+U_r)$ | Degree-$r$ lower ratio | Frequency below $t$ at degree zero; lower severity share otherwise | `LPM.ratio(r, t, X)` |
+| $L_r/(L_r+U_r)$ | Degree-$r$ lower ratio | Frequency at or below $t$ at degree zero. Lower severity share otherwise. | `LPM.ratio(r, t, X)` |
 | $U_r/(L_r+U_r)$ | Degree-$r$ upper ratio | Frequency above $t$ at degree zero; upper severity share otherwise | `UPM.ratio(r, t, X)` |
 
 ## Co-partial moments, dependence, and causation

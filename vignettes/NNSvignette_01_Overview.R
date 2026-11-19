@@ -16,7 +16,7 @@ set.seed(42)
 y <- rnorm(3000)
 mu <- mean(y)
 L2 <- LPM(2, mu, y); U2 <- UPM(2, mu, y)
-cat(sprintf("LPM2 + UPM2 = %.6f vs var(y)=%.6f\n", (L2+U2)*(length(y) / (length(y) - 1)), var(y)))
+cat(sprintf("Bessel-adjusted sum of second partial moments = %.6f vs var(y) = %.6f\n", (L2+U2)*(length(y) / (length(y) - 1)), var(y)))
 
 # Empirical CDF via LPM.ratio(0, t, x)
 for (t in c(-1,0,1)) {
