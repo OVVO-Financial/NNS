@@ -21,7 +21,7 @@
 #' @export
 
 LPM <- function(degree, target, variable, excess_ret = FALSE) {
-  target   <- as.numeric(target)
+  if (!is.null(target)) target <- as.numeric(target)
   variable <- as.numeric(variable)
   
   if (!all(is.finite(variable))) stop("`variable` must be finite.")
@@ -59,7 +59,7 @@ LPM <- function(degree, target, variable, excess_ret = FALSE) {
 #' @export
 
 UPM <- function(degree, target, variable, excess_ret = FALSE) {
-  target   <- as.numeric(target)
+  if (!is.null(target)) target <- as.numeric(target)
   variable <- as.numeric(variable)
   
   if (!all(is.finite(variable))) stop("`variable` must be finite.")
@@ -563,6 +563,8 @@ NNS.moments <- function(x, population = TRUE) {
 #' PM.matrix(1, 1, target = apply(A, 2, "median"), variable = A, pop_adj = TRUE)  
 #' @export
 PM.matrix <- function(LPM_degree, UPM_degree, target, variable, pop_adj, norm = FALSE) {
+  # The vignettes and the book pass "mean" or "means" for the default target.
+  if (identical(target, "mean") || identical(target, "means")) target <- NULL
   .Call(`_NNS_PMMatrix_RCPP`, LPM_degree, UPM_degree, target, variable, pop_adj, norm)
 }
 

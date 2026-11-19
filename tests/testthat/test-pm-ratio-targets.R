@@ -61,3 +61,34 @@ test_that("degree > 0 CDF of a large constant sample is identically 1", {
   z <- NNS.CDF(rep(2, 1e5), 1, plot = FALSE)
   expect_true(all(z$Function$CDF == 1))
 })
+
+test_that("LPM and UPM use mean(variable) for a NULL target", {
+  expect_equal(LPM(1, NULL, x), 1.5)
+  expect_equal(UPM(1, NULL, x), UPM(1, mean(x), x))
+  expect_equal(LPM(0, NULL, x, excess_ret = TRUE), 0.75)
+})
+
+test_that("a logical target is used as a number, not replaced by the mean", {
+  A <- cbind(x, rev(x))
+  expect_equal(LPM.ratio(0, TRUE, x), 0.25)
+  expect_equal(UPM.ratio(0, c(TRUE, FALSE), x), c(0.75, 1))
+  expect_equal(Co.LPM(1, x, x, TRUE, TRUE), 0)
+  expect_equal(D.UPM(1, 1, x, rev(x), TRUE, TRUE), D.UPM(1, 1, x, rev(x), 1, 1))
+  expect_equal(PM.matrix(1, 1, c(TRUE, TRUE), A, FALSE), PM.matrix(1, 1, c(1, 1), A, FALSE))
+  expect_error(LPM.ratio(0, NA, x), "must be finite")
+  expect_error(Co.UPM(0, x, x, 2, NA), "must be finite")
+})
+
+test_that("a character, list or factor target is an error, not the mean", {
+  A <- cbind(x, rev(x))
+  msg <- "must be numeric or NULL"
+  expect_error(LPM.ratio(0, "2", x), msg)
+  expect_error(UPM.ratio(0, list(2), x), msg)
+  expect_error(Co.LPM(1, x, x, "2", 2), msg)
+  expect_error(Co.UPM(1, x, x, 2, list(2)), msg)
+  expect_error(D.LPM(1, 1, x, rev(x), factor(2), 2), msg)
+  expect_error(D.UPM(1, 1, x, rev(x), 2, "2"), msg)
+  expect_error(PM.matrix(1, 1, c("2", "3"), A, FALSE), msg)
+  expect_equal(PM.matrix(1, 1, "mean", A, FALSE), PM.matrix(1, 1, NULL, A, FALSE))
+  expect_equal(PM.matrix(1, 1, "means", A, FALSE), PM.matrix(1, 1, NULL, A, FALSE))
+})

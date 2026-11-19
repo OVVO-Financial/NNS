@@ -28,9 +28,13 @@ static inline bool isInteger(double value) {
 }
 
 // Integer targets (2L, 1:3) are used as given, not replaced by mean(variable).
+// Only NULL means the mean: a logical is coerced as LPM() does, other types are an error.
 static inline bool is_supplied_target(const RObject &target) {
-  return !target.isNULL() &&
-    (is<NumericVector>(target) || is<IntegerVector>(target));
+  if (target.isNULL()) return false;
+  if (Rf_isFactor(target) ||
+      !(is<NumericVector>(target) || is<IntegerVector>(target) || is<LogicalVector>(target)))
+    Rcpp::stop("`target` must be numeric or NULL.");
+  return true;
 }
 
 // Same contract as LPM()/UPM(): non-finite values are rejected, not counted in n.
