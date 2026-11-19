@@ -21,3 +21,7 @@ test_that(
 	  expect_equal(NNS.TSD.uni(x, y^2), 1)
 	}
 )
+test_that("factor data is an error in the univariate SD tests", {
+  f <- factor(c(10, 20, 30)); y <- c(5, 1, 3)
+  for (fn in list(NNS.FSD.uni, NNS.SSD.uni, NNS.TSD.uni)) expect_error(fn(f, y), "not a factor")
+})

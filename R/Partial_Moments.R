@@ -21,7 +21,9 @@
 #' @export
 
 LPM <- function(degree, target, variable, excess_ret = FALSE) {
+  if (is.factor(target)) stop("`target` must be numeric, not a factor.")
   if (!is.null(target)) target <- as.numeric(target)
+  if (is.factor(variable)) stop("`variable` must be numeric, not a factor.")
   variable <- as.numeric(variable)
   
   if (!all(is.finite(variable))) stop("`variable` must be finite.")
@@ -59,7 +61,9 @@ LPM <- function(degree, target, variable, excess_ret = FALSE) {
 #' @export
 
 UPM <- function(degree, target, variable, excess_ret = FALSE) {
+  if (is.factor(target)) stop("`target` must be numeric, not a factor.")
   if (!is.null(target)) target <- as.numeric(target)
+  if (is.factor(variable)) stop("`variable` must be numeric, not a factor.")
   variable <- as.numeric(variable)
   
   if (!all(is.finite(variable))) stop("`variable` must be finite.")
@@ -239,6 +243,7 @@ NNS.CDF <- function(variable,
   if (any(class(variable) %in% c("tbl","data.table"))) {
     variable <- as.data.frame(variable)
   }
+  if (is.factor(variable)) stop("`variable` must be numeric, not a factor.")
 
   # — Drop missing observations (counted in n, they capped the CDF below 1)
   if (is.null(dim(variable))) {
@@ -488,6 +493,7 @@ NNS.CDF <- function(variable,
 #' @export
 
 NNS.moments <- function(x, population = TRUE) {
+  if (is.factor(x)) stop("`x` must be numeric, not a factor.")
   x <- as.numeric(x)
   
   if (!all(is.finite(x))) stop("`x` must be finite.")

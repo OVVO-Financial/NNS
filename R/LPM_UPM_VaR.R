@@ -78,6 +78,7 @@ UPM.VaR <- function(percentile, degree, x) {
   if (inherits(x, c("tbl", "data.table"))) {
     x <- as.numeric(unlist(x))
   }
+  if (is.factor(x)) stop("`x` must be numeric, not a factor.")
   
   x <- as.numeric(x)
   x <- x[!is.na(x)]

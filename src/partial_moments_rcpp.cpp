@@ -37,6 +37,11 @@ static inline bool is_supplied_target(const RObject &target) {
   return true;
 }
 
+// A factor passes is<IntegerVector>, and its level codes are not its values.
+static inline void stop_if_factor(const RObject &x, const char *what) {
+  if (Rf_isFactor(x)) Rcpp::stop("`%s` must be numeric, not a factor.", what);
+}
+
 // Same contract as LPM()/UPM(): non-finite values are rejected, not counted in n.
 static inline void stop_if_not_finite(const NumericVector &v, const char *what) {
   for (R_xlen_t i = 0; i < v.size(); ++i) {
@@ -205,6 +210,7 @@ NumericVector UPM_RCPP(const double &degree,
  NumericVector LPM_ratio_RCPP(const double &degree, const RObject &target, const RObject &variable) {
    nns_check_degree(degree, "degree");
    NumericVector target_vec, variable_vec;
+   stop_if_factor(variable, "variable");
    if (is<NumericVector>(variable))
      variable_vec=as<NumericVector>(variable);
    else if (is<IntegerVector>(variable))
@@ -253,6 +259,7 @@ NumericVector UPM_RCPP(const double &degree,
  NumericVector UPM_ratio_RCPP(const double &degree, const RObject &target, const RObject &variable) {
    nns_check_degree(degree, "degree");
    NumericVector target_vec, variable_vec;
+   stop_if_factor(variable, "variable");
    if (is<NumericVector>(variable))
      variable_vec=as<NumericVector>(variable);
    else if (is<IntegerVector>(variable))
@@ -286,6 +293,8 @@ NumericVector CoLPM_RCPP(
    nns_check_degree(degree_lpm, "degree_lpm");
    nns_check_degree(degree_y, "degree_y");
    NumericVector target_x_vec, target_y_vec, x_vec, y_vec;
+   stop_if_factor(x, "x");
+   stop_if_factor(y, "y");
    if (is<NumericVector>(x))    x_vec=as<NumericVector>(x);
    else if (is<IntegerVector>(x))	x_vec=as<NumericVector>(x);
    else if (is<DataFrame>(x))   x_vec=Rcpp::internal::convert_using_rfunction(Rcpp::internal::convert_using_rfunction(x, "unlist"), "as.vector");
@@ -328,6 +337,8 @@ NumericVector CoUPM_RCPP(
    nns_check_degree(degree_upm, "degree_upm");
    nns_check_degree(degree_y, "degree_y");
    NumericVector target_x_vec, target_y_vec, x_vec, y_vec;
+   stop_if_factor(x, "x");
+   stop_if_factor(y, "y");
    if (is<NumericVector>(x))    x_vec=as<NumericVector>(x);
    else if (is<IntegerVector>(x))	x_vec=as<NumericVector>(x);
    else if (is<DataFrame>(x))   x_vec=Rcpp::internal::convert_using_rfunction(Rcpp::internal::convert_using_rfunction(x, "unlist"), "as.vector");
@@ -389,6 +400,8 @@ NumericVector CoUPM_RCPP(
    nns_check_degree(degree_lpm, "degree_lpm");
    nns_check_degree(degree_upm, "degree_upm");
    NumericVector target_x_vec, target_y_vec, x_vec, y_vec;
+   stop_if_factor(x, "x");
+   stop_if_factor(y, "y");
    if (is<NumericVector>(x))    x_vec=as<NumericVector>(x);
    else if (is<IntegerVector>(x))	x_vec=as<NumericVector>(x);
    else if (is<DataFrame>(x))   x_vec=Rcpp::internal::convert_using_rfunction(Rcpp::internal::convert_using_rfunction(x, "unlist"), "as.vector");
@@ -450,6 +463,8 @@ NumericVector CoUPM_RCPP(
    nns_check_degree(degree_lpm, "degree_lpm");
    nns_check_degree(degree_upm, "degree_upm");
    NumericVector target_x_vec, target_y_vec, x_vec, y_vec;
+   stop_if_factor(x, "x");
+   stop_if_factor(y, "y");
    if (is<NumericVector>(x))    x_vec=as<NumericVector>(x);
    else if (is<IntegerVector>(x))	x_vec=as<NumericVector>(x);
    else if (is<DataFrame>(x))   x_vec=Rcpp::internal::convert_using_rfunction(Rcpp::internal::convert_using_rfunction(x, "unlist"), "as.vector");

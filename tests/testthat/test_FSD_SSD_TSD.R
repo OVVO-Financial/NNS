@@ -45,3 +45,7 @@ test_that(
 )
 
 
+test_that("factor data is an error in NNS.FSD, NNS.SSD and NNS.TSD", {
+  f <- factor(c(10, 20, 30)); y <- c(5, 1, 3)
+  for (fn in list(NNS.FSD, NNS.SSD, NNS.TSD)) expect_error(fn(y, f, plot = FALSE), "not a factor")
+})

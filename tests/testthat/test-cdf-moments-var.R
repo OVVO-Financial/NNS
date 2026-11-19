@@ -122,3 +122,11 @@ test_that("multivariate cumulative hazard needs degree 0 (#100)", {
   f <- function(t) NNS.CDF(A, degree = 0, target = t, plot = FALSE)$target.value
   expect_gte(f(c(.5, .5)) - f(c(-.5, .5)) - f(c(.5, -.5)) + f(c(-.5, -.5)), 0)
 })
+
+test_that("factor data is an error in NNS.moments, NNS.CDF and the VaR functions", {
+  f <- factor(c(10, 20, 30))
+  expect_error(NNS.moments(f), "not a factor")
+  expect_error(NNS.CDF(f, target = 20, plot = FALSE), "not a factor")
+  expect_error(LPM.VaR(0.5, 1, f), "not a factor")
+  expect_error(UPM.VaR(0.5, 1, f), "not a factor")
+})
