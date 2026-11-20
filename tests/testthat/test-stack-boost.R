@@ -133,6 +133,33 @@ test_that("NNS.stack scores the univariate ALL candidate with the deployed NNS.r
   expect_equal(unname(frame$candidate_scores["all"]), sum((oof - y)^2), tolerance = 1e-12)
 })
 
+test_that("Stack fits character levels on the chronological training prefix", {
+  x <- data.frame(g = c(rep(c("a", "b"), 16), rep("new", 8)), z = 1:40)
+  expect_error(NNS.stack(x, x$z, method = 2, ts.test = 8, folds = 2,
+                         ncores = 1, status = FALSE), "unseen level.*new")
+  x$g <- factor(x$g)
+  fit <- NNS.stack(x, x$z, method = 2, ts.test = 8, folds = 2,
+                   ncores = 1, status = FALSE)
+  expect_true(is.finite(fit$OBJfn.dim.red))
+})
+
+test_that("balancing keeps character levels observed in the training fold", {
+  x <- data.frame(g = rep("a", 40))
+  x$g[c(1, 35)] <- "rare"
+  y <- factor(rep(c("A", "A", "A", "B"), 10))
+  fit <- NNS.stack(x, y, x[35, , drop = FALSE], method = 1, ts.test = 8,
+                   folds = 1, balance = TRUE, seed = 3, ncores = 1, status = FALSE)
+  expect_equal(fit$stack, 1)
+})
+
+test_that("Boost accepts declared levels absent from training", {
+  x <- data.frame(g = factor(rep(c("a", "b"), 20), levels = c("c", "b", "a")))
+  fit <- NNS.boost(x, rep(c(10, 20), 20), data.frame(g = c("a", "c", "b")),
+                   epochs = 0, learner.trials = 1, feature.importance = FALSE,
+                   type = "CLASS", folds = 2, seed = 9, status = FALSE)
+  expect_equal(fit$results, c(10, 10, 20))
+})
+
 test_that("boost's objective sees response values for a two-valued numeric response", {
   set.seed(1)
   x <- matrix(rnorm(240), 80, 3)

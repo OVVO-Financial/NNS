@@ -458,6 +458,7 @@ NNS.stack <- function(IVs.train,
     z <- .as_test_frame(IVs.test, names(x))
   }
   
+  character_x <- x[vapply(x, is.character, logical(1))]
   aligned <- .align_predictors(x, z)
   x <- aligned$train
   z <- aligned$test
@@ -708,8 +709,7 @@ NNS.stack <- function(IVs.train,
         any(!is.finite(c(yt, yv))))
       stop("[.validation] needs N-ts.test finite training rows and 1..ts.test finite held-out rows.")
     validation.rows <- prefix + seq_len(nrow(vv))
-    x.cv[seq_len(prefix), ] <- vt
-    x.cv[validation.rows, ] <- vv
+    x.cv <- rbind(vt, vv)
     y.cv[seq_len(prefix)] <- yt
     y.cv[validation.rows] <- yv
   }
@@ -837,6 +837,12 @@ NNS.stack <- function(IVs.train,
   }
   
   splits <- .make_splits()
+  if (is.null(.validation) && ncol(character_x)) {
+    for (s in splits) {
+      .align_predictors(character_x[s$train, , drop = FALSE],
+                        character_x[s$validation, , drop = FALSE])
+    }
+  }
 
   if (is_class) {
     return(.nns_stack_classify(x, y, z, class_values, splits, method, stack,
@@ -846,20 +852,20 @@ NNS.stack <- function(IVs.train,
       tau = if (is.null(ts.test)) NULL else "ts"))
   }
   
-  .coefficient_vector <- function(X, response) {
+  .coefficient_vector <- function(X, response, method = dim.red.method) {
     X <- as.matrix(X)
     p <- ncol(X)
     
-    if (is.numeric(dim.red.method)) {
-      coef <- as.numeric(dim.red.method)
-      if (!is.null(names(dim.red.method))) {
-        if (!setequal(names(dim.red.method), colnames(X))) {
+    if (is.numeric(method)) {
+      coef <- as.numeric(method)
+      if (!is.null(names(method))) {
+        if (!setequal(names(method), colnames(X))) {
           stop(paste0(
             "Named numeric [dim.red.method] coefficients must exactly match ",
             "the encoded design columns."
           ), call. = FALSE)
         }
-        coef <- as.numeric(dim.red.method[colnames(X)])
+        coef <- as.numeric(method[colnames(X)])
       } else if (length(coef) != p) {
         stop(sprintf(
           "Numeric [dim.red.method] must contain %d encoded coefficients.", p
@@ -903,7 +909,7 @@ NNS.stack <- function(IVs.train,
     }
     
     coef <- switch(
-      dim.red.method,
+      method,
       "cor" = cor_coef(),
       "nns.dep" = dep_coef(),
       "nns.caus" = caus_coef(),
@@ -1078,14 +1084,27 @@ NNS.stack <- function(IVs.train,
   full_design <- .numeric_design(x, z)
   encoded_p <- ncol(full_design$train)
   
-  if (2L %in% method && is.numeric(dim.red.method) &&
-      is.null(names(dim.red.method)) && length(dim.red.method) != encoded_p) {
-    stop(sprintf(
-      "Numeric [dim.red.method] must contain %d encoded coefficients.",
-      encoded_p
-    ), call. = FALSE)
+  fold_method <- dim.red.method
+  candidate_p <- encoded_p
+  if (2L %in% method && !is.null(.validation)) {
+    # Dummy names can change when two labels have the same syntactic name.
+    by_predictor <- split(seq_len(encoded_p), full_design$source)
+    columns <- lapply(names(x), function(nm) {
+      idx <- by_predictor[[nm]]
+      if (is.factor(vt[[nm]])) return(idx[match(levels(vt[[nm]]), levels(x[[nm]]))])
+      if (is.factor(x[[nm]])) return(NA_integer_)
+      idx
+    })
+    columns <- unlist(columns, use.names = FALSE)
+    candidate_p <- min(encoded_p, length(columns))
+    if (is.numeric(dim.red.method)) {
+      weights <- .coefficient_vector(full_design$train, y)
+      if (anyNA(columns))
+        stop("The supplied fold has no matching coefficient in the final design.", call. = FALSE)
+      fold_method <- weights[columns]
+    }
   }
-  
+
   # -------------------------------------------------------------------------
   # Method 2: select active dimension count from OOF predictions
   # -------------------------------------------------------------------------
@@ -1102,8 +1121,8 @@ NNS.stack <- function(IVs.train,
   dim_full_xstar_test <- NULL
   
   if (2L %in% method) {
-    dim_sum <- matrix(0, nrow = n_obs, ncol = encoded_p)
-    dim_count <- matrix(0L, nrow = n_obs, ncol = encoded_p)
+    dim_sum <- matrix(0, nrow = n_obs, ncol = candidate_p)
+    dim_count <- matrix(0L, nrow = n_obs, ncol = candidate_p)
     
     for (b in seq_along(splits)) {
       split <- splits[[b]]
@@ -1113,15 +1132,16 @@ NNS.stack <- function(IVs.train,
         x.cv[train_idx, , drop = FALSE],
         x.cv[valid_idx, , drop = FALSE]
       )
-      coef_fold <- .coefficient_vector(fold_design$train, y.cv[train_idx])
+      coef_fold <- .coefficient_vector(fold_design$train, y.cv[train_idx], fold_method)
       balanced_idx <- .balance_indices(y.cv[train_idx])
       
-      if (status) message(sprintf("Method 2 fold %d/%d: generating %d cumulative projections", b, length(splits), encoded_p))
+      if (status) message(sprintf("Method 2 fold %d/%d: generating %d cumulative projections", b, length(splits), candidate_p))
       native_path <- .xstar_path(fold_design$train, fold_design$test, coef_fold)
-      representatives <- if (!is.null(native_path)) as.integer(native_path$representative) else seq_len(encoded_p)
+      representatives <- seq_len(candidate_p)
+      if (!is.null(native_path)) representatives <- as.integer(native_path$representative[representatives])
       unique_candidates <- unique(representatives)
       if (status) message(sprintf("Method 2 fold %d/%d: evaluating %d unique candidates", b, length(splits), length(unique_candidates)))
-      candidate_raw <- vector("list", encoded_p)
+      candidate_raw <- vector("list", candidate_p)
       for (m in unique_candidates) {
         if (!is.null(native_path)) {
           projected <- list(train = native_path$train[, m], test = native_path$test[, m])
@@ -1136,7 +1156,7 @@ NNS.stack <- function(IVs.train,
                                    allow_failure = TRUE)
         candidate_raw[[m]] <- fit$raw
       }
-      for (m in seq_len(encoded_p)) {
+      for (m in seq_len(candidate_p)) {
         raw <- candidate_raw[[representatives[m]]]
         good <- is.finite(raw)
         if (any(good)) {
@@ -1148,11 +1168,11 @@ NNS.stack <- function(IVs.train,
       if (status) message(sprintf("Method 2 fold %d/%d complete", b, length(splits)))
     }
     
-    dim_scores <- rep(NA_real_, encoded_p)
-    dim_thresholds <- rep(0.5, encoded_p)
-    dim_raw_candidates <- vector("list", encoded_p)
+    dim_scores <- rep(NA_real_, candidate_p)
+    dim_thresholds <- rep(0.5, candidate_p)
+    dim_raw_candidates <- vector("list", candidate_p)
     
-    for (m in seq_len(encoded_p)) {
+    for (m in seq_len(candidate_p)) {
       candidate <- .candidate_from_oof(dim_sum, dim_count, m)
       dim_scores[m] <- candidate$score
       dim_thresholds[m] <- candidate$threshold
@@ -1164,7 +1184,7 @@ NNS.stack <- function(IVs.train,
           m,
           if (is.finite(dim_scores[m]))
             format(dim_scores[m], digits = 6) else "NA",
-          encoded_p - m
+          candidate_p - m
         ))
       }
     }
@@ -1230,7 +1250,7 @@ NNS.stack <- function(IVs.train,
     )
     
     if (stack && 2L %in% method) {
-      coef_fold <- .coefficient_vector(fold_design$train, y.cv[train_idx])
+      coef_fold <- .coefficient_vector(fold_design$train, y.cv[train_idx], fold_method)
       selected <- .active_columns(coef_fold, dim_best_count)
       list(train = fold_design$train[, selected, drop = FALSE],
            test = fold_design$test[, selected, drop = FALSE])
