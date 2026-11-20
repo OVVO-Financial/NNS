@@ -27,7 +27,12 @@
     if (numeric.response) class.values[code] else as.numeric(code)
   }
   validation <- lapply(splits, `[[`, "validation")
-  pooled <- tabulate(unlist(validation), n) > 1L
+  validation.rows <- unlist(validation, use.names = FALSE)
+  count <- tabulate(validation.rows, n)
+  valid <- count > 0L
+  pooled <- count > 1L
+  repeated <- which(pooled[validation.rows])
+  contributions <- split(repeated, validation.rows[repeated])
   priority <- matrix(Inf, K, n)
   for (b in seq_along(splits)) {
     va <- validation[[b]]
@@ -105,27 +110,28 @@
                     order, NULL, dist, ncores, categorical,
                     need.fitted = FALSE, k.path = candidates)$predicted.path
   }
-  record <- function(total, count, candidate) {
-    valid <- count > 0
+  record <- function(fold.probabilities, candidate) {
+    predictions <- do.call(rbind, fold.probabilities)
     probability <- matrix(NA_real_, n, K)
-    probability[valid, ] <- total[valid, , drop = FALSE] / count[valid]
+    probability[validation.rows, ] <- predictions
+    for (i in contributions) {
+      # Average each class in the same order regardless of how the folds were visited.
+      probability[validation.rows[i[1L]], ] <- vapply(seq_len(K), function(k) {
+        mean(sort.int(predictions[i, k], na.last = TRUE))
+      }, numeric(1))
+    }
     assessment <- evaluate(probability, valid)
     c(assessment, list(candidate = candidate, probability = probability, valid = valid))
   }
   tune <- function(component, candidates, select.count = NULL) {
     if (component == 1L) {
-      totals <- lapply(candidates, function(candidate) matrix(0, n, K))
-      count <- integer(n)
-      for (b in seq_along(splits)) {
+      paths <- lapply(seq_along(splits), function(b) {
         s <- splits[[b]]; tr <- s$train[balanced[[b]]]; va <- s$validation
-        path <- fit.path(x[tr, , drop = FALSE], y[tr], x[va, , drop = FALSE],
-                         candidates, select.count)
-        for (a in seq_along(candidates))
-          totals[[a]][va, ] <- totals[[a]][va, , drop = FALSE] + path[[a]]
-        count[va] <- count[va] + 1L
-      }
+        fit.path(x[tr, , drop = FALSE], y[tr], x[va, , drop = FALSE],
+                 candidates, select.count)
+      })
       records <- lapply(seq_along(candidates), function(a) {
-        record(totals[[a]], count, candidates[[a]])
+        record(lapply(paths, `[[`, a), candidates[[a]])
       })
       losses <- vapply(records, `[[`, numeric(1), "score")
       best <- if (objective == "min") which.min(losses) else which.max(losses)
@@ -135,8 +141,7 @@
     # predictor count, so each fold encodes and ranks them once.
     prepared <- vector("list", length(splits))
     records <- lapply(candidates, function(candidate) {
-      total <- matrix(0, n, K); count <- integer(n)
-      for (b in seq_along(splits)) {
+      fold.probabilities <- lapply(seq_along(splits), function(b) {
         s <- splits[[b]]; tr <- s$train[balanced[[b]]]; va <- s$validation
         if (is.null(prepared[[b]])) {
           prepared[[b]] <<- list(
@@ -150,10 +155,9 @@
           order, NULL, dist, ncores, dim.red.method, tau = tau,
           dim.count = candidate, point.only = TRUE,
           coef.cache = prepared[[b]]$cache)
-        total[va, ] <- total[va, , drop = FALSE] + as.matrix(fitted$Point.probabilities)
-        count[va] <- count[va] + 1L
-      }
-      record(total, count, candidate)
+        as.matrix(fitted$Point.probabilities)
+      })
+      record(fold.probabilities, candidate)
     })
     losses <- vapply(records, `[[`, numeric(1), "score")
     best <- if (objective == "min") which.min(losses) else which.max(losses)

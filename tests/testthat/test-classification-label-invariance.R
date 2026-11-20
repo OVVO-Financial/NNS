@@ -161,6 +161,32 @@ test_that("pooled class ties follow the earliest training row in either holdout 
   expect_equal(fit()$OBJfn.reg, 1)
 })
 
+test_that("overlapping holdouts preserve an exact average at the class cutoff", {
+  y <- rep(c(1, 0), 25)
+  set.seed(3893)
+  x <- data.frame(v = sample(0:1, length(y), replace = TRUE))
+  classify <- NNS:::.nns_stack_classify
+  score <- function(permutation) {
+    local_mocked_bindings(.nns_stack_classify = function(x, y, z, class.values, splits, ...) {
+      classify(x, y, z, class.values, splits[permutation], ...)
+    }, .package = "NNS")
+    fit <- function(x, method) NNS.stack(x, y, method = method, seed = 993,
+      CV.size = .44, folds = 3, optimize.threshold = FALSE, ncores = 1, status = FALSE,
+      obj.fn = expression({
+        # Row 20 is scored 15th. Its class-0 probabilities are 7/12, 1/2 and 5/12.
+        expect_equal(predicted[15], 1)
+        mean(predicted == actual)
+      }))
+    c(fit(x, 1)$OBJfn.reg, fit(transform(x, w = 1), 2)$OBJfn.dim.red)
+  }
+  expect_equal(score(c(1, 2, 3)), c(16/41, 16/41))
+  expect_equal(score(c(1, 3, 2)), c(16/41, 16/41))
+  expect_equal(score(c(2, 1, 3)), c(16/41, 16/41))
+  expect_equal(score(c(2, 3, 1)), c(16/41, 16/41))
+  expect_equal(score(c(3, 1, 2)), c(16/41, 16/41))
+  expect_equal(score(c(3, 2, 1)), c(16/41, 16/41))
+})
+
 test_that("Stack breaks multiclass ties in training order", {
   y <- rep(c(2, 1, 3), 12)
   x <- data.frame(v = rep(0, length(y)))
