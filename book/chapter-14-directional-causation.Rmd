@@ -146,7 +146,7 @@ For the \(X \to Y\) pairs, write \(U_X\) for the copula-scale values of \(X_{t-\
 D(U_Y) = \frac{m}{m-1}\Bigl[L_2(\mu_Y; U_Y) + U_2(\mu_Y; U_Y)\Bigr],
 \]
 
-the lower plus upper partial moment of degree two — the variance, by Chapter 5. With the factor \(m/(m-1)\) it is a U-statistic, \(\frac{1}{2m(m-1)}\sum_{i \ne j}(U_{Y,i} - U_{Y,j})^2\), and so has the same expectation in any random subset of the sample as in the whole, for any distribution, ties included. Partition the cause into \(k = \lfloor\sqrt{n-\tau}\rfloor\) equal-frequency cells \(c\) on its copula scale, and measure the same deviation of the effect within each cell, about the cell's own mean:
+the lower plus upper partial moment of degree two — the variance, by Chapter 5. With the factor \(m/(m-1)\) it is a U-statistic, \(\frac{1}{2m(m-1)}\sum_{i \ne j}(U_{Y,i} - U_{Y,j})^2\), and so has the same expectation in any random subset of the sample as in the whole, for any distribution, ties included. Partition the cause into \(k = \max(2,\lfloor\sqrt{n-\tau}\rfloor)\) equal-width cells \(c\) on its copula scale, and measure the same deviation of the effect within each cell, about the cell's own mean:
 
 \[
 D_c(U_Y) = D(U_Y \mid c).
@@ -159,13 +159,12 @@ The quantity called **partial-moment conditional probability** here is a normali
 \[
 P(X \to Y)
 =
-1
--
-\frac{\sum_c w_c\, D_c(U_Y)}{D(U_Y)},
-\qquad w_c = \frac{n_c}{n-\tau},
+\min\!\left(1,\max\!\left(0,1-
+\frac{\sum_{c\in E} n_c\,D_c(U_Y)}{D(U_Y)\sum_{c\in E} n_c}\right)\right),
+\qquad E=\{c:n_c\ge 2\},
 \]
 
-bounded to \([0,1]\). This is a resolved-deviation score, not an event probability or a calibrated probability of causation. Under independent random grouping, a nonsingleton cell's sample variance is unbiased for the global sample variance. Clipping, finite cells, and subsequent score selection still affect the sampling distribution, so the final score need not have exactly zero expectation under independence.
+where only cells with at least two observations enter the average. The score is zero if there are fewer than three pairs, no eligible cells, or no variation in the effect. This is a resolved-deviation score, not an event probability or a calibrated probability of causation. Under independent random grouping, a nonsingleton cell's sample variance is unbiased for the global sample variance. Clipping, finite cells, and subsequent score selection still affect the sampling distribution, so the final score need not have exactly zero expectation under independence.
 
 The measure is zero when the effect is spread as widely inside each cell of the cause as it is overall, and it approaches one when the cause's position pins the effect down. It is not symmetric: \(P(X \to Y) \ne P(Y \to X)\) in general. For a symmetric nondegenerate driver with \(Y=X^2\), knowing \(X\) fixes \(Y\), while knowing \(Y\) leaves the sign of \(X\) unresolved. Sufficiently fine cells can reveal this asymmetry; the finite score depends on the sample and resolution. It uses no kernel bandwidth or parametric response model, but its cell resolution and inferential assumptions still matter.
 

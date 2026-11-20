@@ -122,19 +122,19 @@ This simple probability comparison already provides more information than a bina
 
 ### Directional Probability and Effect Size
 
-The directional probability
+The tie-adjusted directional probability
 
 $$
-p = P(X' > Y')
+p^* = P(X' > Y') + \tfrac{1}{2}P(X' = Y')
 $$
 
 has a natural interpretation as an **effect-size measure**.
 
-- $p = 0.5$ indicates no net pairwise directional advantage. Different distributions, such as $\{-1,1\}$ and $\{-10,10\}$, can have this same value.
-- $p > 0.5$ indicates that $X$ tends to produce larger values.
-- $p < 0.5$ indicates that $Y$ tends to produce larger values.
+- $p^* = 0.5$ indicates no net pairwise directional advantage. Different distributions, such as $\{-1,1\}$ and $\{-10,10\}$, can have this same value.
+- $p^* > 0.5$ indicates that $X$ tends to produce larger values.
+- $p^* < 0.5$ indicates that $Y$ tends to produce larger values.
 
-Unlike hypothesis testing, this directional probability does not depend on arbitrary significance thresholds and remains directly interpretable as a frequency statement. If one reports the symmetric certainty transform $C = |2p - 1|$, then $C = 0$ corresponds to no directional superiority, which can occur for different distributions; $C = 1$ indicates complete separation in the pairwise comparison.
+Unlike hypothesis testing, this directional probability does not depend on arbitrary significance thresholds and remains directly interpretable as a frequency statement. If one reports the symmetric certainty transform $C = |2p^* - 1|$, then $C = 0$ corresponds to no directional superiority, which can occur for different distributions; $C = 1$ indicates complete separation in the pairwise comparison.
 
 ---
 
@@ -351,7 +351,7 @@ lpm1 = np.array([lpm_ratio(1, float(np.mean(x[:i])), x[:i]) for i in range(1, x.
 
 This property has direct consequences for the comparison methods developed in the remainder of this chapter.
 
-When two samples $X$ and $Y$ are evaluated at a shared benchmark such as the grand mean $\bar{z}$, the identity above makes $F_1(\bar{z}; X) - 0.5$ the distance from $\bar{z}$ to the group mean $\bar{x}$, in units of twice that group's deviation area, whatever the shape of the distribution. Under the null hypothesis of identical population means, both $F_1(\bar{z}; X)$ and $F_1(\bar{z}; Y)$ scatter around 0.5 with sampling noise, and departures from 0.5 measure how far each group mean sits from the grand statistic.
+When two samples $X$ and $Y$ are evaluated at a shared benchmark such as the grand mean $\bar{z}$, the identity above makes $F_1(\bar{z}; X) - 0.5$ the distance from $\bar{z}$ to the group mean $\bar{x}$, in units of twice that group's deviation area, whatever the shape of the distribution. For two nonconstant populations with the same finite mean, both population ratios equal 0.5 at that mean. In small samples, skewness can put the pooled-mean ratios far from 0.5.
 
 The discrete CDF has no such anchor. Its value at the mean estimates $P(X \le \mu)$, which is 0.5 for a continuous distribution symmetric about its mean, but not in general, so at degree 0 a departure from 0.5 mixes skewness with separation: two identical exponential groups both sit near 0.632, not 0.5.
 
@@ -518,7 +518,7 @@ $$
 
 and that $F_1(\bar{x}; X) = 0.5$ exactly at the sample mean for every non-constant sample.
 
-This **mean-target property** provides a distribution-free anchor for comparing means across samples: under the null that two groups share a common population mean, both groups' degree-one CDFs evaluated at the grand mean scatter around 0.5, and a departure from 0.5 measures the distance between the group mean and the grand mean in units of twice that group's deviation area (Section 15.1.8). Because the anchor does not depend on the shape of either distribution, a skewed group is not read as a shifted one, as it would be by comparing the empirical CDF with 0.5.
+This **mean-target property** gives a distribution-free anchor at each group's own mean. At the pooled sample mean, a group's ratio can depart from 0.5 even when the population means agree (Section 15.1.8).
 
 The degree-one CDF is also continuous in $t$, unlike the empirical step function, because it encodes area-based mass rather than point counts. That smoothness is not robustness: deviations enter in proportion to their size, so a single extreme observation shifts the degree-one CDF at every $t$, while it changes the degree-zero CDF by one count. Chapter 17 gives a numerical example for the tail thresholds.
 
@@ -681,7 +681,7 @@ $$
 
 which maps the comparison to $[0,1]$, where $0$ denotes no directional separation and $1$ denotes complete separation. Unlike a p-value, both $p^*_{X,Y}$ and $C_{SS}$ retain a direct frequency interpretation.
 
-This differs from stochastic dominance. Stochastic superiority is a pairwise exceedance probability, while stochastic dominance requires one distribution to be preferred over the entire shared support. It also differs from NNS ANOVA. NNS ANOVA asks whether the distributions are in agreement at the grand mean and selected benchmark points; stochastic superiority asks which distribution tends to generate larger draws overall. It is therefore stronger than a simple mean comparison, because it uses the full cross-sample ordering, but weaker than dominance, because it does not require the ordering to hold at every threshold. A distribution may have $p^*_{X,Y} > 0.5$ and still fail to dominate if the CDFs cross.
+This differs from stochastic dominance. Stochastic superiority is a pairwise exceedance probability, while stochastic dominance requires one distribution to be preferred over the entire shared support. It also differs from NNS ANOVA. NNS ANOVA asks whether the distributions are in agreement at the grand mean and selected benchmark points; stochastic superiority asks which distribution tends to generate larger draws overall. First-order dominance of $X$ over $Y$ implies a pairwise advantage for $X$. Second- and third-order dominance need not. Conversely, $X$ can have a pairwise advantage even if the CDFs cross.
 
 Given samples
 
