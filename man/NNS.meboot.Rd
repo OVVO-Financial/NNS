@@ -30,7 +30,7 @@ NNS.meboot(
 )
 }
 \arguments{
-\item{x}{vector of data.}
+\item{x}{vector of data or a one-column data frame.}
 
 \item{reps}{numeric; number of replicates to generate.}
 
@@ -79,7 +79,7 @@ is not a \code{pdata.frame} object.}
 \value{
 Returns the following row names in a matrix:
 \itemize{
-  \item{x} original data provided as input.
+  \item{x} input vector, or the extracted column for a one-column data frame.
 \item{replicates} maximum entropy bootstrap replicates.
 \item{ensemble} average observation over all replicates.  Being a per-observation mean it is a central summary, not a single series carrying the target dependence; a rank or linear correlation taken directly on the \code{ensemble} tends to read higher than \code{rho} (averaging amplifies the shared order), so assess \code{rho} on the \code{replicates}.
 \item{xx} sorted order stats (xx[1] is minimum value).
