@@ -507,6 +507,8 @@ NNS.moments <- function(x, population = TRUE) {
   n <- length(x)
   m <- mean(x)
   z <- x - m
+  # The mean can round onto an observation when the spread is small.
+  if (all(is.finite(z))) z <- z - mean(z)
   
   variance <- mean(z^2)
   skew_base <- mean(z^3)
