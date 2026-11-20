@@ -11,7 +11,7 @@
 # column i as x and column j as y. lower_CI /
 # upper_CI hold the null's partial-moment interval and p.value_matrix the
 # two-sided permutation p-value of C(i ---> j) - C(j ---> i).
-NNS.caus.matrix <- function(x, tau = 0, factor.2.dummy = FALSE, plot = FALSE, p.value = FALSE, nperm = 100, conf.int = 0.95, seed = NULL, permute = "auto"){
+NNS.caus.matrix <- function(x, tau = 0, factor.2.dummy = FALSE, plot = FALSE, p.value = FALSE, nperm = 100, conf.int = 0.95, permute = "auto"){
   if(is.null(ncol(x))){
     stop("supply both 'x' and 'y' or a matrix-like 'x'")
   }
@@ -35,7 +35,6 @@ NNS.caus.matrix <- function(x, tau = 0, factor.2.dummy = FALSE, plot = FALSE, p.
 
   if(!p.value) return(causes)
 
-  if(!is.null(seed)) set.seed(seed)
   lower_CI <- matrix(0, n, n, dimnames = list(nm, nm))
   upper_CI <- matrix(0, n, n, dimnames = list(nm, nm))
   p.value_matrix <- matrix(0, n, n, dimnames = list(nm, nm))

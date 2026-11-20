@@ -136,13 +136,15 @@
 # series is broken. The permutation null for time series in NNS.caus.
 .nns_caus_shift_offsets <- function(n, tau = 0L) {
   m <- max(as.integer(tau) + 1L, as.integer(ceiling(n / 10)))
-  if (n - 2L * m >= 0L) m:(n - m) else seq_len(n - 1L)
+  if (n - 2L * m >= 0L) m:(n - m) else integer(0)
 }
 
 
 # Distinct offsets only: a repeated one adds no information but shrinks the p-value.
 .nns_caus_shift_draw <- function(n, tau, nperm) {
   K <- .nns_caus_shift_offsets(n, tau)
+  if (!length(K))
+    stop("No admissible circular shift for n = ", n, " and tau = ", tau, ".", call. = FALSE)
   if (length(K) <= nperm) K else K[sample.int(length(K), nperm)]
 }
 
@@ -194,7 +196,6 @@ NNS.caus_core <- function(x, y = NULL,
                           p.value = FALSE,
                           nperm = 100L,
                           permute = c("auto", "y", "x", "both", "shift"),
-                          seed = NULL,
                           conf.int = 0.95){
   if(!is.null(y))  if(anyNA(x) || anyNA(y)) stop("You have some missing values, please address.")
   if(is.null(y))  if(anyNA(x)) stop("You have some missing values, please address.")
@@ -229,7 +230,7 @@ NNS.caus_core <- function(x, y = NULL,
 
   if(is.null(y)) {
     return(NNS.caus.matrix(x, tau = orig.tau, factor.2.dummy = factor.2.dummy, plot = orig.plot,
-                           p.value = p.value, nperm = nperm, conf.int = conf.int, seed = seed,
+                           p.value = p.value, nperm = nperm, conf.int = conf.int,
                            permute = match.arg(permute)))
   }
 
