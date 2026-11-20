@@ -149,7 +149,7 @@ print.NNS.matrix <- function(x, n = 6L, tailn = n, ...) {
     nc = ncol(x),
     n = n,
     tailn = tailn,
-    more = "as.matrix(x)",
+    more = "print(x, n = Inf)",
     ...
   )
   

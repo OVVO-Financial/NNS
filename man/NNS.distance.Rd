@@ -16,7 +16,7 @@ NNS.distance(rpm, dist.estimate, k = "all", class = NULL)
 \item{class}{if classification problem.}
 }
 \value{
-Returns sum of weighted distances.
+A single numeric prediction at \code{dist.estimate}, in the units of \code{y.hat} for regression or a numeric class code for classification.
 }
 \description{
 Internal kernel function for NNS multivariate regression \link{NNS.reg} parallel instances.

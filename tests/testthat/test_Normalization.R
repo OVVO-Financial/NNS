@@ -53,3 +53,10 @@ test_that(
     expect_equal(unname(sapply(N, mean)), rep(mean(m), 3), tolerance = 1e-12)
   }
 )
+
+test_that("NNS matrix footer gives the full print call", {
+  x <- NNS.norm(cbind(1:20, 21:40), linear = TRUE)
+  footer <- tail(capture.output(print(x)), 1)
+  expect_match(footer, "Use print(x, n = Inf) for all.", fixed = TRUE)
+  expect_identical(capture.output(print(x, n = Inf)), capture.output(print(unclass(x))))
+})

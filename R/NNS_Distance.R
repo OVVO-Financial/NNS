@@ -6,7 +6,7 @@
 #' @param k \code{n.best} from \link{NNS.reg}
 #' @param class if classification problem.
 #'
-#' @return Returns sum of weighted distances.
+#' @return A single numeric prediction at \code{dist.estimate}, in the units of \code{y.hat} for regression or a numeric class code for classification.
 #'
 #'
 #' @export
