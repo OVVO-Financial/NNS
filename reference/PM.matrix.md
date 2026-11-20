@@ -22,7 +22,7 @@ PM.matrix(LPM_degree, UPM_degree, target, variable, pop_adj, norm = FALSE)
 - target:
 
   numeric vector; thresholds for each column. There is no default: pass
-  `NULL` to use `colMeans(variable)`.
+  `NULL` to use the sample mean of each column.
 
 - variable:
 

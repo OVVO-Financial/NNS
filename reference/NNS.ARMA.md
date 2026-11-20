@@ -152,7 +152,7 @@ NNS.ARMA(
 ## Value
 
 Returns a vector of forecasts of length `(h)` if no `pred.int`
-specified. Else, returns a `data.table` with the forecasts as well as
+specified. Else, returns a `data.frame` with the forecasts as well as
 the lower and upper forecast-path bands per forecast point (see
 `pred.int`).
 

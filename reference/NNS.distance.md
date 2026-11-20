@@ -19,7 +19,10 @@ NNS.distance(rpm, dist.estimate, k = "all", class = NULL)
 
 - dist.estimate:
 
-  Vector to generate distances from.
+  Query coordinates. Matching names select RPM features. If no names
+  match, coordinates use the first numeric features in order. A partial
+  match or a repeated matching name gives an error. Each RPM row must
+  share at least one finite coordinate with the query.
 
 - k:
 
@@ -32,4 +35,6 @@ NNS.distance(rpm, dist.estimate, k = "all", class = NULL)
 
 ## Value
 
-Returns sum of weighted distances.
+A single numeric prediction at `dist.estimate`, in the units of `y.hat`
+for regression or a numeric class code for classification. Equal
+distances are ordered by RPM row.

@@ -1167,17 +1167,17 @@ p^* = P(X&#39; &gt; Y&#39;) + \tfrac{1}{2}P(X&#39; = Y&#39;).
 </div>
 <div id="directional-probability-and-effect-size" class="section level3 hasAnchor" number="15.1.6">
 <h3><span class="header-section-number">15.1.6</span> Directional Probability and Effect Size<a href="distribution-comparison.html#directional-probability-and-effect-size" class="anchor-section" aria-label="Anchor link to header"></a></h3>
-<p>The directional probability</p>
+<p>The tie-adjusted directional probability</p>
 <p><span class="math display">\[
-p = P(X&#39; &gt; Y&#39;)
+p^* = P(X&#39; &gt; Y&#39;) + \tfrac{1}{2}P(X&#39; = Y&#39;)
 \]</span></p>
 <p>has a natural interpretation as an <strong>effect-size measure</strong>.</p>
 <ul>
-<li><span class="math inline">\(p = 0.5\)</span> indicates no net pairwise directional advantage. Different distributions, such as <span class="math inline">\(\{-1,1\}\)</span> and <span class="math inline">\(\{-10,10\}\)</span>, can have this same value.</li>
-<li><span class="math inline">\(p &gt; 0.5\)</span> indicates that <span class="math inline">\(X\)</span> tends to produce larger values.</li>
-<li><span class="math inline">\(p &lt; 0.5\)</span> indicates that <span class="math inline">\(Y\)</span> tends to produce larger values.</li>
+<li><span class="math inline">\(p^* = 0.5\)</span> indicates no net pairwise directional advantage. Different distributions, such as <span class="math inline">\(\{-1,1\}\)</span> and <span class="math inline">\(\{-10,10\}\)</span>, can have this same value.</li>
+<li><span class="math inline">\(p^* &gt; 0.5\)</span> indicates that <span class="math inline">\(X\)</span> tends to produce larger values.</li>
+<li><span class="math inline">\(p^* &lt; 0.5\)</span> indicates that <span class="math inline">\(Y\)</span> tends to produce larger values.</li>
 </ul>
-<p>Unlike hypothesis testing, this directional probability does not depend on arbitrary significance thresholds and remains directly interpretable as a frequency statement. If one reports the symmetric certainty transform <span class="math inline">\(C = |2p - 1|\)</span>, then <span class="math inline">\(C = 0\)</span> corresponds to no directional superiority, which can occur for different distributions; <span class="math inline">\(C = 1\)</span> indicates complete separation in the pairwise comparison.</p>
+<p>Unlike hypothesis testing, this directional probability does not depend on arbitrary significance thresholds and remains directly interpretable as a frequency statement. If one reports the symmetric certainty transform <span class="math inline">\(C = |2p^* - 1|\)</span>, then <span class="math inline">\(C = 0\)</span> corresponds to no directional superiority, which can occur for different distributions; <span class="math inline">\(C = 1\)</span> indicates complete separation in the pairwise comparison.</p>
 <hr />
 </div>
 <div id="directional-probability-comparisons" class="section level3 hasAnchor" number="15.1.7">
@@ -1342,7 +1342,7 @@ F_1(t; X) - \frac{1}{2} = \frac{t - \bar{x}}{2\,\big(LPM_1(t, X) + UPM_1(t, X)\b
 <div id="implications-for-distribution-comparison" class="section level4 hasAnchor" number="15.1.8.5">
 <h4><span class="header-section-number">15.1.8.5</span> Implications for Distribution Comparison<a href="distribution-comparison.html#implications-for-distribution-comparison" class="anchor-section" aria-label="Anchor link to header"></a></h4>
 <p>This property has direct consequences for the comparison methods developed in the remainder of this chapter.</p>
-<p>When two samples <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> are evaluated at a shared benchmark such as the grand mean <span class="math inline">\(\bar{z}\)</span>, the identity above makes <span class="math inline">\(F_1(\bar{z}; X) - 0.5\)</span> the distance from <span class="math inline">\(\bar{z}\)</span> to the group mean <span class="math inline">\(\bar{x}\)</span>, in units of twice that group’s deviation area, whatever the shape of the distribution. Under the null hypothesis of identical population means, both <span class="math inline">\(F_1(\bar{z}; X)\)</span> and <span class="math inline">\(F_1(\bar{z}; Y)\)</span> scatter around 0.5 with sampling noise, and departures from 0.5 measure how far each group mean sits from the grand statistic.</p>
+<p>When two samples <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> are evaluated at a shared benchmark such as the grand mean <span class="math inline">\(\bar{z}\)</span>, the identity above makes <span class="math inline">\(F_1(\bar{z}; X) - 0.5\)</span> the distance from <span class="math inline">\(\bar{z}\)</span> to the group mean <span class="math inline">\(\bar{x}\)</span>, in units of twice that group’s deviation area, whatever the shape of the distribution. For two nonconstant populations with the same finite mean, both population ratios equal 0.5 at that mean. In small samples, skewness can put the pooled-mean ratios far from 0.5.</p>
 <p>The discrete CDF has no such anchor. Its value at the mean estimates <span class="math inline">\(P(X \le \mu)\)</span>, which is 0.5 for a continuous distribution symmetric about its mean, but not in general, so at degree 0 a departure from 0.5 mixes skewness with separation: two identical exponential groups both sit near 0.632, not 0.5.</p>
 <p>The NNS ANOVA procedure in Section 15.4.3 is built directly on this foundation.</p>
 <hr />
@@ -1466,7 +1466,7 @@ which penalizes larger deviations disproportionately.</p>
 F_1(t; X) = \frac{LPM_1(t, X)}{LPM_1(t, X) + UPM_1(t, X)},
 \]</span></p>
 <p>and that <span class="math inline">\(F_1(\bar{x}; X) = 0.5\)</span> exactly at the sample mean for every non-constant sample.</p>
-<p>This <strong>mean-target property</strong> provides a distribution-free anchor for comparing means across samples: under the null that two groups share a common population mean, both groups’ degree-one CDFs evaluated at the grand mean scatter around 0.5, and a departure from 0.5 measures the distance between the group mean and the grand mean in units of twice that group’s deviation area (Section 15.1.8). Because the anchor does not depend on the shape of either distribution, a skewed group is not read as a shifted one, as it would be by comparing the empirical CDF with 0.5.</p>
+<p>This <strong>mean-target property</strong> gives a distribution-free anchor at each group’s own mean. At the pooled sample mean, a group’s ratio can depart from 0.5 even when the population means agree (Section 15.1.8).</p>
 <p>The degree-one CDF is also continuous in <span class="math inline">\(t\)</span>, unlike the empirical step function, because it encodes area-based mass rather than point counts. That smoothness is not robustness: deviations enter in proportion to their size, so a single extreme observation shifts the degree-one CDF at every <span class="math inline">\(t\)</span>, while it changes the degree-zero CDF by one count. Chapter 17 gives a numerical example for the tail thresholds.</p>
 </div>
 <div id="grand-mean-and-the-nns-certainty-statistic" class="section level4 hasAnchor" number="15.4.3.2">
@@ -1582,7 +1582,7 @@ p^*_{X,Y} + p^*_{Y,X} = 1,
 C_{SS} = |2p^*_{X,Y} - 1|,
 \]</span></p>
 <p>which maps the comparison to <span class="math inline">\([0,1]\)</span>, where <span class="math inline">\(0\)</span> denotes no directional separation and <span class="math inline">\(1\)</span> denotes complete separation. Unlike a p-value, both <span class="math inline">\(p^*_{X,Y}\)</span> and <span class="math inline">\(C_{SS}\)</span> retain a direct frequency interpretation.</p>
-<p>This differs from stochastic dominance. Stochastic superiority is a pairwise exceedance probability, while stochastic dominance requires one distribution to be preferred over the entire shared support. It also differs from NNS ANOVA. NNS ANOVA asks whether the distributions are in agreement at the grand mean and selected benchmark points; stochastic superiority asks which distribution tends to generate larger draws overall. It is therefore stronger than a simple mean comparison, because it uses the full cross-sample ordering, but weaker than dominance, because it does not require the ordering to hold at every threshold. A distribution may have <span class="math inline">\(p^*_{X,Y} &gt; 0.5\)</span> and still fail to dominate if the CDFs cross.</p>
+<p>This differs from stochastic dominance. Stochastic superiority is a pairwise exceedance probability, while stochastic dominance requires one distribution to be preferred over the entire shared support. It also differs from NNS ANOVA. NNS ANOVA asks whether the distributions are in agreement at the grand mean and selected benchmark points; stochastic superiority asks which distribution tends to generate larger draws overall. First-order dominance of <span class="math inline">\(X\)</span> over <span class="math inline">\(Y\)</span> implies a pairwise advantage for <span class="math inline">\(X\)</span>. Second- and third-order dominance need not. Conversely, <span class="math inline">\(X\)</span> can have a pairwise advantage even if the CDFs cross.</p>
 <p>Given samples</p>
 <p><span class="math display">\[
 x_1, \dots, x_n \sim X, \qquad y_1, \dots, y_m \sim Y,

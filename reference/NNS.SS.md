@@ -113,7 +113,9 @@ bootstrap replicates using
 [`LPM.VaR`](https://OVVO-Financial.github.io/NNS/reference/LPM.VaR.md)
 and
 [`UPM.VaR`](https://OVVO-Financial.github.io/NNS/reference/UPM.VaR.md)
-with `degree = 0`.
+with `degree = 0`. These bounds can be too narrow under serial
+dependence. The bootstrap uses an independent-observations scale for the
+mean.
 
 Missing values are removed from both `x` and `y` using
 [`stats::na.omit`](https://rdrr.io/r/stats/na.fail.html). The empirical

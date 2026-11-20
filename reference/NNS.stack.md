@@ -165,11 +165,13 @@ NNS.stack(
 
 - ncores:
 
-  integer; value specifying the number of cores to be used in the
-  parallelized subroutine
+  Integer thread count for the parallel fits in
   [NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md).
-  If NULL (default), the number of cores to be used is equal to the
-  number of cores of the machine - 1.
+  With `NULL` (default), use one fewer than the available cores (at
+  least one), capped by any thread limit set with
+  [`RcppParallel::setThreadOptions()`](https://rdrr.io/pkg/RcppParallel/man/setThreadOptions.html).
+  With the optional TinyThread backend, parallel predictions use its
+  session thread count or, if unset, its hardware default.
 
 - seed:
 
@@ -222,13 +224,16 @@ for all models.
   [NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md)
   accepts as `threshold`. `NA` when `method` does not include 2.
 
-- `"NNS.dim.red.variables"` returns the names of the predictors carried
-  by the final dimension reduction regression, ranked by absolute
-  coefficient. With `(stack = TRUE)` these are also the only predictors
-  used by the
-  [NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md)
-  multivariate regression, so they are exactly the variables behind
-  `"stack"`. `NULL` when `method` does not include 2.
+- `"NNS.reg.variables"` returns the encoded predictor names used by the
+  final multivariate classification fit. `NULL` when classification uses
+  only method 2.
+
+- `"NNS.dim.red.variables"` For regression, returns the final dimension
+  reduction predictors ranked by absolute coefficient. With
+  `stack = TRUE` the multivariate regression also uses these predictors.
+  For classification, returns the union of the active encoded predictors
+  in the class indices. See `NNS.reg.variables` for the multivariate
+  classifier's predictors. `NULL` when `method` does not include 2.
 
 - `"NNS.dim.red.coefficients"` returns the named final dimension
   reduction coefficients for every encoded predictor column (zero for
@@ -272,8 +277,12 @@ for all models.
 Classification tunes and combines class-probability vectors from the NNS
 predictor cells, preserving nominal label identity. `probabilities`,
 `reg.probabilities`, and `dim.red.probabilities` return the final
-probability matrices. Class balancing resamples the training rows of
-each fold. The neighbour count and the dimension count are chosen by
+probability matrices. Ties at the binary decision threshold or at the
+largest multiclass probability follow first appearance in the fit's
+training response, after any class balancing. When repeated holdouts
+predict the same row, a tie in the pooled probabilities goes to the tied
+class with the earliest original row index among all training rows used
+by those fits. The neighbour count and the dimension count are chosen by
 optimizing `obj.fn` on the pooled out-of-fold predictions; the default
 classification objective is accuracy. As in NNS 13.0, the two models'
 probability vectors are then blended with weights proportional to their

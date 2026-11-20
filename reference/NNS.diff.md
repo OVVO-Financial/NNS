@@ -38,14 +38,18 @@ NNS.diff(
 
   numeric; Stopping tolerance. The search stops when the inferred `h` is
   below `tol` or when the bracket on the y-intercept fixes the
-  derivative to within about `tol * max(1, abs(derivative))`. Defaults
-  to `(tol = 1e-10)`.
+  derivative to within about `tol * max(1, abs(derivative))`. If the
+  initial intercepts are numerically equal, the search halves the step
+  and uses Richardson extrapolation. Success requires successive
+  derivative estimates to agree and the extrapolated difference between
+  the left and right slopes to be zero within the same derivative
+  tolerance. Defaults to `(tol = 1e-10)`.
 
 - max.iter:
 
-  integer; `NULL` (default) Maximum number of bisection iterations.
-  `NULL` sets the limit to `100L`. For noisy functions the bisection may
-  stall before `tol` is reached; `max.iter` provides a hard upper bound.
+  integer; `NULL` (default) Maximum number of iterations. `NULL` sets
+  the limit to `100L`. For noisy functions the bisection may stall
+  before `tol` is reached; `max.iter` provides a hard upper bound.
 
 - digits:
 
@@ -63,8 +67,11 @@ NNS.diff(
 
 ## Value
 
-Returns a matrix of values, intercepts, derivatives, inferred step sizes
-for multiple methods of estimation.
+Returns a matrix of values, intercepts, derivatives and step sizes.
+`iterations` counts search iterations. `converged` is 1 when the
+stopping criterion is met and 0 otherwise. `termination.code` is 0 for
+convergence, 1 at the iteration limit and 2 if the root solve fails or
+finite precision prevents refinement.
 
 ## References
 

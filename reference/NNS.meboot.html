@@ -72,7 +72,7 @@
 
 
 <dl><dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
-<dd><p>vector of data.</p></dd>
+<dd><p>vector of data or a one-column data frame.</p></dd>
 
 
 <dt id="arg-reps">reps<a class="anchor" aria-label="anchor" href="#arg-reps"></a></dt>
@@ -104,16 +104,15 @@
 
 
 <dt id="arg-xmin">xmin<a class="anchor" aria-label="anchor" href="#arg-xmin"></a></dt>
-<dd><p>numeric; the lower limit for the left tail.</p></dd>
+<dd><p>numeric; optional lower limit on reconstructed levels before rounding.</p></dd>
 
 
 <dt id="arg-xmax">xmax<a class="anchor" aria-label="anchor" href="#arg-xmax"></a></dt>
-<dd><p>numeric; the upper limit for the right tail.</p></dd>
+<dd><p>numeric; optional upper limit on reconstructed levels before rounding.</p></dd>
 
 
 <dt id="arg-reachbnd">reachbnd<a class="anchor" aria-label="anchor" href="#arg-reachbnd"></a></dt>
-<dd><p>logical; If <code>TRUE</code> potentially reached bounds (xmin = smallest value - trimmed mean and
-xmax = largest value + trimmed mean) are given when the random draw happens to be equal to 0 and 1, respectively.</p></dd>
+<dd><p>logical; If <code>TRUE</code>, the residual tails reach the endpoints reported in <code>xmin</code> and <code>xmax</code> at probabilities 0 and 1. If <code>FALSE</code>, each tail is shifted to its desired interval mean.</p></dd>
 
 
 <dt id="arg-expand-sd">expand.sd<a class="anchor" aria-label="anchor" href="#arg-expand-sd"></a></dt>
@@ -125,7 +124,7 @@ xmax = largest value + trimmed mean) are given when the random draw happens to b
 
 
 <dt id="arg-scl-adjustment">scl.adjustment<a class="anchor" aria-label="anchor" href="#arg-scl-adjustment"></a></dt>
-<dd><p>logical; If <code>TRUE</code> scale adjustment is performed to ensure that the population variance of the resampled residuals equals the variance of the detrended data.</p></dd>
+<dd><p>logical; If <code>TRUE</code> the scale factor matches the population variance of a raw residual draw to the sample variance of the detrended data. Dependence targeting, SD expansion and forcing path means can change the variance pooled across paths.</p></dd>
 
 
 <dt id="arg-sym">sym<a class="anchor" aria-label="anchor" href="#arg-sym"></a></dt>
@@ -163,15 +162,15 @@ is not a <code>pdata.frame</code> object.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>Returns the following row names in a matrix:</p><ul><li><p>x original data provided as input.</p></li>
+    <p>Returns the following row names in a matrix:</p><ul><li><p>x input vector, or the extracted column for a one-column data frame.</p></li>
 <li><p>replicates maximum entropy bootstrap replicates.</p></li>
 <li><p>ensemble average observation over all replicates.  Being a per-observation mean it is a central summary, not a single series carrying the target dependence; a rank or linear correlation taken directly on the <code>ensemble</code> tends to read higher than <code>rho</code> (averaging amplifies the shared order), so assess <code>rho</code> on the <code>replicates</code>.</p></li>
 <li><p>xx sorted order stats (xx[1] is minimum value).</p></li>
 <li><p>z class intervals limits.</p></li>
 <li><p>dv deviations of consecutive data values.</p></li>
 <li><p>dvtrim trimmed mean of dv.</p></li>
-<li><p>xmin data minimum for ensemble=xx[1]-dvtrim.</p></li>
-<li><p>xmax data x maximum for ensemble=xx[n]+dvtrim.</p></li>
+<li><p>xmin left residual tail endpoint before any recentering, <code>xx[1] - dvtrim</code>.</p></li>
+<li><p>xmax right residual tail endpoint before any recentering, <code>xx[n] + dvtrim</code>.</p></li>
 <li><p>desintxb desired interval means.</p></li>
 <li><p>ordxx ordered x values.</p></li>
 <li><p>kappa scale adjustment to the variance of ME density.</p></li>

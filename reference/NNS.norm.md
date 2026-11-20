@@ -39,8 +39,8 @@ NNS.norm(X, linear = FALSE, chart.type = NULL, location = "topleft")
 
 ## Value
 
-Returns a [data.frame](https://rdrr.io/r/base/data.frame.html) of
-normalized values.
+A matrix of normalized values, or a list of normalized vectors for list
+inputs of unequal lengths.
 
 ## Note
 

@@ -70,11 +70,11 @@
 
 
 <dt id="arg-tol">tol<a class="anchor" aria-label="anchor" href="#arg-tol"></a></dt>
-<dd><p>numeric; Stopping tolerance. The search stops when the inferred <code>h</code> is below <code>tol</code> or when the bracket on the y-intercept fixes the derivative to within about <code>tol * max(1, abs(derivative))</code>. Defaults to <code>(tol = 1e-10)</code>.</p></dd>
+<dd><p>numeric; Stopping tolerance. The search stops when the inferred <code>h</code> is below <code>tol</code> or when the bracket on the y-intercept fixes the derivative to within about <code>tol * max(1, abs(derivative))</code>. If the initial intercepts are numerically equal, the search halves the step and uses Richardson extrapolation. Success requires successive derivative estimates to agree and the extrapolated difference between the left and right slopes to be zero within the same derivative tolerance. Defaults to <code>(tol = 1e-10)</code>.</p></dd>
 
 
 <dt id="arg-max-iter">max.iter<a class="anchor" aria-label="anchor" href="#arg-max-iter"></a></dt>
-<dd><p>integer; <code>NULL</code> (default) Maximum number of bisection iterations. <code>NULL</code> sets the limit to <code>100L</code>. For noisy functions the bisection may stall before <code>tol</code> is reached; <code>max.iter</code> provides a hard upper bound.</p></dd>
+<dd><p>integer; <code>NULL</code> (default) Maximum number of iterations. <code>NULL</code> sets the limit to <code>100L</code>. For noisy functions the bisection may stall before <code>tol</code> is reached; <code>max.iter</code> provides a hard upper bound.</p></dd>
 
 
 <dt id="arg-digits">digits<a class="anchor" aria-label="anchor" href="#arg-digits"></a></dt>
@@ -91,7 +91,7 @@
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>Returns a matrix of values, intercepts, derivatives, inferred step sizes for multiple methods of estimation.</p>
+    <p>Returns a matrix of values, intercepts, derivatives and step sizes. <code>iterations</code> counts search iterations. <code>converged</code> is 1 when the stopping criterion is met and 0 otherwise. <code>termination.code</code> is 0 for convergence, 1 at the iteration limit and 2 if the root solve fails or finite precision prevents refinement.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>

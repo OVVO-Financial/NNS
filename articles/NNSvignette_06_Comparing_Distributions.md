@@ -177,9 +177,8 @@ t.test(x,y)
 
 ### Test if means are Unequal
 
-By altering the mean of the `y` variable, we can start to see the
-sensitivity of the results from the two methods, where both firmly
-reject the null hypothesis of identical means.
+After shifting the mean of `y`, Welch’s test rejects equal means. The
+NNS `Certainty` score describes the disagreement.
 
 ``` r
 
@@ -246,11 +245,8 @@ t.test(x,y)
     ##  mean of x  mean of y 
     ## 0.01612787 1.04246525
 
-The effect size from
-**[`NNS.ANOVA()`](https://OVVO-Financial.github.io/NNS/reference/NNS.ANOVA.md)**
-is calculated from the confidence interval of the control mean and the
-specified `y` shift of 1 is within the provided lower and upper effect
-boundaries.
+The NNS bootstrap interval for the treatment mean minus the control mean
+lies above zero and includes the specified shift of 1.
 
 ### Medians
 

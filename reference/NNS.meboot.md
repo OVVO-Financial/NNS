@@ -36,7 +36,7 @@ NNS.meboot(
 
 - x:
 
-  vector of data.
+  vector of data or a one-column data frame.
 
 - reps:
 
@@ -79,17 +79,17 @@ NNS.meboot(
 
 - xmin:
 
-  numeric; the lower limit for the left tail.
+  numeric; optional lower limit on reconstructed levels before rounding.
 
 - xmax:
 
-  numeric; the upper limit for the right tail.
+  numeric; optional upper limit on reconstructed levels before rounding.
 
 - reachbnd:
 
-  logical; If `TRUE` potentially reached bounds (xmin = smallest value -
-  trimmed mean and xmax = largest value + trimmed mean) are given when
-  the random draw happens to be equal to 0 and 1, respectively.
+  logical; If `TRUE`, the residual tails reach the endpoints reported in
+  `xmin` and `xmax` at probabilities 0 and 1. If `FALSE`, each tail is
+  shifted to its desired interval mean.
 
 - expand.sd:
 
@@ -116,9 +116,10 @@ NNS.meboot(
 
 - scl.adjustment:
 
-  logical; If `TRUE` scale adjustment is performed to ensure that the
-  population variance of the resampled residuals equals the variance of
-  the detrended data.
+  logical; If `TRUE` the scale factor matches the population variance of
+  a raw residual draw to the sample variance of the detrended data.
+  Dependence targeting, SD expansion and forcing path means can change
+  the variance pooled across paths.
 
 - sym:
 
@@ -165,7 +166,7 @@ NNS.meboot(
 
 Returns the following row names in a matrix:
 
-- x original data provided as input.
+- x input vector, or the extracted column for a one-column data frame.
 
 - replicates maximum entropy bootstrap replicates.
 
@@ -183,9 +184,11 @@ Returns the following row names in a matrix:
 
 - dvtrim trimmed mean of dv.
 
-- xmin data minimum for ensemble=xx\[1\]-dvtrim.
+- xmin left residual tail endpoint before any recentering,
+  `xx[1] - dvtrim`.
 
-- xmax data x maximum for ensemble=xx\[n\]+dvtrim.
+- xmax right residual tail endpoint before any recentering,
+  `xx[n] + dvtrim`.
 
 - desintxb desired interval means.
 

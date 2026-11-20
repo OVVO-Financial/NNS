@@ -30,7 +30,7 @@ NNS.MC(
 
 - x:
 
-  vector of data.
+  vector of data or a one-column data frame.
 
 - reps:
 
@@ -80,11 +80,11 @@ NNS.MC(
 
 - xmin:
 
-  numeric; the lower limit for the left tail.
+  numeric; optional lower limit on reconstructed levels before rounding.
 
 - xmax:
 
-  numeric; the upper limit for the right tail.
+  numeric; optional upper limit on reconstructed levels before rounding.
 
 - ...:
 

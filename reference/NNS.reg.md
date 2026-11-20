@@ -197,11 +197,14 @@ NNS.reg(
 
 - ncores:
 
-  integer; value specifying the number of cores to be used in the
-  parallelized procedure. If NULL (default), the number of cores to be
-  used is equal to the number of cores of the machine - 1 for
-  multivariate regression predictions large enough to repay them, and
-  one otherwise. The estimates do not depend on the number of cores.
+  Integer thread count for multivariate predictions. With `NULL`
+  (default), small predictions use one thread. Large predictions use one
+  fewer than the available cores (at least one), capped by any thread
+  limit set with
+  [`RcppParallel::setThreadOptions()`](https://rdrr.io/pkg/RcppParallel/man/setThreadOptions.html).
+  With the optional TinyThread backend, parallel predictions use its
+  session thread count or, if unset, its hardware default. The estimates
+  do not depend on the number of threads.
 
 - point.only:
 

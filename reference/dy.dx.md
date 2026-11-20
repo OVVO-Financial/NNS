@@ -21,14 +21,14 @@ dy.dx(x, y, eval.point = NULL)
 
 - eval.point:
 
-  numeric or ("overall"); `x` point to be evaluated, must be provided.
-  Defaults to `(eval.point = NULL)`. Set to `(eval.point = "overall")`
-  to find an overall partial derivative estimate (1st derivative only).
+  Finite numeric points, or `"overall"` for the average first
+  derivative.
 
 ## Value
 
-Returns a `data.frame` of eval.point along with both 1st and 2nd
-derivative.
+For numeric points, a `data.frame` with the first and second derivatives
+in the supplied order, including repeated points. For `"overall"`, a
+single first derivative.
 
 ## Details
 
@@ -44,12 +44,14 @@ smoothed pointwise estimates instead.
 Numeric evaluation points use central differences of smoothed
 [NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md)
 estimates over five steps from 2 to `floor(sqrt(n))` typical spacings of
-`x`, clipped to the observed range. `second.derivative` is a second
-difference of those estimates, and second differences amplify noise: for
-`y = x^2` plus noise with an R-squared near 0.99 and n = 400, estimates
-of the true value 2 at three interior points had a root mean squared
-error of about 5, and about one in five had the wrong sign. Treat it as
-a descriptive diagnostic on noisy data.
+`x`. The left point is bounded below by `min(x)` and the right point
+above by `max(x)`. At coordinates outside that range, the differences
+use the extrapolated fit. `second.derivative` is a second difference of
+those estimates, and second differences amplify noise: for `y = x^2`
+plus noise with an R-squared near 0.99 and n = 400, estimates of the
+true value 2 at three interior points had a root mean squared error of
+about 5, and about one in five had the wrong sign. Treat it as a
+descriptive diagnostic on noisy data.
 
 ## References
 

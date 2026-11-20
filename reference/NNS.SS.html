@@ -141,7 +141,9 @@ and the tie-adjusted stochastic superiority measure
 $$P^* = P(X &gt; Y) + \frac{1}{2} P(X = Y).$$</p>
 <p>When <code>confidence.interval = TRUE</code>, confidence bounds for <code>P^*</code>
 are computed from <code><a href="NNS.meboot.html">NNS.meboot</a></code> bootstrap replicates using
-<code><a href="LPM.VaR.html">LPM.VaR</a></code> and <code><a href="UPM.VaR.html">UPM.VaR</a></code> with <code>degree = 0</code>.</p>
+<code><a href="LPM.VaR.html">LPM.VaR</a></code> and <code><a href="UPM.VaR.html">UPM.VaR</a></code> with <code>degree = 0</code>.
+These bounds can be too narrow under serial dependence. The bootstrap
+uses an independent-observations scale for the mean.</p>
 
 <p>Missing values are removed from both <code>x</code> and <code>y</code> using
 <code><a href="https://rdrr.io/r/stats/na.fail.html" class="external-link">stats::na.omit</a></code>. The empirical estimates are computed via a fast sorted

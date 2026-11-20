@@ -73,7 +73,8 @@ NNS.caus(
   boundary, while cross-series alignment changes. This does not
   condition on the effect's own past. When at most `nperm` offsets are
   admissible, each is used once and the reported `nperm` is their
-  number. `"y"`, `"x"` and `"both"` shuffle the values, an independence
+  number. If no offsets are admissible, the shift test stops with an
+  error. `"y"`, `"x"` and `"both"` shuffle the values, an independence
   null for cross-sections. `"auto"` uses `"shift"` when the lag is
   positive (including `tau = "ts"`) and `"y"` otherwise. The lag of
   `tau = "ts"` is resolved once on the observed series and kept for
@@ -83,7 +84,8 @@ NNS.caus(
 
 - seed:
 
-  optional integer seed for reproducibility of the permutation test.
+  optional integer seed for the permutation test. A call with a supplied
+  seed preserves the caller's `.Random.seed`, including its absence.
 
 - conf.int:
 
@@ -145,10 +147,11 @@ grows with persistence. For independent pairs with n = 300 and tau = 20,
 the standard deviation of the index was about 0.08 for iid series, 0.14
 for AR(1) series with coefficient 0.9 and 0.17 for random walks, and
 more than half of the persistent pairs fell more than 0.1 from 0.5.
-Distance from 0.5 alone is therefore not a significance criterion. An
-invertible relationship (e.g. `y = 2 * x + 1`) has no cross-sectional
-direction and returns 0.5; a lag can produce unequal directional
-association in that case. The index measures directional lagged
+Distance from 0.5 alone is therefore not a significance criterion. At
+zero lag, `y = 2 * x + 1` gives identical ranks and a score of 0.5 in
+each direction. Invertibility alone does not identify a causal
+direction, and finite partitions can give unequal scores for an
+invertible relationship. The index measures directional lagged
 association. It does not adjust for the response's own history,
 confounding variables, common drivers, or interventions. A common driver
 that reaches `y` later than `x` can favor x —\> y without a causal

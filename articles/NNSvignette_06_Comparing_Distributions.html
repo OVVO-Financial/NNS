@@ -215,9 +215,9 @@ certain these two means are equal.</p>
 <div class="section level3">
 <h3 id="test-if-means-are-unequal">Test if means are Unequal<a class="anchor" aria-label="anchor" href="#test-if-means-are-unequal"></a>
 </h3>
-<p>By altering the mean of the <code>y</code> variable, we can start to
-see the sensitivity of the results from the two methods, where both
-firmly reject the null hypothesis of identical means.</p>
+<p>After shifting the mean of <code>y</code>, Welch’s test rejects equal
+means. The NNS <code>Certainty</code> score describes the
+disagreement.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
 <span><span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">1000</span>, mean <span class="op">=</span> <span class="fl">0</span>, sd <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
@@ -274,10 +274,8 @@ firmly reject the null hypothesis of identical means.</p>
 <span><span class="co">## sample estimates:</span></span>
 <span><span class="co">##  mean of x  mean of y </span></span>
 <span><span class="co">## 0.01612787 1.04246525</span></span></code></pre>
-<p>The effect size from <strong><code><a href="../reference/NNS.ANOVA.html">NNS.ANOVA()</a></code></strong> is
-calculated from the confidence interval of the control mean and the
-specified <code>y</code> shift of 1 is within the provided lower and
-upper effect boundaries.</p>
+<p>The NNS bootstrap interval for the treatment mean minus the control
+mean lies above zero and includes the specified shift of 1.</p>
 </div>
 <div class="section level3">
 <h3 id="medians">Medians<a class="anchor" aria-label="anchor" href="#medians"></a>

@@ -1181,7 +1181,7 @@ U = L_0(X; X) = P(X&#39; \le X) \in (0, 1].
 <p><span class="math display">\[
 D(U_Y) = \frac{m}{m-1}\Bigl[L_2(\mu_Y; U_Y) + U_2(\mu_Y; U_Y)\Bigr],
 \]</span></p>
-<p>the lower plus upper partial moment of degree two — the variance, by Chapter 5. With the factor <span class="math inline">\(m/(m-1)\)</span> it is a U-statistic, <span class="math inline">\(\frac{1}{2m(m-1)}\sum_{i \ne j}(U_{Y,i} - U_{Y,j})^2\)</span>, and so has the same expectation in any random subset of the sample as in the whole, for any distribution, ties included. Partition the cause into <span class="math inline">\(k = \lfloor\sqrt{n-\tau}\rfloor\)</span> equal-frequency cells <span class="math inline">\(c\)</span> on its copula scale, and measure the same deviation of the effect within each cell, about the cell’s own mean:</p>
+<p>the lower plus upper partial moment of degree two — the variance, by Chapter 5. With the factor <span class="math inline">\(m/(m-1)\)</span> it is a U-statistic, <span class="math inline">\(\frac{1}{2m(m-1)}\sum_{i \ne j}(U_{Y,i} - U_{Y,j})^2\)</span>, and so has the same expectation in any random subset of the sample as in the whole, for any distribution, ties included. Partition the cause into <span class="math inline">\(k = \max(2,\lfloor\sqrt{n-\tau}\rfloor)\)</span> equal-width cells <span class="math inline">\(c\)</span> on its copula scale, and measure the same deviation of the effect within each cell, about the cell’s own mean:</p>
 <p><span class="math display">\[
 D_c(U_Y) = D(U_Y \mid c).
 \]</span></p>
@@ -1190,12 +1190,11 @@ D_c(U_Y) = D(U_Y \mid c).
 <p><span class="math display">\[
 P(X \to Y)
 =
-1
--
-\frac{\sum_c w_c\, D_c(U_Y)}{D(U_Y)},
-\qquad w_c = \frac{n_c}{n-\tau},
+\min\!\left(1,\max\!\left(0,1-
+\frac{\sum_{c\in E} n_c\,D_c(U_Y)}{D(U_Y)\sum_{c\in E} n_c}\right)\right),
+\qquad E=\{c:n_c\ge 2\},
 \]</span></p>
-<p>bounded to <span class="math inline">\([0,1]\)</span>. This is a resolved-deviation score, not an event probability or a calibrated probability of causation. Under independent random grouping, a nonsingleton cell’s sample variance is unbiased for the global sample variance. Clipping, finite cells, and subsequent score selection still affect the sampling distribution, so the final score need not have exactly zero expectation under independence.</p>
+<p>where only cells with at least two observations enter the average. The score is zero if there are fewer than three pairs, no eligible cells, or no variation in the effect. This is a resolved-deviation score, not an event probability or a calibrated probability of causation. Under independent random grouping, a nonsingleton cell’s sample variance is unbiased for the global sample variance. Clipping, finite cells, and subsequent score selection still affect the sampling distribution, so the final score need not have exactly zero expectation under independence.</p>
 <p>The measure is zero when the effect is spread as widely inside each cell of the cause as it is overall, and it approaches one when the cause’s position pins the effect down. It is not symmetric: <span class="math inline">\(P(X \to Y) \ne P(Y \to X)\)</span> in general. For a symmetric nondegenerate driver with <span class="math inline">\(Y=X^2\)</span>, knowing <span class="math inline">\(X\)</span> fixes <span class="math inline">\(Y\)</span>, while knowing <span class="math inline">\(Y\)</span> leaves the sign of <span class="math inline">\(X\)</span> unresolved. Sufficiently fine cells can reveal this asymmetry; the finite score depends on the sample and resolution. It uses no kernel bandwidth or parametric response model, but its cell resolution and inferential assumptions still matter.</p>
 <p>The rank transformation puts both variables on a common coordinate scale. Direction is then assessed through resolved within-cell variation, not by comparing their numerical ranges. Empirical ranks with ties need not fill the unit interval, and range overlap alone does not identify directional influence.</p>
 <hr />

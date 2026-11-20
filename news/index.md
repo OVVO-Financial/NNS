@@ -248,9 +248,12 @@ CRAN release: 2026-10-30
   or with `p.value = TRUE` splits each variable once rather than once
   per pair: matrices are 2.2x faster (2.9x with `asym = TRUE`), p-values
   2.1x, and a pair of 100,000 observations 1.6x. `NNS.norm` gains 2.2x.
-- `ncores = NULL` in multivariate `NNS.reg` now uses the machine’s cores
-  less one, as documented, once a prediction is large enough to repay
-  the threads (it ran on one thread); small fits still use one.
-  Estimates do not depend on the number of cores. Under `R CMD check`’s
-  core limit `NNS.reg` and `NNS.stack` use two at most. The package now
-  links the BLAS that R uses.
+- `ncores = NULL` in multivariate `NNS.reg` uses one fewer than the
+  available cores for large predictions. Small fits still use one
+  thread. `NNS.reg` and `NNS.stack` cap automatic thread counts at the
+  RcppParallel session limit when set. Estimates do not depend on the
+  number of cores. Under the `R CMD check` core limit, automatic thread
+  counts are two at most; an explicit `ncores` is used as given. The
+  default TBB backend honors this count. TinyThread uses its own worker
+  count for parallel predictions. The package now links the BLAS that R
+  uses.

@@ -1393,7 +1393,7 @@ CoLPM_{1,1},CoLPM_{2,2},CoLPM_{3,3},\dots
 CoUPM_{1,1},CoUPM_{2,2},CoUPM_{3,3},\dots
 \]</span></p>
 <p>These sequences describe how dependence changes across the distribution, but only relative to what the margins alone produce. Under independence the co-moments factorise, <span class="math inline">\(CoLPM_{d,d}(t_X,t_Y) = L_d(t_X;X)\,L_d(t_Y;Y)\)</span> and <span class="math inline">\(CoUPM_{d,d}(t_X,t_Y) = U_d(t_X;X)\,U_d(t_Y;Y)\)</span>, so skewed margins alone make the two sequences diverge: for two independent negated Exp(1) variables at their means, <span class="math inline">\(CoLPM_{d,d}/CoUPM_{d,d}\)</span> is 1, 7.8 and 113 at degrees 1, 2 and 3. A profile is therefore read against these independence products.</p>
-<p>Example:</p>
+<p>The table uses the worked example above with the signs of both variables reversed and both benchmarks still at zero.</p>
 <table>
 <thead>
 <tr class="header">
@@ -1405,22 +1405,22 @@ CoUPM_{1,1},CoUPM_{2,2},CoUPM_{3,3},\dots
 <tbody>
 <tr class="odd">
 <td>1</td>
-<td>1.2</td>
-<td>1.1</td>
+<td>4.6</td>
+<td>1.4</td>
 </tr>
 <tr class="even">
 <td>2</td>
-<td>3.9</td>
-<td>1.4</td>
+<td>57.8</td>
+<td>7.4</td>
 </tr>
 <tr class="odd">
 <td>3</td>
-<td>8.5</td>
-<td>1.8</td>
+<td>777.4</td>
+<td>43.4</td>
 </tr>
 </tbody>
 </table>
-<p>Moderate deviations appear symmetric, while higher orders put more weight on the lower co-moment. Where the independence products of the margins grow the same way, this is marginal skew; only the excess over them is increasing <strong>downside dependence</strong>.</p>
+<p>The lower co-moment exceeds the upper at each order, and their ratio grows with the order. Where the independence products of the margins grow the same way, this is marginal skew; only the excess over them is increasing <strong>downside dependence</strong>.</p>
 <p>Directional profiles therefore show <strong>how dependence evolves from ordinary fluctuations to extreme events</strong>.</p>
 <hr />
 </div>
