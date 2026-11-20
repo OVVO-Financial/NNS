@@ -60,3 +60,23 @@ test_that("NNS matrix footer gives the full print call", {
   expect_match(footer, "Use print(x, n = Inf) for all.", fixed = TRUE)
   expect_identical(capture.output(print(x, n = Inf)), capture.output(print(unclass(x))))
 })
+
+test_that("linear normalization retains a single row", {
+  X <- rbind(first = c(a = 1, b = 2, c = 3))
+  N <- NNS.norm(X, linear = TRUE)
+  expect_equal(dim(N), c(1L, 3L))
+  expect_equal(as.numeric(N), c(2, 2, 2))
+  expect_equal(dimnames(N), list("first", c("a Normalized", "b Normalized", "c Normalized")))
+})
+
+test_that("normalization accepts a data frame with a numeric list column", {
+  X <- data.frame(a = I(as.list(1:4)), b = 4:1)
+  M <- cbind(a = 1:4, b = 4:1)
+  expect_identical(NNS.norm(X), NNS.norm(M))
+  expect_identical(NNS.norm(X, linear = TRUE), NNS.norm(M, linear = TRUE))
+})
+
+test_that("normalization checks missing observations inside list elements", {
+  expect_error(NNS.norm(list(1:4, c(5, NA, 4))), "missing values")
+  expect_error(NNS.norm(list(1:3, c(5, NaN, 4))), "missing values")
+})

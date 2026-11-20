@@ -34,7 +34,7 @@ NNS.norm <- function(X,
                      chart.type = NULL,
                      location = "topleft"){
   
-  if(anyNA(X)) stop("You have some missing values, please address.")
+  if(anyNA(X, recursive = TRUE)) stop("You have some missing values, please address.")
   
   if(any(class(X)%in%c("tbl","data.table"))) X <- as.data.frame(X)
 
@@ -42,7 +42,11 @@ NNS.norm <- function(X,
     if(length(unique(sapply(X, length))) > 1) linear <- TRUE
     m <- sapply(X, mean)
   } else {
-    X <- apply(X, 2, unlist)
+    columns <- apply(X, 2, unlist)
+    if(is.null(dim(columns)) && nrow(X) == 1L){
+      columns <- matrix(columns, nrow = 1L, dimnames = list(rownames(X), names(columns)))
+    }
+    X <- columns
     m <- colMeans(X)
   }
 
