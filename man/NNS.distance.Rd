@@ -9,14 +9,15 @@ NNS.distance(rpm, dist.estimate, k = "all", class = NULL)
 \arguments{
 \item{rpm}{REGRESSION.POINT.MATRIX from \link{NNS.reg}}
 
-\item{dist.estimate}{Vector to generate distances from.}
+\item{dist.estimate}{Query coordinates. Matching names select RPM features. If no names match, coordinates use the first numeric features in order. A partial match or a repeated matching name gives an error.
+Each RPM row must share at least one finite coordinate with the query.}
 
 \item{k}{\code{n.best} from \link{NNS.reg}}
 
 \item{class}{if classification problem.}
 }
 \value{
-Returns sum of weighted distances.
+The predicted response or class. Equal distances are ordered by RPM row.
 }
 \description{
 Internal kernel function for NNS multivariate regression \link{NNS.reg} parallel instances.

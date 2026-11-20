@@ -15,8 +15,8 @@ NNS.distance.path.bulk <- function(rpm, Xtest, kmax, class = NULL, ncores = 1L) 
   
   # Align by names if available
   if (!is.null(colnames(Xrpm)) && test.named) {
-    cmn <- intersect(colnames(Xrpm), colnames(Xtest))
-    if (length(cmn) == 0L) {
+    cmn <- .nns_distance_names(colnames(Xtest), colnames(Xrpm))
+    if (is.null(cmn)) {
       stop("No common feature columns between RPM and Xtest.")
     }
     Xrpm  <- as.matrix(Xrpm[, cmn, drop = FALSE])
@@ -60,8 +60,8 @@ NNS.distance.path.single.bulk <- function(rpm, Xtest, k, class = NULL, ncores = 
   
   # Align by names if available, matching NNS.distance.path.bulk.
   if (!is.null(colnames(Xrpm)) && test.named) {
-    cmn <- intersect(colnames(Xrpm), colnames(Xtest))
-    if (length(cmn) == 0L) {
+    cmn <- .nns_distance_names(colnames(Xtest), colnames(Xrpm))
+    if (is.null(cmn)) {
       stop("No common feature columns between RPM and Xtest.")
     }
     Xrpm  <- as.matrix(Xrpm[, cmn, drop = FALSE])

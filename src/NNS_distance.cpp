@@ -3,6 +3,7 @@
 #include <Rcpp.h>
 #include <RcppParallel.h>
 #include <algorithm>
+#include <atomic>
 #include <cmath>
 #include <numeric>
 #include <vector>
@@ -66,6 +67,39 @@ static double mode_class_weighted(const std::vector<double>& y, const std::vecto
   return best_val;
 }
 
+template <typename Matrix, typename Query>
+static bool nearest_rows(const Matrix& x, const Query& query,
+                         const std::vector<double>& invR, int k,
+                         std::vector<double>& scores, std::vector<int>& rows) {
+  for (size_t i = 0; i < rows.size(); ++i) {
+    double sum = 0.0;
+    bool comparable = false;
+    for (size_t j = 0; j < invR.size(); ++j) {
+      double a = x(i, j), b = query(j);
+      if (!std::isfinite(a) || !std::isfinite(b)) continue;
+      comparable = true;
+      if (invR[j] > 0.0) {
+        double diff = (a - b) * invR[j];
+        sum += diff * diff + std::fabs(diff);
+      }
+    }
+    if (!comparable) return false;
+    scores[i] = sum == 0.0 ? 1e-10 : sum;
+  }
+
+  std::iota(rows.begin(), rows.end(), 0);
+  auto closer = [&](int a, int b) {
+    return scores[a] == scores[b] ? a < b : scores[a] < scores[b];
+  };
+  if (k < static_cast<int>(rows.size()))
+    std::partial_sort(rows.begin(), rows.begin() + k, rows.end(), closer);
+  else
+    std::sort(rows.begin(), rows.end(), closer);
+  return true;
+}
+
+static constexpr const char* overlap_error = "Each RPM row and query must share a finite coordinate.";
+
 // [[Rcpp::export]]
 SEXP NNS_distance_cpp(NumericMatrix X,
                       NumericVector yhat,
@@ -89,25 +123,10 @@ SEXP NNS_distance_cpp(NumericMatrix X,
     if (std::isfinite(range) && range > 0.0) invR[j] = 1.0 / range;
   }
   
-  std::vector<double> S(l, 0.0);
-  for (int i = 0; i < l; ++i) {
-    double acc = 0.0; // Demoted from long double to enable SIMD Vectorization
-    for (int j = 0; j < n; ++j) {
-      double a = X(i,j), b = dest[j];
-      if (std::isfinite(a) && std::isfinite(b) && invR[j] > 0.0) {
-        double diff = (a - b) * invR[j];
-        acc += diff * diff + std::fabs(diff);
-      }
-    }
-    S[i] = (acc == 0.0 ? 1e-10 : acc);
-  }
-  
   int ll = std::min(k, l);
+  std::vector<double> S(l);
   std::vector<int> idx(l);
-  std::iota(idx.begin(), idx.end(), 0);
-  auto cmp = [&](int a, int b){ return S[a] < S[b]; };
-  if (ll < l) std::partial_sort(idx.begin(), idx.begin()+ll, idx.end(), cmp);
-  else std::sort(idx.begin(), idx.end(), cmp);
+  if (ll < 1 || !nearest_rows(X, dest, invR, ll, S, idx)) stop(overlap_error);
   
   idx.resize(ll);
   std::vector<double> Ssel(ll), ysel(ll);
@@ -118,15 +137,6 @@ SEXP NNS_distance_cpp(NumericMatrix X,
   }
   
   if (ll == 1) return wrap(ysel[0]);
-  if (k == 1) {
-    double smin = *std::min_element(Ssel.begin(), Ssel.end());
-    std::vector<double> yties;
-    for (int t = 0; t < ll; ++t) if (Ssel[t] == smin) yties.push_back(ysel[t]);
-    if (yties.size() == 1) return wrap(yties[0]);
-    std::vector<double> fake_w(yties.size(), 1.0);
-    return wrap(mode_class_weighted(yties, fake_w));
-  }
-  
   std::vector<double> uni(ll, 1.0 / (double)ll);
   
   std::vector<double> tw(ll, 0.0);
@@ -212,6 +222,7 @@ SEXP NNS_distance_cpp(NumericMatrix X,
 
 // ---------- worker ----------
 struct AllKWorker : public Worker {
+  std::atomic<bool> incomparable{false};
   RMatrix<double> RPM;
   RVector<double> yhat;
   RMatrix<double> Xtest;
@@ -246,30 +257,12 @@ struct AllKWorker : public Worker {
         invR[j] = (std::isfinite(range) && range > 0.0) ? (1.0 / range) : 0.0;
       }
       
-      for (int i = 0; i < l; ++i){
-        double acc = 0.0; // Demoted to double for SIMD compatibility
-        for (int j = 0; j < n; ++j){
-          double a = RPM(i,j), b = Xtest(r,j);
-          if (std::isfinite(a) && std::isfinite(b) && invR[j] > 0.0){
-            double diff = (a - b) * invR[j];
-            acc += diff * diff + std::fabs(diff);
-          }
-        }
-        S[i] = (acc == 0.0 ? 1e-10 : acc);
+      auto query = [&](size_t j) { return Xtest(r, j); };
+      if (!nearest_rows(RPM, query, invR, kmax, S, idx)) {
+        incomparable = true;
+        return;
       }
-      
-      std::iota(idx.begin(), idx.end(), 0);
-      auto cmp = [&](int a, int b){ return S[a] < S[b]; };
-      if (kmax < l) std::partial_sort(idx.begin(), idx.begin()+kmax, idx.end(), cmp);
-      else          std::sort(idx.begin(), idx.end(), cmp);
-      
-      auto cmp2 = [&](int a, int b){
-        if (S[a] < S[b]) return true;
-        if (S[b] < S[a]) return false;
-        return a < b;
-      };
-      std::stable_sort(idx.begin(), idx.begin()+kmax, cmp2);
-      
+
       topS.resize(kmax); topY.resize(kmax);
       for (int t = 0; t < kmax; ++t){ int i = idx[t]; topS[t] = S[i]; topY[t] = yhat[i]; }
       
@@ -390,6 +383,7 @@ NumericMatrix NNS_distance_path_parallel_cpp(NumericMatrix RPM,
                uniW, expW, lnormW, plW, out);
   
   RcppParallel::parallelFor(0, m, w);
+  if (w.incomparable) stop(overlap_error);
   
   return out;
 }
@@ -399,6 +393,7 @@ NumericMatrix NNS_distance_path_parallel_cpp(NumericMatrix RPM,
 // Computes exactly the kept column produced by NNS_distance_path_parallel_cpp(..., kmax = k)[, k]
 // without evaluating the discarded path for 1:(k - 1).
 struct SingleKWorker : public Worker {
+  std::atomic<bool> incomparable{false};
   RMatrix<double> RPM;
   RVector<double> yhat;
   RMatrix<double> Xtest;
@@ -433,30 +428,12 @@ struct SingleKWorker : public Worker {
         invR[j] = (std::isfinite(range) && range > 0.0) ? (1.0 / range) : 0.0;
       }
       
-      for (int i = 0; i < l; ++i) {
-        double acc = 0.0;
-        for (int j = 0; j < n; ++j) {
-          double a = RPM(i, j), b = Xtest(r, j);
-          if (std::isfinite(a) && std::isfinite(b) && invR[j] > 0.0) {
-            double diff = (a - b) * invR[j];
-            acc += diff * diff + std::fabs(diff);
-          }
-        }
-        S[i] = (acc == 0.0 ? 1e-10 : acc);
+      auto query = [&](size_t j) { return Xtest(r, j); };
+      if (!nearest_rows(RPM, query, invR, k, S, idx)) {
+        incomparable = true;
+        return;
       }
-      
-      std::iota(idx.begin(), idx.end(), 0);
-      auto cmp = [&](int a, int b) { return S[a] < S[b]; };
-      if (k < l) std::partial_sort(idx.begin(), idx.begin() + k, idx.end(), cmp);
-      else       std::sort(idx.begin(), idx.end(), cmp);
-      
-      auto cmp2 = [&](int a, int b) {
-        if (S[a] < S[b]) return true;
-        if (S[b] < S[a]) return false;
-        return a < b;
-      };
-      std::stable_sort(idx.begin(), idx.begin() + k, cmp2);
-      
+
       for (int t = 0; t < k; ++t) {
         int i = idx[t];
         topS[t] = S[i];
@@ -597,6 +574,7 @@ NumericVector NNS_distance_path_single_parallel_cpp(NumericMatrix RPM,
   SingleKWorker w(RPM, yhat, Xtest, minRPM, maxRPM, k, is_class,
                   uniW, expW, lnormW, plW, out);
   RcppParallel::parallelFor(0, m, w);
+  if (w.incomparable) stop(overlap_error);
   
   return out;
 }
