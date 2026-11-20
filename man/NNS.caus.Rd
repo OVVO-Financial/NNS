@@ -34,7 +34,7 @@ NNS.caus(
 
 \item{permute}{one of "auto" (default), "y", "x", "both" or "shift"; how the null distribution is built.  \code{"shift"} circularly shifts \code{y} by random distinct offsets at least \code{max(tau + 1, n / 10)} steps from alignment, so the within-series ordering is retained, up to the wraparound boundary, while cross-series alignment changes. This does not condition on the effect's own past.  When at most \code{nperm} offsets are admissible, each is used once and the reported \code{nperm} is their number. If no offsets are admissible, the shift test stops with an error.  \code{"y"}, \code{"x"} and \code{"both"} shuffle the values, an independence null for cross-sections.  \code{"auto"} uses \code{"shift"} when the lag is positive (including \code{tau = "ts"}) and \code{"y"} otherwise.  The lag of \code{tau = "ts"} is resolved once on the observed series and kept for every permutation.  For a matrix \code{x} each choice applies to every pair, with column \code{i} as \code{x} and column \code{j} as \code{y}; \code{"auto"} shuffles every column for cross-sections.}
 
-\item{seed}{optional integer seed for the permutation test. A supplied seed applies only within the test.}
+\item{seed}{optional integer seed for the permutation test. A call with a supplied seed preserves the caller's \code{.Random.seed}, including its absence.}
 
 \item{conf.int}{numeric; 0.95 (default) confidence level for the partial-moment based interval computed on the permutation null distribution.}
 }

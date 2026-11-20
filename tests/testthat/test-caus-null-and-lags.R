@@ -120,14 +120,16 @@ test_that("the shift test requires an admissible offset", {
   set.seed(47)
   x <- rnorm(48)
   y <- c(rep(0, 24), x[1:24])
-  expect_error(NNS.caus(x, y, tau = 24, p.value = TRUE), "No admissible circular shift")
+  state <- .Random.seed
+  expect_error(NNS.caus(x, y, tau = 24, p.value = TRUE, seed = 42), "No admissible circular shift")
+  expect_identical(.Random.seed, state)
   expect_error(NNS.caus(cbind(x, y), tau = 24, permute = "shift", p.value = TRUE),
                "No admissible circular shift")
   expect_equal(NNS.caus(x, y, tau = 24)[[1]], NNS.caus(cbind(x, y), tau = 24)[1, 2])
   expect_identical(NNS.caus(x, y, tau = 23, p.value = TRUE)$p.value$nperm, 1L)
 })
 
-test_that("a permutation seed preserves the caller's random stream", {
+test_that("a permutation seed preserves the caller's .Random.seed", {
   x <- 1:24
   y <- x %% 7
   set.seed(123)
@@ -142,7 +144,7 @@ test_that("a permutation seed preserves the caller's random stream", {
   expect_identical(.Random.seed, state)
 })
 
-test_that("an explicit seed leaves an uninitialized random stream uninitialized", {
+test_that("an explicit seed leaves an absent .Random.seed absent", {
   withr::local_seed(123)
   rm(".Random.seed", envir = .GlobalEnv)
   x <- 1:24
@@ -150,4 +152,14 @@ test_that("an explicit seed leaves an uninitialized random stream uninitialized"
   expect_false(exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE))
   NNS.caus(cbind(x, x^2), p.value = TRUE, nperm = 5, seed = 42)
   expect_false(exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE))
+})
+
+test_that("seeded matrix permutations agree for inline and precomputed inputs", {
+  set.seed(42)
+  xy <- cbind(x = rnorm(72), y = rnorm(72))
+  precomputed <- NNS.caus(xy, p.value = TRUE, nperm = 19, seed = 42)
+  set.seed(123)
+  inline <- NNS.caus(cbind(x = rnorm(72), y = rnorm(72)), p.value = TRUE, nperm = 19, seed = 42)
+  expect_equal(precomputed$p.value_matrix[1, 2], 1)
+  expect_identical(inline, precomputed)
 })

@@ -196,6 +196,7 @@ NNS.caus_core <- function(x, y = NULL,
                           p.value = FALSE,
                           nperm = 100L,
                           permute = c("auto", "y", "x", "both", "shift"),
+                          seed = NULL,
                           conf.int = 0.95){
   if(!is.null(y))  if(anyNA(x) || anyNA(y)) stop("You have some missing values, please address.")
   if(is.null(y))  if(anyNA(x)) stop("You have some missing values, please address.")
@@ -230,7 +231,7 @@ NNS.caus_core <- function(x, y = NULL,
 
   if(is.null(y)) {
     return(NNS.caus.matrix(x, tau = orig.tau, factor.2.dummy = factor.2.dummy, plot = orig.plot,
-                           p.value = p.value, nperm = nperm, conf.int = conf.int,
+                           p.value = p.value, nperm = nperm, conf.int = conf.int, seed = seed,
                            permute = match.arg(permute)))
   }
 

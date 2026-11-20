@@ -10,7 +10,7 @@
 #' @param p.value logical; \code{FALSE} (default) If \code{TRUE}, runs a permutation test of the signed statistic \code{C(x--->y) - C(y--->x)}.
 #' @param nperm integer; number of permutations to use when \code{p.value = TRUE}. Default 100.
 #' @param permute one of "auto" (default), "y", "x", "both" or "shift"; how the null distribution is built.  \code{"shift"} circularly shifts \code{y} by random distinct offsets at least \code{max(tau + 1, n / 10)} steps from alignment, so the within-series ordering is retained, up to the wraparound boundary, while cross-series alignment changes. This does not condition on the effect's own past.  When at most \code{nperm} offsets are admissible, each is used once and the reported \code{nperm} is their number. If no offsets are admissible, the shift test stops with an error.  \code{"y"}, \code{"x"} and \code{"both"} shuffle the values, an independence null for cross-sections.  \code{"auto"} uses \code{"shift"} when the lag is positive (including \code{tau = "ts"}) and \code{"y"} otherwise.  The lag of \code{tau = "ts"} is resolved once on the observed series and kept for every permutation.  For a matrix \code{x} each choice applies to every pair, with column \code{i} as \code{x} and column \code{j} as \code{y}; \code{"auto"} shuffles every column for cross-sections.
-#' @param seed optional integer seed for the permutation test. A supplied seed applies only within the test.
+#' @param seed optional integer seed for the permutation test. A call with a supplied seed preserves the caller's \code{.Random.seed}, including its absence.
 #' @param conf.int numeric; 0.95 (default) confidence level for the partial-moment based interval computed on the permutation null distribution.
 #'
 #' @return If \code{p.value = FALSE} returns a named vector \code{c("C(x--->y)", "C(y--->x)")} of directional association indices in [0, 1] that sum to 1: above 0.5 means the first lagged direction has the larger score, and 0.5 is no net direction under this diagnostic.  If \code{p.value = TRUE} returns a list with components:
@@ -90,6 +90,7 @@ NNS.caus <- function(x, y = NULL,
                       p.value = p.value,
                       nperm = nperm,
                       permute = permute,
+                      seed = seed,
                       conf.int = conf.int)
   
   if (is.null(y)) return(cp)
