@@ -293,17 +293,21 @@ theorem claim_C250 {Ω' : Type*} [MeasurableSpace Ω'] {P : Measure Ω} {Q : Mea
   · rw [← integral_map hX (GapCoMoments.measurable_rUpperDev' d t).aestronglyMeasurable, h,
       integral_map hY (GapCoMoments.measurable_rUpperDev' d t).aestronglyMeasurable]
 
-theorem claim_C252 :
+theorem claim_C252 {Ω' : Type*} [MeasurableSpace Ω'] {P : Measure Ω} {Q : Measure Ω'}
+    {X : Ω → ℝ} {Y : Ω' → ℝ} (hX : AEMeasurable X P) (hY : AEMeasurable Y Q)
+    (h : P.map X = Q.map Y) (d t : ℝ) :
     let x : Fin 2 → ℝ := ![-1, 1]
     let y : Fin 2 → ℝ := ![1, -1]
     let μ := pairEmp x x
     let ν := pairEmp x y
+    ((∫ ω, rLowerDev d t (X ω) ∂P) = (∫ ω, rLowerDev d t (Y ω) ∂Q) ∧
+      (∫ ω, rUpperDev d t (X ω) ∂P) = (∫ ω, rUpperDev d t (Y ω) ∂Q)) ∧
     μ.map Prod.fst = ν.map Prod.fst ∧ μ.map Prod.snd = ν.map Prod.snd ∧
     magnitude 0 0 μ = 1 ∧ magnitude 0 0 ν = 1 ∧
     mCoLPM 1 1 0 0 μ / magnitude 0 0 μ = 1 / 2 ∧
     mCoLPM 1 1 0 0 ν / magnitude 0 0 ν = 0 := by
   dsimp only
-  refine ⟨?_, ?_, ?_⟩
+  refine ⟨claim_C250 hX hY h d t, ?_, ?_, ?_⟩
   · simp [pairEmp, Fin.sum_univ_two, Measure.map_add, measurable_fst, measurable_fst.aemeasurable]
   · simp [pairEmp, Fin.sum_univ_two, Measure.map_add, measurable_snd,
       measurable_snd.aemeasurable, add_comm]

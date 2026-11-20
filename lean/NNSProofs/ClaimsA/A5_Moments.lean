@@ -40,11 +40,19 @@ theorem claim_C119 (P : Measure ℝ) [IsProbabilityMeasure P] (h : MemLp id 3 P)
   claim_C025 P h
 
 theorem claim_C122 :
+    (∀ {m : ℕ} (x : Fin m → ℝ), 0 < popVariance x →
+      (0 < mSkewness (empMeasure x) ↔
+        mLPM 3 (mean x) (empMeasure x) < mUPM 3 (mean x) (empMeasure x))) ∧
     ∃ (x : Fin 5 → ℝ) (lo hi : ℝ), (∀ i, lo ≤ x i ∧ x i ≤ hi) ∧
       (∃ i, x i = lo) ∧ (∃ i, x i = hi) ∧
       hi - mean x > mean x - lo ∧ 0 < variance id (empMeasure x) ∧
       mUPM 3 (mean x) (empMeasure x) < mLPM 3 (mean x) (empMeasure x) ∧
       mSkewness (empMeasure x) < 0 := by
+  refine ⟨fun x hv => ?_, ?_⟩
+  · rw [mSkewness_empMeasure]
+    simp only [mUPM_empMeasure, mLPM_empMeasure]
+    have hd : 0 < popVariance x ^ ((3 : ℝ) / 2) := by positivity
+    rw [popSkewness, centralMoment_three_eq, div_pos_iff_of_pos_right hd, sub_pos]
   let x : Fin 5 → ℝ := ![-5, -5, 1, 3, 6]
   have hm : mean x = 0 := by norm_num [mean, x, Fin.sum_univ_five]
   have hv : 0 < popVariance x := by norm_num [popVariance, centralMoment, hm, x, Fin.sum_univ_five]

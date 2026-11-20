@@ -231,7 +231,7 @@ private lemma sortedAt_fin3 (k : ℕ) (hk : k < 3) : sortedAt ![(0 : ℝ), 1, 2]
   simp only [sortedAt, dite_eq_left hk, hs, Equiv.refl_apply]
   interval_cases k <;> simp
 
-theorem LPMVaR0_counterexample :
+theorem LPMVaR0_type7_example :
     LPMVaR0 (9 / 10) ![(0 : ℝ), 1, 2] = 9 / 5 ∧
       LPMratio 0 (9 / 5) ![(0 : ℝ), 1, 2] = 2 / 3 ∧
       LPMratio 0 (LPMVaR0 (9 / 10) ![(0 : ℝ), 1, 2]) ![(0 : ℝ), 1, 2] < 9 / 10 := by
@@ -939,7 +939,7 @@ private lemma LPMratio_four_fin2 {t : ℝ} (h0 : 0 < t) (h1 : t < 1) :
 lemma lt_rTol : (1 : ℝ) / 10 ^ 12 < rTol := by
   rw [rTol]; norm_num
 
-theorem intLPMVaR_snap_counterexample :
+theorem intLPMVaR_snap_example :
     intLPMVaR rTol 4 (1 / 10 ^ 12) ![(0 : ℝ), 1] = 0 ∧
       LPMratio 4 (intLPMVaR rTol 4 (1 / 10 ^ 12) ![(0 : ℝ), 1]) ![(0 : ℝ), 1] = 0 ∧
       (∃! t, t ∈ Set.Icc (0 : ℝ) 1 ∧ LPMratio 4 t ![(0 : ℝ), 1] = 1 / 10 ^ 12) ∧
