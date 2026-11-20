@@ -302,12 +302,42 @@ theorem claim_C252 {Ω' : Type*} [MeasurableSpace Ω'] {P : Measure Ω} {Q : Mea
     let ν := pairEmp x y
     ((∫ ω, rLowerDev d t (X ω) ∂P) = (∫ ω, rLowerDev d t (Y ω) ∂Q) ∧
       (∫ ω, rUpperDev d t (X ω) ∂P) = (∫ ω, rUpperDev d t (Y ω) ∂Q)) ∧
+    (∀ (Z : Ω → ℝ × ℝ) (W : Ω' → ℝ × ℝ), AEMeasurable Z P → AEMeasurable W Q →
+      P.map Z = Q.map W → ∀ r s a b : ℝ,
+        (∫ ω, rLowerDev r a (Z ω).1 * rLowerDev s b (Z ω).2 ∂P) =
+          (∫ ω, rLowerDev r a (W ω).1 * rLowerDev s b (W ω).2 ∂Q) ∧
+        (∫ ω, rUpperDev r a (Z ω).1 * rUpperDev s b (Z ω).2 ∂P) =
+          (∫ ω, rUpperDev r a (W ω).1 * rUpperDev s b (W ω).2 ∂Q) ∧
+        (∫ ω, rUpperDev r a (Z ω).1 * rLowerDev s b (Z ω).2 ∂P) =
+          (∫ ω, rUpperDev r a (W ω).1 * rLowerDev s b (W ω).2 ∂Q) ∧
+        (∫ ω, rLowerDev r a (Z ω).1 * rUpperDev s b (Z ω).2 ∂P) =
+          (∫ ω, rLowerDev r a (W ω).1 * rUpperDev s b (W ω).2 ∂Q) ∧
+        mCoLPM 1 1 a b (P.map Z) / magnitude a b (P.map Z) =
+          mCoLPM 1 1 a b (Q.map W) / magnitude a b (Q.map W) ∧
+        mCoUPM 1 1 a b (P.map Z) / magnitude a b (P.map Z) =
+          mCoUPM 1 1 a b (Q.map W) / magnitude a b (Q.map W) ∧
+        mDLPM 1 1 a b (P.map Z) / magnitude a b (P.map Z) =
+          mDLPM 1 1 a b (Q.map W) / magnitude a b (Q.map W) ∧
+        mDUPM 1 1 a b (P.map Z) / magnitude a b (P.map Z) =
+          mDUPM 1 1 a b (Q.map W) / magnitude a b (Q.map W)) ∧
     μ.map Prod.fst = ν.map Prod.fst ∧ μ.map Prod.snd = ν.map Prod.snd ∧
     magnitude 0 0 μ = 1 ∧ magnitude 0 0 ν = 1 ∧
     mCoLPM 1 1 0 0 μ / magnitude 0 0 μ = 1 / 2 ∧
     mCoLPM 1 1 0 0 ν / magnitude 0 0 ν = 0 := by
   dsimp only
-  refine ⟨claim_C250 hX hY h d t, ?_, ?_, ?_⟩
+  refine ⟨claim_C250 hX hY h d t, ?_, ?_, ?_, ?_⟩
+  · intro Z W hZ hW hZW r s a b
+    have key (f g : ℝ → ℝ) (hf : Measurable f) (hg : Measurable g) :
+        (∫ ω, f (Z ω).1 * g (Z ω).2 ∂P) = ∫ ω, f (W ω).1 * g (W ω).2 ∂Q := by
+      have hm : Measurable fun p : ℝ × ℝ => f p.1 * g p.2 :=
+        (hf.comp measurable_fst).mul (hg.comp measurable_snd)
+      rw [← integral_map hZ hm.aestronglyMeasurable, hZW, integral_map hW hm.aestronglyMeasurable]
+    have mL := GapCoMoments.measurable_rLowerDev'
+    have mU := GapCoMoments.measurable_rUpperDev'
+    refine ⟨key _ _ (mL r a) (mL s b), key _ _ (mU r a) (mU s b), key _ _ (mU r a) (mL s b),
+      key _ _ (mL r a) (mU s b), ?_⟩
+    rw [hZW]
+    exact ⟨rfl, rfl, rfl, rfl⟩
   · simp [pairEmp, Fin.sum_univ_two, Measure.map_add, measurable_fst, measurable_fst.aemeasurable]
   · simp [pairEmp, Fin.sum_univ_two, Measure.map_add, measurable_snd,
       measurable_snd.aemeasurable, add_comm]
