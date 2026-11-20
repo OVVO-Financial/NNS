@@ -30,7 +30,7 @@ NNS.meboot(
 )
 }
 \arguments{
-\item{x}{vector of data.}
+\item{x}{vector of data or a one-column data frame.}
 
 \item{reps}{numeric; number of replicates to generate.}
 
@@ -46,18 +46,17 @@ NNS.meboot(
 
 \item{trim}{numeric [0,1]; The mean trimming proportion, defaults to \code{trim = 0.1}.}
 
-\item{xmin}{numeric; the lower limit for the left tail.}
+\item{xmin}{numeric; optional lower limit on reconstructed levels before rounding.}
 
-\item{xmax}{numeric; the upper limit for the right tail.}
+\item{xmax}{numeric; optional upper limit on reconstructed levels before rounding.}
 
-\item{reachbnd}{logical; If \code{TRUE} potentially reached bounds (xmin = smallest value - trimmed mean and
-xmax = largest value + trimmed mean) are given when the random draw happens to be equal to 0 and 1, respectively.}
+\item{reachbnd}{logical; If \code{TRUE}, the residual tails reach the endpoints reported in \code{xmin} and \code{xmax} at probabilities 0 and 1. If \code{FALSE}, each tail is shifted to its desired interval mean.}
 
 \item{expand.sd}{logical; If \code{TRUE} the standard deviation in the ensemble is expanded. See \code{expand.sd} in \code{meboot::meboot}.  The expansion toward \code{sd(x)} is skipped when \code{drift = FALSE}, \code{target_drift} or \code{target_drift_scale} replaces the original drift, since \code{sd(x)} includes that drift.  A target equal to the original drift up to rounding (relative tolerance \code{sqrt(.Machine$double.eps)}, plus an allowance for rounding in the slope fit that grows with \code{max(abs(x))}) keeps the original reconstruction.}
 
 \item{force.clt}{logical; If \code{TRUE} the replicate means are assigned an iid normal-reference scale: the replicate means are spread as a normal sample centred on \code{mean(x)} with standard deviation \code{sd(x) / sqrt(n)}, the standard error of the mean of the \code{n} observations, whatever the number of \code{reps}.  See \code{force.clt} in \code{meboot::meboot}, whose code divides by the number of replicates instead (its comment says \code{n}).  When \code{drift = FALSE}, \code{target_drift} or \code{target_drift_scale} replaces the original drift, the replicate means are centred and spread using the new baseline plus the original residuals instead of \code{x}.}
 
-\item{scl.adjustment}{logical; If \code{TRUE} scale adjustment is performed to ensure that the population variance of the resampled residuals equals the variance of the detrended data.}
+\item{scl.adjustment}{logical; If \code{TRUE} the scale factor matches the population variance of a raw residual draw to the sample variance of the detrended data. Dependence targeting, SD expansion and forcing path means can change the variance pooled across paths.}
 
 \item{sym}{logical; If \code{TRUE} an adjustment is performed to ensure that the ME density is symmetric.}
 
@@ -79,15 +78,15 @@ is not a \code{pdata.frame} object.}
 \value{
 Returns the following row names in a matrix:
 \itemize{
-  \item{x} original data provided as input.
+  \item{x} input vector, or the extracted column for a one-column data frame.
 \item{replicates} maximum entropy bootstrap replicates.
 \item{ensemble} average observation over all replicates.  Being a per-observation mean it is a central summary, not a single series carrying the target dependence; a rank or linear correlation taken directly on the \code{ensemble} tends to read higher than \code{rho} (averaging amplifies the shared order), so assess \code{rho} on the \code{replicates}.
 \item{xx} sorted order stats (xx[1] is minimum value).
 \item{z} class intervals limits.
 \item{dv} deviations of consecutive data values.
 \item{dvtrim} trimmed mean of dv.
-\item{xmin} data minimum for ensemble=xx[1]-dvtrim.
-\item{xmax} data x maximum for ensemble=xx[n]+dvtrim.
+\item{xmin} left residual tail endpoint before any recentering, \code{xx[1] - dvtrim}.
+\item{xmax} right residual tail endpoint before any recentering, \code{xx[n] + dvtrim}.
 \item{desintxb} desired interval means.
 \item{ordxx} ordered x values.
 \item{kappa} scale adjustment to the variance of ME density.

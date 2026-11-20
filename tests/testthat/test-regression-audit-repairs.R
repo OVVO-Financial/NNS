@@ -190,9 +190,41 @@ test_that("missing and nonfinite prediction values fail", {
   )
 })
 
+test_that("maximum order groups the original numeric coordinates", {
+  x <- 1.7e9 + c(2, 0, 1, 1) * 1e-6
+  fit <- NNS.reg(x, c(8, 2, 4, 6), type = "REG", order = "max",
+                 noise.reduction = "mean", point.est = x, plot = FALSE)
+  expect_identical(fit$regression.points$x, sort(unique(x)))
+  expect_equal(fit$Point.est, c(8, 2, 5, 5))
+})
+
 test_that("NNS.part order max never passes a character value to C++", {
   fit <- NNS.part(c(1, 1, 2, 3), c(1, 3, 4, 9),
                   order = "max", type = "XONLY")
   expect_equal(nrow(fit$regression.points), 3)
   expect_identical(fit$order, 3L)
+})
+
+test_that("predictors named y.hat survive multivariate regression", {
+  x <- data.frame(y.hat = c(3, 1, 4, 2), v = c(1, 2, 1, 2))
+  y <- c(30, 10, 40, 20)
+  fit <- NNS.reg(x, y, type = "REG", order = "max", point.est = x,
+                 plot = FALSE)
+  expect_equal(fit$Point.est, y)
+  expect_equal(fit$Fitted.xy$y.hat, y)
+  expect_equal(fit$Fitted.xy$y.hat.1, x$y.hat)
+  expect_equal(fit$RPM$y.hat, 10 * fit$RPM$y.hat.1)
+
+  safe <- setNames(x, c("u", "v"))
+  expect_equal(NNS.reg(x, y, order = 1, point.est = x, plot = FALSE)$Point.est,
+               NNS.reg(safe, y, order = 1, point.est = safe, plot = FALSE)$Point.est)
+})
+
+test_that("classification keeps predictors that share fitted column names", {
+  x <- data.frame(y.hat = c(3, 1, 4, 2), y.hat.1 = c(1, 2, 1, 2))
+  y <- c(1, 0, 1, 0)
+  fit <- NNS.reg(x, y, type = "CLASS", order = "max", plot = FALSE)
+  expect_equal(fit$Fitted.xy$y.hat, y)
+  expect_equal(fit$Fitted.xy$y.hat.1, x$y.hat.1)
+  expect_equal(fit$Fitted.xy$y.hat.2, x$y.hat)
 })

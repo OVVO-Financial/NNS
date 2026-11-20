@@ -23,7 +23,7 @@
     }
   } else if (is.matrix(x)) {
     if (!inherits(x, "NNS.matrix")) {
-      class(x) <- c("NNS.matrix", "matrix", "array")
+      class(x) <- c("NNS.matrix", union(class(x), c("matrix", "array")))
     }
   }
   
@@ -149,7 +149,7 @@ print.NNS.matrix <- function(x, n = 6L, tailn = n, ...) {
     nc = ncol(x),
     n = n,
     tailn = tailn,
-    more = "as.matrix(x)",
+    more = "print(x, n = Inf)",
     ...
   )
   

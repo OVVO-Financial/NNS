@@ -23,7 +23,7 @@ test_that("a non-invertible function is attributed to its argument", {
   expect_lt(NNS.caus(x^2, x)[["C(x--->y)"]], 0.1)
 })
 
-test_that("an invertible relationship has no cross-sectional direction", {
+test_that("a positive affine relationship has equal cross-sectional scores", {
   set.seed(4); x <- rnorm(500)
   expect_equal(unname(NNS.caus(x, 2 * x + 1)), c(0.5, 0.5))
 })

@@ -2,7 +2,7 @@
 #'
 #' Adapted maximum entropy bootstrap routine from \code{meboot} \url{https://cran.r-project.org/package=meboot}.
 #'
-#' @param x vector of data.
+#' @param x vector of data or a one-column data frame.
 #' @param reps numeric; number of replicates to generate.
 #' @param rho numeric [-1,1] (vectorized); A \code{rho} must be provided, otherwise a blank list will be returned.  The dependence target is applied to each individual \code{replicate} (every replicate is mixed to the requested dependence with the original series); it is \strong{not} applied to the \code{ensemble}.  See \code{Note}.
 #' @param type options("spearman", "pearson", "NNScor", "NNSdep"); \code{type = "spearman"}(default) dependence metric desired.
@@ -10,13 +10,12 @@
 #' @param target_drift numerical; \code{target_drift = NULL} (default) Specifies the desired drift when \code{drift = TRUE}, i.e. a risk-free rate of return.  A drift other than the original is centred so the replicates keep \code{mean(x)}.
 #' @param target_drift_scale numerical; instead of calculating a \code{target_drift}, provide a scalar to the existing drift when \code{drift = TRUE}.
 #' @param trim numeric [0,1]; The mean trimming proportion, defaults to \code{trim = 0.1}.
-#' @param xmin numeric; the lower limit for the left tail.
-#' @param xmax numeric; the upper limit for the right tail.
-#' @param reachbnd logical; If \code{TRUE} potentially reached bounds (xmin = smallest value - trimmed mean and
-#' xmax = largest value + trimmed mean) are given when the random draw happens to be equal to 0 and 1, respectively.
+#' @param xmin numeric; optional lower limit on reconstructed levels before rounding.
+#' @param xmax numeric; optional upper limit on reconstructed levels before rounding.
+#' @param reachbnd logical; If \code{TRUE}, the residual tails reach the endpoints reported in \code{xmin} and \code{xmax} at probabilities 0 and 1. If \code{FALSE}, each tail is shifted to its desired interval mean.
 #' @param expand.sd logical; If \code{TRUE} the standard deviation in the ensemble is expanded. See \code{expand.sd} in \code{meboot::meboot}.  The expansion toward \code{sd(x)} is skipped when \code{drift = FALSE}, \code{target_drift} or \code{target_drift_scale} replaces the original drift, since \code{sd(x)} includes that drift.  A target equal to the original drift up to rounding (relative tolerance \code{sqrt(.Machine$double.eps)}, plus an allowance for rounding in the slope fit that grows with \code{max(abs(x))}) keeps the original reconstruction.
 #' @param force.clt logical; If \code{TRUE} the replicate means are assigned an iid normal-reference scale: the replicate means are spread as a normal sample centred on \code{mean(x)} with standard deviation \code{sd(x) / sqrt(n)}, the standard error of the mean of the \code{n} observations, whatever the number of \code{reps}.  See \code{force.clt} in \code{meboot::meboot}, whose code divides by the number of replicates instead (its comment says \code{n}).  When \code{drift = FALSE}, \code{target_drift} or \code{target_drift_scale} replaces the original drift, the replicate means are centred and spread using the new baseline plus the original residuals instead of \code{x}.
-#' @param scl.adjustment logical; If \code{TRUE} scale adjustment is performed to ensure that the population variance of the resampled residuals equals the variance of the detrended data.
+#' @param scl.adjustment logical; If \code{TRUE} the scale factor matches the population variance of a raw residual draw to the sample variance of the detrended data. Dependence targeting, SD expansion and forcing path means can change the variance pooled across paths.
 #' @param sym logical; If \code{TRUE} an adjustment is performed to ensure that the ME density is symmetric.
 #' @param elaps logical; If \code{TRUE} elapsed time during computations is displayed.
 #' @param digits integer; 6 (default) number of digits to round output to.
@@ -29,15 +28,15 @@
 #'
 #' @return Returns the following row names in a matrix:
 #' \itemize{
-#'   \item{x} original data provided as input.
+#'   \item{x} input vector, or the extracted column for a one-column data frame.
 #' \item{replicates} maximum entropy bootstrap replicates.
 #' \item{ensemble} average observation over all replicates.  Being a per-observation mean it is a central summary, not a single series carrying the target dependence; a rank or linear correlation taken directly on the \code{ensemble} tends to read higher than \code{rho} (averaging amplifies the shared order), so assess \code{rho} on the \code{replicates}.
 #' \item{xx} sorted order stats (xx[1] is minimum value).
 #' \item{z} class intervals limits.
 #' \item{dv} deviations of consecutive data values.
 #' \item{dvtrim} trimmed mean of dv.
-#' \item{xmin} data minimum for ensemble=xx[1]-dvtrim.
-#' \item{xmax} data x maximum for ensemble=xx[n]+dvtrim.
+#' \item{xmin} left residual tail endpoint before any recentering, \code{xx[1] - dvtrim}.
+#' \item{xmax} right residual tail endpoint before any recentering, \code{xx[n] + dvtrim}.
 #' \item{desintxb} desired interval means.
 #' \item{ordxx} ordered x values.
 #' \item{kappa} scale adjustment to the variance of ME density.
@@ -116,13 +115,15 @@ NNS.meboot <- function(x,
                        digits = 6,
                        colsubj, coldata, coltimes, ..., expand.residual.sd = TRUE){
   
+  if (is.data.frame(x) && ncol(x) == 1L) x <- x[[1L]]
   if (length(x) == 1) return(list(x = x))
   type <- tolower(type)
   if (any(class(x) %in% c("tbl","data.table"))) x <- as.vector(unlist(x))
   if (anyNA(x)) stop("You have some missing values, please address.")
   
-  trim <- list(trim = trim, xmin = xmin, xmax = xmax)
-  trimval <- if (is.null(trim$trim)) 0.1 else trim$trim
+  level_min <- xmin
+  level_max <- xmax
+  trimval <- if (is.null(trim)) 0.1 else trim
   n <- length(x)
   
   # --- Fit original linear trend ONCE (time order) and get residuals
@@ -174,13 +175,12 @@ NNS.meboot <- function(x,
   dv     <- abs(diff(as.numeric(rr)))
   dvtrim <- mean(dv, trim = trimval)
   
-  if (is.list(trim)) {
-    xmin <- if (is.null(trim$xmin)) xx[1] - dvtrim else trim$xmin
-    xmax <- if (is.null(trim$xmax)) xx[n] + dvtrim else trim$xmax
-    if (!is.null(trim$xmin) || !is.null(trim$xmax)) {
-      if (isTRUE(force.clt)) { expand.sd <- FALSE; force.clt <- FALSE }
-    }
-  } else { xmin <- xx[1] - dvtrim; xmax <- xx[n] + dvtrim }
+  xmin <- xx[1] - dvtrim
+  xmax <- xx[n] + dvtrim
+  if ((!is.null(level_min) || !is.null(level_max)) && isTRUE(force.clt)) {
+    expand.sd <- FALSE
+    force.clt <- FALSE
+  }
   
   # Theil–Laitinen interval means on residuals
   aux <- colSums(t(cbind(xx[-c(1,2)], xx[-c(1,n)], xx[-c((n-1),n)])) * c(0.25, 0.5, 0.25))
@@ -287,12 +287,20 @@ NNS.meboot <- function(x,
   
   # Optional ME-density scale adjustment on residuals, where the ME density lives
   if (scl.adjustment && !zero_res){
-    zz <- c(xmin, z, xmax)
-    v  <- diff(zz^2) / 12
+    # The type-7 interior is linear between order statistics. Each tail has mass 1/n.
+    breaks <- sort(unique(c(seq(0, 1, length.out = n), 1/n, (n - 1)/n)))
+    q <- stats::quantile(xx, breaks, names = FALSE)
+    left <- q[-length(q)]
+    right <- q[-1L]
+    tails <- c(1L, length(left))
+    left[tails] <- c(xmin, z[n - 1L])
+    right[tails] <- c(z[1L], xmax)
+    mid <- (left + right) / 2
+    if (!reachbnd) mid[tails] <- desintxb[c(1L, n)]
+    mass <- diff(breaks)
+    uv <- sum(mass * ((right - left)^2 / 12 + (mid - sum(mass * mid))^2))
     xb <- mean(orig_res)
-    s1 <- sum((desintxb - xb)^2)
-    uv <- (s1 + sum(v)) / n
-    desired.sd  <- sd(orig_res)
+    desired.sd <- sd(orig_res)
     actualME.sd <- sqrt(uv)
     if (actualME.sd <= 0) stop("actualME.sd<=0 Error")
     kappa <- (desired.sd / actualME.sd) - 1
@@ -325,8 +333,8 @@ NNS.meboot <- function(x,
   # in place (ensemble[]) so the matrix dim/dimnames are preserved: pmax/pmin
   # copy attributes from their FIRST argument, so pmax(scalar, matrix) would
   # silently drop the dim and break the later dimnames() assignment.
-  if (!is.null(trim[[2]])) ensemble[] <- pmax(ensemble, trim[[2]])
-  if (!is.null(trim[[3]])) ensemble[] <- pmin(ensemble, trim[[3]])
+  if (!is.null(level_min)) ensemble[] <- pmax(ensemble, level_min)
+  if (!is.null(level_max)) ensemble[] <- pmin(ensemble, level_max)
   
   # ts attributes
   if (is.ts(x)) {

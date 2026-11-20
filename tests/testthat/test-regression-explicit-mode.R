@@ -54,3 +54,68 @@ test_that("numeric derivative responses use regression even when binary", {
   expect_equal(dy.dx(seq_along(y), y, eval.point = "overall"), 1 / 29)
   expect_equal(dy.dx(seq_along(y), 10 * y - 5, eval.point = "overall"), 10 / 29)
 })
+
+test_that("inferred indices keep both logical indicators in regression and classification", {
+  set.seed(170)
+  x <- data.frame(g = factor(rep(c("10", "2", "1"), 20)),
+                  flag = rep(c(TRUE, FALSE), each = 2, length.out = 60),
+                  z = runif(60))
+  y <- 2 * x$flag + x$z + rnorm(60, sd = .2)
+  weights <- c(g_X1 = 1, g_X10 = 1, g_X2 = 1, flag_FALSE. = 1, flag_TRUE. = 1, z = 1)
+  fit <- function(y, method, type) NNS.reg(x, y, point.est = x[1:6, ],
+    type = type, dim.red.method = method, ncores = 1, plot = FALSE)
+  reg <- fit(y, "equal", "REG")
+  expected <- fit(y, weights, "REG")
+  expect_identical(reg$equation, expected$equation)
+  expect_identical(reg$Point.est, expected$Point.est)
+  labels <- cut(y, 3)
+  cls <- fit(labels, "equal", "CLASS")
+  expected <- fit(labels, weights, "CLASS")
+  expect_identical(cls$equation, expected$equation)
+  expect_identical(cls$Point.probabilities, expected$Point.probabilities)
+  expect_identical(cls$Point.est, expected$Point.est)
+})
+
+test_that("Stack and NNS.reg refit the same categorical index", {
+  x <- data.frame(g = factor(rep(c("no", "yes"), 30)), flag = rep(c(TRUE, FALSE), each = 30))
+  y <- as.numeric(x$g == "yes")
+  weights <- c(flag = 0, g__yes = 2, g__no = -1)
+  fit <- NNS.stack(x, y, method = 2, dim.red.method = weights, folds = 2,
+                   ncores = 1, seed = 5, status = FALSE)
+  refit <- NNS.reg(x, y, point.est = x[1:2, ], dim.red.method = weights,
+                   threshold = fit$NNS.dim.red.threshold, ncores = 1, plot = FALSE)
+  expect_equal(refit$equation, fit$NNS.dim.red.coefficients)
+  expect_equal(refit$Point.est, c(0, 1))
+  legacy <- c(g_no = -1, g_yes = 2, flag_FALSE. = 0, flag_TRUE. = 0)
+  expect_equal(NNS.reg(x, y, point.est = x[1:2, ], dim.red.method = legacy,
+                       ncores = 1, plot = FALSE)$Point.est, c(0, 1))
+})
+
+test_that("a named Stack refit uses the weight of a declared factor level", {
+  x <- data.frame(g = factor(rep(c("a", "b"), 30), levels = c("a", "b", "declared")),
+                  z = seq_len(60))
+  q <- data.frame(g = factor(c("a", "b", "declared"), levels = levels(x$g)), z = 30L)
+  y <- ifelse(x$g == "a", 10, 0)
+  weights <- c(g__a = 1, g__b = 0, g__declared = 2, z = 0)
+  stack <- NNS.stack(x, y, q, type = "REG", method = 2, dim.red.method = weights,
+                     folds = 2, seed = 5, order = "max", ncores = 1, status = FALSE)
+  refit <- NNS.reg(x, y, point.est = q, type = "REG", order = "max",
+                   dim.red.method = stack$NNS.dim.red.coefficients,
+                   threshold = stack$NNS.dim.red.threshold, ncores = 1, plot = FALSE)
+  train.index <- as.numeric(x$g == "a") / 2
+  manual <- NNS.reg(train.index, y, point.est = c(.5, 0, 1), type = "REG",
+                    order = "max", ncores = 1, plot = FALSE)
+  expect_equal(manual$Point.est, c(10, 0, 20))
+  expect_equal(stack$dim.red, manual$Point.est)
+  expect_equal(refit$x.star$x, train.index)
+  expect_equal(refit$Point.est, manual$Point.est)
+})
+
+test_that("named numeric predictors keep standalone constant-column scaling", {
+  x <- data.frame(a = rep(0:1, 30), b = 0)
+  refit <- NNS.reg(x, 10 * x$a, point.est = data.frame(a = 0, b = 1),
+                   dim.red.method = c(a = 1, b = 2), type = "REG",
+                   order = "max", ncores = 1, plot = FALSE)
+  expect_equal(refit$x.star$x, (x$a + 1) / 2)
+  expect_equal(refit$Point.est, 0)
+})

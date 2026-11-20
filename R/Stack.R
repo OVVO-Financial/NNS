@@ -20,7 +20,7 @@
 #' @param dim.red.method options: ("cor", "NNS.dep", "NNS.caus", "equal", "all") method for determining synthetic X* coefficients.  \code{(dim.red.method = "cor")} (default) uses Spearman rank correlation for weights.  \code{(dim.red.method = "NNS.dep")} uses \link{NNS.dep} for nonlinear dependence weights, while \code{(dim.red.method = "NNS.caus")} uses \link{NNS.caus} for directional association weights.  \code{(dim.red.method = "all")} averages all methods for further feature engineering.
 #' @param pred.int numeric [0,1]; \code{NULL} (default) Returns the associated prediction intervals with each \code{method}.
 #' @param status logical; \code{TRUE} (default) Prints status update message in console.
-#' @param ncores integer; value specifying the number of cores to be used in the parallelized subroutine \link{NNS.reg}. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.
+#' @param ncores Integer thread count for the parallel fits in \link{NNS.reg}. With \code{NULL} (default), use one fewer than the available cores (at least one), capped by any thread limit set with \code{RcppParallel::setThreadOptions()}. With the optional TinyThread backend, parallel predictions use its session thread count or, if unset, its hardware default.
 #' @param .validation Internal forecast-validation contract, normally NULL. A list with \code{IVs.train}, \code{DV.train}, \code{IVs.test}, and \code{DV.test} supplies the single chronological validation fold when \code{ts.test} is set, \code{folds = 1}, and \code{CV.size = NULL}. It requires exactly \code{N-ts.test} training rows and one through \code{ts.test} held-out rows; this allows scoring only observed future targets. Training prefixes and generated validation predictors must be constructed without later data. Used only for regression tuning; numeric two-level responses remain regression when this contract is supplied with type = NULL. The final model still fits all original training observations.
 #' @param seed Optional integer random seed used for reproducible resampling, fold construction, and stochastic fitting steps. If `NULL`, the current random-number-generator state is used.
 #'
@@ -29,7 +29,8 @@
 #' \item{\code{"NNS.reg.n.best"}} returns the optimum \code{"n.best"} parameter for the \link{NNS.reg} multivariate regression; when all regression points (for classification, all cells) are selected, their number in the final fit. \code{NA} for a single predictor in regression, whose univariate \link{NNS.reg} fit has no \code{n.best} to tune (use \code{cbind(x, x)} to search one), and when \code{method} does not include 1.  \code{"SSE.reg"} returns the SSE for the \link{NNS.reg} multivariate regression.
 #' \item{\code{"OBJfn.reg"}} returns the best \code{obj.fn} value of the \link{NNS.reg} regression's tuning on the out-of-fold predictions; it is selection-optimized, not an estimate of out-of-sample performance.
 #' \item{\code{"NNS.dim.red.threshold"}} returns the coefficient cutoff at which \link{NNS.reg} on \code{(IVs.train, DV.train)} with the same \code{dim.red.method} keeps the tuned number of predictors: the smallest kept coefficient magnitude, or 0 when every predictor is kept. Ties at the cutoff keep every tied predictor. For classification it is one number when every class index shares the cutoff, as two-class indices always do, and otherwise one cutoff per class, which \link{NNS.reg} accepts as \code{threshold}. \code{NA} when \code{method} does not include 2.
-#' \item{\code{"NNS.dim.red.variables"}} returns the names of the predictors carried by the final dimension reduction regression, ranked by absolute coefficient.  With \code{(stack = TRUE)} these are also the only predictors used by the \link{NNS.reg} multivariate regression, so they are exactly the variables behind \code{"stack"}.  \code{NULL} when \code{method} does not include 2.
+#' \item{\code{"NNS.reg.variables"}} returns the encoded predictor names used by the final multivariate classification fit. \code{NULL} when classification uses only method 2.
+#' \item{\code{"NNS.dim.red.variables"}} For regression, returns the final dimension reduction predictors ranked by absolute coefficient. With \code{stack = TRUE} the multivariate regression also uses these predictors. For classification, returns the union of the active encoded predictors in the class indices. See \code{NNS.reg.variables} for the multivariate classifier's predictors. \code{NULL} when \code{method} does not include 2.
 #' \item{\code{"NNS.dim.red.coefficients"}} returns the named final dimension reduction coefficients for every encoded predictor column (zero for predictors not selected).  \code{NULL} when \code{method} does not include 2.
 #' \item{\code{"OBJfn.dim.red"}} returns the best \code{obj.fn} value of the \link{NNS.reg} dimension reduction regression's tuning on the out-of-fold predictions; it is selection-optimized, not an estimate of out-of-sample performance.
 #' \item{\code{"probability.threshold"}} returns the optimum probability threshold for classification, else 0.5 when set to \code{FALSE}.
@@ -46,7 +47,7 @@
 #' @references Viole, F. (2016) "Classification Using NNS Clustering Analysis"  \doi{10.2139/ssrn.2864711}
 #'
 #' @details
-#' Classification tunes and combines class-probability vectors from the NNS predictor cells, preserving nominal label identity. \code{probabilities}, \code{reg.probabilities}, and \code{dim.red.probabilities} return the final probability matrices. Class balancing resamples the training rows of each fold. The neighbour count and the dimension count are chosen by optimizing \code{obj.fn} on the pooled out-of-fold predictions; the default classification objective is accuracy. As in NNS 13.0, the two models' probability vectors are then blended with weights proportional to their squared objective scores (inverse squares when \code{objective = "min"}), so models with nearly equal scores are blended nearly equally, and the binary probability threshold is tuned on the out-of-fold predictions of that blend. \code{OBJfn.reg} and \code{OBJfn.dim.red} are the best scores of that search on the same predictions, so they are selection-optimized and overstate held-out performance; assess the final model on an independent test set. Custom objectives receive original numeric or logical response values, and factor/character codes as identified by \code{class.levels}. Relabelling is invariant for label-invariant objectives such as accuracy; a custom loss assigning different costs to classes can deliberately change the result.
+#' Classification tunes and combines class-probability vectors from the NNS predictor cells, preserving nominal label identity. \code{probabilities}, \code{reg.probabilities}, and \code{dim.red.probabilities} return the final probability matrices. Ties at the binary decision threshold or at the largest multiclass probability follow first appearance in the fit's training response, after any class balancing. When repeated holdouts predict the same row, a tie in the pooled probabilities goes to the tied class with the earliest original row index among all training rows used by those fits. The neighbour count and the dimension count are chosen by optimizing \code{obj.fn} on the pooled out-of-fold predictions; the default classification objective is accuracy. As in NNS 13.0, the two models' probability vectors are then blended with weights proportional to their squared objective scores (inverse squares when \code{objective = "min"}), so models with nearly equal scores are blended nearly equally, and the binary probability threshold is tuned on the out-of-fold predictions of that blend. \code{OBJfn.reg} and \code{OBJfn.dim.red} are the best scores of that search on the same predictions, so they are selection-optimized and overstate held-out performance; assess the final model on an independent test set. Custom objectives receive original numeric or logical response values, and factor/character codes as identified by \code{class.levels}. Relabelling is invariant for label-invariant objectives such as accuracy; a custom loss assigning different costs to classes can deliberately change the result.
 #' 
 #' Named numeric dimension-reduction coefficients are matched to encoded predictor names in both regression and classification. Factor columns use \code{predictor__level} names; unnamed vectors follow encoded column order. Classification dimension reduction uses one signed index per class indicator. Its reported coefficients are a list of class-specific equations. The tuned dimension count is returned as \code{NNS.dim.red.count}, and \code{NNS.dim.red.threshold} gives the coefficient cutoff that keeps that count in every class index: one number when the class indices share it, as two-class indices always do, and otherwise one cutoff per class. The field \code{NNS.dim.red.variables} is the union of their active encoded columns. These equations describe the synthetic indices, not a complete saved prediction model: reconstruction also requires training-fitted scaling, the predictor cells, their class frequencies, and the selected smoothing controls. With \code{stack = TRUE}, the multivariate classification component retains the selected number of actual encoded coordinates ranked by maximum class-indicator dependence. \code{Prediction.set} contains classes attaining the requested estimated probability mass. Binary interval fields contain the range of this set for compatibility; multiclass interval fields are NULL. The sets do not assert calibrated coverage.
 #' 
@@ -457,6 +458,7 @@ NNS.stack <- function(IVs.train,
     z <- .as_test_frame(IVs.test, names(x))
   }
   
+  character_x <- x[vapply(x, is.character, logical(1))]
   aligned <- .align_predictors(x, z)
   x <- aligned$train
   z <- aligned$test
@@ -707,8 +709,7 @@ NNS.stack <- function(IVs.train,
         any(!is.finite(c(yt, yv))))
       stop("[.validation] needs N-ts.test finite training rows and 1..ts.test finite held-out rows.")
     validation.rows <- prefix + seq_len(nrow(vv))
-    x.cv[seq_len(prefix), ] <- vt
-    x.cv[validation.rows, ] <- vv
+    x.cv <- rbind(vt, vv)
     y.cv[seq_len(prefix)] <- yt
     y.cv[validation.rows] <- yv
   }
@@ -836,6 +837,12 @@ NNS.stack <- function(IVs.train,
   }
   
   splits <- .make_splits()
+  if (is.null(.validation) && ncol(character_x)) {
+    for (s in splits) {
+      .align_predictors(character_x[s$train, , drop = FALSE],
+                        character_x[s$validation, , drop = FALSE])
+    }
+  }
 
   if (is_class) {
     return(.nns_stack_classify(x, y, z, class_values, splits, method, stack,
@@ -845,20 +852,20 @@ NNS.stack <- function(IVs.train,
       tau = if (is.null(ts.test)) NULL else "ts"))
   }
   
-  .coefficient_vector <- function(X, response) {
+  .coefficient_vector <- function(X, response, method = dim.red.method) {
     X <- as.matrix(X)
     p <- ncol(X)
     
-    if (is.numeric(dim.red.method)) {
-      coef <- as.numeric(dim.red.method)
-      if (!is.null(names(dim.red.method))) {
-        if (!setequal(names(dim.red.method), colnames(X))) {
+    if (is.numeric(method)) {
+      coef <- as.numeric(method)
+      if (!is.null(names(method))) {
+        if (!setequal(names(method), colnames(X))) {
           stop(paste0(
             "Named numeric [dim.red.method] coefficients must exactly match ",
             "the encoded design columns."
           ), call. = FALSE)
         }
-        coef <- as.numeric(dim.red.method[colnames(X)])
+        coef <- as.numeric(method[colnames(X)])
       } else if (length(coef) != p) {
         stop(sprintf(
           "Numeric [dim.red.method] must contain %d encoded coefficients.", p
@@ -902,7 +909,7 @@ NNS.stack <- function(IVs.train,
     }
     
     coef <- switch(
-      dim.red.method,
+      method,
       "cor" = cor_coef(),
       "nns.dep" = dep_coef(),
       "nns.caus" = caus_coef(),
@@ -1009,14 +1016,12 @@ NNS.stack <- function(IVs.train,
   # training support, so no gradient extension is applied here either.
   .production_multivariate_path <- function(rpm, Xtest, train_design, kmax = NULL) {
     Xtest <- as.data.frame(Xtest, check.names = FALSE)
-    feature_names <- setdiff(names(rpm), "y.hat")
-    Xtest <- Xtest[, feature_names, drop = FALSE]
     train_design <- as.data.frame(train_design, check.names = FALSE)
-    train_design <- train_design[, feature_names, drop = FALSE]
+    Xtest <- Xtest[, names(train_design), drop = FALSE]
     if (is.null(kmax)) kmax <- nrow(rpm)
     kmax <- min(kmax, nrow(rpm))
     
-    rpm_x <- as.matrix(rpm[, feature_names, drop = FALSE])
+    rpm_x <- as.matrix(rpm[, seq_along(train_design), drop = FALSE])
     storage.mode(rpm_x) <- "double"
     test_matrix <- as.matrix(Xtest)
     storage.mode(test_matrix) <- "double"
@@ -1077,14 +1082,27 @@ NNS.stack <- function(IVs.train,
   full_design <- .numeric_design(x, z)
   encoded_p <- ncol(full_design$train)
   
-  if (2L %in% method && is.numeric(dim.red.method) &&
-      is.null(names(dim.red.method)) && length(dim.red.method) != encoded_p) {
-    stop(sprintf(
-      "Numeric [dim.red.method] must contain %d encoded coefficients.",
-      encoded_p
-    ), call. = FALSE)
+  fold_method <- dim.red.method
+  candidate_p <- encoded_p
+  if (2L %in% method && !is.null(.validation)) {
+    # Dummy names can change when two labels have the same syntactic name.
+    by_predictor <- split(seq_len(encoded_p), full_design$source)
+    columns <- lapply(names(x), function(nm) {
+      idx <- by_predictor[[nm]]
+      if (is.factor(vt[[nm]])) return(idx[match(levels(vt[[nm]]), levels(x[[nm]]))])
+      if (is.factor(x[[nm]])) return(NA_integer_)
+      idx
+    })
+    columns <- unlist(columns, use.names = FALSE)
+    candidate_p <- min(encoded_p, length(columns))
+    if (is.numeric(dim.red.method)) {
+      weights <- .coefficient_vector(full_design$train, y)
+      if (anyNA(columns))
+        stop("The supplied fold has no matching coefficient in the final design.", call. = FALSE)
+      fold_method <- weights[columns]
+    }
   }
-  
+
   # -------------------------------------------------------------------------
   # Method 2: select active dimension count from OOF predictions
   # -------------------------------------------------------------------------
@@ -1101,8 +1119,8 @@ NNS.stack <- function(IVs.train,
   dim_full_xstar_test <- NULL
   
   if (2L %in% method) {
-    dim_sum <- matrix(0, nrow = n_obs, ncol = encoded_p)
-    dim_count <- matrix(0L, nrow = n_obs, ncol = encoded_p)
+    dim_sum <- matrix(0, nrow = n_obs, ncol = candidate_p)
+    dim_count <- matrix(0L, nrow = n_obs, ncol = candidate_p)
     
     for (b in seq_along(splits)) {
       split <- splits[[b]]
@@ -1112,15 +1130,16 @@ NNS.stack <- function(IVs.train,
         x.cv[train_idx, , drop = FALSE],
         x.cv[valid_idx, , drop = FALSE]
       )
-      coef_fold <- .coefficient_vector(fold_design$train, y.cv[train_idx])
+      coef_fold <- .coefficient_vector(fold_design$train, y.cv[train_idx], fold_method)
       balanced_idx <- .balance_indices(y.cv[train_idx])
       
-      if (status) message(sprintf("Method 2 fold %d/%d: generating %d cumulative projections", b, length(splits), encoded_p))
+      if (status) message(sprintf("Method 2 fold %d/%d: generating %d cumulative projections", b, length(splits), candidate_p))
       native_path <- .xstar_path(fold_design$train, fold_design$test, coef_fold)
-      representatives <- if (!is.null(native_path)) as.integer(native_path$representative) else seq_len(encoded_p)
+      representatives <- seq_len(candidate_p)
+      if (!is.null(native_path)) representatives <- as.integer(native_path$representative[representatives])
       unique_candidates <- unique(representatives)
       if (status) message(sprintf("Method 2 fold %d/%d: evaluating %d unique candidates", b, length(splits), length(unique_candidates)))
-      candidate_raw <- vector("list", encoded_p)
+      candidate_raw <- vector("list", candidate_p)
       for (m in unique_candidates) {
         if (!is.null(native_path)) {
           projected <- list(train = native_path$train[, m], test = native_path$test[, m])
@@ -1135,7 +1154,7 @@ NNS.stack <- function(IVs.train,
                                    allow_failure = TRUE)
         candidate_raw[[m]] <- fit$raw
       }
-      for (m in seq_len(encoded_p)) {
+      for (m in seq_len(candidate_p)) {
         raw <- candidate_raw[[representatives[m]]]
         good <- is.finite(raw)
         if (any(good)) {
@@ -1147,11 +1166,11 @@ NNS.stack <- function(IVs.train,
       if (status) message(sprintf("Method 2 fold %d/%d complete", b, length(splits)))
     }
     
-    dim_scores <- rep(NA_real_, encoded_p)
-    dim_thresholds <- rep(0.5, encoded_p)
-    dim_raw_candidates <- vector("list", encoded_p)
+    dim_scores <- rep(NA_real_, candidate_p)
+    dim_thresholds <- rep(0.5, candidate_p)
+    dim_raw_candidates <- vector("list", candidate_p)
     
-    for (m in seq_len(encoded_p)) {
+    for (m in seq_len(candidate_p)) {
       candidate <- .candidate_from_oof(dim_sum, dim_count, m)
       dim_scores[m] <- candidate$score
       dim_thresholds[m] <- candidate$threshold
@@ -1163,7 +1182,7 @@ NNS.stack <- function(IVs.train,
           m,
           if (is.finite(dim_scores[m]))
             format(dim_scores[m], digits = 6) else "NA",
-          encoded_p - m
+          candidate_p - m
         ))
       }
     }
@@ -1229,7 +1248,7 @@ NNS.stack <- function(IVs.train,
     )
     
     if (stack && 2L %in% method) {
-      coef_fold <- .coefficient_vector(fold_design$train, y.cv[train_idx])
+      coef_fold <- .coefficient_vector(fold_design$train, y.cv[train_idx], fold_method)
       selected <- .active_columns(coef_fold, dim_best_count)
       list(train = fold_design$train[, selected, drop = FALSE],
            test = fold_design$test[, selected, drop = FALSE])

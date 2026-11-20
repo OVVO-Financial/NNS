@@ -108,7 +108,7 @@
 
 
 NNS.VAR <- function(variables,
-                    h,
+                    h = 1,
                     tau = 1,
                     dim.red.method = "cor",
                     naive.weights = TRUE,
@@ -132,8 +132,6 @@ NNS.VAR <- function(variables,
   oldw <- getOption("warn")
   options(warn = -1)
   on.exit(options(warn = oldw), add = TRUE)
-  
-  dates <- NULL
   
   # ===================== Lag builder (robust names) =====================
   lag.mtx <- function(x, tau) {
@@ -180,60 +178,48 @@ NNS.VAR <- function(variables,
     mtx[, c(vars0, rest), drop = FALSE]
   }
   
-  # --------- Time-index dates (base R, no external date packages) ---------
-  # `dates` are used only as row labels on the returned matrices, so they are
-  # produced as "Mon YYYY" character labels.  Numerical forecasts never depend
-  # on them.  A yearmon-equivalent numeric (year + (month-1)/12) is used for the
-  # month arithmetic, then formatted -- matching zoo::as.yearmon's appearance.
-  .index_to_yearmon <- function(idx) {
-    if (inherits(idx, c("Date", "POSIXct", "POSIXt"))) {
-      lt <- as.POSIXlt(idx)
-      (lt$year + 1900) + lt$mon / 12
-    } else {
-      suppressWarnings(as.numeric(idx))
-    }
-  }
-  .format_yearmon <- function(ym) {
-    yr <- floor(ym + 1e-8)
-    mo <- as.integer(round((ym - yr) * 12)) + 1L
-    roll <- !is.na(mo) & mo > 12L
-    yr[roll] <- yr[roll] + 1L; mo[roll] <- 1L
-    out <- rep(NA_character_, length(ym))
-    ok  <- !is.na(mo) & mo >= 1L & mo <= 12L
-    out[ok] <- paste(month.abb[mo[ok]], yr[ok])
-    out
-  }
-  
-  # Extract a time index (best effort) without zoo/xts.
-  idx <- NULL
+  dates <- forecast_dates <- NULL
+  month_labels <- function(month) paste(month.abb[month %% 12 + 1L], month %/% 12)
+
   if (inherits(variables, "ts")) {
     idx <- as.numeric(stats::time(variables))
-  } else if (inherits(variables, c("xts", "zoo"))) {
-    raw <- attr(variables, "index")
-    if (is.null(raw)) raw <- suppressWarnings(try(stats::time(variables), silent = TRUE))
-    if (!is.null(raw) && !inherits(raw, "try-error")) {
-      # xts/zoo store the index as numeric seconds since the epoch.
-      if (is.numeric(raw)) idx <- as.POSIXct(raw, origin = "1970-01-01", tz = "UTC") else idx <- raw
+    future <- tail(idx, 1) + seq_len(h) / stats::frequency(variables)
+    labels <- c(idx, future)
+    months <- round(12 * labels)
+    labels <- if (all(abs(12 * labels - months) < 1e-7)) month_labels(months) else as.character(labels)
+    dates <- head(labels, length(idx))
+    forecast_dates <- tail(labels, h)
+    variables <- data.frame(as.matrix(variables), check.names = FALSE)
+  } else if (inherits(variables, "xts") || (nowcast && inherits(variables, "zoo"))) {
+    idx <- stats::time(variables)
+    calendar_index <- inherits(idx, c("yearmon", "yearqtr"))
+    if (calendar_index) idx <- as.Date(idx)
+    dates <- as.character(idx)
+    step <- unique(diff(as.numeric(idx)))
+    if (length(step) == 1L && step > 0)
+      forecast_dates <- as.character(tail(idx, 1) + seq_len(h) * step)
+    if (inherits(idx, c("Date", "POSIXt"))) {
+      calendar <- as.POSIXlt(idx)
+      months <- (calendar$year + 1900L) * 12L + calendar$mon
+      spacing <- unique(diff(months))
+      if (!anyDuplicated(months)) {
+        dates <- month_labels(months)
+        if (nowcast) spacing <- 1L
+      }
+      if ((nowcast || calendar_index || is.null(forecast_dates)) &&
+          length(spacing) == 1L && spacing > 0) {
+        forecast_dates <- month_labels(tail(months, 1) + seq_len(h) * spacing)
+      }
     }
-  }
-  
-  if (nowcast && !is.null(idx)) {
-    ym <- .index_to_yearmon(idx)
-    if (!any(is.na(ym))) dates <- .format_yearmon(c(ym, tail(ym, h) + h/12))
-  }
-  
-  if(any(class(variables)%in%c("tbl","data.table"))) variables <- as.data.frame(variables)
-  if (inherits(variables, "xts")) {
-    if (is.null(dates) && !is.null(idx)) dates <- .format_yearmon(.index_to_yearmon(idx))
+    if (anyDuplicated(dates)) dates <- NULL
+    if (anyDuplicated(forecast_dates)) forecast_dates <- NULL
     variables <- data.frame(matrix(as.numeric(variables), nrow = NROW(variables),
                                    dimnames = list(NULL, colnames(variables))),
                             check.names = FALSE)
+  } else if (any(class(variables) %in% c("tbl", "data.table"))) {
+    variables <- as.data.frame(variables)
   }
-  if (inherits(variables, "ts")) {
-    if (is.null(dates) && !is.null(idx)) dates <- .format_yearmon(.index_to_yearmon(idx))
-    variables <- data.frame(as.matrix(variables), check.names = FALSE)
-  }
-  
+
   dim.red.method <- tolower(dim.red.method)
   # dim.red.method is scalar: the downstream selectors use scalar if() (which
   # errors on a length > 1 condition in R >= 4.2). Use "all" to combine methods.
@@ -342,8 +328,7 @@ NNS.VAR <- function(variables,
     }
     
     if(ahead > 0){
-      # robust tau selection without changing flow
-      tau_i <- if (is.list(tau)) tau[[min(i, length(tau))]] else tau
+      tau_i <- tau[[min(i, length(tau))]]
       periods <- tryCatch(NNS.seas(variable_interpolation, modulo = min(tau_i),
                                    mod.only = FALSE, plot = FALSE)$periods,
                           error = function(e) NULL)
@@ -407,7 +392,7 @@ NNS.VAR <- function(variables,
     if(positive_values[i]) nns_IVs_interpolated_extrapolated[,i] <- pmax(0, nns_IVs_interpolated_extrapolated[,i])
   }
   
-  rownames(nns_IVs_interpolated_extrapolated) <- head(dates, nrow(variables))
+  rownames(nns_IVs_interpolated_extrapolated) <- dates
   colnames(nns_IVs_interpolated_extrapolated) <- colnames(variables)
   
   if(h == 0) return(.NNS.df(nns_IVs_interpolated_extrapolated))
@@ -576,12 +561,12 @@ NNS.VAR <- function(variables,
   
   
   colnames(nns_IVs_results) <- colnames(variables)
-  rownames(nns_IVs_results) <- tail(dates, h)
+  rownames(nns_IVs_results) <- forecast_dates
   colnames(nns_DVs) <- colnames(variables)
-  rownames(nns_DVs) <- tail(dates, h)
+  rownames(nns_DVs) <- forecast_dates
   colnames(forecasts) <- colnames(variables)
-  rownames(forecasts) <- tail(dates, h)
-  rownames(nns_IVs_interpolated_extrapolated) <- head(dates, nrow(nns_IVs_interpolated_extrapolated))
+  rownames(forecasts) <- forecast_dates
+  rownames(nns_IVs_interpolated_extrapolated) <- dates
   
   options(warn = oldw)
   

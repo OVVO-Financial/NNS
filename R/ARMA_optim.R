@@ -97,16 +97,16 @@ NNS.ARMA.optim <- function(variable,
   bias.correction <- match.arg(bias.correction)
   if(is.null(obj.fn)){ stop("Please provide an objective function")}
   objective <- tolower(objective)
+  if(length(objective) != 1L || !objective %in% c("min", "max"))
+    stop("[objective] must be 'min' or 'max'.")
   
   if(is.null(training.set) && is.null(h)) stop("Please use the length of the variable less the desired forecast period as the [training.set] value, or provide a value for [h].")
   
   variable <- as.numeric(variable)
   OV <- variable
   
-  if(!is.null(h) && h > 0) h_oos <- h else {
-    h <- NULL
-    h_oos <- NULL
-  }
+  if(!is.null(h)) .arma_check_horizon(h)
+  h_oos <- h
   
   if(is.null(training.set)) training.set <- floor(.8 * n)
   training.set <- as.integer(training.set)
@@ -124,12 +124,14 @@ NNS.ARMA.optim <- function(variable,
   
   denominator <- min(4, max(3, ifelse((training.set/100)%%1 < .5, floor(training.set/100), ceiling(training.set/100))))
   
+  .arma_check_periods(seasonal.factor)
   seasonal.factor <- seasonal.factor[seasonal.factor <= (training.set/denominator)]
   seasonal.factor <- unique(seasonal.factor)
   
   if(length(seasonal.factor)==0) stop(paste0('Please ensure [seasonal.factor] contains elements less than ', training.set/denominator, ", otherwise use cross-validation of seasonal factors as demonstrated in the vignette >>> Getting Started with NNS: Forecasting"))
   
   oldw <- getOption("warn")
+  on.exit(options(warn = oldw), add = TRUE)
   options(warn = -1)
   
   # Validation forecasts depend only on these arguments, and the search and the
@@ -189,6 +191,7 @@ NNS.ARMA.optim <- function(variable,
           { cl0 <- parallel::makeForkCluster(num_cores); forked <- TRUE; cl0 },
           error = function(e) parallel::makeCluster(num_cores)
         )
+        on.exit(if (!is.null(cl)) parallel::stopCluster(cl), add = TRUE)
         # Fork workers inherit the already-loaded NNS namespace; only the PSOCK
         # fallback needs an explicit library() call on each worker.
         if (!forked) parallel::clusterEvalQ(cl, library(NNS))
@@ -342,6 +345,7 @@ NNS.ARMA.optim <- function(variable,
       # Clean up cluster
       if (!is.null(cl)) {
         parallel::stopCluster(cl)
+        cl <- NULL
         invisible(gc(verbose = FALSE))  # Clean up memory
       }
     }
@@ -473,11 +477,10 @@ NNS.ARMA.optim <- function(variable,
   if(nns.regress) nns.shrink <- TRUE
   
   if(is.null(h_oos)){
-    if(is.null(h)) h <- h_eval
+    h <- h_eval
     raw.results <- raw.validation
     model.results <- final.predicted
   } else {
-    if(is.null(h)) h <- h_oos
     final.variable <- if(nns.regress) NNS.reg(1:n, OV, type = "REG", plot = FALSE, smooth = TRUE)$Fitted.xy$y.hat else OV
     raw.results <- NNS.ARMA(final.variable, h = h_oos, seasonal.factor = nns.periods, method = nns.method, plot = FALSE, negative.values = results.negative.values, weights = nns.weights, shrink = nns.shrink)
     model.results <- raw.results - bias

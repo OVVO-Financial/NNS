@@ -22,9 +22,9 @@ NNS.diff(
 
 \item{h}{numeric [0, ...]; Initial step for secant projection. Defaults to \code{(h = abs(point) * 0.1 + 0.01)}.}
 
-\item{tol}{numeric; Stopping tolerance. The search stops when the inferred \code{h} is below \code{tol} or when the bracket on the y-intercept fixes the derivative to within about \code{tol * max(1, abs(derivative))}. Defaults to \code{(tol = 1e-10)}.}
+\item{tol}{numeric; Stopping tolerance. The search stops when the inferred \code{h} is below \code{tol} or when the bracket on the y-intercept fixes the derivative to within about \code{tol * max(1, abs(derivative))}. If the initial intercepts are numerically equal, the search halves the step and uses Richardson extrapolation. Success requires successive derivative estimates to agree and the extrapolated difference between the left and right slopes to be zero within the same derivative tolerance. Defaults to \code{(tol = 1e-10)}.}
 
-\item{max.iter}{integer; \code{NULL} (default) Maximum number of bisection iterations. \code{NULL} sets the limit to \code{100L}. For noisy functions the bisection may stall before \code{tol} is reached; \code{max.iter} provides a hard upper bound.}
+\item{max.iter}{integer; \code{NULL} (default) Maximum number of iterations. \code{NULL} sets the limit to \code{100L}. For noisy functions the bisection may stall before \code{tol} is reached; \code{max.iter} provides a hard upper bound.}
 
 \item{digits}{numeric; Sets the number of digits specification of the output. Defaults to \code{(digits = 12)}.}
 
@@ -33,7 +33,7 @@ NNS.diff(
 \item{plot}{logical; plots range, secant lines and y-intercept convergence.}
 }
 \value{
-Returns a matrix of values, intercepts, derivatives, inferred step sizes for multiple methods of estimation.
+Returns a matrix of values, intercepts, derivatives and step sizes. \code{iterations} counts search iterations. \code{converged} is 1 when the stopping criterion is met and 0 otherwise. \code{termination.code} is 0 for convergence, 1 at the iteration limit and 2 if the root solve fails or finite precision prevents refinement.
 }
 \description{
 Determines numerical derivative of a given univariate function using projected secant lines on the y-axis. These projected points infer finite steps \code{h}, in the finite step method.

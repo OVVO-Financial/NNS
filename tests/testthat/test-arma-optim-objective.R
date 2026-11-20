@@ -5,6 +5,13 @@ run_optim <- function(...) {
                  obj.fn = mse, ncores = 1, print.trace = FALSE, ...)
 }
 
+test_that("the optimizer diagnoses a zero period from a short training set", {
+  x <- c(20, 18, 19, 21, 22)
+  period <- NNS.seas(x[1:3], plot = FALSE)$best.period
+  expect_error(NNS.ARMA.optim(x, training.set = 3, seasonal.factor = period),
+               "too short to scan for a period.*seasonal.factor = 1")
+})
+
 test_that("obj.fn scores the returned validation forecast", {
   o <- run_optim()
   expect_equal(o$validation.forecast, o$results)
@@ -32,4 +39,25 @@ test_that("an accepted split-window correction is included in the returned score
   expect_equal(o$raw.results, rep(200, length(actual)))
   expect_equal(o$results, pmax(0, o$raw.results + o$bias.shift))
   expect_equal(o$obj.fn, mean((o$results - actual)^2))
+})
+
+test_that("the optimizer requires a positive forecast horizon when supplied", {
+  expect_error(run_optim(h = -1), "positive integer")
+  expect_error(run_optim(h = 0), "positive integer")
+})
+
+test_that("unknown optimizer objectives name the valid choices", {
+  expect_error(run_optim(objective = "maximize"), "objective.*'min'.*'max'")
+})
+
+test_that("an objective error restores warnings and closes the workers", {
+  withr::local_options(list(warn = 1))
+  cl <- parallel::makeCluster(2)
+  on.exit(try(parallel::stopCluster(cl), silent = TRUE), add = TRUE)
+  testthat::local_mocked_bindings(makeForkCluster = function(...) cl, .package = "parallel")
+  expect_error(NNS.ARMA.optim(AirPassengers, h = 2, seasonal.factor = c(1, 12), ncores = 2,
+                              print.trace = FALSE, obj.fn = expression(stop("metric failed"))),
+               "metric failed")
+  expect_equal(getOption("warn"), 1)
+  expect_error(parallel::clusterCall(cl, Sys.getpid))
 })

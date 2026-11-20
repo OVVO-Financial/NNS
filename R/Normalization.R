@@ -7,7 +7,7 @@
 #' @param chart.type  options: ("l", "b"); \code{NULL} (default).  Set \code{(chart.type = "l")} for line,
 #' \code{(chart.type = "b")} for boxplot.
 #' @param location Sets the legend location within the plot, per the \code{x} and \code{y} co-ordinates used in base graphics \link{legend}.
-#' @return Returns a \link{data.frame} of normalized values.
+#' @return A matrix of normalized values, or a list of normalized vectors for list inputs of unequal lengths.
 #' @note Unequal vectors provided in a list will only generate \code{linear=TRUE} normalized values.
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995, 2nd edition: \url{https://ovvo-financial.github.io/NNS/book/})
@@ -34,7 +34,7 @@ NNS.norm <- function(X,
                      chart.type = NULL,
                      location = "topleft"){
   
-  if(anyNA(X)) stop("You have some missing values, please address.")
+  if(anyNA(X, recursive = TRUE)) stop("You have some missing values, please address.")
   
   if(any(class(X)%in%c("tbl","data.table"))) X <- as.data.frame(X)
 
@@ -42,7 +42,11 @@ NNS.norm <- function(X,
     if(length(unique(sapply(X, length))) > 1) linear <- TRUE
     m <- sapply(X, mean)
   } else {
-    X <- apply(X, 2, unlist)
+    columns <- apply(X, 2, unlist)
+    if(is.null(dim(columns)) && nrow(X) == 1L){
+      columns <- matrix(columns, nrow = 1L, dimnames = list(rownames(X), names(columns)))
+    }
+    X <- columns
     m <- colMeans(X)
   }
 

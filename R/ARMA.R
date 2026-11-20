@@ -22,7 +22,7 @@
 #' @param plot logical; \code{TRUE} (default) Returns the plot of all periods exhibiting seasonality and the \code{variable} level reference in upper panel.  Lower panel returns original data and forecast.
 #' @param seasonal.plot logical; \code{TRUE} (default) Adds the seasonality plot above the forecast.  Will be set to \code{FALSE} if no seasonality is detected or \code{seasonal.factor} is set to an integer value.
 #' @param pred.int numeric [0, 1]; \code{NULL} (default) Plots and returns lower and upper bands around the forecasts.  The forecast path itself is resampled with the maximum entropy bootstrap (\link{NNS.MC} over \code{rho} from -1 to 1), the bounds at each step are \link{LPM.VaR} and \link{UPM.VaR} of the replicates at probability \code{(1 - pred.int) / 2}, widened by the spread of the per-lag linear estimates; a one-point (\code{h = 1}) or constant path has no dispersion to resample, so its band is the path widened by that spread alone (zero width with a single seasonal lag); \link{NNS.ARMA.optim} gives intervals from validation errors.  The band therefore describes the dispersion of the forecast path, not the uncertainty of the outcome at each horizon: it does not widen with the horizon, and it is not calibrated to contain future values with probability \code{pred.int}.  \link{NNS.ARMA.optim} derives its interval from validation errors instead.
-#' @return Returns a vector of forecasts of length \code{(h)} if no \code{pred.int} specified.  Else, returns a \code{data.table} with the forecasts as well as the lower and upper forecast-path bands per forecast point (see \code{pred.int}).
+#' @return Returns a vector of forecasts of length \code{(h)} if no \code{pred.int} specified.  Else, returns a \code{data.frame} with the forecasts as well as the lower and upper forecast-path bands per forecast point (see \code{pred.int}).
 #' @note
 #' For monthly data series, increased accuracy may be realized from forcing seasonal factors to multiples of 12.  For example, if the best periods reported are: \{37, 47, 71, 73\}  use
 #' \code{(seasonal.factor = c(36, 48, 72))}.
@@ -76,10 +76,11 @@ NNS.ARMA <- function(variable,
   
   if(anyNA(variable)) stop("You have some missing values, please address.")
   
-  if(!is.numeric(h) || length(h) != 1L || !is.finite(h) || h < 1 || h != round(h))
-    stop("[h] must be a positive integer.")
+  .arma_check_horizon(h)
   
   method <- tolower(method)
+  if(length(method) != 1L || !method %in% c("lin", "nonlin", "both", "means"))
+    stop("[method] must be one of 'lin', 'nonlin', 'both' or 'means'.")
   if(method == "means") shrink <- FALSE
   
   oldw <- getOption("warn")
@@ -108,6 +109,7 @@ NNS.ARMA <- function(variable,
   
   
   if(is.numeric(seasonal.factor)){
+    .arma_check_periods(seasonal.factor)
     seasonal.plot = FALSE
     M <- matrix(seasonal.factor, ncol=1)
     colnames(M) <- "Period"
@@ -201,9 +203,9 @@ NNS.ARMA <- function(variable,
       Lin.estimates <- Lin.Reg.Estimates[[1]]
     } else {
       Lin.estimates <- rowSums(do.call(cbind, Lin.Reg.Estimates))
-      # pred.int reads the per-lag estimates of the loop's last step.
-      Lin.Regression.Estimates <- vapply(unweighted, function(e) e[h], numeric(1))
     }
+    # pred.int reads the per-lag estimates of the loop's last step.
+    if (!is.null(pred.int)) Lin.Regression.Estimates <- vapply(unweighted, function(e) e[h], numeric(1))
     
     if(!negative.values) Lin.estimates <- pmax(0, Lin.estimates)
     
@@ -401,9 +403,15 @@ NNS.ARMA <- function(variable,
 }
 
 
+.arma_check_horizon <- function(h){
+  if(!is.numeric(h) || length(h) != 1L || !is.finite(h) || h < 1 || h != round(h))
+    stop("[h] must be a positive integer.")
+}
+
 # Lags and weights from an NNS.seas period table. seasonal.factor = TRUE takes
 # the first row; ARMA.seas.weighting(TRUE, .) expects the list, not the table.
 .arma_lag_weights <- function(sf, M){
+  if (is.data.frame(M)) .arma_check_periods(M$Period)
   if (isTRUE(sf) && is.data.frame(M) && "Period" %in% names(M)) {
     return(list(lag = M$Period[1], Weights = 1))
   }
@@ -415,4 +423,10 @@ NNS.ARMA <- function(variable,
     ASW$Weights <- rep(1 / length(ASW$lag), length(ASW$lag))
   }
   ASW
+}
+
+.arma_check_periods <- function(periods){
+  if(0 %in% periods)
+    stop("NNS.seas returns 0 when the history is too short to scan for a period. ",
+         "Pass a positive lag supported by the training data, e.g. seasonal.factor = 1.")
 }

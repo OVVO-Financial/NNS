@@ -52,15 +52,15 @@ NNS.SD.cluster <- function(data, degree = 1, type = "discrete", min_cluster = 1,
   iteration <- 1
   n <- ncol(data)
   
-  if(is.null(colnames(data))) colnames(data) <- paste0("X_",1:ncol(data))
+  variable_names <- colnames(data)
+  if(is.null(variable_names)) variable_names <- paste0("X_", seq_len(n))
   
-  # Ensure the input data is a matrix
   remaining_data <- as.matrix(data)
+  colnames(remaining_data) <- as.character(seq_len(n))
   
   
   # Continue clustering until the number of remaining columns is less than or equal to min_cluster
   while (ncol(remaining_data) > min_cluster) {
-    # Use the original NNS.SD.efficient.set call as provided
     SD_set <- NNS.SD.efficient.set(remaining_data, degree = degree, type = type, status = FALSE)
     
     if (length(SD_set) == 0) {
@@ -98,6 +98,8 @@ NNS.SD.cluster <- function(data, degree = 1, type = "discrete", min_cluster = 1,
     clusters[[final_cluster_name]] <- NULL
   }
   
+  clusters <- lapply(clusters, function(ids) variable_names[as.integer(ids)])
+
   # Flatten the clusters into a single vector and generate cluster labels
   all_vars <- unlist(clusters)
   

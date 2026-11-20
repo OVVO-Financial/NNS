@@ -74,3 +74,23 @@ test_that("numeric two-level forecast responses remain regression with a validat
   expect_error(NNS.stack(x, y, .validation = v, ts.test = 5, folds = 1,
     type = "CLASS", ncores = 1, status = FALSE), "requires regression")
 })
+
+test_that("supplied folds use the weights of their own factor levels", {
+  set.seed(17)
+  x <- data.frame(g = ordered(rep(c("a b", "a+b"), 30), levels = c("a b", "a+b")), z = rnorm(60))
+  y <- x$z + 3 * (x$g == "a+b") + rnorm(60)
+  v <- list(IVs.train = x[1:48, ], DV.train = y[1:48],
+            IVs.test = x[49:60, ], DV.test = y[49:60])
+  fit <- function(x, w) NNS.stack(x, y, dim.red.method = w, method = 2,
+    .validation = v, ts.test = 12, folds = 1, ncores = 1, status = FALSE)
+  ref <- fit(x, c(g__a.b.1 = -2, g__a.b = 1, z = 3))
+  x$g <- ordered(c(as.character(x$g[1:48]), rep("a-b", 12)),
+                 levels = c("a-b", "a b", "a+b"))
+  weights <- c(g__a.b.2 = -2, g__a.b = 8, g__a.b.1 = 1, z = 3)
+  named <- fit(x, weights)
+  positional <- fit(x, c(8, 1, -2, 3))
+  expect_equal(named$OBJfn.dim.red, ref$OBJfn.dim.red)
+  expect_equal(positional$OBJfn.dim.red, ref$OBJfn.dim.red)
+  expect_equal(sum(named$NNS.dim.red.coefficients != 0),
+               sum(ref$NNS.dim.red.coefficients != 0))
+})

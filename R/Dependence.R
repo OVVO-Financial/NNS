@@ -88,6 +88,7 @@ NNS.dep <- function(x,
     if (length(x) != length(y)) stop("x and y must have the same length.")
     
     y_p <- replicate(100L, sample.int(length(y)))
+    same <- .nns_dep_perm_matches(x, y, y_p, asym)
     x   <- cbind(x, y, matrix(y[y_p], ncol = ncol(y_p), byrow = FALSE))
     y   <- NULL
   }
@@ -117,6 +118,10 @@ NNS.dep <- function(x,
       cors   <- unlist(lapply(nns.mc, `[[`, "Correlation"))
       deps   <- unlist(lapply(nns.mc, `[[`, "Dependence"))
       
+      matched <- which(same != 0L)
+      cors[matched + 2L] <- same[matched] * cors[2L]
+      deps[matched + 2L] <- deps[2L]
+
       cor_lower_CI <- LPM.VaR(.025, 0, cors[-c(1L, 2L)])
       cor_upper_CI <- UPM.VaR(.025, 0, cors[-c(1L, 2L)])
       dep_lower_CI <- LPM.VaR(.025, 0, deps[-c(1L, 2L)])
@@ -228,6 +233,34 @@ NNS.dep <- function(x,
 }
 
 
+# Matches to the observed table, signed by the orientation of Correlation.
+.nns_dep_perm_matches <- function(x, y, perms, asym) {
+  if (all(x == x[1L]) || all(y == y[1L])) return(rep.int(1L, ncol(perms)))
+
+  if (length(unique(x)) == 2L && length(unique(y)) == 2L) {
+    high.x <- x == max(x)
+    high.y <- y == max(y)
+    overlap <- sum(high.x & high.y)
+    draws <- colSums(matrix(high.y[perms], nrow = length(y)) & high.x)
+    # Swapping the labels of a balanced binary margin reverses Correlation.
+    reflected <- (sum(high.x) * 2 == length(x) & draws == sum(high.y) - overlap) |
+                 (sum(high.y) * 2 == length(y) & draws == sum(high.x) - overlap)
+    return(ifelse(draws == overlap, 1L, ifelse(reflected, -1L, 0L)))
+  }
+
+  transposed <- if (!isTRUE(asym) && identical(sort(x), sort(y))) x[order(y, x)]
+  if (!anyDuplicated(x) && is.null(transposed)) return(integer(ncol(perms)))
+
+  # With fixed x, the second column of the sorted pairs identifies the joint table.
+  observed <- y[order(x, y)]
+  vapply(seq_len(ncol(perms)), function(j) {
+    draw <- y[perms[, j]]
+    key <- draw[order(x, draw)]
+    identical(key, observed) || identical(key, transposed)
+  }, logical(1))
+}
+
+
 # Local (finest-cell) dependence, NNS.dep's measure before the multi-level
 # redesign (#95). NNS.reg's default order and dy.d_'s step rule read it as a
 # fine-scale signal-to-noise measure (see NNS_dep_local_cpp); NNS.dep itself
@@ -334,6 +367,8 @@ NNS.dep.matrix <- function(x, asym = FALSE){
     
     rhos[upper.tri(rhos)] <- t(rhos)[upper.tri(rhos)]
     deps[upper.tri(deps)] <- t(deps)[upper.tri(deps)]
+    diag(rhos) <- 1
+    diag(deps) <- 1
   } else {
     rhos[lower.tri(rhos, diag = FALSE)] <- unlist(raw.rhos_lower)
     deps[lower.tri(deps, diag = FALSE)] <- unlist(raw.deps_lower)
@@ -352,10 +387,12 @@ NNS.dep.matrix <- function(x, asym = FALSE){
     
     rhos <- rhos + rhos_upper
     deps <- deps + deps_upper
+    for (i in seq_len(n)) {
+      self <- pair(i, i)
+      rhos[i, i] <- self$Correlation
+      deps[i, i] <- self$Dependence
+    }
   }
-  
-  diag(rhos) <- 1
-  diag(deps) <- 1
   
   colnames(rhos) <- colnames(x)
   colnames(deps) <- colnames(x)

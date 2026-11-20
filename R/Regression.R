@@ -264,8 +264,18 @@
   out
 }
 
+.nns_reg_levels <- function(x) {
+  if (is.ordered(x)) return(levels(x))
+  if (is.factor(x)) return(sort(levels(x)))
+  sort(unique(as.character(x)))
+}
+
+.nns_reg_predictor_names <- function(predictors, fields) {
+  make.unique(c(fields, predictors))[-seq_along(fields)]
+}
+
 .nns_reg_encode_predictors <- function(x, point.est = NULL,
-                                       factor.2.dummy = TRUE) {
+                                       factor.2.dummy = TRUE, coefficient.names = NULL) {
   factor.2.dummy <- .nns_reg_scalar_logical(factor.2.dummy, "factor.2.dummy")
   # A plain numeric vector is the single numeric predictor "x", as
   # data.frame(x = x) below names it; building that data frame was most of the
@@ -287,6 +297,7 @@
     return(list(
       x = matrix(as.numeric(x), ncol = 1L, dimnames = list(NULL, "x")),
       point.est = point.matrix,
+      stack.index = FALSE,
       raw.names = "x",
       encoded.names = "x",
       metadata = list(list(name = "x", categorical = FALSE, levels = NULL))
@@ -295,6 +306,20 @@
   train <- .nns_reg_as_frame(x)
   points <- .nns_reg_prepare_points(point.est, names(train))
   
+  stack.index <- FALSE
+  categorical <- vapply(train, function(z) is.factor(z) || is.character(z) || is.logical(z),
+                        logical(1L))
+  if (!is.null(coefficient.names) && factor.2.dummy && ncol(train) > 1L && any(categorical)) {
+    blocks <- Map(function(nm, z) {
+      if (is.factor(z) || is.character(z))
+        paste0(nm, "__", make.names(.nns_reg_levels(z), unique = TRUE))
+      else nm
+    }, names(train), train)
+    stack.names <- make.unique(unlist(blocks, use.names = FALSE), sep = "_")
+    stack.index <- length(coefficient.names) == length(stack.names) &&
+      setequal(coefficient.names, stack.names)
+  }
+
   train.parts <- list()
   point.parts <- if (is.null(points)) NULL else list()
   meta <- vector("list", ncol(train))
@@ -304,14 +329,12 @@
     z <- train[[j]]
     zp <- if (is.null(points)) NULL else points[[j]]
     
-    categorical <- is.factor(z) || is.character(z) || is.logical(z)
-    
-    if (categorical) {
+    if (categorical[j]) {
       # A factor's declared levels are part of its training support even when
       # a resampled fold or subset has no row at one of them; sorting the
       # unordered levels keeps the encoding independent of level order.
-      levels.train <- if (is.ordered(z)) levels(z) else
-        if (is.factor(z)) sort(levels(z)) else sort(unique(as.character(z)))
+      single.logical <- stack.index && is.logical(z)
+      levels.train <- if (single.logical) c("FALSE", "TRUE") else .nns_reg_levels(z)
       values.train <- as.character(z)
       if (anyNA(values.train)) {
         stop(sprintf("Predictor '%s' contains missing values.", nm), call. = FALSE)
@@ -331,7 +354,7 @@
         values.point <- NULL
       }
       
-      if (factor.2.dummy) {
+      if (factor.2.dummy && !single.logical) {
         tr <- outer(values.train, levels.train, FUN = function(a, b) as.numeric(a == b))
         if (is.null(dim(tr))) tr <- matrix(tr, nrow = length(values.train),
                                            ncol = length(levels.train))
@@ -346,11 +369,11 @@
           point.parts[[length(point.parts) + 1L]] <- pt
         }
       } else {
-        tr <- matrix(match(values.train, levels.train), ncol = 1L,
+        tr <- matrix(match(values.train, levels.train) - as.integer(single.logical), ncol = 1L,
                      dimnames = list(NULL, nm))
         train.parts[[length(train.parts) + 1L]] <- tr
         if (!is.null(points)) {
-          pt <- matrix(match(values.point, levels.train), ncol = 1L,
+          pt <- matrix(match(values.point, levels.train) - as.integer(single.logical), ncol = 1L,
                        dimnames = list(NULL, nm))
           point.parts[[length(point.parts) + 1L]] <- pt
         }
@@ -387,10 +410,15 @@
   storage.mode(x.matrix) <- "double"
   point.matrix <- if (is.null(points)) NULL else do.call(cbind, point.parts)
   if (!is.null(point.matrix)) storage.mode(point.matrix) <- "double"
+  if (stack.index) {
+    colnames(x.matrix) <- stack.names
+    if (!is.null(point.matrix)) colnames(point.matrix) <- stack.names
+  }
   
   list(
     x = x.matrix,
     point.est = point.matrix,
+    stack.index = stack.index,
     raw.names = names(train),
     encoded.names = colnames(x.matrix),
     metadata = meta
@@ -462,8 +490,8 @@
   actual.order <- NA_integer_
   
   if (identical(order, "max")) {
-    split.y <- split(y, x)
-    rx <- as.numeric(names(split.y))
+    rx <- sort(unique(as.numeric(x)))
+    split.y <- split(y, match(x, rx))
     ry <- unname(vapply(split.y, reducer, numeric(1L)))
     actual.order <- as.integer(length(rx))
   } else {
@@ -489,15 +517,11 @@
     rx <- rx[o]
     ry <- ry[o]
   }
-  # Equal x values (after the character rounding split() applies) share one
-  # reduced point.
   merge.ties <- function() {
-    groups <- split(ry, rx)
-    rx <<- as.numeric(names(groups))
+    keys <- unique(as.numeric(rx))
+    groups <- split(ry, match(rx, keys))
+    rx <<- keys
     ry <<- unname(vapply(groups, reducer, numeric(1L)))
-    o <- order(rx, method = "radix")
-    rx <<- rx[o]
-    ry <<- ry[o]
   }
   if (anyDuplicated(rx)) merge.ties()
 
@@ -706,11 +730,13 @@
   coef
 }
 
-.nns_reg_dimreduce <- function(x, point.est, y, dim.red.method, tau, threshold) {
+.nns_reg_dimreduce <- function(x, point.est, y, dim.red.method, tau, threshold,
+                               stack.index = FALSE) {
   coef <- .nns_reg_dimred_coefficients(x, y, dim.red.method, tau, threshold)
   mins <- apply(x, 2L, min)
   maxs <- apply(x, 2L, max)
   ranges <- maxs - mins
+  if (stack.index) ranges[!is.finite(ranges) | ranges == 0] <- 1
   
   normalize <- function(m) {
     out <- matrix(0.5, nrow = nrow(m), ncol = ncol(m),
@@ -789,7 +815,7 @@
 #' @param smooth logical; \code{FALSE} (default) Applies a smoothing spline instead of local linear fit to regression points.
 #' @param noise.reduction the method of determining regression points options: ("mean", "median", "mode", "off"); In low signal:noise situations,\code{(noise.reduction = "mean")}  uses means for \link{NNS.dep} restricted partitions, \code{(noise.reduction = "median")} uses medians instead of means for \link{NNS.dep} restricted partitions, while \code{(noise.reduction = "mode")}  uses modes instead of means for \link{NNS.dep} restricted partitions.  \code{(noise.reduction = "off")} uses an overall central tendency measure for partitions.
 #' @param dist options:(NULL, "NNS", "L1", "L2", "FACTOR") the method of distance calculation. \code{dist = NULL} is the default and selects the native blended NNS distance, \eqn{sum(abs(z) + z^2)}, over range-normalized coordinates. \code{dist = "NNS"} is an explicit alias for the default. \code{dist = "L2"} selects Euclidean distance; \code{dist = "L1"} selects Manhattan distance; \code{dist = "FACTOR"} uses a frequency.
-#' @param ncores integer; value specifying the number of cores to be used in the parallelized  procedure. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1 for multivariate regression predictions large enough to repay them, and one otherwise.  The estimates do not depend on the number of cores.
+#' @param ncores Integer thread count for multivariate predictions. With \code{NULL} (default), small predictions use one thread. Large predictions use one fewer than the available cores (at least one), capped by any thread limit set with \code{RcppParallel::setThreadOptions()}. With the optional TinyThread backend, parallel predictions use its session thread count or, if unset, its hardware default. The estimates do not depend on the number of threads.
 #' @param multivariate.call Internal argument for multivariate regressions.
 #' @param point.only Internal argument for abbreviated output.
 #' @return UNIVARIATE REGRESSION RETURNS THE FOLLOWING VALUES:
@@ -953,7 +979,8 @@ NNS.reg <- function(x, y,
   y.numeric <- task$y
   if (any(!is.finite(y.numeric))) stop("[y] must contain finite values.", call. = FALSE)
   
-  encoded <- .nns_reg_encode_predictors(x, point.est, factor.2.dummy)
+  encoded <- .nns_reg_encode_predictors(x, point.est, factor.2.dummy,
+                                        if (is.numeric(dim.red.method)) names(dim.red.method))
   if (nrow(encoded$x) != length(y.numeric)) {
     stop(sprintf("[x] has %d rows but [y] has %d values.",
                  nrow(encoded$x), length(y.numeric)), call. = FALSE)
@@ -1007,7 +1034,7 @@ NNS.reg <- function(x, y,
                   "per class applies to classification."), call. = FALSE)
     }
     dr <- .nns_reg_dimreduce(encoded$x, encoded$point.est, y.numeric,
-                             dim.red.method, tau, threshold)
+                             dim.red.method, tau, threshold, encoded$stack.index)
     ux <- dr$x.star
     up <- dr$point.star
     synthetic.x.equation <- dr$equation

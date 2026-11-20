@@ -41,3 +41,15 @@ test_that("co-moments reject unequal lengths, empty input and recycled targets",
                  c(f(x, x, -1, 0.5), f(x, x, 0, 0.5), f(x, x, 1, 0.5)))
   }
 })
+
+test_that("joint moments reject factor thresholds before coercion", {
+  corners <- as.matrix(expand.grid(a = c(-1, 1), b = c(-1, 1)))
+  zeros <- factor(c("0", "0"))
+  expect_error(Co.LPM_nD(corners, zeros, 1, FALSE), "target.*factor")
+  expect_error(Co.UPM_nD(corners, zeros, 1, FALSE), "target.*factor")
+  expect_error(DPM_nD(corners, zeros, 1, FALSE), "target.*factor")
+  expect_equal(Co.LPM_nD(corners, c(0, 0), 1, FALSE), .25)
+  expect_equal(Co.UPM_nD(corners, c(0, 0), 1, FALSE), .25)
+  expect_equal(DPM_nD(corners, c(0, 0), 1, FALSE), .5)
+  expect_equal(Co.LPM_nD(corners, corners[4, , drop = FALSE], 1, FALSE), 1)
+})

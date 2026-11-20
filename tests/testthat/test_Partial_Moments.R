@@ -275,3 +275,19 @@ test_that("PM.matrix(norm = TRUE) uses the degree-0 cell when the total is 0", {
   expect_identical(c(pY$cupm[1, 2], pY$dupm[1, 2], pY$dlpm[1, 2], pY$clpm[1, 2], pY$clpm[1, 1], pY$cupm[1, 1]),
                    c(0.0625, 0.5625, 0.1875, 0.1875, 0.5, 0.5))
 })
+
+test_that("PM.matrix centers each column at its sample mean", {
+  x <- rep(1e8 + 0.01, 10000)
+  y <- x + rep(c(-0.001, 0.001), each = 5000)
+  v <- PM.matrix(1, 1, NULL, cbind(x, y), pop_adj = TRUE)$cov.matrix
+  expect_identical(v[1, 1], 0)
+  expect_equal(v[2, 2] / var(y), 1, tolerance = 1e-12)
+})
+
+test_that("PM.matrix counts a constant decimal column on the lower side", {
+  X <- cbind(rep(0.1, 6), c(-1, -1, -1, -1, -1, 5))
+  p0 <- PM.matrix(0, 0, NULL, X, pop_adj = FALSE, norm = TRUE)
+  p1 <- PM.matrix(1, 1, NULL, X, pop_adj = FALSE, norm = TRUE)
+  expect_equal(p0$cov.matrix[1, 2], 2 / 3)
+  expect_equal(p1$cov.matrix[1, 2], 2 / 3)
+})

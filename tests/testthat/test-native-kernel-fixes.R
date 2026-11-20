@@ -14,7 +14,9 @@ test_that("vectorised LPM/UPM (> 32 targets) match the direct scan at every degr
       expect_equal(l, direct_lpm(d, t, x), tolerance = 1e-10)
       expect_equal(u, direct_upm(d, t, x), tolerance = 1e-10)
       r <- LPM.ratio(d, t, x)
-      expect_true(all(r >= 0 & r <= 1, na.rm = TRUE))
+      expect_true(all(r >= 0 & r <= 1))
+      reference <- vapply(t, function(tt) LPM.ratio(d, tt, x), numeric(1))
+      expect_equal(r, reference, tolerance = 1e-10)
     }
   }
   # Degree 2 just below the maximum used to come out negative.
@@ -166,4 +168,25 @@ test_that("NNS.reg CLASS predicts one of a cell's tied classes", {
   x <- 1:8; y <- c(1, 1, 3, 3, 2, 2, 2, 2)
   f <- NNS.reg(x, y, type = "CLASS", order = 2, plot = FALSE)
   expect_true(all(f$Fitted.xy$y.hat[1:4] %in% c(1, 3)))
+})
+
+test_that("risk-neutral scaling checks the price convention", {
+  prices <- c(95, 100, 105)
+  expect_error(NNS.rescale(prices, 100, 0.05, "riskneutral", 2, "Discunted"),
+               "Terminal.*Discounted")
+  expect_error(NNS.rescale(prices, 100, 0.05, "riskneutral", 2, ""),
+               "Terminal.*Discounted")
+  expect_equal(mean(NNS.rescale(prices, 100, 0.05, "riskneutral", 2)),
+               100 * exp(0.1))
+  expect_equal(mean(NNS.rescale(prices, 100, 0.05, "riskneutral", 2, "discounted")), 100)
+  expect_equal(mean(NNS.rescale(prices, 100, 0.05, "riskneutral", 2, "disc")), 100)
+  expect_equal(mean(NNS.rescale(prices, 100, 0.05, "riskneutral", 2, "Disc")), 100)
+  expect_equal(mean(NNS.rescale(prices, 100, 0.05, "riskneutral", 2, "Term")),
+               100 * exp(0.1))
+})
+
+test_that("min-max scaling preserves missing values in constant windows", {
+  expect_warning(x <- NNS.rescale(c(2, NA, NaN, 2), 5, 10), "midpoint")
+  expect_identical(x, c(7.5, NA, NaN, 7.5))
+  expect_identical(suppressWarnings(NNS.rescale(c(NA, NaN), 5, 10)), c(NA_real_, NaN))
 })

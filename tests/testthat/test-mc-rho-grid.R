@@ -28,3 +28,11 @@ test_that("NNS.MC keeps its default full-range grid", {
     expect_identical(names(m$replicates), paste0("rho = ", old))
   }
 })
+
+test_that("NNS.MC accepts a one-column data frame", {
+  x <- data.frame(passengers = as.numeric(AirPassengers))
+  set.seed(1)
+  expected <- NNS.MC(x$passengers, reps = 3, by = 1)
+  set.seed(1)
+  expect_identical(NNS.MC(x, reps = 3, by = 1), expected)
+})

@@ -248,6 +248,8 @@
     X, y, order, noise.reduction, is.class
   )
 
+  names(X) <- .nns_reg_predictor_names(names(X), "y.hat")
+
   # Maximum order already supplies the exact observed coordinates.  Bypass the
   # generic rightmost-closed native interval setup and build the RPM directly
   # from the exact rank IDs.
@@ -346,19 +348,10 @@
   min(k, rpm.rows)
 }
 
-# The default for ncores = NULL: the machine's cores less one, as documented,
-# and two at most when R CMD check limits cores. The count is detected once
-# per session.
-.nns_core_cache <- new.env(parent = emptyenv())
-
 .nns_default_cores <- function() {
-  detected <- .nns_core_cache$detected
-  if (is.null(detected)) {
-    detected <- suppressWarnings(parallel::detectCores())
-    if (!is.finite(detected)) detected <- 2L
-    .nns_core_cache$detected <- detected
-  }
-  cores <- max(1L, as.integer(detected) - 1L)
+  cores <- max(1L, RcppParallel::defaultNumThreads() - 1L)
+  limit <- suppressWarnings(as.integer(Sys.getenv("RCPP_PARALLEL_NUM_THREADS")))
+  if (!is.na(limit) && limit > 0L) cores <- min(cores, limit)
   limited <- tolower(Sys.getenv("_R_CHECK_LIMIT_CORES_", ""))
   if (nzchar(limited) && limited != "false") cores <- min(cores, 2L)
   cores
@@ -449,7 +442,7 @@ NNS.M.reg <- function(X_n, Y, factor.2.dummy = TRUE, order = NULL,
   k <- max(1L, k)
   
   # Threads for a prediction of `rows` points. An explicit ncores is used as
-  # given. The default uses the machine's cores less one once the prediction
+  # given. The default uses the available threads once the prediction
   # is large enough to repay starting them (about 20 ms on one thread: each
   # point searches the regression points and weights its k neighbours), and
   # one thread below that. The estimates do not depend on the thread count.
@@ -520,6 +513,9 @@ NNS.M.reg <- function(X_n, Y, factor.2.dummy = TRUE, order = NULL,
   }
   
   fitted <- as.data.frame(X, stringsAsFactors = FALSE)
+  fields <- c("y", "y.hat", "NNS.ID", "residuals")
+  if (!is.null(intervals$conf.lower)) fields <- c(fields, "conf.int.neg", "conf.int.pos")
+  names(fitted) <- .nns_reg_predictor_names(names(fitted), fields)
   fitted$y <- y
   fitted$y.hat <- fitted.pred
   fitted$NNS.ID <- partition$ids

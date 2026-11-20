@@ -334,7 +334,7 @@ plot_nns_part(part)
 ```
 
 <center>
-![Figure 21.1. k-means (top) with analyst-specified $K=3$ versus NNS.part (bottom) with data-determined clusters. The directional partition uses a depth and occupancy rule without a prespecified count; k-means assigns observations to three centroid-based Voronoi regions.](images/ch21_kmeans_comp.png)
+![Figure 21.1. k-means (top) with analyst-specified $K=3$ versus NNS.part (bottom) with data-determined clusters. The lower panel uses the default gravity splits. Set `noise.reduction = "mean"` in the R call to use the arithmetic means derived above.](images/ch21_kmeans_comp.png)
 </center>
 
 ---

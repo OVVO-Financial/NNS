@@ -526,7 +526,10 @@ NumericVector CoUPM_RCPP(
    if((is_supplied_target(target) || (is<DataFrame>(target) && !target.isNULL()))){
      tgt=as<NumericVector>(target);
    }else{
-     tgt=colMeans(variable_matrix);
+     tgt = NumericVector(variable_cols);
+     for (size_t j = 0; j < variable_cols; ++j) {
+       tgt[j] = mean(variable_matrix(_, j));
+     }
    }
    
    size_t target_length=tgt.size();

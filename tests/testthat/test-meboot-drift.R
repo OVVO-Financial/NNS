@@ -9,6 +9,14 @@ meboot_reps <- function(...) {
 mean_slope <- function(R) mean(apply(R, 2, function(r) coef(lm(r ~ t))[2]))
 mean_detrended_sd <- function(R) mean(apply(R, 2, function(r) sd(resid(lm(r ~ t)))))
 
+test_that("a one-column data frame bootstraps like its column", {
+  x <- data.frame(passengers = as.numeric(AirPassengers))
+  set.seed(1)
+  expected <- NNS.meboot(x$passengers, reps = 3, rho = 1)
+  set.seed(1)
+  expect_identical(NNS.meboot(x, reps = 3, rho = 1), expected)
+})
+
 test_that("drift = FALSE replicates are a flat baseline plus residual-scale noise", {
   R <- meboot_reps(drift = FALSE)
   expect_lt(abs(mean_slope(R)), 0.1)
@@ -22,14 +30,23 @@ test_that("target_drift and target_drift_scale set the replicate slope", {
   expect_lt(mean_detrended_sd(meboot_reps(target_drift = 1)), 1.1 * sd(res))
 })
 
-test_that("scl.adjustment kappa uses the residual mean and sd", {
-  set.seed(1)
-  b <- NNS.meboot(x, reps = 50, rho = 1, scl.adjustment = TRUE)
-  zz <- c(b["xmin", ]$xmin, b["z", ]$z, b["xmax", ]$xmax)
-  uv <- (sum((b["desintxb", ]$desintxb - mean(res))^2) + sum(diff(zz^2) / 12)) / length(x)
-  expect_equal(b["kappa", ]$kappa, sd(res) / sqrt(uv) - 1, tolerance = 1e-10)
-  expect_equal(mean(apply(b["replicates", ]$replicates, 2, sd)),
-               mean(apply(meboot_reps(), 2, sd)), tolerance = 0.01)
+test_that("scl.adjustment scales the residual draw variance to the sample variance", {
+  residuals <- c(1, 1, -4, 1, 1)
+  x <- 2 * (1:5) + residuals
+  draw <- function(...) {
+    set.seed(1)
+    NNS.meboot(x, reps = 4, target_drift = 0, digits = 14, expand.residual.sd = FALSE,
+               expand.sd = FALSE, force.clt = FALSE, ...)
+  }
+  # Each tail has mass 1/5. The interior is uniform on [0,1] with mass 1/20 and has mass 11/20 at 1.
+  fixed <- draw(scl.adjustment = TRUE, xmin = -6.5, xmax = 3.5)
+  shifted <- draw(scl.adjustment = TRUE, xmin = -6.5, xmax = 3.5, reachbnd = FALSE)
+  expect_equal((1 + fixed["kappa", ][[1]])^2 * 8399/1600, var(residuals))
+  expect_equal((1 + shifted["kappa", ][[1]])^2 * 4399/1600, var(residuals))
+
+  adjusted <- draw(scl.adjustment = TRUE)
+  expect_equal(adjusted["replicates", ][[1]] - mean(x),
+               (1 + adjusted["kappa", ][[1]]) * (draw()["replicates", ][[1]] - mean(x)))
 })
 
 test_that("force.clt spreads changed-drift replicate means on the residual scale", {
@@ -51,6 +68,21 @@ test_that("force.clt spreads changed-drift replicate means on the residual scale
   ref <- 5 * tt + resid(fit)
   expect_equal(mean(sloped), mean(y), tolerance = 1e-6)
   expect_equal(sd(sloped), sd(ref) / sqrt(100), tolerance = 1e-5)
+})
+
+test_that("level limits clip reconstructed paths drawn from the same residual tails", {
+  x <- as.numeric(AirPassengers) - min(AirPassengers) + 1
+  draw <- function(...) {
+    set.seed(1)
+    NNS.meboot(x, reps = 5, rho = 1, ...)
+  }
+  raw <- draw(expand.sd = FALSE, force.clt = FALSE)
+  bounded <- draw(xmin = 0, xmax = 400)
+  paths <- raw["replicates", ][[1]]
+  expect_lt(min(paths), 0)
+  expect_gt(max(paths), 400)
+  expect_identical(bounded["replicates", ][[1]], pmin(pmax(paths, 0), 400))
+  expect_identical(bounded[c("xmin", "xmax"), ], raw[c("xmin", "xmax"), ])
 })
 
 test_that("drift = FALSE keeps mean(x) as the replicate level", {
@@ -93,4 +125,12 @@ test_that("force.clt spreads replicate means like means of n observations (#101)
   # Before: 0.841 at 20 replicates and 0.420 at 80 (sd(x) / sqrt(reps)).
   expect_lt(abs(s80 / s20 - 1), 0.2)
   expect_equal(s80, sd(x) / sqrt(length(x)), tolerance = 0.2)
+})
+
+test_that("a bootstrap path retains its monthly calendar", {
+  set.seed(1)
+  paths <- NNS.meboot(AirPassengers, reps = 3, rho = 1)["replicates", ][[1]]
+  expect_equal(frequency(paths[, 1]), 12)
+  expect_equal(start(paths[, 1]), c(1949, 1))
+  expect_length(window(paths[, 1], start = 1950, end = c(1950, 12)), 12)
 })

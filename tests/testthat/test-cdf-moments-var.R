@@ -1,6 +1,7 @@
 strict_joint_survival <- function(A, t) mean(rowSums(sweep(A, 2, t, ">")) == ncol(A))
 
 test_that("NNS.moments sample skewness is the adjusted Fisher-Pearson G1", {
+  expect_identical(NNS.moments(c(0.1, 0.2), population = FALSE)$skewness, NaN)
   expect_equal(NNS.moments(c(1, 2, 4, 8, 16), population = FALSE)$skewness, 1.325315, tolerance = 1e-6)
 })
 
@@ -38,6 +39,14 @@ test_that("multivariate target is bounds-checked on every coordinate", {
 test_that("multivariate target must have one value per column", {
   A <- cbind(c(0, 1, 2), c(0, 1, 2), c(0, 1, 2))
   expect_error(NNS.CDF(A, 0, target = c(1, 1), plot = FALSE), "one value per column")
+})
+
+test_that("joint CDF rejects an ordered factor threshold", {
+  corners <- as.matrix(expand.grid(a = c(-1, 1), b = c(-1, 1)))
+  zeros <- ordered(c("0", "0"), levels = c("-1", "0", "1"))
+  expect_equal(NNS.CDF(corners, target = c(0, 0), plot = FALSE)$target.value, 0.25)
+  expect_error(NNS.CDF(corners, target = zeros, plot = FALSE),
+               "`target` must be numeric, not a factor.", fixed = TRUE)
 })
 
 test_that("degree > 0 multivariate survival is the normalised joint UPM", {
@@ -142,4 +151,41 @@ test_that("a factor column in a tibble or data.table is an error in the VaR func
   x <- structure(list(v = c(10, 20, 30)), class = c("tbl_df", "tbl", "data.frame"), row.names = 1:3)
   expect_equal(LPM.VaR(0.5, 1, x), LPM.VaR(0.5, 1, c(10, 20, 30)))
   expect_equal(UPM.VaR(0.5, 1, x), UPM.VaR(0.5, 1, c(10, 20, 30)))
+})
+
+test_that("VaR rejects factor percentiles in both tails", {
+  p <- factor("0.05")
+  expect_error(LPM.VaR(p, 0, 1:101), "percentile.*factor")
+  expect_error(UPM.VaR(p, 0, 1:101), "percentile.*factor")
+  expect_equal(unname(LPM.VaR(.05, 0, 1:101)), 6)
+  expect_equal(unname(UPM.VaR(.05, 0, 1:101)), 96)
+})
+
+test_that("VaR requires a column selection for a dated table", {
+  r <- c(-.03, -.01, .01, .03)
+  day <- as.Date("2024-01-01") + 0:3
+  tbl <- structure(data.frame(day, r), class = c("tbl_df", "tbl", "data.frame"))
+  dt <- structure(data.frame(r, day), class = c("data.table", "data.frame"))
+  expect_error(UPM.VaR(.05, 0, tbl), "x.*one column")
+  expect_error(LPM.VaR(.05, 0, dt), "x.*one column")
+  expect_error(LPM.VaR(.05, 0, data.frame(day = day[1], r = r[1])), "x.*one column")
+  tbl$r <- factor(r)
+  expect_error(UPM.VaR(.05, 0, tbl), "`x` must be numeric, not a factor.", fixed = TRUE)
+})
+
+test_that("VaR keeps scalar lists and one-column time series", {
+  s <- ts(1:3)
+  tbl <- structure(list(v = s), class = c("tbl_df", "tbl", "data.frame"), row.names = 1:3)
+  dt <- structure(list(v = s), class = c("data.table", "data.frame"), row.names = 1:3)
+  expect_identical(LPM.VaR(.2, 0, tbl), LPM.VaR(.2, 0, 1:3))
+  expect_identical(UPM.VaR(.2, 0, dt), UPM.VaR(.2, 0, 1:3))
+  expect_identical(UPM.VaR(.2, 0, s), UPM.VaR(.2, 0, 1:3))
+  expect_identical(LPM.VaR(list(.2, .8), 0, as.list(1:3)), LPM.VaR(c(.2, .8), 0, 1:3))
+  expect_identical(UPM.VaR(.2, 0, c(FALSE, TRUE)), UPM.VaR(.2, 0, 0:1))
+})
+
+test_that("VaR accepts a one-dimensional array and a row of percentiles", {
+  x <- tapply(1:4, 1:4, mean)
+  expect_identical(LPM.VaR(matrix(c(.25, .75), nrow = 1), 0, x),
+                   stats::quantile(1:4, c(.25, .75)))
 })

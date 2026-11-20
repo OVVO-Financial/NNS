@@ -136,13 +136,15 @@
 # series is broken. The permutation null for time series in NNS.caus.
 .nns_caus_shift_offsets <- function(n, tau = 0L) {
   m <- max(as.integer(tau) + 1L, as.integer(ceiling(n / 10)))
-  if (n - 2L * m >= 0L) m:(n - m) else seq_len(n - 1L)
+  if (n - 2L * m >= 0L) m:(n - m) else integer(0)
 }
 
 
 # Distinct offsets only: a repeated one adds no information but shrinks the p-value.
 .nns_caus_shift_draw <- function(n, tau, nperm) {
   K <- .nns_caus_shift_offsets(n, tau)
+  if (!length(K))
+    stop("No admissible circular shift for n = ", n, " and tau = ", tau, ".", call. = FALSE)
   if (length(K) <= nperm) K else K[sample.int(length(K), nperm)]
 }
 

@@ -2,11 +2,12 @@
 #'
 #' Internal kernel function for NNS multivariate regression \link{NNS.reg} parallel instances.
 #' @param rpm REGRESSION.POINT.MATRIX from \link{NNS.reg}
-#' @param dist.estimate Vector to generate distances from.
+#' @param dist.estimate Query coordinates. Matching names select RPM features. If no names match, coordinates use the first numeric features in order. A partial match or a repeated matching name gives an error.
+#' Each RPM row must share at least one finite coordinate with the query.
 #' @param k \code{n.best} from \link{NNS.reg}
 #' @param class if classification problem.
 #'
-#' @return Returns sum of weighted distances.
+#' @return A single numeric prediction at \code{dist.estimate}, in the units of \code{y.hat} for regression or a numeric class code for classification. Equal distances are ordered by RPM row.
 #'
 #'
 #' @export
@@ -25,15 +26,15 @@ NNS.distance <- function(rpm, dist.estimate, k = "all", class = NULL) {
   feat_all <- setdiff(names(rpm), "y.hat")
   
   # 3) choose columns to match dist.estimate
-  if (!is.null(names(dest)) && all(names(dest) %in% feat_all)) {
-    # align by names, preferred
-    feat <- names(dest)
-  } else {
+  feat <- .nns_distance_names(names(dest), feat_all)
+  if (is.null(feat)) {
     # fall back: take the first n numeric columns, like the original
     numerics <- vapply(rpm[, feat_all, drop = FALSE], is.numeric, logical(1L))
     feat <- feat_all[numerics]
     if (length(feat) < n) stop("Not enough numeric feature columns in rpm")
     feat <- feat[seq_len(n)]
+  } else {
+    dest <- dest[feat]
   }
 
   X <- as.matrix(rpm[, feat, drop = FALSE])
@@ -58,4 +59,13 @@ NNS.distance <- function(rpm, dist.estimate, k = "all", class = NULL) {
   
   # 5) call the C++ core
   NNS_distance_cpp(X, y.hat, as.numeric(dest), as.integer(k), !is.null(class))
+}
+
+.nns_distance_names <- function(supplied, available) {
+  matched <- supplied %in% available
+  if (!any(matched)) return(NULL)
+  if (!all(matched))
+    stop("Unknown distance feature: ", paste(supplied[!matched], collapse = ", "))
+  if (anyDuplicated(supplied)) stop("Duplicate distance feature names")
+  intersect(available, supplied)
 }
