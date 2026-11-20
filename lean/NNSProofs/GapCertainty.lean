@@ -753,8 +753,6 @@ theorem certainty_chapter_example :
 
 def c01 : ℝ := 3602879701896397 / 36028797018963968
 
-def c01pooledR : ℝ := 7205759403792795 / 72057594037927936
-
 def c01ctrl : Fin 2 → ℝ := fun _ => c01
 
 def c01trt : Fin 4 → ℝ := ![c01 - 1 / 16, c01 + 1 / 16, c01, c01]
@@ -770,22 +768,6 @@ theorem certainty_c01 :
   · rw [certainty_const_var_meansOnly (x := c01ctrl) (c := c01) (by norm_num) (by norm_num)
       (fun _ => rfl) hy hmy]
     norm_num [popAdj]
-
-theorem certaintyAt_c01_pooledR (T : Targets) :
-    c01 < c01pooledR ∧ certaintyAt c01ctrl c01trt true false c01pooledR T = 0 := by
-  have hlt : c01 < c01pooledR := by norm_num [c01, c01pooledR]
-  have hcx : constVal c01ctrl = some c01 := constVal_eq_some.mpr ⟨by norm_num, fun _ => rfl⟩
-  have hne : constVal c01ctrl ≠ some c01pooledR := by
-    rw [hcx]; intro h; exact hlt.ne (Option.some_injective _ h)
-  have hr : LPMratio 1 c01pooledR c01ctrl = 1 :=
-    LPMratio_eq_one_of_forall_le (by norm_num) 1 fun _ => hlt.le
-  have hc : centralDist c01ctrl c01trt false c01pooledR = 1 / 2 := by
-    simp only [centralDist, Bool.false_eq_true, ↓reduceIte, areaDist, hne, hr]
-    have h2 := abs_sub_half_le (LPMratio_mem_Icc 1 c01pooledR c01trt)
-    rw [min_eq_left (le_max_of_le_left (by norm_num))]
-  refine ⟨hlt, ?_⟩
-  rw [certaintyAt_eq_mul (by norm_num) (by norm_num), hc]
-  simp [rawScore]
 
 def sepCtrl : Fin 3 → ℝ := fun _ => 0
 

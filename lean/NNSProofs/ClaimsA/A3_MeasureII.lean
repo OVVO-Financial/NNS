@@ -16,12 +16,12 @@ variable {μ ν : Measure ℝ} {Ω : Type*} [MeasurableSpace Ω] {P : Measure Ω
 variable {n k : ℕ}
 
 theorem claim_C142 (hX : Measurable X) (r : ℕ) (t : ℝ) :
-    mUPM r t (P.map X) = ∫ w, (if r = 0 then (if t < X w then 1 else 0)
+    eUPM r t (P.map X) = ∫⁻ w, ENNReal.ofReal (if r = 0 then (if t < X w then 1 else 0)
       else max (X w - t) 0 ^ r) ∂P ∧
-    mLPM r t (P.map X) = ∫ w, (if r = 0 then (if X w ≤ t then 1 else 0)
+    eLPM r t (P.map X) = ∫⁻ w, ENNReal.ofReal (if r = 0 then (if X w ≤ t then 1 else 0)
       else max (t - X w) 0 ^ r) ∂P := by
-  rw [mUPM, mLPM, integral_map hX.aemeasurable (upperDev_measurable r t).aestronglyMeasurable,
-    integral_map hX.aemeasurable (lowerDev_measurable r t).aestronglyMeasurable]
+  rw [eUPM, eLPM, lintegral_map (upperDev_measurable r t).ennreal_ofReal hX,
+    lintegral_map (lowerDev_measurable r t).ennreal_ofReal hX]
   by_cases hr : r = 0
   · simp [hr, upperDev, lowerDev]
   · simp [hr, upperDev_eq_max_pow hr, lowerDev_eq_max_pow hr]
@@ -36,11 +36,15 @@ theorem claim_C143 [IsProbabilityMeasure μ] (r : ℕ) (t : ℝ) (h : MemLp id r
     integrable_lowerDev h t, integrable_upperDev h t, rfl, rfl⟩
 
 theorem claim_C144 (hX : Measurable X) (r : ℕ) (t : ℝ) :
-    mLPM r t (P.map X) = ∫ w in {w | X w ≤ t}, (t - X w) ^ r ∂P ∧
-    mUPM r t (P.map X) = ∫ w in {w | t < X w}, (X w - t) ^ r ∂P := by
-  rw [mLPM_eq_setIntegral, mUPM_eq_setIntegral]
-  exact ⟨setIntegral_map measurableSet_Iic (by fun_prop) hX.aemeasurable,
-    setIntegral_map measurableSet_Ioi (by fun_prop) hX.aemeasurable⟩
+    eLPM r t (P.map X) = ∫⁻ w in {w | X w ≤ t}, ENNReal.ofReal ((t - X w) ^ r) ∂P ∧
+    eUPM r t (P.map X) = ∫⁻ w in {w | t < X w}, ENNReal.ofReal ((X w - t) ^ r) ∂P := by
+  rw [eLPM, eUPM, lintegral_map (lowerDev_measurable r t).ennreal_ofReal hX,
+    lintegral_map (upperDev_measurable r t).ennreal_ofReal hX]
+  constructor
+  · rw [← lintegral_indicator (s := {w | X w ≤ t}) (hX measurableSet_Iic)]
+    exact lintegral_congr fun w => by by_cases hw : X w ≤ t <;> simp [lowerDev, hw]
+  · rw [← lintegral_indicator (s := {w | t < X w}) (hX measurableSet_Ioi)]
+    exact lintegral_congr fun w => by by_cases hw : t < X w <;> simp [upperDev, hw]
 
 theorem claim_C146 [IsProbabilityMeasure μ] (r : ℕ) (h : MemLp id r μ) (t : ℝ) :
     ∫ x, (x - t) ^ r ∂μ = mUPM r t μ + (-1) ^ r * mLPM r t μ :=
@@ -81,8 +85,8 @@ theorem claim_C157 [IsProbabilityMeasure P] (hX : Measurable X) (t : ℝ) :
     {w | X w ≤ t}ᶜ = {w | t < X w} ∧
     (∀ g : Ω → ℝ, Integrable g P → ∫ w, g w ∂P =
       (∫ w in {w | X w ≤ t}, g w ∂P) + ∫ w in {w | t < X w}, g w ∂P) ∧
-    (∀ r : ℕ, mLPM r t (P.map X) = ∫ w in {w | X w ≤ t}, (t - X w) ^ r ∂P ∧
-      mUPM r t (P.map X) = ∫ w in {w | t < X w}, (X w - t) ^ r ∂P) ∧
+    (∀ r : ℕ, eLPM r t (P.map X) = ∫⁻ w in {w | X w ≤ t}, ENNReal.ofReal ((t - X w) ^ r) ∂P ∧
+      eUPM r t (P.map X) = ∫⁻ w in {w | t < X w}, ENNReal.ofReal ((X w - t) ^ r) ∂P) ∧
     ∀ r : ℕ, MemLp X r P → ∫ w, (X w - t) ^ r ∂P =
       mUPM r t (P.map X) + (-1) ^ r * mLPM r t (P.map X) := by
   have hc : {w | X w ≤ t}ᶜ = {w | t < X w} := by ext; simp
@@ -93,8 +97,8 @@ theorem claim_C157 [IsProbabilityMeasure P] (hX : Measurable X) (t : ℝ) :
 
 theorem claim_C158 [IsProbabilityMeasure P] (hX : Measurable X) (r : ℕ) (t : ℝ) :
     (∀ w, X w - t = max (X w - t) 0 - max (t - X w) 0) ∧
-    mLPM r t (P.map X) = ∫ w in {w | X w ≤ t}, (t - X w) ^ r ∂P ∧
-    mUPM r t (P.map X) = ∫ w in {w | t < X w}, (X w - t) ^ r ∂P ∧
+    eLPM r t (P.map X) = ∫⁻ w in {w | X w ≤ t}, ENNReal.ofReal ((t - X w) ^ r) ∂P ∧
+    eUPM r t (P.map X) = ∫⁻ w in {w | t < X w}, ENNReal.ofReal ((X w - t) ^ r) ∂P ∧
     (MemLp X r P → ∫ w, (X w - t) ^ r ∂P =
       mUPM r t (P.map X) + (-1) ^ r * mLPM r t (P.map X)) := by
   obtain ⟨hl, hu⟩ := claim_C144 (P := P) hX r t

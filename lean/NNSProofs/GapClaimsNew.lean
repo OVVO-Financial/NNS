@@ -244,16 +244,14 @@ theorem claim_C309 :
         = 81 / 100 ∧
       certainty (fun _ : Fin 10 => (0 : ℝ)) (fun j : Fin 10 => (-1 : ℝ) ^ (j : ℕ)) false false
         = 81 / 250) ∧
-    (mean c01ctrl = c01 ∧ mean c01trt = c01 ∧ certainty c01ctrl c01trt true false = 4 / 9 ∧
-      c01 < c01pooledR ∧ ∀ T, certaintyAt c01ctrl c01trt true false c01pooledR T = 0) := by
+    (mean c01ctrl = c01 ∧ mean c01trt = c01 ∧ certainty c01ctrl c01trt true false = 4 / 9) := by
   refine ⟨fun x c hx => ⟨(LPM_one_const hx).1, (LPM_one_const hx).2, balance_const hx⟩,
     areaDist_const_target,
     fun x y c hn hm hx hy mo me => certainty_const_const hn hm hx hy mo me,
     fun x y c hn hm hx hy hmean => ⟨certainty_const_var_meansOnly hn hm hx hy hmean,
       certainty_const_var_full hn hm hx hy hmean⟩,
     certainty_chapter_example,
-    ⟨certainty_c01.1, certainty_c01.2.1, certainty_c01.2.2.2,
-      (certaintyAt_c01_pooledR ⟨0, 0, 0, 0⟩).1, fun T => (certaintyAt_c01_pooledR T).2⟩⟩
+    ⟨certainty_c01.1, certainty_c01.2.1, certainty_c01.2.2.2⟩⟩
 
 theorem claim_C310 :
     (∀ (x : Fin n → ℝ) (y : Fin m → ℝ) (meansOnly medians : Bool) (z : ℝ) (T : Targets),
@@ -384,25 +382,23 @@ theorem claim_C343 :
   exact ⟨e, he, hev, fun u hu => mean_comp_le_of_fsdUni hr hr hev hu⟩
 
 theorem claim_C344 :
-    (∀ {k : ℕ} (D : Fin k → Fin k → ℕ), Acyclic D →
+    (∀ {k r : ℕ} (X : Fin k → Fin r → ℝ), 0 < r → ∀ d, (d = 1 ∨ d = 2 ∨ d = 3) → ∀ b,
+      let D := domMatrix X d b
+      Acyclic D ∧
       (∀ (R : Finset (Fin k)) (i j : Fin k), i ∈ effSet D R → j ∈ effSet D R → D i j ≠ 1) ∧
       (∀ minC : ℕ, 0 < minC → ∀ S ∈ (sdCluster D minC).dropLast, ∀ i ∈ S, ∀ j ∈ S, D i j ≠ 1)) ∧
-    (∀ {k r : ℕ} (X : Fin k → Fin r → ℝ), 0 < r → Acyclic (domMatrix X 1 true)) ∧
     (sdCluster (domMatrix chainFamily 1 true) 2 = [{0}, {1, 2}] ∧
       sdDomPairCentred (chainFamily 1) (chainFamily 2) 1 true = 1) ∧
-    (sdCluster mergeD 2 = [{0, 1, 2}] ∧ mergeD 0 2 = 1 ∧ Acyclic mergeD) ∧
     ((0 : Fin 3) ∈ peelLevel (domMatrix peelFamily 1 true) 0 ∧
       (2 : Fin 3) ∈ peelLevel (domMatrix peelFamily 1 true) 0 ∧
       (1 : Fin 3) ∈ peelLevel (domMatrix peelFamily 1 true) 1 ∧
       sdDomPairCentred (peelFamily 0) (peelFamily 1) 1 true = 1 ∧
-      sdDomPairCentred (peelFamily 2) (peelFamily 1) 1 true ≠ 1) ∧
-    (sdCluster ssdCycleD 1 = [{0, 1, 2}, {3}] ∧
-      ssdCycleD 0 1 = 1 ∧ ssdCycleD 1 2 = 1 ∧ ssdCycleD 2 0 = 1) :=
-  ⟨fun _ hD => ⟨fun R _ _ hi hj => effSet_antichain_of_acyclic hD R hi hj,
-      fun minC _ _ hS _ hi _ hj => sdCluster_antichain_of_acyclic hD minC hS hi hj⟩,
-    fun X hr => acyclic_domMatrix hr X (Or.inl rfl) true,
-    cluster_witness, ⟨merge_witness.1, merge_witness.2, mergeD_acyclic⟩, peel_witness,
-    ⟨ssdCycle_cluster.2.1, ssdCycle_cluster.2.2⟩⟩
+      sdDomPairCentred (peelFamily 2) (peelFamily 1) 1 true ≠ 1) := by
+  refine ⟨?_, cluster_witness, peel_witness⟩
+  intro k r X hr d hd b
+  have hD := acyclic_domMatrix hr X hd b
+  exact ⟨hD, fun R _ _ hi hj => effSet_antichain_of_acyclic hD R hi hj,
+    fun minC _ _ hS _ hi _ hj => sdCluster_antichain_of_acyclic hD minC hS hi hj⟩
 
 theorem claim_C519 :
     (∀ σ τ : Equiv.Perm (Fin 1000),
