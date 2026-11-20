@@ -34,3 +34,9 @@ test_that("variables left when peeling stops at once form the final cluster", {
   expect_warning(res <- NNS.SD.cluster(A[, "A", drop = FALSE], dendrogram = TRUE), "Not enough variables")
   expect_identical(res$Clusters, list(Cluster_1 = "A"))
 })
+
+test_that("columns with the same name can belong to different clusters", {
+  assets <- cbind(fund = c(-0.02, -0.01, 0), fund = c(0.01, 0.02, 0.03), cash = c(0, 0, 0))
+  expect_identical(NNS.SD.cluster(assets)$Clusters,
+                   list(Cluster_1 = "fund", Cluster_2 = "cash", Cluster_3 = "fund"))
+})
