@@ -87,9 +87,8 @@ NNS.dep <- function(x,
     if (is.null(y)) stop("p.value = TRUE requires both x and y.")
     if (length(x) != length(y)) stop("x and y must have the same length.")
     
-    ties.x <- anyDuplicated(x) > 0L
-    ties.y <- anyDuplicated(y) > 0L
     y_p <- replicate(100L, sample.int(length(y)))
+    same <- .nns_dep_perm_matches(x, y, y_p, asym)
     x   <- cbind(x, y, matrix(y[y_p], ncol = ncol(y_p), byrow = FALSE))
     y   <- NULL
   }
@@ -104,6 +103,8 @@ NNS.dep <- function(x,
         part <- .nns_dep_part(nrow(x))
         own.x <- part(x[, 1L], x[, 1L], "XONLY")
         own.y <- part(x[, 2L], x[, 2L], "XONLY")
+        ties.x <- anyDuplicated(x[, 1L]) > 0L
+        ties.y <- anyDuplicated(x[, 2L]) > 0L
         columns <- lapply(seq_len(ncol(x)), function(g) {
           own.g <- if (g == 1L) own.x else if (g == 2L) own.y else own.y[y_p[, g - 2L]]
           .nns_dep_native(x[, 1L], x[, g], own.x, own.g, asym, part,
@@ -117,6 +118,10 @@ NNS.dep <- function(x,
       cors   <- unlist(lapply(nns.mc, `[[`, "Correlation"))
       deps   <- unlist(lapply(nns.mc, `[[`, "Dependence"))
       
+      matched <- which(same != 0L)
+      cors[matched + 2L] <- same[matched] * cors[2L]
+      deps[matched + 2L] <- deps[2L]
+
       cor_lower_CI <- LPM.VaR(.025, 0, cors[-c(1L, 2L)])
       cor_upper_CI <- UPM.VaR(.025, 0, cors[-c(1L, 2L)])
       dep_lower_CI <- LPM.VaR(.025, 0, deps[-c(1L, 2L)])
@@ -142,17 +147,15 @@ NNS.dep <- function(x,
         abline(v = dep_upper_CI, col = "red", lwd = 2, lty = 3)
       }
       
-      # Reordering an equal joint table can round its score differently.
-      tol <- if (ties.x || ties.y) 1e-12 else 0
       return(list(
         "Correlation"         = as.numeric(cors[2L]),
-        "Correlation p.value" = min(1, 2 * min(1 + sum(cors[-c(1L, 2L)] <= cors[2L] + tol),
-                                               1 + sum(cors[-c(1L, 2L)] >= cors[2L] - tol)) /
+        "Correlation p.value" = min(1, 2 * min(1 + sum(cors[-c(1L, 2L)] <= cors[2L]),
+                                               1 + sum(cors[-c(1L, 2L)] >= cors[2L])) /
                                        (1 + length(cors[-c(1L, 2L)]))),
         "Correlation 95% CIs" = c(cor_lower_CI, cor_upper_CI),
         "Dependence"          = as.numeric(deps[2L]),
         # Dependence is a magnitude: only the upper tail is evidence against independence.
-        "Dependence p.value"  = (1 + sum(deps[-c(1L, 2L)] >= deps[2L] - tol)) /
+        "Dependence p.value"  = (1 + sum(deps[-c(1L, 2L)] >= deps[2L])) /
                                 (1 + length(deps[-c(1L, 2L)])),
         "Dependence 95% CIs"  = c(dep_lower_CI, dep_upper_CI)
       ))
@@ -227,6 +230,32 @@ NNS.dep <- function(x,
     quad_joint = qj,
     asym       = isTRUE(asym)
   )
+}
+
+
+# Matches to the observed table, signed by the orientation of Correlation.
+.nns_dep_perm_matches <- function(x, y, perms, asym) {
+  if (length(unique(x)) == 2L && length(unique(y)) == 2L) {
+    high.x <- x == max(x)
+    high.y <- y == max(y)
+    overlap <- sum(high.x & high.y)
+    draws <- colSums(matrix(high.y[perms], nrow = length(y)) & high.x)
+    # Swapping the labels of a balanced binary margin reverses Correlation.
+    reflected <- (sum(high.x) * 2 == length(x) & draws == sum(high.y) - overlap) |
+                 (sum(high.y) * 2 == length(y) & draws == sum(high.x) - overlap)
+    return(ifelse(draws == overlap, 1L, ifelse(reflected, -1L, 0L)))
+  }
+
+  transposed <- if (!isTRUE(asym) && identical(sort(x), sort(y))) x[order(y, x)]
+  if (!anyDuplicated(x) && is.null(transposed)) return(integer(ncol(perms)))
+
+  # With fixed x, the second column of the sorted pairs identifies the joint table.
+  observed <- y[order(x, y)]
+  vapply(seq_len(ncol(perms)), function(j) {
+    draw <- y[perms[, j]]
+    key <- draw[order(x, draw)]
+    identical(key, observed) || identical(key, transposed)
+  }, logical(1))
 }
 
 
