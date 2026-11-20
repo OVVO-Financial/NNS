@@ -263,3 +263,14 @@ test_that("a declared NA class keeps its own probability column", {
   is.na(y)[1] <- TRUE
   expect_error(run(y), "missing values")
 })
+
+test_that("per-class thresholds match a declared NA class by name", {
+  y <- factor(rep(c("b", NA, "a"), each = 10), levels = c("b", NA, "a"), exclude = NULL)
+  set.seed(201)
+  x <- data.frame(signal = as.integer(y) + rnorm(30), noise = rnorm(30))
+  fit <- function(th) NNS.reg(x, y, point.est = x[c(1, 11, 21), ], threshold = th,
+                              dim.red.method = "cor", plot = FALSE)
+  th <- setNames(c(0, .2, .7), levels(y))
+  expect_equal(fit(rev(th))$Point.probabilities, fit(unname(th))$Point.probabilities,
+               tolerance = 1e-12)
+})

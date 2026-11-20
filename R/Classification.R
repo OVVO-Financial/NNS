@@ -145,7 +145,7 @@
     class.threshold <- if (length(threshold) <= 1L) {
       rep(threshold, length(values))
     } else if (!is.null(names(threshold)) && all(labels %in% names(threshold))) {
-      unname(threshold[labels])
+      unname(threshold[match(labels, names(threshold))])
     } else if (length(threshold) == length(values)) {
       unname(threshold)
     } else {
