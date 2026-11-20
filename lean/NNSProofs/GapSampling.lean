@@ -158,6 +158,13 @@ theorem ae_tendsto_LPM (X : ℕ → Ω → ℝ) (r : ℕ) (t : ℝ)
       (𝓝 (mLPM r t (P.map (X 0)))) :=
   ae_tendsto_average X (lowerDev_measurable r t) hint hindep hident
 
+theorem ae_tendsto_UPM (X : ℕ → Ω → ℝ) (r : ℕ) (t : ℝ)
+    (hint : Integrable (fun ω => upperDev r t (X 0 ω)) P)
+    (hindep : Pairwise ((· ⟂ᵢ[P] ·) on X)) (hident : ∀ i, IdentDistrib (X i) (X 0) P P) :
+    ∀ᵐ ω ∂P, Tendsto (fun n : ℕ => UPM r t fun i : Fin n => X i ω) atTop
+      (𝓝 (mUPM r t (P.map (X 0)))) :=
+  ae_tendsto_average X (upperDev_measurable r t) hint hindep hident
+
 variable (X Y : ℕ → Ω → ℝ) (r s : ℕ) (tx ty : ℝ)
 
 end LLN
@@ -166,6 +173,10 @@ section GlivenkoCantelli
 
 def ecdfLeft {n : ℕ} (t : ℝ) (x : Fin n → ℝ) : ℝ :=
   (∑ i, (Iio t).indicator (1 : ℝ → ℝ) (x i)) / n
+
+theorem ecdfLeft_eq_card {n : ℕ} (t : ℝ) (x : Fin n → ℝ) :
+    ecdfLeft t x = (Finset.card {i | x i < t} : ℝ) / n := by
+  simp [ecdfLeft, indicator_apply, Finset.sum_boole]
 
 private lemma LPM_zero_le_ecdfLeft {n : ℕ} {t u : ℝ} (htu : t < u) (x : Fin n → ℝ) :
     LPM 0 t x ≤ ecdfLeft u x := by

@@ -1,6 +1,7 @@
 """Regenerate the claim index and counterexamples in README.md."""
 import csv
 import re
+import subprocess
 from collections import Counter
 from pathlib import Path
 
@@ -23,6 +24,31 @@ def source_link(reference):
     return f'[{label}, {lines}](https://github.com/OVVO-Financial/NNS/blob/{PIN}/{path}#{anchor})'
 
 
+def check_theorems(rows, locations):
+    pairs = []
+    for row in rows:
+        claim, name = row['claim'], row['theorem']
+        if not re.fullmatch(r'(?:[A-Za-z_]\w*\.)+claim_' + re.escape(claim), name):
+            raise ValueError(f'Invalid theorem name for {claim}: {name}')
+        path = locations[claim].split('#')[0]
+        module = '.'.join(Path(path).with_suffix('').parts)
+        pairs.append(f'(`{name}, `{module})')
+    checks = """import Lean
+import NNSProofs
+open Lean in
+run_cmd
+  let env ← getEnv
+  let entries : List (Name × Name) := [""" + ',\n    '.join(pairs) + """]
+  for (name, mod) in entries do
+    unless env.find? name matches some (.thmInfo _) do
+      throwError "missing theorem {name}"
+    unless (env.getModuleIdxFor? name).map (env.header.moduleNames[·.toNat]!) == some mod do
+      throwError "{name} is outside {mod}"
+"""
+    subprocess.run(['lake', 'build', 'NNSProofs'], cwd=ROOT, check=True, stdout=subprocess.DEVNULL)
+    subprocess.run(['lake', 'env', 'lean', '--stdin'], cwd=ROOT, input=checks, text=True, check=True)
+
+
 def main():
     locations = {}
     for path in (ROOT / 'NNSProofs').rglob('*.lean'):
@@ -38,6 +64,8 @@ def main():
     claims = {row['claim'] for row in rows}
     if len(claims) != len(rows) or claims != locations.keys():
         raise ValueError('Claim IDs in claims.tsv and the Lean sources differ')
+
+    check_theorems(rows, locations)
 
     readme = ROOT / 'README.md'
     heading = '\n## Claim index\n'
@@ -64,8 +92,6 @@ def main():
                  '|---|---|---|---|'])
     for row in rows:
         claim, theorem = row['claim'], row['theorem']
-        if theorem.split('.')[-1] != f'claim_{claim}':
-            raise ValueError(f'{theorem} does not match {claim}')
         status = STATUS[row['status']]
         if row['status'] in {'PROVED-WITH-SIDE-CONDITION', 'RESIDUAL'}:
             status += '. ' + row['note']

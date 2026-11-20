@@ -450,24 +450,26 @@ theorem mPMRatio_one_expMeasure (hr : 0 < r) {t : ℝ} (ht : 0 ≤ t) :
   simp only [Nat.factorial_one, Nat.cast_one, one_mul, pow_one]
   rw [hL, hS, div_div_div_cancel_right₀ hr.ne']
 
-lemma exp_neg_bounds : Real.exp (-0.29) < 0.749 ∧ 0.74 < Real.exp (-0.30) := by
-  have h1 := Real.exp_bound (x := -0.29) (by norm_num [abs_le]) (n := 5) (by norm_num)
-  have h2 := Real.exp_bound (x := -0.30) (by norm_num [abs_le]) (n := 5) (by norm_num)
+lemma exp_neg_bounds : Real.exp (-0.293824) < 0.7454079 ∧ 0.7454060 < Real.exp (-0.293826) := by
+  have h1 := Real.exp_bound (x := -0.293824) (by norm_num [abs_le]) (n := 10) (by norm_num)
+  have h2 := Real.exp_bound (x := -0.293826) (by norm_num [abs_le]) (n := 10) (by norm_num)
   rw [abs_le] at h1 h2
   norm_num [Finset.sum_range_succ, Nat.factorial] at h1 h2
   constructor <;> linarith [h1.1, h1.2, h2.1, h2.2]
 
-lemma mPMRatio_one_expMeasure_lt (hr : 0 < r) : mPMRatio 1 (0.29 / r) (expMeasure r) < 1 / 20 := by
+lemma mPMRatio_one_expMeasure_lt (hr : 0 < r) :
+    mPMRatio 1 (0.293824 / r) (expMeasure r) < 1 / 20 := by
   have he := exp_neg_bounds.1
-  have hlow := Real.add_one_le_exp (-0.29 : ℝ)
-  have hu : r * (0.29 / r) = 0.29 := by field_simp
+  have hlow := Real.add_one_le_exp (-0.293824 : ℝ)
+  have hu : r * (0.293824 / r) = 0.293824 := by field_simp
   rw [mPMRatio_one_expMeasure hr (by positivity), hu,
     div_lt_div_iff₀ (by linarith) (by norm_num)]
   linarith
 
-lemma lt_mPMRatio_one_expMeasure (hr : 0 < r) : 1 / 20 < mPMRatio 1 (0.30 / r) (expMeasure r) := by
+lemma lt_mPMRatio_one_expMeasure (hr : 0 < r) :
+    1 / 20 < mPMRatio 1 (0.293826 / r) (expMeasure r) := by
   have he := exp_neg_bounds.2
-  have hu : r * (0.30 / r) = 0.30 := by field_simp
+  have hu : r * (0.293826 / r) = 0.293826 := by field_simp
   rw [mPMRatio_one_expMeasure hr (by positivity), hu,
     div_lt_div_iff₀ (by norm_num) (by linarith)]
   linarith
@@ -478,22 +480,23 @@ lemma memLp_one_expMeasure (hr : 0 < r) :
 
 theorem mPMRatio_one_expMeasure_eq_one_div_twenty (hr : 0 < r) {t : ℝ}
     (h : mPMRatio 1 t (expMeasure r) = 1 / 20) :
-    0.29 < r * t ∧ r * t < 0.30 ∧ 0.25 < cdf (expMeasure r) t ∧ cdf (expMeasure r) t < 0.26 := by
+    0.293824 < r * t ∧ r * t < 0.293826 ∧
+      0.25455 < cdf (expMeasure r) t ∧ cdf (expMeasure r) t < 0.25465 := by
   have := isProbabilityMeasure_expMeasure hr
   have hmono := mPMRatio_monotone (memLp_one_expMeasure hr)
-  have h1 : 0.29 < r * t := by
+  have h1 : 0.293824 < r * t := by
     by_contra hle
-    have := hmono ((le_div_iff₀ hr).mpr (by linarith : t * r ≤ 0.29))
+    have := hmono ((le_div_iff₀ hr).mpr (by linarith : t * r ≤ 0.293824))
     linarith [mPMRatio_one_expMeasure_lt hr]
-  have h2 : r * t < 0.30 := by
+  have h2 : r * t < 0.293826 := by
     by_contra hle
-    have := hmono ((div_le_iff₀ hr).mpr (by linarith : 0.30 ≤ t * r))
+    have := hmono ((div_le_iff₀ hr).mpr (by linarith : 0.293826 ≤ t * r))
     linarith [lt_mPMRatio_one_expMeasure hr]
   have ht : 0 ≤ t := by
     by_contra hneg
     nlinarith [not_le.mp hneg]
-  have he1 : Real.exp (-(r * t)) < Real.exp (-0.29) := Real.exp_lt_exp.mpr (by linarith)
-  have he2 : Real.exp (-0.30) < Real.exp (-(r * t)) := Real.exp_lt_exp.mpr (by linarith)
+  have he1 : Real.exp (-(r * t)) < Real.exp (-0.293824) := Real.exp_lt_exp.mpr (by linarith)
+  have he2 : Real.exp (-0.293826) < Real.exp (-(r * t)) := Real.exp_lt_exp.mpr (by linarith)
   have hb := exp_neg_bounds
   rw [cdf_expMeasure_eq hr, ite_eq_left ht]
   refine ⟨h1, h2, ?_, ?_⟩ <;> linarith
@@ -508,38 +511,13 @@ lemma expMeasure_compl_singleton_ne_zero (hr : 0 < r) (t : ℝ) : expMeasure r {
   exact one_ne_zero huniv
 
 theorem threshold_one_expMeasure (hr : 0 < r) :
-    0.29 < r * GapQuantile.threshold 1 (expMeasure r) (1 / 20) ∧
-      r * GapQuantile.threshold 1 (expMeasure r) (1 / 20) < 0.30 ∧
-      0.25 < cdf (expMeasure r) (GapQuantile.threshold 1 (expMeasure r) (1 / 20)) ∧
-      cdf (expMeasure r) (GapQuantile.threshold 1 (expMeasure r) (1 / 20)) < 0.26 := by
+    0.293824 < r * GapQuantile.threshold 1 (expMeasure r) (1 / 20) ∧
+      r * GapQuantile.threshold 1 (expMeasure r) (1 / 20) < 0.293826 ∧
+      0.25455 < cdf (expMeasure r) (GapQuantile.threshold 1 (expMeasure r) (1 / 20)) ∧
+      cdf (expMeasure r) (GapQuantile.threshold 1 (expMeasure r) (1 / 20)) < 0.25465 := by
   have := isProbabilityMeasure_expMeasure hr
   exact mPMRatio_one_expMeasure_eq_one_div_twenty hr (GapQuantile.mPMRatio_threshold one_ne_zero
     (memLp_one_expMeasure hr) (expMeasure_compl_singleton_ne_zero hr) (by norm_num) (by norm_num))
-
-theorem threshold_one_two_points {a b : ℝ} (hab : a < b) :
-    GapQuantile.threshold 1 (empMeasure ![a, b]) (1 / 20) = (19 * a + b) / 20 ∧
-      LPM 0 (GapQuantile.threshold 1 (empMeasure ![a, b]) (1 / 20)) ![a, b] = 1 / 2 := by
-  set t := (19 * a + b) / 20 with ht
-  have ha : a < t := by rw [ht]; linarith
-  have hb : t < b := by rw [ht]; linarith
-  have hx : ∃ i j, (![a, b] : Fin 2 → ℝ) i ≠ ![a, b] j := ⟨0, 1, by simpa using hab.ne⟩
-  have hnc : ¬ ∀ i : Fin 2, (![a, b] : Fin 2 → ℝ) i = t := fun h => ha.ne (h 0)
-  have hr : LPMratio 1 t ![a, b] = 1 / 20 := by
-    simp only [LPMratio, LPM, UPM, Fin.sum_univ_two]
-    simp [lowerDev, upperDev, hnc, ha.le, hb.not_ge, ha.not_gt, hb]
-    field_simp
-    rw [ht]
-    ring
-  have := isProbabilityMeasure_empMeasure (n := 2) (by norm_num) ![a, b]
-  have heq : t = GapQuantile.threshold 1 (empMeasure ![a, b]) (1 / 20) :=
-    GapQuantile.eq_threshold_of_mPMRatio_eq one_ne_zero
-      (memLp_empMeasure (by norm_num) ![a, b] _)
-      (GapQuantile.empMeasure_compl_singleton_ne_zero hx) (by norm_num) (by norm_num)
-      ((GapQuantile.mPMRatio_empMeasure one_ne_zero hx t).trans hr)
-  rw [← heq]
-  refine ⟨rfl, ?_⟩
-  simp only [LPM, Fin.sum_univ_two]
-  simp [lowerDev, ha.le, hb.not_ge]
 
 lemma integrable_lowerDev_expMeasure (hr : 0 < r) (d : ℕ) (t : ℝ) :
     Integrable (lowerDev d t) (expMeasure r) := by
