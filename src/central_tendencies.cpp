@@ -473,79 +473,45 @@ SEXP NNS_mode_cpp(SEXP xSEXP, bool discrete, bool multi) {
   // For fallback paths
   int maxc = 0; for (int c : counts) if (c > maxc) maxc = c;
 
-  // ----- Peak detection on SMOOTHED counts (concavity) -----
+  // ----- Peak detection on smoothed counts -----
   std::vector<double> cs; smooth_counts_tri7(counts, cs);
 
-  // Optional margin above side maxima (in smoothed counts)
-  const double MARGIN = 0.0;
-
   std::vector<int> peak_idx; peak_idx.reserve(lz);
-  // A peak beats the neighbours at offsets 1..3 that exist. Within three bins
-  // of either end, where that neighbourhood is cut short, a peak must also be
-  // the tallest bin of the smoothed histogram: a density highest at its
-  // minimum (an exponential, say) has its mode there, while an isolated
-  // extreme observation does not.
-  const double cs_max = (lz > 0) ? *std::max_element(cs.begin(), cs.end()) : 0.0;
+  const double cs_max = *std::max_element(cs.begin(), cs.end());
   for (int i = 0; i < lz && lz >= 7; ++i) {
-    const double ci = cs[i];
-    if (ci <= 0.0) continue;
-    if ((i < 3 || i > lz - 4) && ci < cs_max) continue;
+    const int first = i;
+    const double height = cs[i];
+    while (i + 1 < lz && cs[i + 1] == height) ++i;
+    if (height <= 0.0 || (first == 0 && i == lz - 1)) continue;
+    // A truncated neighbourhood can only establish a peak at the global maximum.
+    if ((first < 3 || i > lz - 4) && height < cs_max) continue;
 
-    double Ls = R_NegInf, Rs = R_NegInf;
-    for (int d = 1; d <= 3; ++d) {
-      if (i - d >= 0) Ls = std::max(Ls, cs[i - d]);
-      if (i + d < lz) Rs = std::max(Rs, cs[i + d]);
-    }
-    if (!(ci > Ls + MARGIN && ci > Rs + MARGIN)) continue;
-
-    // Negative curvature gate (concavity), reflected at the ends
-    const double left = (i > 0) ? cs[i - 1] : ((i + 1 < lz) ? cs[i + 1] : ci);
-    const double right = (i + 1 < lz) ? cs[i + 1] : ((i > 0) ? cs[i - 1] : ci);
-    if (!(left - 2.0 * ci + right < 0.0)) continue;
-
-    peak_idx.push_back(i);
+    const int lo = std::max(0, first - 3), hi = std::min(lz - 1, i + 3);
+    if (*std::max_element(cs.begin() + lo, cs.begin() + hi + 1) == height)
+      peak_idx.push_back(first + (i - first) / 2);
   }
 
-  // Non-maximum suppression on smoothed heights: keep peaks >= 4 bins apart
   if (!peak_idx.empty()) {
-    // Equal heights keep bin order, so the kept peaks don't depend on the sort implementation.
-    std::stable_sort(peak_idx.begin(), peak_idx.end(),
-                     [&](int a, int b){ return cs[a] > cs[b]; });
-    std::vector<int> kept;
-    for (int idx : peak_idx) {
-      bool too_close = false;
-      for (int jdx : kept) if (std::abs(idx - jdx) <= 3) { too_close = true; break; }
-      if (!too_close) kept.push_back(idx);
+    // Per-peak centre: the observations within +-3 bins
+    NumericVector centers((int)peak_idx.size());
+    for (int t = 0; t < (int)peak_idx.size(); ++t) {
+      const int zc = peak_idx[t];
+      centers[t] = obs_centre(std::max(0, zc - 3), std::min(lz - 1, zc + 3));
     }
 
-    if (!kept.empty()) {
-      // Per-peak centre: the observations within +-3 bins
-      NumericVector centers((int)kept.size());
-      for (int t = 0; t < (int)kept.size(); ++t) {
-        const int zc = kept[t];
-        centers[t] = obs_centre(std::max(0, zc - 3), std::min(lz - 1, zc + 3));
+    if (multi) {
+      NumericVector out = clone(centers);
+      std::sort(out.begin(), out.end());
+      return out;
+    } else {
+      const double g = gravity_value(xnum, false);
+      double best_c = NA_REAL, best_d = R_PosInf;
+      for (int t = 0; t < (int)peak_idx.size(); ++t) {
+        if (cs[peak_idx[t]] != cs_max) continue;
+        const double dist = std::fabs(centers[t] - g);
+        if (dist < best_d || (dist == best_d && centers[t] < best_c)) { best_d = dist; best_c = centers[t]; }
       }
-
-      if (multi) {
-        NumericVector out = clone(centers);
-        std::sort(out.begin(), out.end());
-        return out;
-      } else {
-        // GLOBAL-HEIGHT RULE: the kept peak with the largest smoothed height.
-        // Equally high peaks are broken by distance to the gravity of the
-        // data (then the lower value), so the result is always a real peak:
-        // an average of tied peaks can land in a gap with no data.
-        double best_h = cs[kept[0]];
-        for (int t = 1; t < (int)kept.size(); ++t) best_h = std::max(best_h, cs[kept[t]]);
-        const double g = gravity_value(xnum, false);
-        double best_c = NA_REAL, best_d = R_PosInf;
-        for (int t = 0; t < (int)kept.size(); ++t) {
-          if (cs[kept[t]] != best_h) continue;
-          const double dist = std::fabs(centers[t] - g);
-          if (dist < best_d || (dist == best_d && centers[t] < best_c)) { best_d = dist; best_c = centers[t]; }
-        }
-        return Rf_ScalarReal(best_c);
-      }
+      return Rf_ScalarReal(best_c);
     }
   }
 

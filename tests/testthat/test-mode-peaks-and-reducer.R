@@ -16,6 +16,18 @@ test_that("discrete-valued data return their own values, end values included", {
   expect_identical(NNS.mode(rep(c(0.1, 0.25, 0.4), c(20, 50, 20))), 0.25)
 })
 
+test_that("nearby equal-height peaks both count toward the mode", {
+  x <- c(0, 1, 3, 4, rep(5, 4), rep(8, 4), 9, 10, 18, 25)
+  expect_equal(NNS.mode(x), c(5.9, 7.1, 18))
+  expect_equal(NNS.mode(x, multi = FALSE), 7.1)
+})
+
+test_that("a flat-topped peak counts as one mode", {
+  x <- c(0, 1, 2, 2, rep(5, 4), rep(6, 4), 9, 9, 18, 25)
+  expect_equal(NNS.mode(x), c(4.8, 18))
+  expect_equal(NNS.mode(x, multi = FALSE), 4.8)
+})
+
 test_that("a density highest at its minimum has its mode there", {
   e <- vapply(1:20, function(s) { set.seed(s); NNS.mode(rexp(1000), multi = FALSE) }, numeric(1))
   expect_lt(mean(e), 0.3)                                                # 0.64 before
