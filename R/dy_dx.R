@@ -4,13 +4,13 @@
 #'
 #' @param x a numeric vector.
 #' @param y a numeric vector.
-#' @param eval.point Numeric points in the observed range of \code{x}, or \code{"overall"} for the average first derivative.
+#' @param eval.point Finite numeric points, or \code{"overall"} for the average first derivative.
 #' @return For numeric points, a \code{data.frame} with the first and second derivatives in the supplied order, including repeated points. For \code{"overall"}, a single first derivative.
 #'
 #' @details
 #' \code{eval.point = "overall"} returns the mean of the \code{gradient} column of \code{NNS.reg(x, y)$Fitted.xy}. Each observation receives the slope of the unsmoothed regression segment that contains it, so the result is an observation-weighted average of segment slopes, not an average of smoothed derivatives. Very short segments between nearly coincident regression points can have extreme slopes; \code{mean(dy.dx(x, y, eval.point = x)$first.derivative)} averages the smoothed pointwise estimates instead.
 #'
-#' Numeric evaluation points use central differences of smoothed \link{NNS.reg} estimates over five steps from 2 to \code{floor(sqrt(n))} typical spacings of \code{x}, clipped to the observed range. \code{second.derivative} is a second difference of those estimates, and second differences amplify noise: for \code{y = x^2} plus noise with an R-squared near 0.99 and n = 400, estimates of the true value 2 at three interior points had a root mean squared error of about 5, and about one in five had the wrong sign. Treat it as a descriptive diagnostic on noisy data.
+#' Numeric evaluation points use central differences of smoothed \link{NNS.reg} estimates over five steps from 2 to \code{floor(sqrt(n))} typical spacings of \code{x}. The left point is bounded below by \code{min(x)} and the right point above by \code{max(x)}. At coordinates outside that range, the differences use the extrapolated fit. \code{second.derivative} is a second difference of those estimates, and second differences amplify noise: for \code{y = x^2} plus noise with an R-squared near 0.99 and n = 400, estimates of the true value 2 at three interior points had a root mean squared error of about 5, and about one in five had the wrong sign. Treat it as a descriptive diagnostic on noisy data.
 #'
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995, 2nd edition: \url{https://ovvo-financial.github.io/NNS/book/})
@@ -53,10 +53,10 @@ dy.dx <- function(x, y, eval.point = NULL){
   }
   if(!is.numeric(eval.point))
     stop("eval.point must be numeric point(s) or 'overall'")
-  if(any(!is.finite(eval.point)) || any(eval.point < min(x) | eval.point > max(x)))
-    stop("Derivative evaluation points must lie inside the observed coordinate support.")
+  if(any(!is.finite(eval.point)))
+    stop("eval.point must contain only finite numeric values")
 
-  points <- unique(as.numeric(eval.point))
+  points <- as.numeric(eval.point)
   root_n <- floor(sqrt(length(x)))
   h_s <- round(exp(seq(log(2), log(root_n), length.out = 5)))
   x.spacing <- gravity(diff(sort(unique(x))))
@@ -75,8 +75,12 @@ dy.dx <- function(x, y, eval.point = NULL){
   first <- (rise.right + rise.left) / (right + left)
   second <- (rise.right / right - rise.left / left) / ((right + left) / 2)
 
-  idx <- match(eval.point, points)
-  .NNS.out(data.frame(eval.point = points[idx],
-                      first.derivative = rowMeans(matrix(first, nrow = length(points)))[idx],
-                      second.derivative = rowMeans(matrix(second, nrow = length(points)))[idx]))
+  unique.points <- unique(points)
+  groups <- match(windows[, 2L], unique.points)
+  result <- data.frame(eval.point = unique.points,
+                       first.derivative = vapply(split(first, groups), mean, numeric(1), USE.NAMES = FALSE),
+                       second.derivative = vapply(split(second, groups), mean, numeric(1), USE.NAMES = FALSE))
+  result <- result[match(points, unique.points), , drop = FALSE]
+  rownames(result) <- NULL
+  .NNS.out(result)
 }

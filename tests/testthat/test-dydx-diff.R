@@ -70,5 +70,11 @@ test_that("dy.dx returns both derivatives in query order, including repeats", {
   expect_equal(actual$eval.point, points)
   expect_equal(actual$first.derivative, expected$first.derivative[points])
   expect_equal(actual$second.derivative, expected$second.derivative[points])
-  expect_error(dy.dx(x, sin(x), c(1, 7)), "observed coordinate support")
+})
+
+test_that("dy.dx uses the extrapolated fit outside the observed range", {
+  x <- seq(0, 2 * pi, pi / 100)
+  d <- dy.dx(x, sin(x), c(1, 2 * pi + 0.025, 8))
+  expect_equal(d$first.derivative, c(0.5264168302, 0.9170342179, 0.9216025607))
+  expect_equal(d$second.derivative, c(-0.7986915489, 0.0262492942, 0))
 })
