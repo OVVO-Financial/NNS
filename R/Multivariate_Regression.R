@@ -394,8 +394,8 @@ NNS.M.reg <- function(X_n, Y, factor.2.dummy = TRUE, order = NULL,
                          is.na(type) || !tolower(type) %in% c("class", "reg"))) {
     stop("NNS.M.reg [type] must be NULL, 'REG', or 'CLASS'.", call. = FALSE)
   }
-  Y <- .nns_reg_response_vector(Y)
-  task <- .nns_reg_type(type, Y)
+  Y <- .nns_response_vector(Y)
+  task <- .nns_reg_response(Y, type)
   is.class <- task$is.class
   
   encoded <- .nns_reg_encode_predictors(X_n, point.est, factor.2.dummy)
