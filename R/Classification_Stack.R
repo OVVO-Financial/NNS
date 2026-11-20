@@ -26,26 +26,40 @@
   decode <- function(code) {
     if (numeric.response) class.values[code] else as.numeric(code)
   }
-  fold.orders <- lapply(splits, function(s) class.order(y[s$train]))
+  validation <- lapply(splits, `[[`, "validation")
+  pooled <- tabulate(unlist(validation), n) > 1L
+  priority <- matrix(Inf, K, n)
+  for (b in seq_along(splits)) {
+    va <- validation[[b]]
+    tr <- splits[[b]]$train[balanced[[b]]]
+    priority[, va[!pooled[va]]] <- match(values, y[tr])
+    shared <- va[pooled[va]]
+    if (length(shared)) {
+      # Original row indices are comparable across different training samples.
+      tr <- sort(tr)
+      earliest <- tr[match(values, y[tr])]
+      priority[, shared] <- pmin(priority[, shared, drop = FALSE], earliest)
+    }
+  }
+  final.order <- class.order(y[final.rows])
   preferred <- function(prob, priority) {
     if (K == 2L) values[priority[1L]] else .nns_class_select(prob, values, priority)
   }
-  choose <- function(prob, threshold = .5, first = preferred(prob, tie.order)) {
+  choose <- function(prob, threshold = .5, first = preferred(prob, final.order)) {
     if (K != 2L) return(first)
     p <- prob[, tie.order[2L]]
     ifelse(p == threshold, first,
            ifelse(p > threshold, values[tie.order[2L]], values[tie.order[1L]]))
   }
   evaluate <- function(prob, valid) {
-    first <- integer(n)
-    # The first contributing fold breaks ties when holdouts overlap.
-    for (b in rev(seq_along(splits))) {
-      rows <- splits[[b]]$validation
-      first[rows] <- preferred(prob[rows, , drop = FALSE], fold.orders[[b]])
-    }
     prob <- prob[valid, , drop = FALSE]
+    ranks <- t(priority[, valid, drop = FALSE])
+    if (K > 2L) {
+      largest <- prob[cbind(seq_len(nrow(prob)), max.col(prob, ties.method = "first"))]
+      ranks[prob < largest] <- Inf
+    }
+    first <- values[max.col(-ranks, ties.method = "first")]
     actual <- decode(y[valid])
-    first <- first[valid]
     thresholds <- if (K == 2L && optimize.threshold) seq(.01, .99, .01) else .5
     loss <- vapply(thresholds, function(t) score(decode(choose(prob, t, first)), actual), numeric(1))
     usable <- which(is.finite(loss))
@@ -195,7 +209,7 @@
   prediction.set <- function(prob) {
     if (is.null(prob) || is.null(pred.int)) return(NULL)
     lapply(seq_len(nrow(prob)), function(i) {
-      o <- tie.order[order(prob[i, tie.order], decreasing = TRUE)]
+      o <- final.order[order(prob[i, final.order], decreasing = TRUE)]
       count <- which(cumsum(prob[i, o]) >= pred.int - 1e-12)[1L]
       decode(values[o[seq_len(count)]])
     })

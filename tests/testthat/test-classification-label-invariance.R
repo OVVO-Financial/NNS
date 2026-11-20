@@ -136,10 +136,29 @@ test_that("Stack breaks binary ties in training order for each holdout", {
   expect_equal(c(fit$OBJfn.reg, fit$OBJfn.dim.red), c(0, 0))
   expect_equal(c(fit$reg, fit$dim.red, fit$stack), c(1, 1, 1))
 
-  pooled <- NNS.stack(x, y, method = 1, CV.size = .25, folds = 3,
-    seed = 16, optimize.threshold = FALSE, ncores = 1, status = FALSE,
+  balanced <- NNS.stack(x, y, x[1, , drop = FALSE], CV.size = .25, folds = 1,
+    balance = TRUE, seed = 4, pred.int = .5, optimize.threshold = FALSE, ncores = 1, status = FALSE,
     obj.fn = expression(mean(predicted[actual == 1] == 1)), objective = "max")
-  expect_equal(pooled$OBJfn.reg, 2 / 7)
+  # The balanced training samples for both the holdout and the refit start with class 0.
+  expect_equal(c(balanced$OBJfn.reg, balanced$OBJfn.dim.red), c(0, 0))
+  expect_equal(c(balanced$reg, balanced$dim.red, balanced$stack), c(0, 0, 0))
+  expect_equal(balanced$Prediction.set[[1]], 0)
+})
+
+test_that("pooled class ties follow the earliest training row in either holdout order", {
+  y <- rep(c(1, 0), 12)
+  x <- data.frame(v = rep(0, length(y)))
+  # Expected decisions for validation rows 1, 5, 8, 9, 12, 15, 16, 17, 19, 21, 22, 24.
+  fit <- function() NNS.stack(x, y, method = 1, CV.size = .25, folds = 3,
+    seed = 16, optimize.threshold = FALSE, ncores = 1, status = FALSE,
+    obj.fn = expression(mean(predicted == c(0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0, 1))))
+  expect_equal(fit()$OBJfn.reg, 1)
+
+  classify <- NNS:::.nns_stack_classify
+  local_mocked_bindings(.nns_stack_classify = function(x, y, z, class.values, splits, ...) {
+    classify(x, y, z, class.values, rev(splits), ...)
+  }, .package = "NNS")
+  expect_equal(fit()$OBJfn.reg, 1)
 })
 
 test_that("Stack breaks multiclass ties in training order", {
