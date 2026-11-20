@@ -248,6 +248,8 @@
     X, y, order, noise.reduction, is.class
   )
 
+  names(X) <- .nns_reg_predictor_names(names(X), "y.hat")
+
   # Maximum order already supplies the exact observed coordinates.  Bypass the
   # generic rightmost-closed native interval setup and build the RPM directly
   # from the exact rank IDs.
@@ -520,6 +522,9 @@ NNS.M.reg <- function(X_n, Y, factor.2.dummy = TRUE, order = NULL,
   }
   
   fitted <- as.data.frame(X, stringsAsFactors = FALSE)
+  fields <- c("y", "y.hat", "NNS.ID", "residuals")
+  if (!is.null(intervals$conf.lower)) fields <- c(fields, "conf.int.neg", "conf.int.pos")
+  names(fitted) <- .nns_reg_predictor_names(names(fitted), fields)
   fitted$y <- y
   fitted$y.hat <- fitted.pred
   fitted$NNS.ID <- partition$ids

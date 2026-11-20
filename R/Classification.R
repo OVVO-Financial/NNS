@@ -198,6 +198,7 @@
     colnames(fitted.prob) <- labels
     fitted.pred <- .nns_class_select(fitted.prob, values, tie.order)
     fitted <- as.data.frame(X)
+    names(fitted) <- .nns_reg_predictor_names(names(fitted), c("y", "y.hat", "NNS.ID", "error"))
     fitted$y <- task$y; fitted$y.hat <- fitted.pred
     fitted$NNS.ID <- ids; fitted$error <- as.numeric(fitted.pred != task$y)
     accuracy <- mean(fitted.pred == task$y)
