@@ -293,17 +293,7 @@ NNS.stack <- function(IVs.train,
   
   x <- .as_train_frame(IVs.train)
   
-  if (any(class(DV.train) %in% c("tbl", "data.table"))) {
-    DV.train <- as.vector(unlist(DV.train))
-  }
-  if (is.data.frame(DV.train) || is.matrix(DV.train)) {
-    if (NCOL(DV.train) != 1L) {
-      stop("[DV.train] must contain exactly one response column.",
-           call. = FALSE)
-    }
-    DV.train <- as.vector(unlist(DV.train))
-  }
-  
+  DV.train <- .nns_response_vector(DV.train, "DV.train")
   if (length(DV.train) != nrow(x)) {
     stop("nrow(IVs.train) must equal length(DV.train).", call. = FALSE)
   }
