@@ -21,7 +21,7 @@ NNS.MC(
 )
 }
 \arguments{
-\item{x}{vector of data.}
+\item{x}{vector of data or a one-column data frame.}
 
 \item{reps}{numeric; number of replicates to generate for each \code{rho} value, \code{30} default.  The defaults give 201 \code{rho} values and 6030 replicates.}
 

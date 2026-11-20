@@ -9,6 +9,14 @@ meboot_reps <- function(...) {
 mean_slope <- function(R) mean(apply(R, 2, function(r) coef(lm(r ~ t))[2]))
 mean_detrended_sd <- function(R) mean(apply(R, 2, function(r) sd(resid(lm(r ~ t)))))
 
+test_that("a one-column data frame bootstraps like its column", {
+  x <- data.frame(passengers = as.numeric(AirPassengers))
+  set.seed(1)
+  expected <- NNS.meboot(x$passengers, reps = 3, rho = 1)
+  set.seed(1)
+  expect_identical(NNS.meboot(x, reps = 3, rho = 1), expected)
+})
+
 test_that("drift = FALSE replicates are a flat baseline plus residual-scale noise", {
   R <- meboot_reps(drift = FALSE)
   expect_lt(abs(mean_slope(R)), 0.1)

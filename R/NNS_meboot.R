@@ -2,7 +2,7 @@
 #'
 #' Adapted maximum entropy bootstrap routine from \code{meboot} \url{https://cran.r-project.org/package=meboot}.
 #'
-#' @param x vector of data.
+#' @param x vector of data or a one-column data frame.
 #' @param reps numeric; number of replicates to generate.
 #' @param rho numeric [-1,1] (vectorized); A \code{rho} must be provided, otherwise a blank list will be returned.  The dependence target is applied to each individual \code{replicate} (every replicate is mixed to the requested dependence with the original series); it is \strong{not} applied to the \code{ensemble}.  See \code{Note}.
 #' @param type options("spearman", "pearson", "NNScor", "NNSdep"); \code{type = "spearman"}(default) dependence metric desired.
@@ -29,7 +29,7 @@
 #'
 #' @return Returns the following row names in a matrix:
 #' \itemize{
-#'   \item{x} original data provided as input.
+#'   \item{x} input vector, or the extracted column for a one-column data frame.
 #' \item{replicates} maximum entropy bootstrap replicates.
 #' \item{ensemble} average observation over all replicates.  Being a per-observation mean it is a central summary, not a single series carrying the target dependence; a rank or linear correlation taken directly on the \code{ensemble} tends to read higher than \code{rho} (averaging amplifies the shared order), so assess \code{rho} on the \code{replicates}.
 #' \item{xx} sorted order stats (xx[1] is minimum value).
@@ -116,6 +116,7 @@ NNS.meboot <- function(x,
                        digits = 6,
                        colsubj, coldata, coltimes, ..., expand.residual.sd = TRUE){
   
+  if (is.data.frame(x) && ncol(x) == 1L) x <- x[[1L]]
   if (length(x) == 1) return(list(x = x))
   type <- tolower(type)
   if (any(class(x) %in% c("tbl","data.table"))) x <- as.vector(unlist(x))
