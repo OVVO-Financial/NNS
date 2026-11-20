@@ -157,7 +157,7 @@ The classical one-sided bound using only the mean and variance is Cantelli's ine
 P(X \le g)\le \frac{\sigma^2}{\sigma^2+(\mu-g)^2}.
 \]
 
-(Half of Chebyshev's two-sided bound, \(\tfrac12\left(\sigma/(\mu-g)\right)^2\), holds only for symmetric distributions; Chapter 4 gives a counterexample.)
+(Symmetry guarantees that half of Chebyshev's two-sided bound, \(\tfrac12\left(\sigma/(\mu-g)\right)^2\), bounds the lower-tail probability. Chapter 4 gives an asymmetric example where it fails.)
 
 A directional refinement replaces symmetric standard deviation with semideviation:
 
@@ -167,13 +167,13 @@ P(X \le g)\le \left(\frac{\sigma_-}{\mu-g}\right)^2,
 
 where \(\sigma_-^2 = E[(\mu-X)_+^2]\) measures only downside dispersion. It is Markov's inequality applied to the lower partial moment, so it holds for every distribution.
 
-A more general bound uses lower partial moments of degree \(\alpha\). Define
+A more general bound uses lower partial moments. For a positive degree \(\alpha\), define
 
 \[
 \theta(t,\alpha)=\left(E[(t-X)_+^\alpha]\right)^{1/\alpha}.
 \]
 
-Then, for \(g \le t\),
+The following bound holds for thresholds strictly below the target.
 
 \[
 P(X\le g)\le \left(\frac{\theta(t,\alpha)}{t-g}\right)^\alpha.

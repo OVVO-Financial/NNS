@@ -275,7 +275,7 @@ The classical one-sided bound, Cantelli's inequality, controls this lower-tail p
 \[
 P(X\le g)\le \frac{\sigma^2}{\sigma^2+(\mu-g)^2}.
 \]
-This bound depends only on the mean and variance, so it remains distribution-free, but it does not distinguish between upper and lower deviations. Halving Chebyshev's two-sided bound, \(\tfrac12\left(\sigma/(\mu-g)\right)^2\), is not a valid alternative: it holds for symmetric distributions only. The sample \(\{-1, 1/3, 1/3, 1/3\}\) has mean 0 and variance \(1/3\) and puts probability \(1/4\) at \(X\le -1\), above the halved bound of \(1/6\) and equal to Cantelli's.
+This bound depends only on the mean and variance, so it remains distribution-free, but it does not distinguish between upper and lower deviations. Symmetry guarantees that half of Chebyshev's two-sided bound, \(\tfrac12\left(\sigma/(\mu-g)\right)^2\), is a valid lower-tail bound. Some asymmetric distributions also satisfy it. It fails for the sample \(\{-1, 1/3, 1/3, 1/3\}\), which has mean 0 and variance \(1/3\) and puts probability \(1/4\) at \(X\le -1\), above the halved bound of \(1/6\) and equal to Cantelli's.
 
 A directional refinement replaces symmetric variance with semivariance:
 \[
@@ -283,11 +283,11 @@ P(X\le g)\le \left(\frac{\sigma_-}{\mu-g}\right)^2,
 \]
 where \(\sigma_-^2 = L_2(\mu;X) = E[(\mu-X)_+^2]\) measures dispersion only on the adverse side of the mean. This is Markov's inequality for \((\mu-X)_+^2\), which is at least \((\mu-g)^2\) whenever \(X\le g\), so it holds for every distribution. For a symmetric distribution \(\sigma_-^2=\sigma^2/2\) and the bound reduces to the halved form above, which is why that form holds in the symmetric case. The estimation-error literature highlights the importance of this refinement through the Berck–Hihn result, which links semivariance directly to a strong boundary form of Chebyshev’s inequality.
 
-A further generalization uses lower partial moments of degree \(\alpha\). Define
+A further generalization uses lower partial moments. For a positive degree \(\alpha\), define
 \[
 \theta(t,\alpha)=\big(E[(t-X)_+^\alpha]\big)^{1/\alpha}.
 \]
-Then, for \(g\le t\),
+The following bound holds for thresholds strictly below the target.
 \[
 P(X\le g)\le \left(\frac{\theta(t,\alpha)}{t-g}\right)^\alpha.
 \]
@@ -314,7 +314,7 @@ In each case the relevant question is the same:
 \[
 P(X\le g)?
 \]
-Classical methods answer this using symmetric dispersion summaries. The directional framework answers it more precisely by measuring deviations on the relevant side of the benchmark.
+Classical methods answer this using symmetric dispersion summaries. The directional bound uses deviations on the adverse side of the benchmark. Which bound is tighter depends on the distribution and threshold.
 
 The quantity
 \[

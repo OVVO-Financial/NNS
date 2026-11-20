@@ -96,7 +96,7 @@ Directional statistics extends this same partition structure to **magnitudes of 
 
 Measure theory frequently decomposes functions into positive and negative parts.
 
-For any real-valued function \(f\),
+For any real-valued measurable function \(f\),
 
 \[
 f = f^{+} - f^{-}
@@ -213,7 +213,7 @@ raising both sides to power \(r\) and integrating yields
 E[(X-t)^r] = U_r(t;X) + (-1)^r L_r(t;X).
 \]
 
-This identity holds for any integrable random variable.
+This identity holds for a positive integer degree when the absolute deviation from the target has a finite moment of that degree.
 
 Classical symmetric moments therefore arise as **signed combinations of two directional integrals**.
 
