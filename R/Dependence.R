@@ -87,6 +87,8 @@ NNS.dep <- function(x,
     if (is.null(y)) stop("p.value = TRUE requires both x and y.")
     if (length(x) != length(y)) stop("x and y must have the same length.")
     
+    ties.x <- anyDuplicated(x) > 0L
+    ties.y <- anyDuplicated(y) > 0L
     y_p <- replicate(100L, sample.int(length(y)))
     x   <- cbind(x, y, matrix(y[y_p], ncol = ncol(y_p), byrow = FALSE))
     y   <- NULL
@@ -102,8 +104,6 @@ NNS.dep <- function(x,
         part <- .nns_dep_part(nrow(x))
         own.x <- part(x[, 1L], x[, 1L], "XONLY")
         own.y <- part(x[, 2L], x[, 2L], "XONLY")
-        ties.x <- anyDuplicated(x[, 1L]) > 0L
-        ties.y <- anyDuplicated(x[, 2L]) > 0L
         columns <- lapply(seq_len(ncol(x)), function(g) {
           own.g <- if (g == 1L) own.x else if (g == 2L) own.y else own.y[y_p[, g - 2L]]
           .nns_dep_native(x[, 1L], x[, g], own.x, own.g, asym, part,
@@ -142,15 +142,17 @@ NNS.dep <- function(x,
         abline(v = dep_upper_CI, col = "red", lwd = 2, lty = 3)
       }
       
+      # Reordering an equal joint table can round its score differently.
+      tol <- if (ties.x || ties.y) 1e-12 else 0
       return(list(
         "Correlation"         = as.numeric(cors[2L]),
-        "Correlation p.value" = min(1, 2 * min(1 + sum(cors[-c(1L, 2L)] <= cors[2L]),
-                                               1 + sum(cors[-c(1L, 2L)] >= cors[2L])) /
+        "Correlation p.value" = min(1, 2 * min(1 + sum(cors[-c(1L, 2L)] <= cors[2L] + tol),
+                                               1 + sum(cors[-c(1L, 2L)] >= cors[2L] - tol)) /
                                        (1 + length(cors[-c(1L, 2L)]))),
         "Correlation 95% CIs" = c(cor_lower_CI, cor_upper_CI),
         "Dependence"          = as.numeric(deps[2L]),
         # Dependence is a magnitude: only the upper tail is evidence against independence.
-        "Dependence p.value"  = (1 + sum(deps[-c(1L, 2L)] >= deps[2L])) /
+        "Dependence p.value"  = (1 + sum(deps[-c(1L, 2L)] >= deps[2L] - tol)) /
                                 (1 + length(deps[-c(1L, 2L)])),
         "Dependence 95% CIs"  = c(dep_lower_CI, dep_upper_CI)
       ))
@@ -334,6 +336,8 @@ NNS.dep.matrix <- function(x, asym = FALSE){
     
     rhos[upper.tri(rhos)] <- t(rhos)[upper.tri(rhos)]
     deps[upper.tri(deps)] <- t(deps)[upper.tri(deps)]
+    diag(rhos) <- 1
+    diag(deps) <- 1
   } else {
     rhos[lower.tri(rhos, diag = FALSE)] <- unlist(raw.rhos_lower)
     deps[lower.tri(deps, diag = FALSE)] <- unlist(raw.deps_lower)
@@ -352,10 +356,12 @@ NNS.dep.matrix <- function(x, asym = FALSE){
     
     rhos <- rhos + rhos_upper
     deps <- deps + deps_upper
+    for (i in seq_len(n)) {
+      self <- pair(i, i)
+      rhos[i, i] <- self$Correlation
+      deps[i, i] <- self$Dependence
+    }
   }
-  
-  diag(rhos) <- 1
-  diag(deps) <- 1
   
   colnames(rhos) <- colnames(x)
   colnames(deps) <- colnames(x)

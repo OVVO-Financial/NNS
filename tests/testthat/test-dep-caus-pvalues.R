@@ -50,6 +50,24 @@ test_that("NNS.dep Correlation p.value counts tied null correlations", {
   expect_equal(p$`Correlation p.value`, 1)
 })
 
+test_that("NNS.dep counts permutations with the observed binary table", {
+  set.seed(611285)
+  x <- rbinom(80, 1, .1)
+  y <- rbinom(80, 1, .1)
+  p <- NNS.dep(x, y, p.value = TRUE)
+  # Sixteen shuffles preserve the table and three have larger scores.
+  expect_equal(p$`Dependence p.value`, 20 / 101)
+  expect_equal(p$`Correlation p.value`, 40 / 101)
+})
+
+test_that("NNS.dep includes rounded ties in the lower correlation tail", {
+  set.seed(610046)
+  x <- rbinom(80, 1, .2)
+  y <- rbinom(80, 1, .2)
+  p <- NNS.dep(x, y, p.value = TRUE)
+  expect_equal(p$`Correlation p.value`, 42 / 101)
+})
+
 test_that("NNS.dep Correlation p.value holds its size under independence", {
   # 28 / 200 rejections at 0.05 when it was the smaller one-sided tail.
   set.seed(5)
