@@ -1,4 +1,4 @@
-# Getting Started with NNS: Partial Moments
+# 02. Getting Started with NNS: Partial Moments
 
 ## Partial Moments
 

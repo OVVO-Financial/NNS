@@ -1,4 +1,4 @@
-# Getting Started with NNS: Correlation and Dependence
+# 03. Getting Started with NNS: Correlation and Dependence
 
 ``` r
 

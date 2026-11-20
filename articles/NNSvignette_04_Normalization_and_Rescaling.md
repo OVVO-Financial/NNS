@@ -1,4 +1,4 @@
-# Getting Started with NNS: Normalization and Rescaling
+# 04. Getting Started with NNS: Normalization and Rescaling
 
 ``` r
 

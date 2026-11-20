@@ -1,4 +1,4 @@
-# Getting Started with NNS: Comparing Distributions
+# 06. Getting Started with NNS: Comparing Distributions
 
 ``` r
 

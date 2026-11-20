@@ -1,4 +1,4 @@
-# Getting Started with NNS: Sampling and Simulation
+# 05. Getting Started with NNS: Sampling and Simulation
 
 ``` r
 
