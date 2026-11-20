@@ -288,7 +288,7 @@ NNS.boost <- function(IVs.train,
   
   x <- .as_train_frame(IVs.train)
   
-  DV.train <- .nns_response_vector(DV.train, "DV.train")
+  DV.train <- .nns_ensemble_response_vector(DV.train)
   if (length(DV.train) != nrow(x)) {
     stop("nrow(IVs.train) must equal length(DV.train).", call. = FALSE)
   }

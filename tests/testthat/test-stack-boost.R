@@ -53,6 +53,34 @@ test_that("stack uses the response column's ordered levels", {
   expect_identical(fit(unordered)$class.levels, control$class.levels)
 })
 
+test_that("Stack and Boost keep Date responses in days", {
+  x <- rep(1:3, each = 8)
+  day <- as.Date("2020-01-01") + x
+  stack <- function(y) NNS.stack(x, y, 1:3, method = 1, folds = 2, order = "max",
+                                 seed = 17, status = FALSE, ncores = 1)$stack
+  boost <- function(y) NNS.boost(x, y, 1:3, type = "CLASS", epochs = 0, folds = 2,
+                                 learner.trials = 1, seed = 17, status = FALSE,
+                                 feature.importance = FALSE)$results
+  expect_equal(stack(data.frame(day)), stack(as.numeric(day)), tolerance = 1e-12)
+  expect_equal(boost(data.frame(day)), boost(as.numeric(day)), tolerance = 1e-12)
+})
+
+test_that("Stack and Boost distinguish both occurrences of a repeated hour", {
+  x <- rep(1:3, each = 8)
+  time <- as.POSIXct("2026-11-01 05:30:00", tz = "UTC") + (x - 1) * 3600
+  attr(time, "tzone") <- "America/New_York"
+  stack <- function(y) NNS.stack(x, y, 1:3, type = "CLASS", method = 1, folds = 2,
+                                 seed = 17, status = FALSE, ncores = 1)
+  boost <- function(y) NNS.boost(x, y, 1:3, type = "CLASS", epochs = 0, folds = 2,
+                                 learner.trials = 1, seed = 17, status = FALSE,
+                                 feature.importance = FALSE)
+  expect_equal(stack(data.frame(time))$stack, stack(as.numeric(time))$stack, tolerance = 1e-12)
+  actual <- boost(data.frame(time))
+  control <- boost(as.numeric(time))
+  expect_equal(actual$results, control$results, tolerance = 1e-12)
+  expect_identical(actual$class.levels, control$class.levels)
+})
+
 test_that("NNS.stack codes a character response like the equivalent factor", {
   idx <- c(101:140, 1:100)
   x <- iris[idx, 1:4]

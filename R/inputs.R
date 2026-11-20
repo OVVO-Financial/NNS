@@ -614,6 +614,11 @@
   if (is.data.frame(y)) y[[1L]] else y[, 1L]
 }
 
+.nns_ensemble_response_vector <- function(y) {
+  value <- .nns_response_vector(y, "DV.train")
+  if (is.data.frame(y) && inherits(value, c("Date", "POSIXct"))) as.numeric(value) else value
+}
+
 .nns_fold_columns <- function(fold, train, source) {
   # Two level labels can share a syntactic name, so match their original levels.
   by.predictor <- split(seq_along(source), source)
