@@ -41,9 +41,9 @@ NNS.MC(
 
 \item{target_drift_scale}{numerical; instead of calculating a \code{target_drift}, provide a scalar to the existing drift when \code{drift = TRUE}.}
 
-\item{xmin}{numeric; the lower limit for the left tail.}
+\item{xmin}{numeric; optional lower limit on reconstructed levels before rounding.}
 
-\item{xmax}{numeric; the upper limit for the right tail.}
+\item{xmax}{numeric; optional upper limit on reconstructed levels before rounding.}
 
 \item{...}{possible additional arguments to be passed to \link{NNS.meboot}.}
 }

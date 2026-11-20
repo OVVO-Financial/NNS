@@ -12,8 +12,8 @@
 #' @param drift logical; \code{drift = TRUE} (default) preserves the drift of the original series.
 #' @param target_drift numerical; \code{target_drift = NULL} (default) Specifies the desired drift when \code{drift = TRUE}, i.e. a risk-free rate of return.
 #' @param target_drift_scale numerical; instead of calculating a \code{target_drift}, provide a scalar to the existing drift when \code{drift = TRUE}.
-#' @param xmin numeric; the lower limit for the left tail.
-#' @param xmax numeric; the upper limit for the right tail.
+#' @param xmin numeric; optional lower limit on reconstructed levels before rounding.
+#' @param xmax numeric; optional upper limit on reconstructed levels before rounding.
 #' @param ... possible additional arguments to be passed to \link{NNS.meboot}.
 #'
 #' @return
