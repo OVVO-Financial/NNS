@@ -11,7 +11,7 @@ PM.matrix(LPM_degree, UPM_degree, target, variable, pop_adj, norm = FALSE)
 
 \item{UPM_degree}{numeric; upper partial moment degree (0 = freq, 1 = area).}
 
-\item{target}{numeric vector; thresholds for each column. There is no default: pass \code{NULL} to use \code{colMeans(variable)}.}
+\item{target}{numeric vector; thresholds for each column. There is no default: pass \code{NULL} to use the sample mean of each column.}
 
 \item{variable}{numeric matrix or data.frame.}
 

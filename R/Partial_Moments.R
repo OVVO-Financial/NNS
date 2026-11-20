@@ -542,7 +542,7 @@ NNS.moments <- function(x, population = TRUE) {
 #' @description Builds a list containing CUPM, DUPM, DLPM, CLPM and the overall covariance matrix.
 #' @param LPM_degree numeric; lower partial moment degree (0 = freq, 1 = area).
 #' @param UPM_degree numeric; upper partial moment degree (0 = freq, 1 = area).
-#' @param target numeric vector; thresholds for each column. There is no default: pass \code{NULL} to use \code{colMeans(variable)}.
+#' @param target numeric vector; thresholds for each column. There is no default: pass \code{NULL} to use the sample mean of each column.
 #' @param variable numeric matrix or data.frame.
 #' @param pop_adj logical; \code{TRUE} applies the sample adjustment \code{n / (n - 1)} to the co-/divergent moments (with both degrees 1, \code{target = NULL} and \code{norm = FALSE}, the covariance matrix then equals \code{cov()}). It is ignored when either degree is 0.
 #' @param norm logical; default FALSE. If TRUE, each quadrant matrix is cell-wise normalized so their sum is 1 at each (i,j). A cell whose four moments are all 0, as when a column is constant at its target, takes the degree-0 values.  
