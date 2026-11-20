@@ -41,6 +41,18 @@ test_that("NNS.boost returns -5/5 response values for a -5/5 numeric response", 
   expect_equal(unname(as.matrix(f$pred.int)), cbind(c(5, 5, 5, -5, -5, -5), c(5, 5, 5, -5, -5, -5)))
 })
 
+test_that("stack uses the response column's ordered levels", {
+  x <- iris[1:100, 1:2]
+  y <- ordered(iris$Species[1:100], levels = rev(levels(iris$Species)))
+  fit <- function(y) NNS.stack(x, y, x[c(1, 100), ], method = 1, folds = 2,
+    optimize.threshold = FALSE, status = FALSE, ncores = 1, seed = 17)
+  control <- fit(y)
+  expect_identical(fit(data.frame(y))$class.levels, control$class.levels)
+  expect_equal(fit(data.frame(y))$probabilities, control$probabilities)
+  unordered <- factor(y, levels = levels(y), ordered = FALSE)
+  expect_identical(fit(unordered)$class.levels, control$class.levels)
+})
+
 test_that("NNS.stack codes a character response like the equivalent factor", {
   idx <- c(101:140, 1:100)
   x <- iris[idx, 1:4]

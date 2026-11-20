@@ -220,3 +220,46 @@ test_that("Stack reports the multivariate coordinates separately from the class 
   expect_equal(fit$NNS.reg.variables, "signal")
   expect_equal(fit$stack, c(0, 1))
 })
+
+test_that("class codes give the same accuracy as labels for an unsorted factor", {
+  x <- iris[1:100, 1:2]
+  y <- factor(iris$Species[1:100], levels = c("versicolor", "setosa"))
+  rows <- c(1, 100)
+  query <- x[rows, ]
+  actual <- y[rows]
+
+  reg <- NNS.reg(x, y, point.est = query, plot = FALSE)
+  expect_identical(reg$Point.est == as.numeric(actual),
+                   reg$class.levels[reg$Point.est] == as.character(actual))
+
+  stack <- NNS.stack(x, y, query, method = 1, folds = 2, seed = 17,
+                     ncores = 1, status = FALSE)
+  expect_identical(stack$stack == as.numeric(actual),
+                   stack$class.levels[stack$stack] == as.character(actual))
+
+  boost <- NNS.boost(x, y, query, epochs = 0, folds = 2, learner.trials = 3,
+                     seed = 9, feature.importance = FALSE, status = FALSE)
+  expect_identical(boost$results == as.numeric(actual),
+                   boost$class.levels[boost$results] == as.character(actual))
+})
+
+test_that("logical class predictions keep their truth values", {
+  x <- rep(1:2, each = 8)
+  y <- x == 2
+  fit <- NNS.reg(x, y, point.est = 1:2, plot = FALSE, confidence.interval = .8)
+  expect_identical(fit$Point.est, c(FALSE, TRUE))
+  expect_identical(fit$Fitted.xy$y.hat, y)
+  expect_identical(unlist(fit$Prediction.set), c(FALSE, TRUE))
+})
+
+test_that("a declared NA class keeps its own probability column", {
+  x <- rep(1:3, each = 5)
+  y <- factor(rep(c("b", NA, "a"), each = 5), exclude = NULL)
+  run <- function(y) NNS.reg(x, y, order = "max", point.est = 1:3, plot = FALSE)
+  fit <- run(y)
+  expect_identical(fit$class.levels[fit$Point.est], as.character(y[c(1, 6, 11)]))
+  expect_equal(unname(unclass(fit$Point.probabilities)),
+               unname(unclass(run(factor(as.integer(y)))$Point.probabilities)))
+  is.na(y)[1] <- TRUE
+  expect_error(run(y), "missing values")
+})

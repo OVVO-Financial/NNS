@@ -25,7 +25,7 @@
 #' @param dist options:(NULL, "NNS", "L1", "L2", "FACTOR") the method of distance calculation passed to delegated \link{NNS.reg} and \link{NNS.stack} calls. \code{dist = NULL} is the default and selects the native blended NNS distance; \code{dist = "NNS"} is an explicit alias for the default.
 #' @param folds integer; 5 (default) Number of cross-validation \code{folds} passed to the final \link{NNS.stack} call.
 #'
-#' @return Returns a vector of fitted values for the dependent variable test set \code{$results}, prediction intervals \code{$pred.int}, the final feature loadings \code{$feature.weights}, final feature frequencies \code{$feature.frequency}, and (for classification) the class labels \code{$class.levels}.  Classification results are numeric: a factor or character \code{DV.train} yields integer class codes with a base category of 1 (label recoverable as \code{class.levels[results]}), and a numeric \code{DV.train} yields its original numeric class values.
+#' @return Returns a vector of fitted values for the dependent variable test set \code{$results}, prediction intervals \code{$pred.int}, the final feature loadings \code{$feature.weights}, final feature frequencies \code{$feature.frequency}, and (for classification) the class labels \code{$class.levels}.  Factor and character responses return one-based numeric codes. Use \code{class.levels[results]} to recover the labels. Observed factor labels follow their declared order. Character labels are sorted. Numeric and logical classes retain their values. The objective function receives the same values as the predictions.
 #'
 #' @note
 #' \itemize{
