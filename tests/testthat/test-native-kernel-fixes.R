@@ -172,9 +172,15 @@ test_that("risk-neutral scaling checks the price convention", {
   prices <- c(95, 100, 105)
   expect_error(NNS.rescale(prices, 100, 0.05, "riskneutral", 2, "Discunted"),
                "Terminal.*Discounted")
+  expect_error(NNS.rescale(prices, 100, 0.05, "riskneutral", 2, ""),
+               "Terminal.*Discounted")
   expect_equal(mean(NNS.rescale(prices, 100, 0.05, "riskneutral", 2)),
                100 * exp(0.1))
   expect_equal(mean(NNS.rescale(prices, 100, 0.05, "riskneutral", 2, "discounted")), 100)
+  expect_equal(mean(NNS.rescale(prices, 100, 0.05, "riskneutral", 2, "disc")), 100)
+  expect_equal(mean(NNS.rescale(prices, 100, 0.05, "riskneutral", 2, "Disc")), 100)
+  expect_equal(mean(NNS.rescale(prices, 100, 0.05, "riskneutral", 2, "Term")),
+               100 * exp(0.1))
 })
 
 test_that("min-max scaling preserves missing values in constant windows", {

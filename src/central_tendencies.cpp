@@ -277,7 +277,9 @@ NumericVector NNS_rescale_cpp(SEXP xSEXP, double a, double b,
   }
   
   if (method == "riskneutral") {
-    if (type != "terminal" && type != "discounted")
+    const bool terminal = std::string("terminal").compare(0, type.size(), type) == 0;
+    const bool discounted = std::string("discounted").compare(0, type.size(), type) == 0;
+    if (terminal == discounted)
       stop("Invalid type: use 'Terminal' or 'Discounted'");
     if (T_.isNull()) stop("T (time to maturity) must be provided for riskneutral method");
     double T = Rcpp::as<double>(T_);
@@ -293,7 +295,7 @@ NumericVector NNS_rescale_cpp(SEXP xSEXP, double a, double b,
     if (!R_finite(mx) || mx <= 0.0)
       stop("Mean(x) must be positive/finite for riskneutral scaling");
     
-    double target = (type == "discounted") ? S0 : (S0 * std::exp(r * T));
+    double target = discounted ? S0 : (S0 * std::exp(r * T));
     double theta = std::log(target / mx);
     
     for (int i = 0; i < n; ++i) out[i] = xR[i] * std::exp(theta);
