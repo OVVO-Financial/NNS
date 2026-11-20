@@ -41,6 +41,14 @@ test_that("multivariate target must have one value per column", {
   expect_error(NNS.CDF(A, 0, target = c(1, 1), plot = FALSE), "one value per column")
 })
 
+test_that("joint CDF rejects an ordered factor threshold", {
+  corners <- as.matrix(expand.grid(a = c(-1, 1), b = c(-1, 1)))
+  zeros <- ordered(c("0", "0"), levels = c("-1", "0", "1"))
+  expect_equal(NNS.CDF(corners, target = c(0, 0), plot = FALSE)$target.value, 0.25)
+  expect_error(NNS.CDF(corners, target = zeros, plot = FALSE),
+               "`target` must be numeric, not a factor.", fixed = TRUE)
+})
+
 test_that("degree > 0 multivariate survival is the normalised joint UPM", {
   set.seed(7)
   A <- matrix(rnorm(90), ncol = 3)

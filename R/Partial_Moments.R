@@ -95,6 +95,7 @@ UPM <- function(degree, target, variable, excess_ret = FALSE) {
 #' @export
 Co.LPM_nD <- function(data, target, degree = 0.0, norm = TRUE) {
   data   <- as.matrix(data)
+  if (is.factor(target)) stop("`target` must be numeric, not a factor.")
   target <- as.numeric(target)
   degree <- as.numeric(degree)
   norm   <- as.logical(norm)
@@ -149,6 +150,7 @@ Co.LPM_nD.batch <- function(data, targets, degree = 0.0, norm = TRUE, strict = F
 #' @export
 Co.UPM_nD <- function(data, target, degree = 0.0, norm = TRUE) {
   data   <- as.matrix(data)
+  if (is.factor(target)) stop("`target` must be numeric, not a factor.")
   target <- as.numeric(target)
   degree <- as.numeric(degree)
   norm   <- as.logical(norm)
@@ -177,6 +179,7 @@ Co.UPM_nD <- function(data, target, degree = 0.0, norm = TRUE) {
 #' @export
 DPM_nD <- function(data, target, degree = 0.0, norm = TRUE) {
   data   <- as.matrix(data)
+  if (is.factor(target)) stop("`target` must be numeric, not a factor.")
   target <- as.numeric(target)
   degree <- as.numeric(degree)
   norm   <- as.logical(norm)
