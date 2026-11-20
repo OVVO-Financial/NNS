@@ -57,7 +57,7 @@ xmax = largest value + trimmed mean) are given when the random draw happens to b
 
 \item{force.clt}{logical; If \code{TRUE} the replicate means are assigned an iid normal-reference scale: the replicate means are spread as a normal sample centred on \code{mean(x)} with standard deviation \code{sd(x) / sqrt(n)}, the standard error of the mean of the \code{n} observations, whatever the number of \code{reps}.  See \code{force.clt} in \code{meboot::meboot}, whose code divides by the number of replicates instead (its comment says \code{n}).  When \code{drift = FALSE}, \code{target_drift} or \code{target_drift_scale} replaces the original drift, the replicate means are centred and spread using the new baseline plus the original residuals instead of \code{x}.}
 
-\item{scl.adjustment}{logical; If \code{TRUE} scale adjustment is performed to ensure that the population variance of the resampled residuals equals the variance of the detrended data.}
+\item{scl.adjustment}{logical; If \code{TRUE} the scale factor matches the population variance of a raw residual draw to the sample variance of the detrended data. Dependence targeting, SD expansion and forcing path means can change the variance pooled across paths.}
 
 \item{sym}{logical; If \code{TRUE} an adjustment is performed to ensure that the ME density is symmetric.}
 
