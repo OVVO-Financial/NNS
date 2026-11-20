@@ -2,6 +2,7 @@ name: Lean proofs
 
 on:
   push:
+    branches: ["NNS-Beta-Version"]
     paths:
       - 'lean/**'
       - '.github/workflows/lean.yml'
@@ -9,6 +10,10 @@ on:
     paths:
       - 'lean/**'
       - '.github/workflows/lean.yml'
+
+concurrency:
+  group: lean-proofs-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
