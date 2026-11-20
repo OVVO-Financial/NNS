@@ -1,3 +1,17 @@
+test_that("regression uses observed class labels for codes and probabilities", {
+  x <- rep(1:2, each = 8)
+  y <- rep(c("b", "a"), each = 8)
+  fit <- function(y) NNS.reg(x, y, point.est = 1:2, plot = FALSE)
+  expected <- fit(factor(y, levels = c("b", "a")))
+  observed <- fit(factor(y, levels = c("b", "missing", "a")))
+  expect_identical(observed$class.levels, expected$class.levels)
+  expect_equal(observed$Point.probabilities, expected$Point.probabilities)
+  expect_identical(observed$Point.est, expected$Point.est)
+  ordered <- fit(ordered(y, levels = c("b", "missing", "a")))
+  expect_identical(ordered$class.levels, c("b", "a"))
+  expect_identical(ordered$class.levels[ordered$Point.est], y[c(1, 16)])
+})
+
 test_that("classification interpolates class frequencies, not arbitrary class codes", {
   x <- rep(0:2, each = 4)
   labels <- rep(c("A", "C", "B"), each = 4)

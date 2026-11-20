@@ -326,7 +326,6 @@ NNS.stack <- function(IVs.train,
   if (is_class && !is.numeric(DV.train) && !is.factor(DV.train) &&
       !is.character(DV.train) && !is.logical(DV.train))
     stop("Unsupported classification response type.", call. = FALSE)
-  if (is.factor(DV.train)) DV.train <- droplevels(DV.train)
   response <- .nns_encode_response(DV.train, type)
   y <- if (is_class) response$codes else response$y
   if (is_class) {

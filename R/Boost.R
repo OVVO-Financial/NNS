@@ -309,7 +309,6 @@ NNS.boost <- function(IVs.train,
   
   if (!is_class && !is.numeric(DV.train))
     stop("A nonnumeric response requires type = 'CLASS'.", call. = FALSE)
-  if (is.factor(DV.train)) DV.train <- droplevels(DV.train)
   response <- .nns_boost_response(DV.train, type)
   y <- if (is_class) response$codes else response$y
   if (is_class) {

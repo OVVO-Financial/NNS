@@ -580,6 +580,7 @@
   if (nominal) {
     if (is.factor(y)) {
       labels <- levels(y)
+      if (is.class) labels <- labels[tabulate(y, length(labels)) > 0L]
       # An explicit NA level has a code distinct from a missing observation.
       value <- as.numeric(match(levels(y), labels)[as.integer(y)])
     } else {
