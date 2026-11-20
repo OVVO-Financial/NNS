@@ -133,7 +133,7 @@
   Q <- encoded$point.est
   values <- task$class.values
   labels <- task$labels
-  output <- task$decode(seq_along(values))
+  output <- values
   indicators <- outer(task$y, values, "==") * 1
   colnames(indicators) <- labels
   tie.order <- match(unique(task$y), values)
@@ -200,8 +200,8 @@
     fitted <- as.data.frame(X)
     names(fitted) <- .nns_reg_predictor_names(names(fitted), c("y", "y.hat", "NNS.ID", "error"))
     fitted$y <- output[match(task$y, values)]; fitted$y.hat <- fitted.pred
-    fitted$NNS.ID <- ids; fitted$error <- as.numeric(fitted.pred != task$y)
-    accuracy <- mean(fitted.pred == task$y)
+    fitted$NNS.ID <- ids; fitted$error <- as.numeric(fitted.pred != fitted$y)
+    accuracy <- mean(fitted.pred == fitted$y)
   }
   if (plot && !point.only && ncol(X) == 1L) {
     graphics::plot(X[, 1], task$y, xlab = colnames(X)[1], ylab = "Class", pch = 1)

@@ -441,7 +441,7 @@
            call. = FALSE)
     }
   }
-  list(train = train, test = test, metadata = schema)
+  list(train = train, test = test)
 }
 
 .nns_check_predictors <- function(x, name) {
