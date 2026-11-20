@@ -129,6 +129,16 @@ test_that("NNS.dep on a matrix equals NNS.dep on each pair", {
   }
 })
 
+test_that("automatic regression and stack threads respect the session limit", {
+  withr::local_envvar(c(RCPP_PARALLEL_NUM_THREADS = NA, "_R_CHECK_LIMIT_CORES_" = NA))
+  available <- max(1L, RcppParallel::defaultNumThreads() - 1L)
+  expect_identical(.nns_default_cores(), available)
+  Sys.setenv(RCPP_PARALLEL_NUM_THREADS = 1L)
+  expect_identical(.nns_default_cores(), 1L)
+  Sys.setenv(RCPP_PARALLEL_NUM_THREADS = available + 1L)
+  expect_identical(.nns_default_cores(), available)
+})
+
 test_that("the default thread count does not change multivariate estimates", {
   set.seed(107)
   n <- 3000

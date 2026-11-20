@@ -65,7 +65,7 @@ NNS.stack(
 
 \item{status}{logical; \code{TRUE} (default) Prints status update message in console.}
 
-\item{ncores}{integer; value specifying the number of cores to be used in the parallelized subroutine \link{NNS.reg}. If NULL (default), the number of cores to be used is equal to the number of cores of the machine - 1.}
+\item{ncores}{Integer thread count for the parallel fits in \link{NNS.reg}. With \code{NULL} (default), use one fewer than the available cores (at least one), capped by any thread limit set with \code{RcppParallel::setThreadOptions()}. With the optional TinyThread backend, parallel predictions use its session thread count or, if unset, its hardware default.}
 
 \item{seed}{Optional integer random seed used for reproducible resampling, fold construction, and stochastic fitting steps. If `NULL`, the current random-number-generator state is used.}
 
