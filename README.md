@@ -51,6 +51,9 @@ install.packages('NNS')
 ## Examples
 Please see https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/examples/index.md for basic partial moments equivalences, hands-on statistics, machine learning and econometrics examples.
 
+## Formal Proofs
+Mathematical claims from the book and the help pages are formalized in Lean 4. See [lean/README.md](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/lean/README.md).
+
 
 ## Citation
 ```

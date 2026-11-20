@@ -59,6 +59,10 @@ A useful way to navigate both resources together is:
 
 The examples repository is intended for hands-on implementation, not as a substitute for the proofs and derivations developed in the text. Keep the repository disclaimer in mind when applying any script directly to production or policy settings; examples are instructional templates and should be validated, stress-tested, and context-calibrated before operational use.
 
+## About the Formal Proofs {-}
+
+Mathematical claims from this book and from the package help pages are formalized in Lean 4. See [`lean/README.md`](https://github.com/OVVO-Financial/NNS/blob/NNS-Beta-Version/lean/README.md) in the package repository.
+
 ## About the Python Code {-}
 
 The NNS framework is also available as a Python package. Throughout the book, each R example is complemented by an equivalent Python workflow so that readers can follow the material in either language. The Python blocks show the functional calls only; outputs and figures are shown once through the R examples and are not reprinted.
