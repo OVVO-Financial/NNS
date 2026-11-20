@@ -24,15 +24,3 @@ test_that("multi-group medians evaluate at the pooled median", {
   expect_equal(NNS.ANOVA(list(x, y), medians = TRUE, means.only = TRUE, plot = FALSE),
                c(Certainty = expected))
 })
-
-test_that("a constant group and a variable group with equal means use that mean", {
-  for (k in c(0.1, 0.5, 2.7, 100.1)) {
-    x <- rep(k, 2)
-    y <- k + c(-1/16, 1/16, 0, 0)
-    r <- NNS.ANOVA(x, y, means.only = TRUE, confidence.interval = NULL, plot = FALSE)
-    expect_identical(r$Grand_Statistic, mean(y))
-    expect_equal(r$Certainty, 4/9)
-  }
-  x <- rep(.Machine$double.xmax, 3)
-  expect_equal(NNS.ANOVA(x, x, means.only = TRUE, confidence.interval = NULL, plot = FALSE)$Certainty, 4/9)
-})

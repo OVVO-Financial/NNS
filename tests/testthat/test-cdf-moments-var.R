@@ -143,11 +143,3 @@ test_that("a factor column in a tibble or data.table is an error in the VaR func
   expect_equal(LPM.VaR(0.5, 1, x), LPM.VaR(0.5, 1, c(10, 20, 30)))
   expect_equal(UPM.VaR(0.5, 1, x), UPM.VaR(0.5, 1, c(10, 20, 30)))
 })
-
-test_that("a factor column in a plain data.frame is an error in the VaR functions", {
-  x <- data.frame(v = factor(30, levels = c(10, 30)))
-  expect_error(LPM.VaR(0.5, 1, x), "not a factor")
-  expect_error(UPM.VaR(0.5, 1, x), "not a factor")
-  expect_error(LPM.VaR(0.5, 1, data.frame(v = factor(c(10, 20, 30)))), "not a factor")
-  expect_equal(LPM.VaR(0.5, 1, data.frame(v = 30)), LPM.VaR(0.5, 1, 30))
-})

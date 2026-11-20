@@ -1,9 +1,7 @@
 ---
-title: "Getting Started with NNS: Partial Moments"
+title: "02. Getting Started with NNS: Partial Moments"
 author: "Fred Viole"
-output:
-  rmarkdown::html_vignette:
-    check_title: false
+output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{02. Getting Started with NNS: Partial Moments}
   %\VignetteEngine{knitr::rmarkdown}

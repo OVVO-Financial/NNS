@@ -1,9 +1,7 @@
 ---
-title: "Getting Started with NNS: Comparing Distributions"
+title: "06. Getting Started with NNS: Comparing Distributions"
 author: "Fred Viole"
-output:
-  rmarkdown::html_vignette:
-    check_title: false
+output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{06. Getting Started with NNS: Comparing Distributions}
   %\VignetteEngine{knitr::rmarkdown}

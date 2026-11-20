@@ -13,7 +13,7 @@
 <meta name="author" content="Fred Viole" />
 
 
-<title>Getting Started with NNS: Overview</title>
+<title>01. Getting Started with NNS: Overview</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -338,7 +338,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 
 
-<h1 class="title toc-ignore">Getting Started with NNS: Overview</h1>
+<h1 class="title toc-ignore">01. Getting Started with NNS: Overview</h1>
 <h4 class="author">Fred Viole</h4>
 
 
@@ -393,7 +393,8 @@ analysis around a chosen target <span class="math inline">\(t\)</span>
 (often the mean or a benchmark).</li>
 <li>At <span class="math inline">\(t=\mu_X\)</span>: <span class="math display">\[
 \operatorname{Var}(X) = \operatorname{UPM}(2,\mu_X,X) +
-\operatorname{LPM}(2,\mu_X,X)\quad\text{(exact empirical identity)}.
+\operatorname{LPM}(2,\mu_X,X)\quad\text{(empirical variance with divisor
+} n\text{)}.
 \]</span> This <strong>is not</strong> the same as splitting conditional
 variances around a threshold; partial moments use a <em>global</em>
 reference, preserving the between‑group contribution.</li>
@@ -414,8 +415,8 @@ reference, preserving the between‑group contribution.</li>
 <span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">3000</span>)</span>
 <span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>mu <span class="ot">&lt;-</span> <span class="fu">mean</span>(y)</span>
 <span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>L2 <span class="ot">&lt;-</span> <span class="fu">LPM</span>(<span class="dv">2</span>, mu, y); U2 <span class="ot">&lt;-</span> <span class="fu">UPM</span>(<span class="dv">2</span>, mu, y)</span>
-<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">&quot;LPM2 + UPM2 = %.6f vs var(y)=%.6f</span><span class="sc">\n</span><span class="st">&quot;</span>, (L2<span class="sc">+</span>U2)<span class="sc">*</span>(<span class="fu">length</span>(y) <span class="sc">/</span> (<span class="fu">length</span>(y) <span class="sc">-</span> <span class="dv">1</span>)), <span class="fu">var</span>(y)))</span></code></pre></div>
-<pre><code>## LPM2 + UPM2 = 1.011889 vs var(y)=1.011889</code></pre>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">&quot;Bessel-adjusted sum of second partial moments = %.6f vs var(y) = %.6f</span><span class="sc">\n</span><span class="st">&quot;</span>, (L2<span class="sc">+</span>U2)<span class="sc">*</span>(<span class="fu">length</span>(y) <span class="sc">/</span> (<span class="fu">length</span>(y) <span class="sc">-</span> <span class="dv">1</span>)), <span class="fu">var</span>(y)))</span></code></pre></div>
+<pre><code>## Bessel-adjusted sum of second partial moments = 1.011889 vs var(y) = 1.011889</code></pre>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="co"># Empirical CDF via LPM.ratio(0, t, x)</span></span>
 <span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="cf">for</span> (t <span class="cf">in</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">1</span>)) {</span>
 <span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>  cdf_lpm <span class="ot">&lt;-</span> <span class="fu">LPM.ratio</span>(<span class="dv">0</span>, t, y)</span>
@@ -428,9 +429,8 @@ reference, preserving the between‑group contribution.</li>
 <span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>z <span class="ot">&lt;-</span> <span class="fu">rexp</span>(<span class="dv">3000</span>)<span class="sc">-</span><span class="dv">1</span>; mu_z <span class="ot">&lt;-</span> <span class="fu">mean</span>(z)</span>
 <span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">&quot;Skewed z: LPM2=%.4f, UPM2=%.4f (expect imbalance)</span><span class="sc">\n</span><span class="st">&quot;</span>, <span class="fu">LPM</span>(<span class="dv">2</span>,mu_z,z), <span class="fu">UPM</span>(<span class="dv">2</span>,mu_z,z)))</span></code></pre></div>
 <pre><code>## Skewed z: LPM2=0.2780, UPM2=0.7682 (expect imbalance)</code></pre>
-<p><strong>Interpretation.</strong> The equality
-<code>LPM2 + UPM2 == var(x)</code> (Bessel adjustment used) holds
-because deviations are measured against the <em>global</em> mean.
+<p><strong>Interpretation.</strong> The Bessel-adjusted sum of the
+second partial moments about the sample mean equals the sample variance.
 <code>LPM.ratio(0, t, x)</code> constructs an empirical CDF directly
 from partial‑moment counts.</p>
 <hr />
@@ -440,8 +440,9 @@ from partial‑moment counts.</p>
 <h1>2. Descriptive &amp; Distributional Tools</h1>
 <div id="higher-moments-from-partial-moments" class="section level2">
 <h2>2.1 Higher moments from partial moments</h2>
-<p>Define asymmetric analogues of skewness/kurtosis using <span class="math inline">\(\operatorname{UPM}_3\)</span>, <span class="math inline">\(\operatorname{LPM}_3\)</span> (and degree 4),
-yielding robust tail diagnostics without parametric assumptions.</p>
+<p><code>NNS.moments()</code> reports the mean, variance, skewness and
+excess kurtosis. To compare the two tails separately, compute the upper
+and lower third or fourth partial moments.</p>
 <p><strong>Header.</strong></p>
 <ul>
 <li><code>NNS.moments(x)</code></li>
@@ -1251,8 +1252,8 @@ partial moment (away from <code>target</code>).</li>
 partial moment (away from <code>target</code>).</li>
 <li><code>NNS.CDF(x, target = NULL, points = NULL, plot = TRUE/FALSE)</code>
 — CDF from partial moments.</li>
-<li><code>NNS.moments(x)</code> — mean/var/skew/kurtosis via partial
-moments.</li>
+<li><code>NNS.moments(x)</code> returns the mean, variance, skewness and
+excess kurtosis.</li>
 </ul>
 </div>
 <div id="descriptive-statistics-distributions" class="section level2">
