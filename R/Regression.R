@@ -270,6 +270,10 @@
   sort(unique(as.character(x)))
 }
 
+.nns_reg_predictor_names <- function(predictors, fields) {
+  make.unique(c(fields, predictors))[-seq_along(fields)]
+}
+
 .nns_reg_encode_predictors <- function(x, point.est = NULL,
                                        factor.2.dummy = TRUE, coefficient.names = NULL) {
   factor.2.dummy <- .nns_reg_scalar_logical(factor.2.dummy, "factor.2.dummy")

@@ -5,4 +5,9 @@ test_that("method 1 native and reference select identical n.best on regression s
   expect_identical(nat$NNS.reg.n.best, ref$NNS.reg.n.best)
   expect_true(all(is.finite(ref$reg)))
   expect_numeric_close(nat$reg, ref$reg)
+
+  names(x)[1L] <- "y.hat"
+  renamed <- stack_with_native(TRUE, NNS.stack(x, y, IVs.test = x[1:3,], method = 1, folds = 2, ncores = 1, status = FALSE))
+  expect_identical(renamed$NNS.reg.n.best, nat$NNS.reg.n.best)
+  expect_numeric_close(renamed$reg, nat$reg)
 })

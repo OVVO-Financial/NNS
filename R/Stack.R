@@ -1016,14 +1016,12 @@ NNS.stack <- function(IVs.train,
   # training support, so no gradient extension is applied here either.
   .production_multivariate_path <- function(rpm, Xtest, train_design, kmax = NULL) {
     Xtest <- as.data.frame(Xtest, check.names = FALSE)
-    feature_names <- setdiff(names(rpm), "y.hat")
-    Xtest <- Xtest[, feature_names, drop = FALSE]
     train_design <- as.data.frame(train_design, check.names = FALSE)
-    train_design <- train_design[, feature_names, drop = FALSE]
+    Xtest <- Xtest[, names(train_design), drop = FALSE]
     if (is.null(kmax)) kmax <- nrow(rpm)
     kmax <- min(kmax, nrow(rpm))
     
-    rpm_x <- as.matrix(rpm[, feature_names, drop = FALSE])
+    rpm_x <- as.matrix(rpm[, seq_along(train_design), drop = FALSE])
     storage.mode(rpm_x) <- "double"
     test_matrix <- as.matrix(Xtest)
     storage.mode(test_matrix) <- "double"
