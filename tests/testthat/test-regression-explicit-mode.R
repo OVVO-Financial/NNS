@@ -90,3 +90,32 @@ test_that("Stack and NNS.reg refit the same categorical index", {
   expect_equal(NNS.reg(x, y, point.est = x[1:2, ], dim.red.method = legacy,
                        ncores = 1, plot = FALSE)$Point.est, c(0, 1))
 })
+
+test_that("a named Stack refit uses the weight of a declared factor level", {
+  x <- data.frame(g = factor(rep(c("a", "b"), 30), levels = c("a", "b", "declared")),
+                  z = seq_len(60))
+  q <- data.frame(g = factor(c("a", "b", "declared"), levels = levels(x$g)), z = 30L)
+  y <- ifelse(x$g == "a", 10, 0)
+  weights <- c(g__a = 1, g__b = 0, g__declared = 2, z = 0)
+  stack <- NNS.stack(x, y, q, type = "REG", method = 2, dim.red.method = weights,
+                     folds = 2, seed = 5, order = "max", ncores = 1, status = FALSE)
+  refit <- NNS.reg(x, y, point.est = q, type = "REG", order = "max",
+                   dim.red.method = stack$NNS.dim.red.coefficients,
+                   threshold = stack$NNS.dim.red.threshold, ncores = 1, plot = FALSE)
+  train.index <- as.numeric(x$g == "a") / 2
+  manual <- NNS.reg(train.index, y, point.est = c(.5, 0, 1), type = "REG",
+                    order = "max", ncores = 1, plot = FALSE)
+  expect_equal(manual$Point.est, c(10, 0, 20))
+  expect_equal(stack$dim.red, manual$Point.est)
+  expect_equal(refit$x.star$x, train.index)
+  expect_equal(refit$Point.est, manual$Point.est)
+})
+
+test_that("named numeric predictors keep standalone constant-column scaling", {
+  x <- data.frame(a = rep(0:1, 30), b = 0)
+  refit <- NNS.reg(x, 10 * x$a, point.est = data.frame(a = 0, b = 1),
+                   dim.red.method = c(a = 1, b = 2), type = "REG",
+                   order = "max", ncores = 1, plot = FALSE)
+  expect_equal(refit$x.star$x, (x$a + 1) / 2)
+  expect_equal(refit$Point.est, 0)
+})

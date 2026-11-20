@@ -293,6 +293,7 @@
     return(list(
       x = matrix(as.numeric(x), ncol = 1L, dimnames = list(NULL, "x")),
       point.est = point.matrix,
+      stack.index = FALSE,
       raw.names = "x",
       encoded.names = "x",
       metadata = list(list(name = "x", categorical = FALSE, levels = NULL))
@@ -302,7 +303,9 @@
   points <- .nns_reg_prepare_points(point.est, names(train))
   
   stack.index <- FALSE
-  if (!is.null(coefficient.names) && factor.2.dummy && ncol(train) > 1L) {
+  categorical <- vapply(train, function(z) is.factor(z) || is.character(z) || is.logical(z),
+                        logical(1L))
+  if (!is.null(coefficient.names) && factor.2.dummy && ncol(train) > 1L && any(categorical)) {
     blocks <- Map(function(nm, z) {
       if (is.factor(z) || is.character(z))
         paste0(nm, "__", make.names(.nns_reg_levels(z), unique = TRUE))
@@ -322,9 +325,7 @@
     z <- train[[j]]
     zp <- if (is.null(points)) NULL else points[[j]]
     
-    categorical <- is.factor(z) || is.character(z) || is.logical(z)
-    
-    if (categorical) {
+    if (categorical[j]) {
       # A factor's declared levels are part of its training support even when
       # a resampled fold or subset has no row at one of them; sorting the
       # unordered levels keeps the encoding independent of level order.
@@ -413,6 +414,7 @@
   list(
     x = x.matrix,
     point.est = point.matrix,
+    stack.index = stack.index,
     raw.names = names(train),
     encoded.names = colnames(x.matrix),
     metadata = meta
@@ -728,11 +730,13 @@
   coef
 }
 
-.nns_reg_dimreduce <- function(x, point.est, y, dim.red.method, tau, threshold) {
+.nns_reg_dimreduce <- function(x, point.est, y, dim.red.method, tau, threshold,
+                               stack.index = FALSE) {
   coef <- .nns_reg_dimred_coefficients(x, y, dim.red.method, tau, threshold)
   mins <- apply(x, 2L, min)
   maxs <- apply(x, 2L, max)
   ranges <- maxs - mins
+  if (stack.index) ranges[!is.finite(ranges) | ranges == 0] <- 1
   
   normalize <- function(m) {
     out <- matrix(0.5, nrow = nrow(m), ncol = ncol(m),
@@ -1030,7 +1034,7 @@ NNS.reg <- function(x, y,
                   "per class applies to classification."), call. = FALSE)
     }
     dr <- .nns_reg_dimreduce(encoded$x, encoded$point.est, y.numeric,
-                             dim.red.method, tau, threshold)
+                             dim.red.method, tau, threshold, encoded$stack.index)
     ux <- dr$x.star
     up <- dr$point.star
     synthetic.x.equation <- dr$equation
