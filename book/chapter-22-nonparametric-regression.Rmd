@@ -440,7 +440,7 @@ For a multivariate numeric fit, let \(D_{\mathrm{multi}}\) be the mean of the NN
 \right)\right\}.}
 \]
 
-The count scales with the number of RPM rows it averages over rather than with the sample size: at a fixed depth the number of rows stops growing with \(n\), so a count proportional to \(\sqrt n\) would eventually average over nearly every row and flatten the fit toward the overall mean.
+At fixed depth, the number of RPM rows is bounded. A count proportional to \(\sqrt n\) can therefore include every row and smooth away local differences. Even then, each prediction weights the row centers by their rank and distance from the query.
 
 A higher dependence score tends to use fewer RPM rows; a lower score tends to aggregate over more rows. However, `order = "max"` and the purely categorical exact-cell route select \(k=1\) by default unless the caller supplies `n.best`. The user may also supply an integer count or `n.best = "all"`.
 
