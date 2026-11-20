@@ -33,4 +33,6 @@ test_that("a constant group and a variable group with equal means use that mean"
     expect_identical(r$Grand_Statistic, mean(y))
     expect_equal(r$Certainty, 4/9)
   }
+  x <- rep(.Machine$double.xmax, 3)
+  expect_equal(NNS.ANOVA(x, x, means.only = TRUE, confidence.interval = NULL, plot = FALSE)$Certainty, 4/9)
 })
