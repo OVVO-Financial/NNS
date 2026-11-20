@@ -235,6 +235,8 @@ NNS.dep <- function(x,
 
 # Matches to the observed table, signed by the orientation of Correlation.
 .nns_dep_perm_matches <- function(x, y, perms, asym) {
+  if (all(x == x[1L]) || all(y == y[1L])) return(rep.int(1L, ncol(perms)))
+
   if (length(unique(x)) == 2L && length(unique(y)) == 2L) {
     high.x <- x == max(x)
     high.y <- y == max(y)
