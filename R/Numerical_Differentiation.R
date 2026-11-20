@@ -5,12 +5,12 @@
 #' @param f an expression or call or a formula with no lhs.
 #' @param point numeric; Point to be evaluated for derivative of a given function \code{f}.
 #' @param h numeric [0, ...]; Initial step for secant projection. Defaults to \code{(h = abs(point) * 0.1 + 0.01)}.
-#' @param tol numeric; Stopping tolerance. The search stops when the inferred \code{h} is below \code{tol} or when the bracket on the y-intercept fixes the derivative to within about \code{tol * max(1, abs(derivative))}. If the initial intercepts coincide within numerical precision or the point is near zero, the search halves the step until successive centered slopes and the extrapolated one-sided slopes agree within that tolerance. Defaults to \code{(tol = 1e-10)}.
-#' @param max.iter integer; \code{NULL} (default) Maximum number of bisection iterations. \code{NULL} sets the limit to \code{100L}. For noisy functions the bisection may stall before \code{tol} is reached; \code{max.iter} provides a hard upper bound.
+#' @param tol numeric; Stopping tolerance. The search stops when the inferred \code{h} is below \code{tol} or when the bracket on the y-intercept fixes the derivative to within about \code{tol * max(1, abs(derivative))}. If the initial intercepts are numerically equal, the search halves the step and uses Richardson extrapolation. Success requires successive derivative estimates to agree and the extrapolated difference between the left and right slopes to be zero within the same derivative tolerance. Defaults to \code{(tol = 1e-10)}.
+#' @param max.iter integer; \code{NULL} (default) Maximum number of iterations. \code{NULL} sets the limit to \code{100L}. For noisy functions the bisection may stall before \code{tol} is reached; \code{max.iter} provides a hard upper bound.
 #' @param digits numeric; Sets the number of digits specification of the output. Defaults to \code{(digits = 12)}.
 #' @param print.trace logical; \code{FALSE} (default) Displays each iteration, lower y-intercept, upper y-intercept and inferred \code{h}.
 #' @param plot logical; plots range, secant lines and y-intercept convergence.
-#' @return Returns a matrix of values, intercepts, derivatives, inferred step sizes for multiple methods of estimation.
+#' @return Returns a matrix of values, intercepts, derivatives and step sizes. \code{iterations} counts search iterations. \code{converged} is 1 when the stopping criterion is met and 0 otherwise. \code{termination.code} is 0 for convergence, 1 at the iteration limit and 2 if the root solve fails or finite precision prevents refinement.
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995, 2nd edition: \url{https://ovvo-financial.github.io/NNS/book/})
 #' @examples
@@ -112,15 +112,14 @@ NNS.diff <- function(f, point, h = abs(point) * 0.1 + 0.01, tol = 1e-10, max.ite
   inferred.h <- NA_real_
   
   # A collapsed projection gives no bound on the slope at a smaller step.
-  refine.step <- abs(point) < .Machine$double.eps^0.5 || lower.B == upper.B ||
-    abs(left.slope - right.slope) <= sqrt(.Machine$double.eps) *
-      max(1, abs(left.slope), abs(right.slope))
+  refine.step <- isTRUE(all.equal(lower.B, upper.B, tolerance = .Machine$double.eps^0.5))
   if(refine.step) {
     inferred.h <- h
     steps <- c(left.slope, right.slope)
     slope <- mean(steps)
   }
-  for(i in seq_len(max.iter)) {
+  i <- 1L
+  while(i >= 1L){
     if(refine.step) {
       half <- inferred.h / 2
       left <- point - half
@@ -129,11 +128,14 @@ NNS.diff <- function(f, point, h = abs(point) * 0.1 + 0.01, tol = 1e-10, max.ite
       next.steps <- c((f.x - f(left)) / (point - left), (f(right) - f.x) / (right - point))
       if(any(!is.finite(next.steps))) break
 
-      # Extrapolate each one-sided slope to check that both sides agree.
-      limits <- 2 * next.steps - steps
+      # For smooth functions the left-right gap has terms in h, h^3, h^5, ...
+      gap <- diff(2 * next.steps - steps)
+      jump <- if(i == 1L) gap else gap + (gap - previous.gap) / 7
+      previous.gap <- gap
       previous <- slope
+      centered <- mean(next.steps)
+      slope <- centered + (centered - mean(steps)) / 3
       steps <- next.steps
-      slope <- mean(steps)
       inferred.h <- half
       Bs[i] <- f.x - slope * point
       bounds <- range(f.x - steps * point)
@@ -141,17 +143,21 @@ NNS.diff <- function(f, point, h = abs(point) * 0.1 + 0.01, tol = 1e-10, max.ite
       Bu[i] <- bounds[2L]
       if(print.trace) print(c(Iteration = i, h = half, "Lower B" = Bl[i], "Upper B" = Bu[i]))
       threshold <- tol * max(1, abs(slope))
-      # Rounding f(point) alone can hide slope changes below this scale.
-      if(.Machine$double.eps * abs(f.x) / half > threshold) break
-      if(max(abs(c(previous, limits) - slope)) <= threshold) {
+      # Estimate the slope resolution across the centered interval.
+      if(.Machine$double.eps * abs(f.x) / (2 * half) > threshold) break
+      if(abs(previous - slope) <= threshold && abs(jump) <= threshold) {
         converged <- TRUE
         termination.code <- 0L
         break
       }
-      if(i == max.iter) termination.code <- 1L
+      if(i >= max.iter) {
+        termination.code <- 1L
+        break
+      }
+      i <- i + 1L
       next
     }
-    
+
     Bl[i] <- lower.B
     Bu[i] <- upper.B
     Bs[i] <- new.B
@@ -210,14 +216,21 @@ NNS.diff <- function(f, point, h = abs(point) * 0.1 + 0.01, tol = 1e-10, max.ite
       termination.code <- 0L
       break
     }
+    i <- i + 1L
   }
   
   if(refine.step) {
     final.B <- f.x - slope * point
   } else {
     final.B <- mean(c(upper.B, lower.B))
-    slope <- (f.x - final.B) / point
+
     if(is.finite(inferred.h)) inferred.h <- abs(inferred.h)
+
+    if(abs(point) < .Machine$double.eps^0.5) {
+      slope <- mean(Finite.step(f, point, h)[c("f(x-h)", "f(x+h)")])
+    } else {
+      slope <- (f.x - final.B) / point
+    }
   }
 
   complex.step <- NA_real_
@@ -232,7 +245,7 @@ NNS.diff <- function(f, point, h = abs(point) * 0.1 + 0.01, tol = 1e-10, max.ite
   initial.fs <- Finite.step(f, point, h)
   
   inferred.fs <- if(refine.step) {
-    setNames(c(steps, slope), names(initial.fs))
+    setNames(c(steps, mean(steps)), names(initial.fs))
   } else if(is.finite(inferred.h) && inferred.h != 0) {
     Finite.step(f, point, inferred.h)
   } else {

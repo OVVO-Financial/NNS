@@ -79,3 +79,19 @@ test_that("NNS.diff flags unresolved one-sided slopes and roundoff at zero", {
   expect_equal(unname(offset["converged", 1]), 0)
   expect_equal(unname(offset["termination.code", 1]), 2)
 })
+
+test_that("NNS.diff refines nearly coincident projections without root finding", {
+  x <- -2.10611725906715e-8
+  expect_no_warning(result <- NNS.diff(function(t) exp(-t^2), x))
+  expect_equal(unname(result["converged", 1]), 1)
+  expect_lt(abs(result["DERIVATIVE", 1] + 2 * x * exp(-x^2)), 1e-10)
+})
+
+test_that("NNS.diff resolves linear and smooth slopes with an offset", {
+  line <- NNS.diff(function(x) 1 + x, 0, h = 2^-18)
+  expect_identical(unname(line[c("DERIVATIVE", "termination.code"), 1]), c(1, 0))
+  expect_gt(line["iterations", 1], 0)
+  shifted <- NNS.diff(function(x) 10 + exp(x), 0)
+  expect_equal(unname(shifted["converged", 1]), 1)
+  expect_lt(abs(shifted["DERIVATIVE", 1] - 1), 1e-10)
+})
