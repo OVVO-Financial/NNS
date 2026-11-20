@@ -11,3 +11,4 @@
 ^tools$
 ^NNS_.*\.tar\.gz$
 ^NNS_.*\.zip$
+^lean$
