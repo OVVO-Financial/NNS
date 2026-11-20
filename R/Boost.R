@@ -369,7 +369,8 @@ NNS.boost <- function(IVs.train,
     }
     value <- eval(
       obj.fn,
-      envir = list(predicted = predicted, actual = actual),
+      envir = list(predicted = if (is_class) response$decode(predicted) else predicted,
+                   actual = if (is_class) response$decode(actual) else actual),
       enclos = parent.frame()
     )
     if (!is.numeric(value) || length(value) != 1L) {
@@ -797,13 +798,16 @@ NNS.boost <- function(IVs.train,
   names(replicated.train) <- make.unique(names(replicated.train), sep = ".")
   names(replicated.test) <- names(replicated.train)
   
+  # Stack fits the same codes as the learners; its objective must see the same response values.
+  stack.objective <- if (is_class) as.expression(bquote(.(.score)(predicted, actual))) else obj.fn
+
   final.stack <- suppressWarnings(
     NNS.stack(
       IVs.train = replicated.train,
       DV.train = y,
       IVs.test = replicated.test,
       type = type,
-      obj.fn = obj.fn,
+      obj.fn = stack.objective,
       objective = objective,
       optimize.threshold = FALSE,
       dist = dist,
