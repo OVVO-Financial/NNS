@@ -4,13 +4,13 @@
 #'
 #' @param x a numeric vector.
 #' @param y a numeric vector.
-#' @param eval.point numeric or ("overall"); \code{x} point to be evaluated, must be provided.  Defaults to \code{(eval.point = NULL)}.  Set to \code{(eval.point = "overall")} to find an overall partial derivative estimate (1st derivative only).
-#' @return Returns a \code{data.frame} of eval.point along with both 1st and 2nd derivative.
+#' @param eval.point Finite numeric points, or \code{"overall"} for the average first derivative.
+#' @return For numeric points, a \code{data.frame} with the first and second derivatives in the supplied order, including repeated points. For \code{"overall"}, a single first derivative.
 #'
 #' @details
 #' \code{eval.point = "overall"} returns the mean of the \code{gradient} column of \code{NNS.reg(x, y)$Fitted.xy}. Each observation receives the slope of the unsmoothed regression segment that contains it, so the result is an observation-weighted average of segment slopes, not an average of smoothed derivatives. Very short segments between nearly coincident regression points can have extreme slopes; \code{mean(dy.dx(x, y, eval.point = x)$first.derivative)} averages the smoothed pointwise estimates instead.
 #'
-#' Numeric evaluation points use central differences of smoothed \link{NNS.reg} estimates over five steps from 2 to \code{floor(sqrt(n))} typical spacings of \code{x}, clipped to the observed range. \code{second.derivative} is a second difference of those estimates, and second differences amplify noise: for \code{y = x^2} plus noise with an R-squared near 0.99 and n = 400, estimates of the true value 2 at three interior points had a root mean squared error of about 5, and about one in five had the wrong sign. Treat it as a descriptive diagnostic on noisy data.
+#' Numeric evaluation points use central differences of smoothed \link{NNS.reg} estimates over five steps from 2 to \code{floor(sqrt(n))} typical spacings of \code{x}. The left point is bounded below by \code{min(x)} and the right point above by \code{max(x)}. At coordinates outside that range, the differences use the extrapolated fit. \code{second.derivative} is a second difference of those estimates, and second differences amplify noise: for \code{y = x^2} plus noise with an R-squared near 0.99 and n = 400, estimates of the true value 2 at three interior points had a root mean squared error of about 5, and about one in five had the wrong sign. Treat it as a descriptive diagnostic on noisy data.
 #'
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995, 2nd edition: \url{https://ovvo-financial.github.io/NNS/book/})
@@ -43,81 +43,44 @@ dy.dx <- function(x, y, eval.point = NULL){
   
   if(anyNA(cbind(x,y))) stop("You have some missing values, please address.")
   
-  order <- NULL
-  
   if(!is.null(ncol(x)) && is.null(colnames(x))){
     x <- data.frame(x)
     x <- unlist(x)
   }
   
-  if(is.character(eval.point)){
-    return("First" = mean(NNS.reg(x, y, type = "REG", order = order, plot = FALSE, ncores = 1)$Fitted.xy$gradient))
-  } else {
-
-    original.eval.point.min <- eval.point
-    original.eval.point.max <- eval.point
-    
-    eval.point.idx <- which(eval.point==eval.point)
-
-    n <- length(x)
-    root_n <- floor(sqrt(n))
-    h_s <- round(exp(seq(log(2), log(root_n), length.out = 5)))
-    # Typical spacing between neighbouring x values, independent of row order.
-    x.spacing <- gravity(diff(sort(unique(x))))
-
-    results <- vector(mode = "list", length(h_s))
-    first.deriv <- vector(mode = "list", length(h_s))
-    second.deriv <- vector(mode = "list", length(h_s))
-    deriv.points <- vector(mode = "list", length(h_s))
-    grads <- vector(mode = "numeric", length(h_s))
-  
-    for(index in seq_along(h_s)){
-      h_step <- x.spacing * h_s[index]
-
-      eval.point.min <- pmax(min(x), original.eval.point.min - h_step)
-      eval.point.max <- pmin(max(x), h_step + original.eval.point.max)
-      
-      deriv.points[[index]] <- cbind(eval.point.min, eval.point, eval.point.max)
-    }
-
-    deriv.points <- do.call(rbind.data.frame, deriv.points)
-
-    deriv.points <- deriv.points[order(deriv.points[, "eval.point"], method = "radix"), , drop = FALSE]
-    rownames(deriv.points) <- NULL
-
-      # At the boundary one run is 0 (the window is clipped to [min(x), max(x)]);
-      # the first derivative then uses the one-sided slope below.
-
-      reg.output <- NNS.reg(x, y, type = "REG", plot = FALSE, point.est = unlist(deriv.points), point.only = TRUE, ncores = 1, smooth = TRUE)
-
-      combined.matrices <- cbind(deriv.points, matrix(unlist(reg.output$Point.est), ncol = 3, byrow = F))
-      colnames(combined.matrices) <- c(colnames(deriv.points), "estimates.min", "estimates", "estimates.max")
-
-      # Per-row run/rise computed from the combined columns (matches prior data.table `:=` scoping)
-      eval.point.col <- combined.matrices[, "eval.point"]
-      run_1c  <- combined.matrices[, "eval.point.max"] - eval.point.col
-      run_2c  <- eval.point.col - combined.matrices[, "eval.point.min"]
-      rise_1c <- combined.matrices[, "estimates.max"] - combined.matrices[, "estimates"]
-      rise_2c <- combined.matrices[, "estimates"]     - combined.matrices[, "estimates.min"]
-
-      first.deriv.vec  <- (rise_1c + rise_2c) / (run_1c + run_2c)
-      second.deriv.vec <- (rise_1c / run_1c - rise_2c / run_2c) / ((run_1c + run_2c) / 2)
-
-      # Grouped means by eval.point (ascending), NA-preserving like data.table mean()
-      unique.eval  <- sort(unique(eval.point.col))
-      first.deriv  <- data.frame(eval.point = unique.eval,
-                                 first.derivative  = vapply(unique.eval,
-                                   function(p) mean(first.deriv.vec[eval.point.col == p]), numeric(1)))
-      second.deriv <- data.frame(eval.point = unique.eval,
-                                 second.derivative = vapply(unique.eval,
-                                   function(p) mean(second.deriv.vec[eval.point.col == p]), numeric(1)))
-
+  if(identical(unname(eval.point), "overall")){
+    return(mean(NNS.reg(x, y, type = "REG", order = NULL, plot = FALSE, ncores = 1)$Fitted.xy$gradient))
   }
+  if(!is.numeric(eval.point))
+    stop("eval.point must be numeric point(s) or 'overall'")
+  if(any(!is.finite(eval.point)))
+    stop("eval.point must contain only finite numeric values")
 
-  colnames(first.deriv) <- c("eval.point", "first.derivative")
-  colnames(second.deriv) <- c("eval.point", "second.derivative")
-  
-  return(.NNS.out(merge(first.deriv, second.deriv, by = "eval.point")))
+  points <- as.numeric(eval.point)
+  root_n <- floor(sqrt(length(x)))
+  h_s <- round(exp(seq(log(2), log(root_n), length.out = 5)))
+  x.spacing <- gravity(diff(sort(unique(x))))
+  windows <- lapply(h_s * x.spacing, function(h) {
+    cbind(pmax(min(x), points - h), points, pmin(max(x), points + h))
+  })
+  windows <- do.call(rbind, windows)
+  fit <- NNS.reg(x, y, type = "REG", plot = FALSE, point.est = as.vector(windows),
+                 point.only = TRUE, ncores = 1, smooth = TRUE)
+  estimates <- matrix(as.numeric(fit$Point.est), ncol = 3L)
+
+  left <- windows[, 2L] - windows[, 1L]
+  right <- windows[, 3L] - windows[, 2L]
+  rise.left <- estimates[, 2L] - estimates[, 1L]
+  rise.right <- estimates[, 3L] - estimates[, 2L]
+  first <- (rise.right + rise.left) / (right + left)
+  second <- (rise.right / right - rise.left / left) / ((right + left) / 2)
+
+  unique.points <- unique(points)
+  groups <- match(windows[, 2L], unique.points)
+  result <- data.frame(eval.point = unique.points,
+                       first.derivative = vapply(split(first, groups), mean, numeric(1), USE.NAMES = FALSE),
+                       second.derivative = vapply(split(second, groups), mean, numeric(1), USE.NAMES = FALSE))
+  result <- result[match(points, unique.points), , drop = FALSE]
+  rownames(result) <- NULL
+  .NNS.out(result)
 }
-
-

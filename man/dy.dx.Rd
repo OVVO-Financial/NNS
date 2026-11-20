@@ -11,10 +11,10 @@ dy.dx(x, y, eval.point = NULL)
 
 \item{y}{a numeric vector.}
 
-\item{eval.point}{numeric or ("overall"); \code{x} point to be evaluated, must be provided.  Defaults to \code{(eval.point = NULL)}.  Set to \code{(eval.point = "overall")} to find an overall partial derivative estimate (1st derivative only).}
+\item{eval.point}{Finite numeric points, or \code{"overall"} for the average first derivative.}
 }
 \value{
-Returns a \code{data.frame} of eval.point along with both 1st and 2nd derivative.
+For numeric points, a \code{data.frame} with the first and second derivatives in the supplied order, including repeated points. For \code{"overall"}, a single first derivative.
 }
 \description{
 Returns the numerical partial derivative of \code{y} wrt \code{x} for a point of interest.
@@ -22,7 +22,7 @@ Returns the numerical partial derivative of \code{y} wrt \code{x} for a point of
 \details{
 \code{eval.point = "overall"} returns the mean of the \code{gradient} column of \code{NNS.reg(x, y)$Fitted.xy}. Each observation receives the slope of the unsmoothed regression segment that contains it, so the result is an observation-weighted average of segment slopes, not an average of smoothed derivatives. Very short segments between nearly coincident regression points can have extreme slopes; \code{mean(dy.dx(x, y, eval.point = x)$first.derivative)} averages the smoothed pointwise estimates instead.
 
-Numeric evaluation points use central differences of smoothed \link{NNS.reg} estimates over five steps from 2 to \code{floor(sqrt(n))} typical spacings of \code{x}, clipped to the observed range. \code{second.derivative} is a second difference of those estimates, and second differences amplify noise: for \code{y = x^2} plus noise with an R-squared near 0.99 and n = 400, estimates of the true value 2 at three interior points had a root mean squared error of about 5, and about one in five had the wrong sign. Treat it as a descriptive diagnostic on noisy data.
+Numeric evaluation points use central differences of smoothed \link{NNS.reg} estimates over five steps from 2 to \code{floor(sqrt(n))} typical spacings of \code{x}. The left point is bounded below by \code{min(x)} and the right point above by \code{max(x)}. At coordinates outside that range, the differences use the extrapolated fit. \code{second.derivative} is a second difference of those estimates, and second differences amplify noise: for \code{y = x^2} plus noise with an R-squared near 0.99 and n = 400, estimates of the true value 2 at three interior points had a root mean squared error of about 5, and about one in five had the wrong sign. Treat it as a descriptive diagnostic on noisy data.
 }
 \examples{
 \dontrun{

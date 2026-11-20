@@ -53,3 +53,31 @@ test_that("NNS.diff is unaffected by a constant added to f", {
   expect_equal(d(1000, tol = 1e-4)["DERIVATIVE", 1],
                d(0, tol = 1e-4)["DERIVATIVE", 1], tolerance = 1e-8)
 })
+
+test_that("dy.dx accepts only the overall option for text queries", {
+  x <- seq(0, 6, length.out = 70)
+  expect_error(dy.dx(x, sin(x), "1.75"), "numeric.*overall")
+  expect_error(dy.dx(x, sin(x), c("overall", "typo")), "numeric.*overall")
+  fit <- NNS.reg(x, sin(x), plot = FALSE, ncores = 1)
+  expect_equal(dy.dx(x, sin(x), "overall"), mean(fit$Fitted.xy$gradient))
+})
+
+test_that("dy.dx returns both derivatives in query order, including repeats", {
+  x <- seq(0, 6, length.out = 70)
+  points <- c(3, 1, 3, 2)
+  expected <- dy.dx(x, sin(x), 1:3)
+  actual <- dy.dx(x, sin(x), points)
+  expect_equal(actual$eval.point, points)
+  expect_equal(actual$first.derivative, expected$first.derivative[points])
+  expect_equal(actual$second.derivative, expected$second.derivative[points])
+})
+
+test_that("dy.dx uses the extrapolated fit outside the observed range", {
+  x <- seq(0, 2 * pi, pi / 100)
+  points <- c(1, 2 * pi + 0.025, 8)
+  d <- dy.dx(x, sin(x), points)
+  one <- lapply(points, function(p) dy.dx(x, sin(x), p))
+  expect_true(all(is.finite(d$first.derivative)))
+  expect_equal(d$first.derivative, vapply(one, `[[`, numeric(1), "first.derivative"))
+  expect_equal(d$second.derivative, vapply(one, `[[`, numeric(1), "second.derivative"))
+})
