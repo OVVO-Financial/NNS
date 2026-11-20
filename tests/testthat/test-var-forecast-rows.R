@@ -75,3 +75,38 @@ test_that("the multivariate forecast responds to the univariate forecasts", {
                matrix(5, 3, 2), ignore_attr = TRUE)
   expect_gt(max(abs(as.matrix(high$multivariate) - as.matrix(low$multivariate))), 0.01)
 })
+
+test_that("monthly NNS.VAR forecasts start after the last observation", {
+  panel <- ts(var_fixture(), end = c(2006, 12), frequency = 12)
+  fit <- NNS.VAR(panel, h = 2, ncores = 1, status = FALSE)
+  expect_identical(tail(rownames(fit$interpolated_and_extrapolated), 2),
+                   c("Nov 2006", "Dec 2006"))
+  future <- c("Jan 2007", "Feb 2007")
+  expect_identical(rownames(fit$univariate), future)
+  expect_identical(rownames(fit$multivariate), future)
+  expect_identical(rownames(fit$ensemble), future)
+})
+
+test_that("weekly NNS.VAR forecasts keep the ts time coordinates", {
+  panel <- ts(var_fixture(), end = c(2006, 52), frequency = 52)
+  fit <- NNS.VAR(panel, h = 2, ncores = 1, status = FALSE)
+  expect_identical(rownames(fit$interpolated_and_extrapolated),
+                   as.character(time(panel)))
+  expect_identical(rownames(fit$ensemble), as.character(2007 + (0:1) / 52))
+})
+
+test_that("NNS.VAR forecasts one period by default", {
+  panel <- ts(var_fixture(), end = c(2006, 4), frequency = 4)
+  fit <- NNS.VAR(panel, ncores = 1, status = FALSE)
+  expect_identical(rownames(fit$ensemble), "Jan 2007")
+})
+
+test_that("per-variable lag encodings use the same first-stage periods", {
+  set.seed(421)
+  panel <- data.frame(x = rnorm(96), y = 20 + 4 * sin(2 * pi * (1:96) / 24) + rnorm(96))
+  fit <- function(tau) NNS.VAR(panel, h = 3, tau = tau, ncores = 1, status = FALSE,
+                               obj.fn = expression(mean((predicted - actual)^2)))
+  reference <- fit(list(1, 24))$univariate
+  expect_equal(fit(c(1, 24))$univariate, reference)
+  expect_equal(fit(matrix(c(1, 24), nrow = 1))$univariate, reference)
+})

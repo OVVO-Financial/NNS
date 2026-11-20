@@ -6,7 +6,7 @@
 \usage{
 NNS.VAR(
   variables,
-  h,
+  h = 1,
   tau = 1,
   dim.red.method = "cor",
   naive.weights = TRUE,
