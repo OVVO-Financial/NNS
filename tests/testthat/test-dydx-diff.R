@@ -95,3 +95,15 @@ test_that("NNS.diff resolves linear and smooth slopes with an offset", {
   expect_equal(unname(shifted["converged", 1]), 1)
   expect_lt(abs(shifted["DERIVATIVE", 1] - 1), 1e-10)
 })
+
+test_that("NNS.diff resolves an exactly sampled line with a large offset", {
+  line <- NNS.diff(function(x) 1000 + x, 0, h = 2^-9)
+  expect_identical(unname(line[c("DERIVATIVE", "converged", "termination.code"), 1]), c(1, 1, 0))
+})
+
+test_that("NNS.diff leaves the complex-step derivative missing for real-only functions", {
+  f <- stats::approxfun(c(-1, 1), c(-1, 1))
+  expect_no_warning(line <- NNS.diff(f, 0))
+  expect_identical(unname(line[c("DERIVATIVE", "Complex Step Derivative (Inferred h)"), 1]), c(1, NA_real_))
+  expect_identical(unname(NNS.diff(Re, 0)["Complex Step Derivative (Inferred h)", 1]), NA_real_)
+})

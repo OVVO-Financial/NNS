@@ -115,6 +115,8 @@ NNS.diff <- function(f, point, h = abs(point) * 0.1 + 0.01, tol = 1e-10, max.ite
   refine.step <- isTRUE(all.equal(lower.B, upper.B, tolerance = .Machine$double.eps^0.5))
   if(refine.step) {
     inferred.h <- h
+    sample.ulp <- function(a, b) 2^(floor(log2(max(abs(a), abs(b), .Machine$double.xmin))) - 52)
+    coarse.ulp <- sample.ulp(f.x.h.lower, f.x.h.upper)
     steps <- c(left.slope, right.slope)
     slope <- mean(steps)
   }
@@ -125,7 +127,9 @@ NNS.diff <- function(f, point, h = abs(point) * 0.1 + 0.01, tol = 1e-10, max.ite
       left <- point - half
       right <- point + half
       if(left == point || right == point) break
-      next.steps <- c((f.x - f(left)) / (point - left), (f(right) - f.x) / (right - point))
+      f.left <- f(left)
+      f.right <- f(right)
+      next.steps <- c((f.x - f.left) / (point - left), (f.right - f.x) / (right - point))
       if(any(!is.finite(next.steps))) break
 
       # For smooth functions the left-right gap has terms in h, h^3, h^5, ...
@@ -143,8 +147,10 @@ NNS.diff <- function(f, point, h = abs(point) * 0.1 + 0.01, tol = 1e-10, max.ite
       Bu[i] <- bounds[2L]
       if(print.trace) print(c(Iteration = i, h = half, "Lower B" = Bl[i], "Upper B" = Bu[i]))
       threshold <- tol * max(1, abs(slope))
-      # Estimate the slope resolution across the centered interval.
-      if(.Machine$double.eps * abs(f.x) / (2 * half) > threshold) break
+      # Half a ULP per sample, weighted by the centered Richardson coefficients.
+      fine.ulp <- sample.ulp(f.left, f.right)
+      if((8 * fine.ulp + coarse.ulp) / (12 * half) > threshold) break
+      coarse.ulp <- fine.ulp
       if(abs(previous - slope) <= threshold && abs(jump) <= threshold) {
         converged <- TRUE
         termination.code <- 0L
@@ -236,8 +242,12 @@ NNS.diff <- function(f, point, h = abs(point) * 0.1 + 0.01, tol = 1e-10, max.ite
   complex.step <- NA_real_
   if(is.finite(inferred.h) && inferred.h != 0) {
     z <- complex(real = point, imaginary = inferred.h)
-    f.z <- tryCatch(f(z), error = function(e) NA_complex_)
-    if(length(f.z) == 1L && !is.na(f.z)) {
+    f.z <- if(refine.step) {
+      tryCatch(f(z), warning = function(w) NA_complex_, error = function(e) NA_complex_)
+    } else {
+      tryCatch(f(z), error = function(e) NA_complex_)
+    }
+    if(length(f.z) == 1L && !is.na(f.z) && (!refine.step || is.complex(f.z))) {
       complex.step <- Im(f.z) / Im(z)
     }
   }
