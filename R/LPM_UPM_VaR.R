@@ -20,6 +20,7 @@
 
 LPM.VaR <- function(percentile, degree, x) {
   x <- .NNS_prepare_VaR_x(x)
+  if (is.factor(percentile)) stop("`percentile` must be numeric, not a factor.")
   percentile <- pmin(pmax(as.numeric(percentile), 0), 1)
   
   if (degree == 0) {
@@ -55,6 +56,7 @@ LPM.VaR <- function(percentile, degree, x) {
 
 UPM.VaR <- function(percentile, degree, x) {
   x <- .NNS_prepare_VaR_x(x)
+  if (is.factor(percentile)) stop("`percentile` must be numeric, not a factor.")
   percentile <- pmin(pmax(as.numeric(percentile), 0), 1)
   
   if (degree == 0) {
@@ -77,6 +79,8 @@ UPM.VaR <- function(percentile, degree, x) {
 .NNS_prepare_VaR_x <- function(x) {
   # unlist() and as.numeric() would both turn a factor column into its codes.
   if (is.data.frame(x) && any(vapply(x, is.factor, logical(1)))) stop("`x` must be numeric, not a factor.")
+  dated_table <- is.data.frame(x) && ncol(x) > 1L &&
+    any(vapply(x, inherits, logical(1), c("Date", "POSIXt")))
   if (inherits(x, c("tbl", "data.table"))) x <- as.numeric(unlist(x))
   if (is.factor(x)) stop("`x` must be numeric, not a factor.")
   
@@ -86,6 +90,8 @@ UPM.VaR <- function(percentile, degree, x) {
   if (!length(x)) {
     stop("x must contain at least one non-NA numeric value.")
   }
+  # Keep the original coercion and empty-sample errors for tables that already failed.
+  if (dated_table) stop("`x` must have exactly one column when a date is present.")
   
   x
 }
