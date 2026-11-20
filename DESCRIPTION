@@ -20,7 +20,8 @@ Suggests:
     rgl,
     rmarkdown,
     testthat (>= 3.0.0),
-    withr
+    withr,
+    xts
 VignetteBuilder: knitr
 LinkingTo: Rcpp, RcppParallel
 SystemRequirements: GNU make
