@@ -478,17 +478,23 @@ SEXP NNS_mode_cpp(SEXP xSEXP, bool discrete, bool multi) {
 
   std::vector<int> peak_idx; peak_idx.reserve(lz);
   const double cs_max = *std::max_element(cs.begin(), cs.end());
-  for (int i = 0; i < lz && lz >= 7; ++i) {
-    const int first = i;
+  auto is_peak = [&](int i) {
     const double height = cs[i];
-    while (i + 1 < lz && cs[i + 1] == height) ++i;
-    if (height <= 0.0 || (first == 0 && i == lz - 1)) continue;
-    // A truncated neighbourhood can only establish a peak at the global maximum.
-    if ((first < 3 || i > lz - 4) && height < cs_max) continue;
-
-    const int lo = std::max(0, first - 3), hi = std::min(lz - 1, i + 3);
-    if (*std::max_element(cs.begin() + lo, cs.begin() + hi + 1) == height)
-      peak_idx.push_back(first + (i - first) / 2);
+    if ((i > 0 && cs[i - 1] >= height) || (i + 1 < lz && cs[i + 1] >= height)) return false;
+    if ((i < 3 || i > lz - 4) && height < cs_max) return false;
+    const int lo = std::max(0, i - 3), hi = std::min(lz - 1, i + 3);
+    return *std::max_element(cs.begin() + lo, cs.begin() + hi + 1) == height;
+  };
+  for (int i = 0; i < lz && lz >= 7; ++i) {
+    if (!is_peak(i)) continue;
+    // A tie inside the window counts only when another peak qualifies there too.
+    bool tied = false, paired = false;
+    for (int j = std::max(0, i - 3); j <= std::min(lz - 1, i + 3); ++j) {
+      if (j == i || cs[j] != cs[i]) continue;
+      tied = true;
+      if (is_peak(j)) { paired = true; break; }
+    }
+    if (!tied || paired) peak_idx.push_back(i);
   }
 
   if (!peak_idx.empty()) {
@@ -504,10 +510,12 @@ SEXP NNS_mode_cpp(SEXP xSEXP, bool discrete, bool multi) {
       std::sort(out.begin(), out.end());
       return out;
     } else {
+      double best_h = cs[peak_idx[0]];
+      for (int i : peak_idx) best_h = std::max(best_h, cs[i]);
       const double g = gravity_value(xnum, false);
       double best_c = NA_REAL, best_d = R_PosInf;
       for (int t = 0; t < (int)peak_idx.size(); ++t) {
-        if (cs[peak_idx[t]] != cs_max) continue;
+        if (cs[peak_idx[t]] != best_h) continue;
         const double dist = std::fabs(centers[t] - g);
         if (dist < best_d || (dist == best_d && centers[t] < best_c)) { best_d = dist; best_c = centers[t]; }
       }

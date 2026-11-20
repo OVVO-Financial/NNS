@@ -22,10 +22,16 @@ test_that("nearby equal-height peaks both count toward the mode", {
   expect_equal(NNS.mode(x, multi = FALSE), 7.1)
 })
 
-test_that("a flat-topped peak counts as one mode", {
+test_that("a flat top leaves the smaller strict peak eligible", {
   x <- c(0, 1, 2, 2, rep(5, 4), rep(6, 4), 9, 9, 18, 25)
-  expect_equal(NNS.mode(x), c(4.8, 18))
-  expect_equal(NNS.mode(x, multi = FALSE), 4.8)
+  expect_equal(NNS.mode(x), 18)
+  expect_equal(NNS.mode(x, multi = FALSE), 18)
+})
+
+test_that("a flat top with no strict peaks falls back to the busiest bins", {
+  x <- c(0, 1, 2, 2, rep(5, 4), rep(6, 4), 9, 9, 25, 25)
+  expect_equal(NNS.mode(x), c(5, 6))
+  expect_equal(NNS.mode(x, multi = FALSE), 6)
 })
 
 test_that("a density highest at its minimum has its mode there", {
