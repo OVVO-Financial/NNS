@@ -1,6 +1,7 @@
 strict_joint_survival <- function(A, t) mean(rowSums(sweep(A, 2, t, ">")) == ncol(A))
 
 test_that("NNS.moments sample skewness is the adjusted Fisher-Pearson G1", {
+  expect_identical(NNS.moments(c(0.1, 0.2), population = FALSE)$skewness, NaN)
   expect_equal(NNS.moments(c(1, 2, 4, 8, 16), population = FALSE)$skewness, 1.325315, tolerance = 1e-6)
 })
 

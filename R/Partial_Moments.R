@@ -515,7 +515,7 @@ NNS.moments <- function(x, population = TRUE) {
   } else {
     # Adjusted Fisher-Pearson G1: n/((n-1)(n-2)) * sum(z^3) / s^3, with s the
     # sample (n-1) standard deviation, as in the kurtosis branch below.
-    skewness <- (n / ((n - 1) * (n - 2))) *
+    skewness <- if (n < 3L) NaN else (n / ((n - 1) * (n - 2))) *
       ((n * skew_base) / (variance * (n / (n - 1)))^(3 / 2))
     
     kurtosis <- ((n * (n + 1)) / ((n - 1) * (n - 2) * (n - 3))) *
