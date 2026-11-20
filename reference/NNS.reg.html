@@ -132,7 +132,7 @@
 
 
 <dt id="arg-n-best">n.best<a class="anchor" aria-label="anchor" href="#arg-n-best"></a></dt>
-<dd><p>integer; <code>NULL</code> (default) Sets the number of nearest regression points to use in weighting for multivariate regression at <code>floor((1 - D) * sqrt(nrow(x)))</code> (at least 1, at most the number of regression points), where D averages the copula summaries with response y and -y so the smoothing choice is unchanged by response reflection.  <code>(n.best = "all")</code> will select and weight all generated regression points.  Analogous to <code>k</code> in a
+<dd><p>integer; <code>NULL</code> (default) Sets the number of nearest regression points to use in weighting for multivariate regression at <code>floor((1 - D) * sqrt(R))</code>, where R is the number of regression points (at least 1), and D averages the copula summaries with response y and -y so the smoothing choice is unchanged by response reflection. For classification, D is the mean over predictors of each predictor's strongest dependence with a class indicator.  <code>(n.best = "all")</code> will select and weight all generated regression points.  Analogous to <code>k</code> in a
 <code>k Nearest Neighbors</code> algorithm.  Different values of <code>n.best</code> are tested using cross-validation in <a href="NNS.stack.html">NNS.stack</a>. <code>NA</code> selects the default, as <code>NULL</code> does.</p></dd>
 
 

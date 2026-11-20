@@ -1426,9 +1426,10 @@ O_j=\max\{1,\lfloor10D_j+0.5\rfloor\},
 <p><span class="math display">\[
 \boxed{k=
 \min\left\{M,\max\left(1,
-\left\lfloor(1-D_{\mathrm{multi}})\sqrt n\right\rfloor
+\left\lfloor(1-D_{\mathrm{multi}})\sqrt M\right\rfloor
 \right)\right\}.}
 \]</span></p>
+<p>The count scales with the number of RPM rows it averages over rather than with the sample size: at a fixed depth the number of rows stops growing with <span class="math inline">\(n\)</span>, so a count proportional to <span class="math inline">\(\sqrt n\)</span> would eventually average over nearly every row and flatten the fit toward the overall mean.</p>
 <p>A higher dependence score tends to use fewer RPM rows; a lower score tends to aggregate over more rows. However, <code>order = "max"</code> and the purely categorical exact-cell route select <span class="math inline">\(k=1\)</span> by default unless the caller supplies <code>n.best</code>. The user may also supply an integer count or <code>n.best = "all"</code>.</p>
 <p>Depth and neighbor count are therefore different controls. Refining the RPM creates more candidate local representatives; increasing <span class="math inline">\(k\)</span> combines more of those representatives in the final prediction. The resulting effective resolution cannot be characterized by either parameter alone.</p>
 </div>
