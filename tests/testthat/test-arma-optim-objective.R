@@ -5,6 +5,13 @@ run_optim <- function(...) {
                  obj.fn = mse, ncores = 1, print.trace = FALSE, ...)
 }
 
+test_that("the optimizer diagnoses a zero period from a short training set", {
+  x <- c(20, 18, 19, 21, 22)
+  period <- NNS.seas(x[1:3], plot = FALSE)$best.period
+  expect_error(NNS.ARMA.optim(x, training.set = 3, seasonal.factor = period),
+               "too short to scan for a period.*seasonal.factor = 1")
+})
+
 test_that("obj.fn scores the returned validation forecast", {
   o <- run_optim()
   expect_equal(o$validation.forecast, o$results)
