@@ -139,6 +139,13 @@ test_that("automatic regression and stack threads respect the session limit", {
   expect_identical(.nns_default_cores(), available)
 })
 
+test_that("NNS.dep gives a constant column zero asymmetric self-dependence", {
+  x <- cbind(cash = 0, stock = seq_len(64))
+  m <- NNS.dep(x, asym = TRUE)
+  expect_equal(diag(m$Correlation), c(cash = 0, stock = 1))
+  expect_equal(diag(m$Dependence), c(cash = 0, stock = 1))
+})
+
 test_that("the default thread count does not change multivariate estimates", {
   set.seed(107)
   n <- 3000
