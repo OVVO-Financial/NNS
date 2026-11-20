@@ -15,3 +15,11 @@ test_that("pred.int works for a flat forecast path (#98)", {
   expect_equal(unname(unlist(r[, 2])), rep(2, 12))
   expect_equal(unname(unlist(r[, 3])), rep(2, 12))
 })
+
+test_that("one linear lag has no spread across lags", {
+  band <- function(lag) {
+    set.seed(99)
+    NNS.ARMA(1:96, h = 6, seasonal.factor = lag, method = "lin", pred.int = .95, plot = FALSE)
+  }
+  expect_equal(band(12), band(c(12, 12)))
+})

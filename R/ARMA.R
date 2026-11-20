@@ -201,9 +201,9 @@ NNS.ARMA <- function(variable,
       Lin.estimates <- Lin.Reg.Estimates[[1]]
     } else {
       Lin.estimates <- rowSums(do.call(cbind, Lin.Reg.Estimates))
-      # pred.int reads the per-lag estimates of the loop's last step.
-      Lin.Regression.Estimates <- vapply(unweighted, function(e) e[h], numeric(1))
     }
+    # pred.int reads the per-lag estimates of the loop's last step.
+    if (!is.null(pred.int)) Lin.Regression.Estimates <- vapply(unweighted, function(e) e[h], numeric(1))
     
     if(!negative.values) Lin.estimates <- pmax(0, Lin.estimates)
     
