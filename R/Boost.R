@@ -830,7 +830,7 @@ NNS.boost <- function(IVs.train,
     estimates <- response$decode(estimates)
     if (!is.null(pred_int_out)) {
       pred_int_out <- as.data.frame(pred_int_out)
-      pred_int_out[] <- lapply(pred_int_out, response$decode)
+      pred_int_out[] <- lapply(pred_int_out, function(code) as.numeric(response$decode(code)))
     }
   }
 

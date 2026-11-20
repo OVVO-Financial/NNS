@@ -57,3 +57,15 @@ test_that("boost keeps ordered response levels in a one-column frame", {
   control <- fit(y)
   expect_identical(fit(data.frame(y)), control)
 })
+
+test_that("Boost and Stack return numeric bounds for logical classes", {
+  x <- rep(1:2, each = 15)
+  y <- x == 2
+  stack <- NNS.stack(x, y, 1:2, method = 1, folds = 2, seed = 4, ncores = 1,
+                     pred.int = .8, status = FALSE)
+  boost <- NNS.boost(x, y, 1:2, epochs = 0, learner.trials = 1, folds = 2,
+                     seed = 4, pred.int = .8, status = FALSE, feature.importance = FALSE)
+  expect_type(boost$pred.int[[1]], "double")
+  expect_type(boost$pred.int[[2]], "double")
+  expect_equal(as.matrix(boost$pred.int), as.matrix(stack$pred.int), tolerance = 1e-12)
+})
