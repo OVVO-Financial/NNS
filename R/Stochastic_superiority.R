@@ -122,8 +122,17 @@ NNS.SS <- function(x,
                    ci = 0.95,
                    rho = 1) {
   
-  x <- as.numeric(stats::na.omit(x))
-  y <- as.numeric(stats::na.omit(y))
+  numeric_sample <- function(v, arg) {
+    if (is.factor(v) || (is.list(v) && any(vapply(v, is.factor, logical(1))))) {
+      stop(sprintf("`%s` must be numeric, not a factor.", arg))
+    }
+    v <- stats::na.omit(v)
+    v <- if (is.character(v)) suppressWarnings(as.numeric(v)) else as.numeric(v)
+    if (anyNA(v)) stop(sprintf("`%s` must contain only numeric values.", arg))
+    v
+  }
+  x <- numeric_sample(x, "x")
+  y <- numeric_sample(y, "y")
   
   if (length(x) == 0L || length(y) == 0L) {
     stop("x and y must both contain at least one non-missing value.")
