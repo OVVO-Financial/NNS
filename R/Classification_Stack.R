@@ -6,7 +6,8 @@
                                 balance.indices, numeric.response, status,
                                 numeric.design, tau = NULL) {
   values <- sort(unique(y))
-  tie.order <- match(unique(y), values)
+  class.order <- function(response) match(unique(response), values)
+  tie.order <- class.order(y)
   labels <- as.character(class.values)
   n <- length(y); K <- length(values)
   encode <- function(train, test) {
@@ -25,15 +26,47 @@
   decode <- function(code) {
     if (numeric.response) class.values[code] else as.numeric(code)
   }
-  choose <- function(prob, threshold = .5) {
-    if (K == 2L) {
-      ifelse(prob[, tie.order[2L]] > threshold,
-             values[tie.order[2L]], values[tie.order[1L]])
-    } else .nns_class_select(prob, values, tie.order)
+  validation <- lapply(splits, `[[`, "validation")
+  validation.rows <- unlist(validation, use.names = FALSE)
+  count <- tabulate(validation.rows, n)
+  valid <- count > 0L
+  pooled <- count > 1L
+  repeated <- which(pooled[validation.rows])
+  contributions <- split(repeated, validation.rows[repeated])
+  priority <- matrix(Inf, K, n)
+  for (b in seq_along(splits)) {
+    va <- validation[[b]]
+    tr <- splits[[b]]$train[balanced[[b]]]
+    priority[, va[!pooled[va]]] <- match(values, y[tr])
+    shared <- va[pooled[va]]
+    if (length(shared)) {
+      # Original row indices are comparable across different training samples.
+      tr <- sort(tr)
+      earliest <- tr[match(values, y[tr])]
+      priority[, shared] <- pmin(priority[, shared, drop = FALSE], earliest)
+    }
   }
-  evaluate <- function(prob, actual) {
+  final.order <- class.order(y[final.rows])
+  preferred <- function(prob, priority) {
+    if (K == 2L) values[priority[1L]] else .nns_class_select(prob, values, priority)
+  }
+  choose <- function(prob, threshold = .5, first = preferred(prob, final.order)) {
+    if (K != 2L) return(first)
+    p <- prob[, tie.order[2L]]
+    ifelse(p == threshold, first,
+           ifelse(p > threshold, values[tie.order[2L]], values[tie.order[1L]]))
+  }
+  evaluate <- function(prob, valid) {
+    prob <- prob[valid, , drop = FALSE]
+    ranks <- t(priority[, valid, drop = FALSE])
+    if (K > 2L) {
+      largest <- prob[cbind(seq_len(nrow(prob)), max.col(prob, ties.method = "first"))]
+      ranks[prob < largest] <- Inf
+    }
+    first <- values[max.col(-ranks, ties.method = "first")]
+    actual <- decode(y[valid])
     thresholds <- if (K == 2L && optimize.threshold) seq(.01, .99, .01) else .5
-    loss <- vapply(thresholds, function(t) score(decode(choose(prob, t)), decode(actual)), numeric(1))
+    loss <- vapply(thresholds, function(t) score(decode(choose(prob, t, first)), actual), numeric(1))
     usable <- which(is.finite(loss))
     if (!length(usable)) stop("No classification threshold has a finite objective.")
     best <- if (objective == "min") min(loss[usable]) else max(loss[usable])
@@ -58,11 +91,14 @@
   fit <- function(train, response, test, component, candidate, select.count = NULL) {
     encoded <- design(train, response, test, component, select.count)
     task <- list(y = response, class.values = values, class.levels = labels)
-    .nns_reg_classify(encoded, task, order,
-                      if (component == 1L) candidate else NULL, dist, ncores,
-                      if (component == 2L) dim.red.method else NULL, tau = tau,
-                      dim.count = if (component == 2L) candidate else NULL,
-                      point.only = TRUE)
+    model <- .nns_reg_classify(
+      encoded, task, order,
+      if (component == 1L) candidate else NULL, dist, ncores,
+      if (component == 2L) dim.red.method else NULL, tau = tau,
+      dim.count = if (component == 2L) candidate else NULL,
+      point.only = TRUE)
+    model$variables <- colnames(encoded$x)
+    model
   }
   # The method 1 cells, class shares and distances do not depend on the
   # neighbour count, so each fold builds them once for every candidate. The
@@ -74,27 +110,28 @@
                     order, NULL, dist, ncores, categorical,
                     need.fitted = FALSE, k.path = candidates)$predicted.path
   }
-  record <- function(total, count, candidate) {
-    valid <- count > 0
+  record <- function(fold.probabilities, candidate) {
+    predictions <- do.call(rbind, fold.probabilities)
     probability <- matrix(NA_real_, n, K)
-    probability[valid, ] <- total[valid, , drop = FALSE] / count[valid]
-    assessment <- evaluate(probability[valid, , drop = FALSE], y[valid])
+    probability[validation.rows, ] <- predictions
+    for (i in contributions) {
+      # Average each class in the same order regardless of how the folds were visited.
+      probability[validation.rows[i[1L]], ] <- vapply(seq_len(K), function(k) {
+        mean(sort.int(predictions[i, k], na.last = TRUE))
+      }, numeric(1))
+    }
+    assessment <- evaluate(probability, valid)
     c(assessment, list(candidate = candidate, probability = probability, valid = valid))
   }
   tune <- function(component, candidates, select.count = NULL) {
     if (component == 1L) {
-      totals <- lapply(candidates, function(candidate) matrix(0, n, K))
-      count <- integer(n)
-      for (b in seq_along(splits)) {
+      paths <- lapply(seq_along(splits), function(b) {
         s <- splits[[b]]; tr <- s$train[balanced[[b]]]; va <- s$validation
-        path <- fit.path(x[tr, , drop = FALSE], y[tr], x[va, , drop = FALSE],
-                         candidates, select.count)
-        for (a in seq_along(candidates))
-          totals[[a]][va, ] <- totals[[a]][va, , drop = FALSE] + path[[a]]
-        count[va] <- count[va] + 1L
-      }
+        fit.path(x[tr, , drop = FALSE], y[tr], x[va, , drop = FALSE],
+                 candidates, select.count)
+      })
       records <- lapply(seq_along(candidates), function(a) {
-        record(totals[[a]], count, candidates[[a]])
+        record(lapply(paths, `[[`, a), candidates[[a]])
       })
       losses <- vapply(records, `[[`, numeric(1), "score")
       best <- if (objective == "min") which.min(losses) else which.max(losses)
@@ -104,8 +141,7 @@
     # predictor count, so each fold encodes and ranks them once.
     prepared <- vector("list", length(splits))
     records <- lapply(candidates, function(candidate) {
-      total <- matrix(0, n, K); count <- integer(n)
-      for (b in seq_along(splits)) {
+      fold.probabilities <- lapply(seq_along(splits), function(b) {
         s <- splits[[b]]; tr <- s$train[balanced[[b]]]; va <- s$validation
         if (is.null(prepared[[b]])) {
           prepared[[b]] <<- list(
@@ -119,10 +155,9 @@
           order, NULL, dist, ncores, dim.red.method, tau = tau,
           dim.count = candidate, point.only = TRUE,
           coef.cache = prepared[[b]]$cache)
-        total[va, ] <- total[va, , drop = FALSE] + as.matrix(fitted$Point.probabilities)
-        count[va] <- count[va] + 1L
-      }
-      record(total, count, candidate)
+        as.matrix(fitted$Point.probabilities)
+      })
+      record(fold.probabilities, candidate)
     })
     losses <- vapply(records, `[[`, numeric(1), "score")
     best <- if (objective == "min") which.min(losses) else which.max(losses)
@@ -144,9 +179,8 @@
     weights <- .nns_stack_objective_weights(reg.fit$score, dim.fit$score, objective)
     valid <- reg.fit$valid & dim.fit$valid
     threshold <- evaluate(
-      weights[["reg"]] * reg.fit$probability[valid, , drop = FALSE] +
-        weights[["dim.red"]] * dim.fit$probability[valid, , drop = FALSE],
-      y[valid])$threshold
+      weights[["reg"]] * reg.fit$probability +
+        weights[["dim.red"]] * dim.fit$probability, valid)$threshold
   }
   # The coefficient cutoff at which NNS.reg(x, y, dim.red.method = ..., threshold
   # = cutoff) keeps the tuned number of predictors in every class index,
@@ -179,7 +213,7 @@
   prediction.set <- function(prob) {
     if (is.null(prob) || is.null(pred.int)) return(NULL)
     lapply(seq_len(nrow(prob)), function(i) {
-      o <- tie.order[order(prob[i, tie.order], decreasing = TRUE)]
+      o <- final.order[order(prob[i, final.order], decreasing = TRUE)]
       count <- which(cumsum(prob[i, o]) >= pred.int - 1e-12)[1L]
       decode(values[o[seq_len(count)]])
     })
@@ -207,7 +241,8 @@
     dim.red.pred.int = interval(dp), stack = decode(choose(probability, threshold)),
     pred.int = interval(probability), Prediction.set = prediction.set(probability),
     probabilities = probability, reg.probabilities = rp, dim.red.probabilities = dp,
-    weights = weights, class.levels = class.values)
+    weights = weights, class.levels = class.values,
+    NNS.reg.variables = reg.final$variables)
   .NNS.out(result)
 }
 
