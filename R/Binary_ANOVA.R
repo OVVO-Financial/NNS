@@ -145,10 +145,12 @@ NNS.ANOVA.bin <- function(control, treatment,
     tails <- match.arg(tails, c("both", "left", "right"))
     
     # Bootstrap both groups
-    control_boot <- matrix(sample(control, size = n_boot * length(control), replace = TRUE), 
-                           nrow = length(control))
-    treatment_boot <- matrix(sample(treatment, size = n_boot * length(treatment), replace = TRUE), 
-                             nrow = length(treatment))
+    bootstrap <- function(x) {
+      n <- length(x)
+      matrix(x[sample.int(n, n_boot * n, replace = TRUE)], nrow = n)
+    }
+    control_boot <- bootstrap(control)
+    treatment_boot <- bootstrap(treatment)
     
     if(medians) {
       control_stats <- apply(control_boot, 2, median)
