@@ -207,7 +207,7 @@ NNS.boost <- function(IVs.train,
         tr_chr <- as.character(tr)
         te_chr <- as.character(te)
         lev <- if (is.factor(tr))
-          levels(droplevels(tr))
+          levels(tr)
         else
           sort(unique(tr_chr))
         unseen <- setdiff(unique(te_chr), lev)
@@ -221,7 +221,6 @@ NNS.boost <- function(IVs.train,
             call. = FALSE
           )
         }
-        train[[j]] <- factor(tr_chr, levels = lev, ordered = is.ordered(tr))
         test[[j]] <- factor(te_chr, levels = lev, ordered = is.ordered(tr))
       } else if (is.logical(tr)) {
         if (!is.logical(te)) {
@@ -570,6 +569,8 @@ NNS.boost <- function(IVs.train,
       g[sample.int(length(g), largest, replace = TRUE)]), use.names = FALSE)
     
     idx <- sort(c(down_idx, up_idx))
+    chars <- vapply(train_x, is.character, logical(1))
+    train_x[chars] <- lapply(train_x[chars], factor)
     list(x = train_x[idx, , drop = FALSE], y = train_y[idx])
   }
   
