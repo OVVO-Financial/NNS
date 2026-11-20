@@ -22,6 +22,13 @@ test_that("nearby equal-height peaks both count toward the mode", {
   expect_equal(NNS.mode(x, multi = FALSE), 7.1)
 })
 
+test_that("peaks centred on the same observations return one mode", {
+  three_bins_apart <- c(0.8, 1.1, 2.2, 3, 3.1, 3.2, 3.4, 3.4, 8.4, 8.6)
+  expect_equal(NNS.mode(three_bins_apart), 2.525)
+  two_bins_apart <- c(0, 0.25, 2.1, 2.2, 2.3, 3.3, 0.25 + sqrt(10), 3.6, 3.7, 7.2)
+  expect_equal(NNS.mode(two_bins_apart), mean(two_bins_apart[1:9]))
+})
+
 test_that("a flat top leaves the smaller strict peak eligible", {
   x <- c(0, 1, 2, 2, rep(5, 4), rep(6, 4), 9, 9, 18, 25)
   expect_equal(NNS.mode(x), 18)

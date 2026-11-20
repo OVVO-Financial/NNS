@@ -506,9 +506,9 @@ SEXP NNS_mode_cpp(SEXP xSEXP, bool discrete, bool multi) {
     }
 
     if (multi) {
-      NumericVector out = clone(centers);
-      std::sort(out.begin(), out.end());
-      return out;
+      std::sort(centers.begin(), centers.end());
+      const auto end = std::unique(centers.begin(), centers.end());
+      return NumericVector(centers.begin(), end);
     } else {
       double best_h = cs[peak_idx[0]];
       for (int i : peak_idx) best_h = std::max(best_h, cs[i]);
