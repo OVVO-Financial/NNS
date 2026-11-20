@@ -645,18 +645,13 @@
        (is.factor(y) || is.character(y) || is.logical(y) ||
           (is.numeric(y) && length(unique(y)) == 2L &&
              setequal(sort(unique(as.numeric(y))), c(0, 1)))))
-  if (is.class && is.logical(y)) y <- as.numeric(y)
   task <- .nns_encode_response(y, if (is.class) "class" else type)
   if (!is.null(task$class.levels)) task$class.levels <- as.character(task$class.levels)
   task
 }
 
 .nns_boost_response <- function(y, type) {
-  if (identical(type, "class") && is.logical(y)) y <- as.character(y)
   if (identical(type, "class") && !is.numeric(y) && !is.factor(y) &&
       !is.logical(y) && !is.character(y)) y <- factor(y)
-  response <- .nns_encode_response(y, type)
-  if (is.character(response$class.levels))
-    response$decode <- function(code) as.integer(response$class.values[code])
-  response
+  .nns_encode_response(y, type)
 }
