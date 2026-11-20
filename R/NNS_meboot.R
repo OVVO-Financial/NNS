@@ -16,7 +16,7 @@
 #' xmax = largest value + trimmed mean) are given when the random draw happens to be equal to 0 and 1, respectively.
 #' @param expand.sd logical; If \code{TRUE} the standard deviation in the ensemble is expanded. See \code{expand.sd} in \code{meboot::meboot}.  The expansion toward \code{sd(x)} is skipped when \code{drift = FALSE}, \code{target_drift} or \code{target_drift_scale} replaces the original drift, since \code{sd(x)} includes that drift.  A target equal to the original drift up to rounding (relative tolerance \code{sqrt(.Machine$double.eps)}, plus an allowance for rounding in the slope fit that grows with \code{max(abs(x))}) keeps the original reconstruction.
 #' @param force.clt logical; If \code{TRUE} the replicate means are assigned an iid normal-reference scale: the replicate means are spread as a normal sample centred on \code{mean(x)} with standard deviation \code{sd(x) / sqrt(n)}, the standard error of the mean of the \code{n} observations, whatever the number of \code{reps}.  See \code{force.clt} in \code{meboot::meboot}, whose code divides by the number of replicates instead (its comment says \code{n}).  When \code{drift = FALSE}, \code{target_drift} or \code{target_drift_scale} replaces the original drift, the replicate means are centred and spread using the new baseline plus the original residuals instead of \code{x}.
-#' @param scl.adjustment logical; If \code{TRUE} scale adjustment is performed to ensure that the population variance of the resampled residuals equals the variance of the detrended data.
+#' @param scl.adjustment logical; If \code{TRUE} the scale factor matches the population variance of a raw residual draw to the sample variance of the detrended data. Dependence targeting, SD expansion and forcing path means can change the variance pooled across paths.
 #' @param sym logical; If \code{TRUE} an adjustment is performed to ensure that the ME density is symmetric.
 #' @param elaps logical; If \code{TRUE} elapsed time during computations is displayed.
 #' @param digits integer; 6 (default) number of digits to round output to.
@@ -287,12 +287,20 @@ NNS.meboot <- function(x,
   
   # Optional ME-density scale adjustment on residuals, where the ME density lives
   if (scl.adjustment && !zero_res){
-    zz <- c(xmin, z, xmax)
-    v  <- diff(zz^2) / 12
+    # The type-7 interior is linear between order statistics. Each tail has mass 1/n.
+    breaks <- sort(unique(c(seq(0, 1, length.out = n), 1/n, (n - 1)/n)))
+    q <- stats::quantile(xx, breaks, names = FALSE)
+    left <- q[-length(q)]
+    right <- q[-1L]
+    tails <- c(1L, length(left))
+    left[tails] <- c(xmin, z[n - 1L])
+    right[tails] <- c(z[1L], xmax)
+    mid <- (left + right) / 2
+    if (!reachbnd) mid[tails] <- desintxb[c(1L, n)]
+    mass <- diff(breaks)
+    uv <- sum(mass * ((right - left)^2 / 12 + (mid - sum(mass * mid))^2))
     xb <- mean(orig_res)
-    s1 <- sum((desintxb - xb)^2)
-    uv <- (s1 + sum(v)) / n
-    desired.sd  <- sd(orig_res)
+    desired.sd <- sd(orig_res)
     actualME.sd <- sqrt(uv)
     if (actualME.sd <= 0) stop("actualME.sd<=0 Error")
     kappa <- (desired.sd / actualME.sd) - 1

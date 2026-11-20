@@ -22,14 +22,23 @@ test_that("target_drift and target_drift_scale set the replicate slope", {
   expect_lt(mean_detrended_sd(meboot_reps(target_drift = 1)), 1.1 * sd(res))
 })
 
-test_that("scl.adjustment kappa uses the residual mean and sd", {
-  set.seed(1)
-  b <- NNS.meboot(x, reps = 50, rho = 1, scl.adjustment = TRUE)
-  zz <- c(b["xmin", ]$xmin, b["z", ]$z, b["xmax", ]$xmax)
-  uv <- (sum((b["desintxb", ]$desintxb - mean(res))^2) + sum(diff(zz^2) / 12)) / length(x)
-  expect_equal(b["kappa", ]$kappa, sd(res) / sqrt(uv) - 1, tolerance = 1e-10)
-  expect_equal(mean(apply(b["replicates", ]$replicates, 2, sd)),
-               mean(apply(meboot_reps(), 2, sd)), tolerance = 0.01)
+test_that("scl.adjustment scales the residual draw variance to the sample variance", {
+  residuals <- c(1, 1, -4, 1, 1)
+  x <- 2 * (1:5) + residuals
+  draw <- function(...) {
+    set.seed(1)
+    NNS.meboot(x, reps = 4, target_drift = 0, digits = 14, expand.residual.sd = FALSE,
+               expand.sd = FALSE, force.clt = FALSE, ...)
+  }
+  # Each tail has mass 1/5. The interior is uniform on [0,1] with mass 1/20 and has mass 11/20 at 1.
+  fixed <- draw(scl.adjustment = TRUE, xmin = -6.5, xmax = 3.5)
+  shifted <- draw(scl.adjustment = TRUE, xmin = -6.5, xmax = 3.5, reachbnd = FALSE)
+  expect_equal((1 + fixed["kappa", ][[1]])^2 * 8399/1600, var(residuals))
+  expect_equal((1 + shifted["kappa", ][[1]])^2 * 4399/1600, var(residuals))
+
+  adjusted <- draw(scl.adjustment = TRUE)
+  expect_equal(adjusted["replicates", ][[1]] - mean(x),
+               (1 + adjusted["kappa", ][[1]]) * (draw()["replicates", ][[1]] - mean(x)))
 })
 
 test_that("force.clt spreads changed-drift replicate means on the residual scale", {
