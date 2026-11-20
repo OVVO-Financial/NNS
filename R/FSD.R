@@ -45,8 +45,6 @@ NNS.FSD <- function(x, y, type = "discrete", plot = TRUE){
 
   if(anyNA(x) || anyNA(y)) stop("You have some missing values, please address.")
 
-  Combined_sort <- sort(c(x, y), decreasing = FALSE)
-
   ## Indicator function ***for all values of x and y*** as the continuous CDF target
   if(type == "discrete"){
     degree <- 0
@@ -54,13 +52,11 @@ NNS.FSD <- function(x, y, type = "discrete", plot = TRUE){
     degree <- 1
   }
 
-  LPM_x_sort <- LPM.ratio(degree, Combined_sort, x)
-  LPM_y_sort <- LPM.ratio(degree, Combined_sort, y)
-
-
-
   order.name <- if (degree == 0) "FSD" else "OMEGA"
   if(plot){
+    Combined_sort <- sort(c(x, y), decreasing = FALSE)
+    LPM_x_sort <- LPM.ratio(degree, Combined_sort, x)
+    LPM_y_sort <- LPM.ratio(degree, Combined_sort, y)
     plot(Combined_sort, LPM_x_sort, type = "l", lwd = 3,col = "red",
          main = if (degree == 0) "FSD" else "Omega / expectile dominance",
          ylab = if (degree == 0) "Empirical cumulative probability" else "Lower deviation-area ratio",
