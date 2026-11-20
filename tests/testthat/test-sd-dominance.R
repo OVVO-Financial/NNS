@@ -154,3 +154,12 @@ test_that("NNS.TSD plots the curves against the sample values", {
   NNS.TSD(c(10, 11, 12), c(10.5, 11.5, 13))
   expect_gt(par("usr")[1], 9)
 })
+
+test_that("unplotted discrete FSD can compare a total loss", {
+  x <- c(0, 1)
+  y <- c(-Inf, 0)
+  expect_identical(NNS.FSD(x, y, plot = FALSE), "X FSD Y")
+  expect_identical(NNS.FSD(y, x, plot = FALSE), "Y FSD X")
+  expect_identical(NNS.FSD(y, y, plot = FALSE), "NO FSD EXISTS")
+  expect_error(NNS.FSD(x, y, "continuous", plot = FALSE), "finite")
+})
