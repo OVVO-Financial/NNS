@@ -106,13 +106,20 @@ theorem claim_C098 (μ : Measure ℝ) [IsProbabilityMeasure μ] (g : ℝ) :
     fun _ _ ha hg h => real_Iic_le_theta ha hg h, theta_mean_two_div μ g⟩
 
 theorem claim_C099 :
-    let ν := empirical wSample
-    let gap := pmean ν - (-50)
-    ν.real (Iic (-50)) < pvar ν / (pvar ν + gap ^ 2) ∧
-      pvar ν / (pvar ν + gap ^ 2) < semivar ν / gap ^ 2 := by
-  dsimp only
-  rw [wSample_bounds.1, wSample_bounds.2.1, wSample_bounds.2.2.1]
-  norm_num
+    ((empirical wSample).real (Iic (-50)) <
+        pvar (empirical wSample) /
+          (pvar (empirical wSample) + (pmean (empirical wSample) - (-50)) ^ 2) ∧
+      pvar (empirical wSample) /
+          (pvar (empirical wSample) + (pmean (empirical wSample) - (-50)) ^ 2) <
+        semivar (empirical wSample) / (pmean (empirical wSample) - (-50)) ^ 2) ∧
+    semivar (empirical vSample) / (pmean (empirical vSample) - (-1)) ^ 2 <
+      pvar (empirical vSample) /
+        (pvar (empirical vSample) + (pmean (empirical vSample) - (-1)) ^ 2) := by
+  refine ⟨?_, ?_⟩
+  · rw [wSample_bounds.1, wSample_bounds.2.1, wSample_bounds.2.2.1]
+    norm_num
+  · rw [vSample_bounds.1, vSample_bounds.2]
+    norm_num
 
 theorem claim_C108 (μ : Measure ℝ) [IsProbabilityMeasure μ] (t : ℝ) :
     (∀ r : ℝ, 0 < r →

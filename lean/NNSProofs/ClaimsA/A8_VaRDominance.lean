@@ -316,7 +316,7 @@ theorem claim_C445 (hp : p ∈ Set.Icc (0 : ℝ) 1) (x : Fin n → ℝ) :
     LPMVaR0 (9/10) ![(0 : ℝ),1,2] = 9/5 ∧
     LPMratio 0 (LPMVaR0 (9/10) ![(0 : ℝ),1,2]) ![(0 : ℝ),1,2] < 9/10 :=
   ⟨(zero_pair hp x).1, fun _ hd hx => lower_share hd hp hx,
-    LPMVaR0_counterexample.1, LPMVaR0_counterexample.2.2⟩
+    LPMVaR0_type7_example.1, LPMVaR0_type7_example.2.2⟩
 
 theorem claim_C446 (hp : p ∈ Set.Icc (0 : ℝ) 1) (x : Fin n → ℝ) :
     let h := ((n-1 : ℕ) : ℝ) * p
@@ -391,7 +391,7 @@ theorem claim_C559 (hn : 0 < n) (hp : p ∈ Set.Icc (0 : ℝ) 1) (x : Fin n → 
 theorem claim_C609 (hp : p ∈ Set.Icc (0 : ℝ) 1) (x : Fin n → ℝ) :
     LPMVaR0 p x = quantile7 p x ∧ LPMVaR0 (9/10) ![(0 : ℝ),1,2] = 9/5 ∧
     LPMratio 0 (9/5) ![(0 : ℝ),1,2] = 2/3 ∧ (2/3 : ℝ) ≠ 9/10 :=
-  ⟨(claim_C492 hp x).1, LPMVaR0_counterexample.1, LPMVaR0_counterexample.2.1, by norm_num⟩
+  ⟨(claim_C492 hp x).1, LPMVaR0_type7_example.1, LPMVaR0_type7_example.2.1, by norm_num⟩
 
 theorem claim_C588 (hn : 0 < n) (hm : 0 < m) (x : Fin n → ℝ) (y : Fin m → ℝ) :
     let X := fun t => LPM 0 t x

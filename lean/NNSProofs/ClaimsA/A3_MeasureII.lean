@@ -50,11 +50,15 @@ theorem claim_C146 [IsProbabilityMeasure μ] (r : ℕ) (h : MemLp id r μ) (t : 
     ∫ x, (x - t) ^ r ∂μ = mUPM r t μ + (-1) ^ r * mLPM r t μ :=
   (mUPM_add_neg_one_pow_mul_mLPM h t).symm
 
-theorem claim_C147 : ∃ μ : Measure ℝ, IsProbabilityMeasure μ ∧ Integrable id μ ∧
-    eUPM 3 0 μ = ∞ ∧ eLPM 3 0 μ = ∞ ∧ ¬ Integrable (fun x : ℝ => x ^ 3) μ := by
-  obtain ⟨μ, hp, hi, h⟩ := exists_integrable_eUPM_eLPM_eq_top
+theorem claim_C147 [IsProbabilityMeasure μ] :
+    (∀ (r : ℕ) (t : ℝ), MemLp id r μ →
+      ∫ x, (x - t) ^ r ∂μ = mUPM r t μ + (-1) ^ r * mLPM r t μ) ∧
+    ∃ ρ : Measure ℝ, IsProbabilityMeasure ρ ∧ Integrable id ρ ∧
+      eUPM 3 0 ρ = ∞ ∧ eLPM 3 0 ρ = ∞ ∧ ¬ Integrable (fun x : ℝ => x ^ 3) ρ := by
+  refine ⟨fun r t h => claim_C146 r h t, ?_⟩
+  obtain ⟨ρ, hp, hi, h⟩ := exists_integrable_eUPM_eLPM_eq_top
   obtain ⟨hu, hl, hs, -⟩ := h 3 (by decide)
-  exact ⟨μ, hp, hi, hu, hl, hs⟩
+  exact ⟨ρ, hp, hi, hu, hl, hs⟩
 
 theorem claim_C148 [IsProbabilityMeasure μ] (h : Integrable id μ) :
     ∫ x, x ∂μ = mUPM 1 0 μ - mLPM 1 0 μ := mean_eq_mUPM_one_sub_mLPM_one h

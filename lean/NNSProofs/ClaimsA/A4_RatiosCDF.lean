@@ -451,7 +451,7 @@ theorem claim_C610 (hn : 0 < n) (x : Fin n → ℝ) (t : ℝ) {p d : ℝ}
     rw [UPMVaR_eq_LPMVaR (by decide), clampP_of_mem (by constructor <;> norm_num),
       (by norm_num : (1 : ℝ) - 1 / 10 = 9 / 10)]
     simp only [LPMVaR, ↓reduceIte]
-    rw [LPMVaR0_not_minimal.1, LPMVaR0_counterexample.1]
+    rw [LPMVaR0_not_minimal.1, LPMVaR0_type7_example.1]
     have hm : (empMeasure ![(0 : ℝ), 1, 2]).real (Icc (1 / 5) (9 / 5)) = 1 / 3 := by
       norm_num [empMeasure, measureReal_def, Fin.sum_univ_three,
         Measure.dirac_apply' _ measurableSet_Icc, ENNReal.toReal_inv]

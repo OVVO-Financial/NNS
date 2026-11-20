@@ -51,14 +51,14 @@ C080	Uniform integration and interval length	NNS.GapClaims.claim_C080	PROVED-FAI
 C087	Unconditional shortfall and tail averages	NNS.GapClaims.claim_C087	PROVED-WITH-SIDE-CONDITION	The theorem covers unconditional shortfall, conditional shortfall on a tail of positive probability, and integer central moments.	book/chapter-04-numerical-integration-via-partial-moments.Rmd:245-251
 C088	Unconditional shortfall and tail averages	NNS.GapClaims.claim_C088	PROVED-FAITHFUL		book/chapter-04-numerical-integration-via-partial-moments.Rmd:255-261
 C089	Cantelli's lower-tail inequality	NNS.ClaimsA.claim_C089	PROVED-FAITHFUL		book/chapter-04-numerical-integration-via-partial-moments.Rmd:270-276
-C090	When the halved Chebyshev bound holds	NNS.ClaimsA.claim_C090	FALSE-AS-DOCUMENTED	Symmetry is sufficient for the halved Chebyshev bound. The asymmetric sample (−1, −1, 2) also satisfies it at every threshold below its mean.	book/chapter-04-numerical-integration-via-partial-moments.Rmd:278
+C090	When the halved Chebyshev bound holds	NNS.ClaimsA.claim_C090	PROVED-FAITHFUL		book/chapter-04-numerical-integration-via-partial-moments.Rmd:278
 C091	When the halved Chebyshev bound holds	NNS.ClaimsA.claim_C091	PROVED-FAITHFUL		book/chapter-04-numerical-integration-via-partial-moments.Rmd:278
 C092	Downside semivariance bound	NNS.ClaimsA.claim_C092	PROVED-FAITHFUL		book/chapter-04-numerical-integration-via-partial-moments.Rmd:280-284
 C093	Downside semivariance bound	NNS.ClaimsA.claim_C093	PROVED-FAITHFUL		book/chapter-04-numerical-integration-via-partial-moments.Rmd:280-284
 C094	When the halved Chebyshev bound holds	NNS.ClaimsA.claim_C094	PROVED-FAITHFUL		book/chapter-04-numerical-integration-via-partial-moments.Rmd:284
-C096	Endpoint of the directional tail bound	NNS.ClaimsA.claim_C096	FALSE-AS-DOCUMENTED	The bound includes the endpoint g = t. For a point mass at t the event has probability one and the displayed quotient divides zero by zero.	book/chapter-04-numerical-integration-via-partial-moments.Rmd:286-292
+C096	Endpoint of the directional tail bound	NNS.ClaimsA.claim_C096	PROVED-FAITHFUL		book/chapter-04-numerical-integration-via-partial-moments.Rmd:286-292
 C098	Comparing one-sided probability bounds	NNS.ClaimsA.claim_C098	PROVED-FAITHFUL		book/chapter-04-numerical-integration-via-partial-moments.Rmd:296-298
-C099	Comparing one-sided probability bounds	NNS.ClaimsA.claim_C099	FALSE-AS-DOCUMENTED	Cantelli gives a tighter bound at −50 for a sample with one loss of 99 and 99 gains of one.	book/chapter-04-numerical-integration-via-partial-moments.Rmd:317
+C099	Comparing one-sided probability bounds	NNS.ClaimsA.claim_C099	PROVED-FAITHFUL		book/chapter-04-numerical-integration-via-partial-moments.Rmd:317
 C104	Moment of a signed deviation	NNS.GapClaims.claim_C104	PROVED-FAITHFUL		book/chapter-05-classical-moments-as-directional-aggregates.Rmd:19-27
 C105	Mean deviation and balance at the mean	NNS.ClaimsA.claim_C105	PROVED-FAITHFUL		book/chapter-05-classical-moments-as-directional-aggregates.Rmd:32
 C106	Variance as the sum of two semivariances	NNS.ClaimsA.claim_C106	PROVED-FAITHFUL		book/chapter-05-classical-moments-as-directional-aggregates.Rmd:33
@@ -77,15 +77,15 @@ C118	Directional information lost in the variance or moment sum	NNS.GapClaims.cl
 C119	Third central moment	NNS.ClaimsA.claim_C119	PROVED-FAITHFUL		book/chapter-05-classical-moments-as-directional-aggregates.Rmd:153-155
 C120	Fourth central moment and kurtosis	NNS.ClaimsA.claim_C120	PROVED-FAITHFUL		book/chapter-05-classical-moments-as-directional-aggregates.Rmd:161-163
 C121	Skewness and the signed third moment	NNS.GapClaims.claim_C121	PROVED-FAITHFUL		book/chapter-05-classical-moments-as-directional-aggregates.Rmd:175-188
-C122	Skewness and the signed third moment	NNS.ClaimsA.claim_C122	FALSE-AS-DOCUMENTED	The sample (−5, −5, 1, 3, 6) extends farther to the right of its mean and has negative skewness.	book/chapter-05-classical-moments-as-directional-aggregates.Rmd:190-197
-C123	Fourth central moment and kurtosis	NNS.GapClaims.claim_C123	PROVED-FAITHFUL		book/chapter-05-classical-moments-as-directional-aggregates.Rmd:199-212
-C125	Directional information lost in the variance or moment sum	NNS.GapClaims.claim_C125	PROVED-FAITHFUL		book/chapter-05-classical-moments-as-directional-aggregates.Rmd:222-226
-C126	Directional information lost in the variance or moment sum	NNS.GapClaims.claim_C126	PROVED-FAITHFUL		book/chapter-05-classical-moments-as-directional-aggregates.Rmd:236-247
-C127	Zero semivariance and degenerate support	NNS.GapClaims.claim_C127	PROVED-FAITHFUL		book/chapter-05-classical-moments-as-directional-aggregates.Rmd:249
-C128	Zero semivariance and degenerate support	NNS.GapClaims.claim_C128	PROVED-FAITHFUL		book/chapter-05-classical-moments-as-directional-aggregates.Rmd:252
-C129	Directional information lost in the variance or moment sum	NNS.GapClaims.claim_C129	PROVED-FAITHFUL		book/chapter-05-classical-moments-as-directional-aggregates.Rmd:254-255
-C130	Integrals on either side of the benchmark	NNS.ClaimsA.claim_C130	PROVED-FAITHFUL		book/chapter-05-classical-moments-as-directional-aggregates.Rmd:261-276
-C131	Integrals on either side of the benchmark	NNS.ClaimsA.claim_C131	PROVED-FAITHFUL		book/chapter-05-classical-moments-as-directional-aggregates.Rmd:280-285
+C122	Skewness and the signed third moment	NNS.ClaimsA.claim_C122	PROVED-FAITHFUL		book/chapter-05-classical-moments-as-directional-aggregates.Rmd:190
+C123	Fourth central moment and kurtosis	NNS.GapClaims.claim_C123	PROVED-FAITHFUL		book/chapter-05-classical-moments-as-directional-aggregates.Rmd:192-205
+C125	Directional information lost in the variance or moment sum	NNS.GapClaims.claim_C125	PROVED-FAITHFUL		book/chapter-05-classical-moments-as-directional-aggregates.Rmd:215-219
+C126	Directional information lost in the variance or moment sum	NNS.GapClaims.claim_C126	PROVED-FAITHFUL		book/chapter-05-classical-moments-as-directional-aggregates.Rmd:229-240
+C127	Zero semivariance and degenerate support	NNS.GapClaims.claim_C127	PROVED-FAITHFUL		book/chapter-05-classical-moments-as-directional-aggregates.Rmd:242
+C128	Zero semivariance and degenerate support	NNS.GapClaims.claim_C128	PROVED-FAITHFUL		book/chapter-05-classical-moments-as-directional-aggregates.Rmd:245
+C129	Directional information lost in the variance or moment sum	NNS.GapClaims.claim_C129	PROVED-FAITHFUL		book/chapter-05-classical-moments-as-directional-aggregates.Rmd:247-248
+C130	Integrals on either side of the benchmark	NNS.ClaimsA.claim_C130	PROVED-FAITHFUL		book/chapter-05-classical-moments-as-directional-aggregates.Rmd:254-269
+C131	Integrals on either side of the benchmark	NNS.ClaimsA.claim_C131	PROVED-FAITHFUL		book/chapter-05-classical-moments-as-directional-aggregates.Rmd:273-278
 C133	Integrability of directional powers	NNS.GapClaims.claim_C133	PROVED-FAITHFUL		book/chapter-06-measure-theoretic-interpretation.Rmd:21-23 book/chapter-06-measure-theoretic-interpretation.Rmd:154-166
 C134	Degree-zero CDF and survival function	NNS.GapClaims.claim_C134	PROVED-FAITHFUL		book/chapter-06-measure-theoretic-interpretation.Rmd:50
 C135	Expectation under a density or a distribution	NNS.GapClaims.claim_C135	PROVED-FAITHFUL		book/chapter-06-measure-theoretic-interpretation.Rmd:56
@@ -98,7 +98,7 @@ C142	Ties and the degree-zero partition	NNS.ClaimsA.claim_C142	PROVED-FAITHFUL		
 C143	Directional powers and their averages	NNS.ClaimsA.claim_C143	PROVED-FAITHFUL		book/chapter-06-measure-theoretic-interpretation.Rmd:166
 C144	Integrals on either side of the benchmark	NNS.ClaimsA.claim_C144	PROVED-FAITHFUL		book/chapter-06-measure-theoretic-interpretation.Rmd:182-193
 C146	Moment of a signed deviation	NNS.ClaimsA.claim_C146	PROVED-FAITHFUL		book/chapter-06-measure-theoretic-interpretation.Rmd:213
-C147	Integrability of directional powers	NNS.ClaimsA.claim_C147	FALSE-AS-DOCUMENTED	A distribution can have finite absolute mean and infinite third directional moments. Integrability alone does not justify the third-moment identity.	book/chapter-06-measure-theoretic-interpretation.Rmd:216
+C147	Integrability of directional powers	NNS.ClaimsA.claim_C147	PROVED-FAITHFUL		book/chapter-06-measure-theoretic-interpretation.Rmd:216
 C148	Mean as the difference of two partial moments	NNS.ClaimsA.claim_C148	PROVED-FAITHFUL		book/chapter-06-measure-theoretic-interpretation.Rmd:225
 C149	Variance as the sum of two semivariances	NNS.ClaimsA.claim_C149	PROVED-FAITHFUL		book/chapter-06-measure-theoretic-interpretation.Rmd:231
 C150	Third central moment	NNS.ClaimsA.claim_C150	PROVED-FAITHFUL		book/chapter-06-measure-theoretic-interpretation.Rmd:237
@@ -180,7 +180,7 @@ C247	Recovering a joint CDF or density from hinge moments	NNS.GapClaims.claim_C2
 C249	The joint law from the degree-zero CDF	NNS.GapClaims.claim_C249	PROVED-FAITHFUL		book/chapter-13-conditional-probability-and-bayes-theorem.Rmd:381
 C250	Which partial moments a distribution determines	NNS.ClaimsA.claim_C250	PROVED-FAITHFUL		book/chapter-13-conditional-probability-and-bayes-theorem.Rmd:391
 C251	Which partial moments a distribution determines	NNS.GapClaims.claim_C251	PROVED-FAITHFUL		book/chapter-13-conditional-probability-and-bayes-theorem.Rmd:397-399
-C252	Which partial moments a distribution determines	NNS.ClaimsA.claim_C252	FALSE-AS-DOCUMENTED	Keeping both marginals fixed and reversing the pairing can change the normalized joint lower weight from one half to zero.	book/chapter-13-conditional-probability-and-bayes-theorem.Rmd:401
+C252	Which partial moments a distribution determines	NNS.ClaimsA.claim_C252	PROVED-FAITHFUL		book/chapter-13-conditional-probability-and-bayes-theorem.Rmd:401
 C254	Conditional probabilities and Bayes' rule	NNS.ClaimsA.claim_C254	PROVED-FAITHFUL		book/chapter-13-conditional-probability-and-bayes-theorem.Rmd:412
 C255	Recovering a joint CDF or density from hinge moments	NNS.ClaimsA.claim_C255	PROVED-WITH-SIDE-CONDITION	The density is continuous with locally integrably dominated weighted slices.	book/chapter-13-conditional-probability-and-bayes-theorem.Rmd:416
 C256	Recovering a joint CDF or density from hinge moments	NNS.ClaimsA.claim_C256	PROVED-FAITHFUL		book/chapter-13-conditional-probability-and-bayes-theorem.Rmd:5
@@ -230,11 +230,11 @@ C328	Strict first-order stochastic dominance	NNS.GapClaimsNew.claim_C328	PROVED-
 C330	Strict first-order stochastic dominance	NNS.GapClaims.claim_C330	PROVED-FAITHFUL		book/chapter-15-distribution-comparison.Rmd:772
 C331	Integrated CDFs and higher-order dominance	NNS.ClaimsA.claim_C331	PROVED-FAITHFUL		book/chapter-15-distribution-comparison.Rmd:776-782
 C332	Integrated CDFs and higher-order dominance	NNS.ClaimsA.claim_C332	PROVED-FAITHFUL		book/chapter-15-distribution-comparison.Rmd:786-795
-C333	Strict first-order stochastic dominance	NNS.ClaimsA.claim_C333	FALSE-AS-DOCUMENTED	Two identical samples pass the weak CDF inequality at every threshold. First-order dominance also requires strict inequality somewhere.	book/chapter-15-distribution-comparison.Rmd:801-805
+C333	Strict first-order stochastic dominance	NNS.ClaimsA.claim_C333	PROVED-FAITHFUL		book/chapter-15-distribution-comparison.Rmd:801-807
 C334	Integrated CDFs and higher-order dominance	NNS.ClaimsA.claim_C334	PROVED-FAITHFUL		book/chapter-15-distribution-comparison.Rmd:809-815
 C335	Integrated CDFs and higher-order dominance	NNS.ClaimsA.claim_C335	PROVED-FAITHFUL		book/chapter-15-distribution-comparison.Rmd:817-823
 C336	Integrated CDFs and higher-order dominance	NNS.ClaimsA.claim_C336	PROVED-FAITHFUL		book/chapter-15-distribution-comparison.Rmd:823
-C338	Strict first-order stochastic dominance	NNS.ClaimsA.claim_C338	FALSE-AS-DOCUMENTED	Failure of the forward CDF test can mean dominance in the reverse direction. Point masses at zero and one give this case.	book/chapter-15-distribution-comparison.Rmd:829-835
+C338	Strict first-order stochastic dominance	NNS.ClaimsA.claim_C338	PROVED-FAITHFUL		book/chapter-15-distribution-comparison.Rmd:829-835
 C339	Integrated CDFs and higher-order dominance	NNS.ClaimsA.claim_C339	PROVED-FAITHFUL		book/chapter-15-distribution-comparison.Rmd:837
 C341	Area-ratio order and first-order dominance	NNS.ClaimsA.claim_C341	PROVED-FAITHFUL		book/chapter-15-distribution-comparison.Rmd:843
 C342	Area-ratio order and first-order dominance	NNS.ClaimsA.claim_C342	PROVED-FAITHFUL		book/chapter-15-distribution-comparison.Rmd:845
@@ -251,10 +251,10 @@ C360	Normalized lower and upper moments	NNS.ClaimsA.claim_C360	PROVED-FAITHFUL		
 C361	Degree-zero CDF and survival function	NNS.ClaimsA.claim_C361	PROVED-FAITHFUL		book/chapter-16-directional-tail-thresholds-probability-bounds-and-estimation-error.Rmd:114
 C363	Quantiles, expectiles and inversion	NNS.GapClaims.claim_C363	PROVED-WITH-SIDE-CONDITION	The theorem covers the integer-degree solver and its stopping tolerance.	book/chapter-16-directional-tail-thresholds-probability-bounds-and-estimation-error.Rmd:119
 C364	Cantelli's lower-tail inequality	NNS.ClaimsA.claim_C364	PROVED-FAITHFUL		book/chapter-16-directional-tail-thresholds-probability-bounds-and-estimation-error.Rmd:157
-C365	When the halved Chebyshev bound holds	NNS.ClaimsA.claim_C365	FALSE-AS-DOCUMENTED	The asymmetric sample (−1, −1, 2) satisfies the halved Chebyshev bound at every lower threshold, refuting the necessity of symmetry.	book/chapter-16-directional-tail-thresholds-probability-bounds-and-estimation-error.Rmd:160
+C365	When the halved Chebyshev bound holds	NNS.ClaimsA.claim_C365	PROVED-FAITHFUL		book/chapter-16-directional-tail-thresholds-probability-bounds-and-estimation-error.Rmd:160
 C366	Downside semivariance bound	NNS.ClaimsA.claim_C366	PROVED-FAITHFUL		book/chapter-16-directional-tail-thresholds-probability-bounds-and-estimation-error.Rmd:162-168
 C367	Generalized downside dispersion	NNS.ClaimsA.claim_C367	PROVED-FAITHFUL		book/chapter-16-directional-tail-thresholds-probability-bounds-and-estimation-error.Rmd:173
-C368	Endpoint of the directional tail bound	NNS.ClaimsA.claim_C368	FALSE-AS-DOCUMENTED	At g = t a point mass at t has lower-tail probability one. The proposed upper bound has a zero denominator.	book/chapter-16-directional-tail-thresholds-probability-bounds-and-estimation-error.Rmd:176-179
+C368	Endpoint of the directional tail bound	NNS.ClaimsA.claim_C368	PROVED-FAITHFUL		book/chapter-16-directional-tail-thresholds-probability-bounds-and-estimation-error.Rmd:176-179
 C369	Comparing one-sided probability bounds	NNS.ClaimsA.claim_C369	PROVED-FAITHFUL		book/chapter-16-directional-tail-thresholds-probability-bounds-and-estimation-error.Rmd:183-188
 C375	Mean balance and variance decomposition	NNS.ClaimsA.claim_C375	PROVED-FAITHFUL		book/chapter-16-directional-tail-thresholds-probability-bounds-and-estimation-error.Rmd:19
 C377	Variance as the sum of two semivariances	NNS.GapClaims.claim_C377	PROVED-WITH-SIDE-CONDITION	The probability law has a finite second moment.	book/chapter-01-why-classical-statistics-breaks.Rmd:23-25
@@ -289,7 +289,7 @@ C423	Positive and negative parts	NNS.GapClaims.claim_C423	PROVED-FAITHFUL		book/
 C424	Positive and negative parts	NNS.GapClaims.claim_C424	PROVED-FAITHFUL		book/chapter-28-appendix-notation-and-function-reference.Rmd:56
 C425	Directional powers and their averages	NNS.ClaimsA.claim_C425	PROVED-FAITHFUL		book/chapter-28-appendix-notation-and-function-reference.Rmd:58
 C426	Directional powers and their averages	NNS.ClaimsA.claim_C426	PROVED-FAITHFUL		book/chapter-28-appendix-notation-and-function-reference.Rmd:59
-C427	Normalized lower and upper moments	NNS.ClaimsA.claim_C427	FALSE-AS-DOCUMENTED	At degree zero the lower ratio counts observations equal to the target. A count strictly below the target misses ties.	book/chapter-28-appendix-notation-and-function-reference.Rmd:60
+C427	Normalized lower and upper moments	NNS.ClaimsA.claim_C427	PROVED-FAITHFUL		book/chapter-28-appendix-notation-and-function-reference.Rmd:60
 C428	Normalized lower and upper moments	NNS.ClaimsA.claim_C428	PROVED-WITH-SIDE-CONDITION	The quotient needs a positive total. At a constant sample equal to the target, the upper fallback is zero.	book/chapter-28-appendix-notation-and-function-reference.Rmd:61
 C429	Normalized lower and upper moments	NNS.ClaimsA.claim_C429	PROVED-FAITHFUL		book/chapter-28-appendix-notation-and-function-reference.Rmd:24
 C430	Quantiles, expectiles and inversion	NNS.ClaimsA.claim_C430	PROVED-FAITHFUL		book/chapter-28-appendix-notation-and-function-reference.Rmd:25
@@ -310,43 +310,43 @@ C446	Quantiles, expectiles and inversion	NNS.ClaimsA.claim_C446	PROVED-FAITHFUL	
 C447	Quantiles, expectiles and inversion	NNS.ClaimsA.claim_C447	PROVED-FAITHFUL		book/chapter-28-appendix-notation-and-function-reference.Rmd:93
 C450	Quantiles, expectiles and inversion	NNS.ClaimsA.claim_C450	PROVED-FAITHFUL		book/chapter-28-appendix-notation-and-function-reference.Rmd:98
 C455	Variance as the sum of two semivariances	NNS.ClaimsA.claim_C455	PROVED-FAITHFUL		README.md:11 book/chapter-05-classical-moments-as-directional-aggregates.Rmd:122-134
-C459	Mean as the difference of two partial moments	NNS.ClaimsA.claim_C459	PROVED-FAITHFUL		vignettes/NNSvignette_02_Partial_Moments.Rmd:32-33 book/chapter-05-classical-moments-as-directional-aggregates.Rmd:86-94
-C460	Sample variance and the Bessel adjustment	NNS.ClaimsA.claim_C460	PROVED-FAITHFUL		vignettes/NNSvignette_02_Partial_Moments.Rmd:41-42 book/chapter-05-classical-moments-as-directional-aggregates.Rmd:122-134
-C461	Variance as the sum of two semivariances	NNS.ClaimsA.claim_C461	PROVED-FAITHFUL		vignettes/NNSvignette_02_Partial_Moments.Rmd:45-49 book/chapter-05-classical-moments-as-directional-aggregates.Rmd:122-134
-C462	Covariance and correlation from directional components	NNS.ClaimsA.claim_C462	PROVED-FAITHFUL		vignettes/NNSvignette_02_Partial_Moments.Rmd:52-53 book/chapter-10-directional-dependence.Rmd:175-191
-C463	Sample variance and the Bessel adjustment	NNS.ClaimsA.claim_C463	PROVED-FAITHFUL		vignettes/NNSvignette_02_Partial_Moments.Rmd:58-60 book/chapter-05-classical-moments-as-directional-aggregates.Rmd:122-134
-C464	Moment summaries and tail information	NNS.ClaimsA.claim_C464	PROVED-FAITHFUL		vignettes/NNSvignette_02_Partial_Moments.Rmd:65-69 man/NNS.moments.Rd:12-20
-C466	Covariance and correlation from directional components	NNS.ClaimsA.claim_C466	PROVED-FAITHFUL		vignettes/NNSvignette_02_Partial_Moments.Rmd:87-88 book/chapter-10-directional-dependence.Rmd:175-191
-C467	Covariance and correlation from directional components	NNS.ClaimsA.claim_C467	PROVED-FAITHFUL		vignettes/NNSvignette_02_Partial_Moments.Rmd:92-93 book/chapter-09-why-correlation-fails.Rmd:287-299
-C469	Covariance and correlation from directional components	NNS.ClaimsA.claim_C469	PROVED-FAITHFUL		vignettes/NNSvignette_02_Partial_Moments.Rmd:109-113 book/chapter-09-why-correlation-fails.Rmd:26-49
-C470	Degree-zero CDF and survival function	NNS.ClaimsA.claim_C470	PROVED-FAITHFUL		vignettes/NNSvignette_02_Partial_Moments.Rmd:118-120 vignettes/NNSvignette_02_Partial_Moments.Rmd:126 man/LPM.ratio.Rd:10
-C471	Marginal and joint quadrant probabilities	NNS.ClaimsA.claim_C471	PROVED-FAITHFUL		vignettes/NNSvignette_02_Partial_Moments.Rmd:129-133 book/chapter-13-conditional-probability-and-bayes-theorem.Rmd:54-63
-C473	Degree-one area shares and their induced CDF	NNS.ClaimsA.claim_C473	PROVED-FAITHFUL		vignettes/NNSvignette_02_Partial_Moments.Rmd:143-144 man/NNS.CDF.Rd:16 man/NNS.CDF.Rd:28
-C474	Degree-one area shares and their induced CDF	NNS.ClaimsA.claim_C474	PROVED-FAITHFUL		vignettes/NNSvignette_02_Partial_Moments.Rmd:146-147 man/NNS.CDF.Rd:16 man/NNS.CDF.Rd:28
-C475	Degree-one area shares and their induced CDF	NNS.ClaimsA.claim_C475	PROVED-FAITHFUL		vignettes/NNSvignette_02_Partial_Moments.Rmd:149-150 man/NNS.CDF.Rd:16 man/NNS.CDF.Rd:28
-C480	Conditional probabilities and Bayes' rule	NNS.ClaimsA.claim_C480	PROVED-FAITHFUL		vignettes/NNSvignette_02_Partial_Moments.Rmd:171-173 book/chapter-13-conditional-probability-and-bayes-theorem.Rmd:165-170
-C481	Integrals on either side of the benchmark	NNS.ClaimsA.claim_C481	PROVED-FAITHFUL		vignettes/NNSvignette_01_Overview.Rmd:41-49 book/chapter-06-measure-theoretic-interpretation.Rmd:182-193
-C483	Integrals on either side of the benchmark	NNS.ClaimsA.claim_C483	PROVED-FAITHFUL		vignettes/NNSvignette_01_Overview.Rmd:59 book/chapter-06-measure-theoretic-interpretation.Rmd:182-193
-C484	Variance as the sum of two semivariances	NNS.ClaimsA.claim_C484	PROVED-FAITHFUL		vignettes/NNSvignette_01_Overview.Rmd:68-71 book/chapter-05-classical-moments-as-directional-aggregates.Rmd:122-134
-C485	Within-group and between-group variance	NNS.GapClaims.claim_C485	PROVED-FAITHFUL		vignettes/NNSvignette_01_Overview.Rmd:72 book/chapter-05-classical-moments-as-directional-aggregates.Rmd:122-134
-C486	Sample variance and the Bessel adjustment	NNS.ClaimsA.claim_C486	PROVED-FAITHFUL		vignettes/NNSvignette_01_Overview.Rmd:89 vignettes/NNSvignette_01_Overview.Rmd:102 book/chapter-05-classical-moments-as-directional-aggregates.Rmd:122-134
-C487	Degree-zero CDF and survival function	NNS.ClaimsA.claim_C487	PROVED-FAITHFUL		vignettes/NNSvignette_01_Overview.Rmd:91-94 vignettes/NNSvignette_01_Overview.Rmd:102 man/LPM.ratio.Rd:10
-C490	Moment summaries and tail information	NNS.ClaimsA.claim_C490	FALSE-AS-DOCUMENTED	Two samples can give the same four outputs of NNS.moments and different upper third and fourth partial moments. Those outputs do not determine the separate tail diagnostics.	vignettes/NNSvignette_01_Overview.Rmd:110-118 vignettes/NNSvignette_01_Overview.Rmd:522 man/NNS.moments.Rd:12-20
-C491	Degree-zero CDF and survival function	NNS.ClaimsA.claim_C491	PROVED-FAITHFUL		vignettes/NNSvignette_01_Overview.Rmd:137-138 vignettes/NNSvignette_01_Overview.Rmd:515 man/LPM.ratio.Rd:10
-C492	Quantiles, expectiles and inversion	NNS.ClaimsA.claim_C492	PROVED-FAITHFUL		vignettes/NNSvignette_01_Overview.Rmd:139-140 vignettes/NNSvignette_01_Overview.Rmd:516 man/LPM.VaR.Rd:12 man/LPM.VaR.Rd:17
-C493	Quantiles, expectiles and inversion	NNS.ClaimsA.claim_C493	PROVED-FAITHFUL		vignettes/NNSvignette_01_Overview.Rmd:143 man/LPM.VaR.Rd:12 man/LPM.VaR.Rd:17
-C494	Quantiles, expectiles and inversion	NNS.ClaimsA.claim_C494	PROVED-WITH-SIDE-CONDITION	The observations on either side of each interpolated rank must differ.	vignettes/NNSvignette_01_Overview.Rmd:144-145 man/LPM.VaR.Rd:12 man/LPM.VaR.Rd:17
-C498	Co-lower moments in copula coordinates	NNS.GapClaims.claim_C498	PROVED-FAITHFUL		vignettes/NNSvignette_01_Overview.Rmd:196 book/chapter-12-copula-interpretation.Rmd:228-253
-C500	Pairwise superiority, ties and symmetry	NNS.GapClaimsNew.claim_C500	PROVED-FAITHFUL		vignettes/NNSvignette_01_Overview.Rmd:276-283 vignettes/NNSvignette_06_Comparing_Distributions.Rmd:99-109 man/NNS.SS.Rd:35-39
-C501	Pairwise superiority, ties and symmetry	NNS.GapClaimsNew.claim_C501	PROVED-FAITHFUL		vignettes/NNSvignette_01_Overview.Rmd:286 vignettes/NNSvignette_06_Comparing_Distributions.Rmd:111 man/NNS.SS.Rd:35-39
-C507	Measurability of deviations and threshold events	NNS.GapClaims.claim_C507	PROVED-FAITHFUL		vignettes/NNSvignette_01_Overview.Rmd:488 book/chapter-06-measure-theoretic-interpretation.Rmd:70-82
-C508	Integrals on either side of the benchmark	NNS.ClaimsA.claim_C508	PROVED-FAITHFUL		vignettes/NNSvignette_01_Overview.Rmd:490-494 book/chapter-06-measure-theoretic-interpretation.Rmd:182-193
-C509	Integrals on either side of the benchmark	NNS.ClaimsA.claim_C509	PROVED-FAITHFUL		vignettes/NNSvignette_01_Overview.Rmd:496-502 book/chapter-08-distribution-estimation.Rmd:63-89
-C510	Variance as the sum of two semivariances	NNS.ClaimsA.claim_C510	PROVED-FAITHFUL		vignettes/NNSvignette_01_Overview.Rmd:504 book/chapter-05-classical-moments-as-directional-aggregates.Rmd:122-134
-C511	Concordant and divergent co-moments	NNS.ClaimsA.claim_C511	PROVED-FAITHFUL		vignettes/NNSvignette_01_Overview.Rmd:517-518 man/Co.LPM.Rd:10-21
-C517	Benchmarks and certainty in NNS ANOVA	NNS.GapClaimsNew.claim_C517	PROVED-FAITHFUL		vignettes/NNSvignette_06_Comparing_Distributions.Rmd:31 book/chapter-15-distribution-comparison.Rmd:580-588
-C519	Strict first-order stochastic dominance	NNS.GapClaimsNew.claim_C519	PROVED-FAITHFUL		vignettes/NNSvignette_06_Comparing_Distributions.Rmd:177-180 man/NNS.FSD.Rd:14-19
-C520	Efficient sets and dominance clusters	NNS.GapClaimsNew.claim_C520	PROVED-FAITHFUL		vignettes/NNSvignette_06_Comparing_Distributions.Rmd:186-199 man/NNS.SD.efficient.set.Rd:12-22
+C459	Mean as the difference of two partial moments	NNS.ClaimsA.claim_C459	PROVED-FAITHFUL		vignettes/NNSvignette_02_Partial_Moments.Rmd:30-31 book/chapter-05-classical-moments-as-directional-aggregates.Rmd:86-94
+C460	Sample variance and the Bessel adjustment	NNS.ClaimsA.claim_C460	PROVED-FAITHFUL		vignettes/NNSvignette_02_Partial_Moments.Rmd:39-40 book/chapter-05-classical-moments-as-directional-aggregates.Rmd:122-134
+C461	Variance as the sum of two semivariances	NNS.ClaimsA.claim_C461	PROVED-FAITHFUL		vignettes/NNSvignette_02_Partial_Moments.Rmd:43-47 book/chapter-05-classical-moments-as-directional-aggregates.Rmd:122-134
+C462	Covariance and correlation from directional components	NNS.ClaimsA.claim_C462	PROVED-FAITHFUL		vignettes/NNSvignette_02_Partial_Moments.Rmd:50-51 book/chapter-10-directional-dependence.Rmd:175-191
+C463	Sample variance and the Bessel adjustment	NNS.ClaimsA.claim_C463	PROVED-FAITHFUL		vignettes/NNSvignette_02_Partial_Moments.Rmd:56-58 book/chapter-05-classical-moments-as-directional-aggregates.Rmd:122-134
+C464	Moment summaries and tail information	NNS.ClaimsA.claim_C464	PROVED-FAITHFUL		vignettes/NNSvignette_02_Partial_Moments.Rmd:63-67 man/NNS.moments.Rd:12-20
+C466	Covariance and correlation from directional components	NNS.ClaimsA.claim_C466	PROVED-FAITHFUL		vignettes/NNSvignette_02_Partial_Moments.Rmd:85-86 book/chapter-10-directional-dependence.Rmd:175-191
+C467	Covariance and correlation from directional components	NNS.ClaimsA.claim_C467	PROVED-FAITHFUL		vignettes/NNSvignette_02_Partial_Moments.Rmd:90-91 book/chapter-09-why-correlation-fails.Rmd:287-299
+C469	Covariance and correlation from directional components	NNS.ClaimsA.claim_C469	PROVED-FAITHFUL		vignettes/NNSvignette_02_Partial_Moments.Rmd:107-111 book/chapter-09-why-correlation-fails.Rmd:26-49
+C470	Degree-zero CDF and survival function	NNS.ClaimsA.claim_C470	PROVED-FAITHFUL		vignettes/NNSvignette_02_Partial_Moments.Rmd:116-118 vignettes/NNSvignette_02_Partial_Moments.Rmd:124 man/LPM.ratio.Rd:10
+C471	Marginal and joint quadrant probabilities	NNS.ClaimsA.claim_C471	PROVED-FAITHFUL		vignettes/NNSvignette_02_Partial_Moments.Rmd:127-131 book/chapter-13-conditional-probability-and-bayes-theorem.Rmd:54-63
+C473	Degree-one area shares and their induced CDF	NNS.ClaimsA.claim_C473	PROVED-FAITHFUL		vignettes/NNSvignette_02_Partial_Moments.Rmd:141-142 man/NNS.CDF.Rd:16 man/NNS.CDF.Rd:28
+C474	Degree-one area shares and their induced CDF	NNS.ClaimsA.claim_C474	PROVED-FAITHFUL		vignettes/NNSvignette_02_Partial_Moments.Rmd:144-145 man/NNS.CDF.Rd:16 man/NNS.CDF.Rd:28
+C475	Degree-one area shares and their induced CDF	NNS.ClaimsA.claim_C475	PROVED-FAITHFUL		vignettes/NNSvignette_02_Partial_Moments.Rmd:147-148 man/NNS.CDF.Rd:16 man/NNS.CDF.Rd:28
+C480	Conditional probabilities and Bayes' rule	NNS.ClaimsA.claim_C480	PROVED-FAITHFUL		vignettes/NNSvignette_02_Partial_Moments.Rmd:169-171 book/chapter-13-conditional-probability-and-bayes-theorem.Rmd:165-170
+C481	Integrals on either side of the benchmark	NNS.ClaimsA.claim_C481	PROVED-FAITHFUL		vignettes/NNSvignette_01_Overview.Rmd:39-47 book/chapter-06-measure-theoretic-interpretation.Rmd:182-193
+C483	Integrals on either side of the benchmark	NNS.ClaimsA.claim_C483	PROVED-FAITHFUL		vignettes/NNSvignette_01_Overview.Rmd:57 book/chapter-06-measure-theoretic-interpretation.Rmd:182-193
+C484	Variance as the sum of two semivariances	NNS.ClaimsA.claim_C484	PROVED-FAITHFUL		vignettes/NNSvignette_01_Overview.Rmd:66-69 book/chapter-05-classical-moments-as-directional-aggregates.Rmd:122-134
+C485	Within-group and between-group variance	NNS.GapClaims.claim_C485	PROVED-FAITHFUL		vignettes/NNSvignette_01_Overview.Rmd:70 book/chapter-05-classical-moments-as-directional-aggregates.Rmd:122-134
+C486	Sample variance and the Bessel adjustment	NNS.ClaimsA.claim_C486	PROVED-FAITHFUL		vignettes/NNSvignette_01_Overview.Rmd:87 vignettes/NNSvignette_01_Overview.Rmd:100 book/chapter-05-classical-moments-as-directional-aggregates.Rmd:122-134
+C487	Degree-zero CDF and survival function	NNS.ClaimsA.claim_C487	PROVED-FAITHFUL		vignettes/NNSvignette_01_Overview.Rmd:89-92 vignettes/NNSvignette_01_Overview.Rmd:100 man/LPM.ratio.Rd:10
+C490	Moment summaries and tail information	NNS.ClaimsA.claim_C490	PROVED-FAITHFUL		vignettes/NNSvignette_01_Overview.Rmd:108-116 vignettes/NNSvignette_01_Overview.Rmd:520 man/NNS.moments.Rd:12-20
+C491	Degree-zero CDF and survival function	NNS.ClaimsA.claim_C491	PROVED-FAITHFUL		vignettes/NNSvignette_01_Overview.Rmd:135-136 vignettes/NNSvignette_01_Overview.Rmd:513 man/LPM.ratio.Rd:10
+C492	Quantiles, expectiles and inversion	NNS.ClaimsA.claim_C492	PROVED-FAITHFUL		vignettes/NNSvignette_01_Overview.Rmd:137-138 vignettes/NNSvignette_01_Overview.Rmd:514 man/LPM.VaR.Rd:12 man/LPM.VaR.Rd:17
+C493	Quantiles, expectiles and inversion	NNS.ClaimsA.claim_C493	PROVED-FAITHFUL		vignettes/NNSvignette_01_Overview.Rmd:141 man/LPM.VaR.Rd:12 man/LPM.VaR.Rd:17
+C494	Quantiles, expectiles and inversion	NNS.ClaimsA.claim_C494	PROVED-WITH-SIDE-CONDITION	The observations on either side of each interpolated rank must differ.	vignettes/NNSvignette_01_Overview.Rmd:142-143 man/LPM.VaR.Rd:12 man/LPM.VaR.Rd:17
+C498	Co-lower moments in copula coordinates	NNS.GapClaims.claim_C498	PROVED-FAITHFUL		vignettes/NNSvignette_01_Overview.Rmd:194 book/chapter-12-copula-interpretation.Rmd:228-253
+C500	Pairwise superiority, ties and symmetry	NNS.GapClaimsNew.claim_C500	PROVED-FAITHFUL		vignettes/NNSvignette_01_Overview.Rmd:274-281 vignettes/NNSvignette_06_Comparing_Distributions.Rmd:97-107 man/NNS.SS.Rd:35-39
+C501	Pairwise superiority, ties and symmetry	NNS.GapClaimsNew.claim_C501	PROVED-FAITHFUL		vignettes/NNSvignette_01_Overview.Rmd:284 vignettes/NNSvignette_06_Comparing_Distributions.Rmd:109 man/NNS.SS.Rd:35-39
+C507	Measurability of deviations and threshold events	NNS.GapClaims.claim_C507	PROVED-FAITHFUL		vignettes/NNSvignette_01_Overview.Rmd:486 book/chapter-06-measure-theoretic-interpretation.Rmd:70-82
+C508	Integrals on either side of the benchmark	NNS.ClaimsA.claim_C508	PROVED-FAITHFUL		vignettes/NNSvignette_01_Overview.Rmd:488-492 book/chapter-06-measure-theoretic-interpretation.Rmd:182-193
+C509	Integrals on either side of the benchmark	NNS.ClaimsA.claim_C509	PROVED-FAITHFUL		vignettes/NNSvignette_01_Overview.Rmd:494-500 book/chapter-08-distribution-estimation.Rmd:63-89
+C510	Variance as the sum of two semivariances	NNS.ClaimsA.claim_C510	PROVED-FAITHFUL		vignettes/NNSvignette_01_Overview.Rmd:502 book/chapter-05-classical-moments-as-directional-aggregates.Rmd:122-134
+C511	Concordant and divergent co-moments	NNS.ClaimsA.claim_C511	PROVED-FAITHFUL		vignettes/NNSvignette_01_Overview.Rmd:515-516 man/Co.LPM.Rd:10-21
+C517	Benchmarks and certainty in NNS ANOVA	NNS.GapClaimsNew.claim_C517	PROVED-FAITHFUL		vignettes/NNSvignette_06_Comparing_Distributions.Rmd:29 book/chapter-15-distribution-comparison.Rmd:580-588
+C519	Strict first-order stochastic dominance	NNS.GapClaimsNew.claim_C519	PROVED-FAITHFUL		vignettes/NNSvignette_06_Comparing_Distributions.Rmd:175-178 man/NNS.FSD.Rd:14-19
+C520	Efficient sets and dominance clusters	NNS.GapClaimsNew.claim_C520	PROVED-FAITHFUL		vignettes/NNSvignette_06_Comparing_Distributions.Rmd:184-197 man/NNS.SD.efficient.set.Rd:12-22
 C521	Frequency and area at degrees zero and one	NNS.ClaimsA.claim_C521	PROVED-FAITHFUL		man/LPM.Rd:10
 C522	Frequency and area at degrees zero and one	NNS.ClaimsA.claim_C522	PROVED-FAITHFUL		man/UPM.Rd:10
 C523	Ties and the degree-zero partition	NNS.ClaimsA.claim_C523	PROVED-FAITHFUL		man/UPM.Rd:10 man/LPM.Rd:10
@@ -385,14 +385,14 @@ C591	Area-ratio order and first-order dominance	NNS.GapClaimsNew.claim_C591	PROV
 C594	Strict first-order stochastic dominance	NNS.ClaimsA.claim_C594	PROVED-FAITHFUL		man/NNS.FSD.Rd:25
 C595	Integrated CDFs and higher-order dominance	NNS.ClaimsA.claim_C595	PROVED-FAITHFUL		man/NNS.SSD.Rd:20
 C596	Integrated CDFs and higher-order dominance	NNS.ClaimsA.claim_C596	PROVED-FAITHFUL		man/NNS.TSD.Rd:20 man/NNS.TSD.Rd:23
-C601	Concordant and divergent co-moments	NNS.ClaimsA.claim_C601	PROVED-FAITHFUL		man/Co.LPM.Rd:10-21 man/D.LPM.Rd:26-28 NEWS.md:150-151
-C602	Scaling the integer-degree threshold solver	NNS.ClaimsA.claim_C602	PROVED-FAITHFUL		book/chapter-16-directional-tail-thresholds-probability-bounds-and-estimation-error.Rmd:111-119 src/NNS_VaR_integer.cpp:205-218 man/LPM.VaR.Rd:12 NEWS.md:150-151
+C601	Concordant and divergent co-moments	NNS.ClaimsA.claim_C601	PROVED-FAITHFUL		man/Co.LPM.Rd:10-21 man/D.LPM.Rd:26-28 NEWS.md:162-163
+C602	Scaling the integer-degree threshold solver	NNS.ClaimsA.claim_C602	PROVED-FAITHFUL		book/chapter-16-directional-tail-thresholds-probability-bounds-and-estimation-error.Rmd:111-119 src/NNS_VaR_integer.cpp:205-218 man/LPM.VaR.Rd:12 NEWS.md:162-163
 C607	Area-ratio order and first-order dominance	NNS.ClaimsA.claim_C607	PROVED-FAITHFUL		NEWS.md:13-16 man/NNS.FSD.Rd:14-19
 C609	Quantiles, expectiles and inversion	NNS.ClaimsA.claim_C609	PROVED-FAITHFUL		man/LPM.VaR.Rd:12 man/LPM.VaR.Rd:17
 C610	Quantiles, expectiles and inversion	NNS.ClaimsA.claim_C610	PROVED-FAITHFUL		book/chapter-17-prediction-intervals.Rmd:291 book/chapter-15-distribution-comparison.Rmd:224-229
 C611	Comparing one-sided probability bounds	NNS.ClaimsA.claim_C611	PROVED-FAITHFUL		book/chapter-04-numerical-integration-via-partial-moments.Rmd:274-294
 C612	Benchmarks and certainty in NNS ANOVA	NNS.GapClaimsNew.claim_C612	PROVED-FAITHFUL		book/chapter-15-distribution-comparison.Rmd:570-578
-C615	Mixed-degree co-moments and scale-invariant solver stopping	NNS.ClaimsA.claim_C615	PROVED-FAITHFUL		NEWS.md:150-151 man/Co.LPM.Rd:10-21 man/D.LPM.Rd:26-28 src/NNS_VaR_integer.cpp:205-218 man/LPM.VaR.Rd:12 book/chapter-16-directional-tail-thresholds-probability-bounds-and-estimation-error.Rmd:111-119
+C615	Mixed-degree co-moments and scale-invariant solver stopping	NNS.ClaimsA.claim_C615	PROVED-FAITHFUL		NEWS.md:162-163 man/Co.LPM.Rd:10-21 man/D.LPM.Rd:26-28 src/NNS_VaR_integer.cpp:205-218 man/LPM.VaR.Rd:12 book/chapter-16-directional-tail-thresholds-probability-bounds-and-estimation-error.Rmd:111-119
 C618	Degree-one area shares and their induced CDF	NNS.ClaimsA.claim_C618	PROVED-FAITHFUL		NEWS.md:5-6 book/chapter-15-distribution-comparison.Rmd:193-224
 C621	Benchmarks and certainty in NNS ANOVA	NNS.GapClaimsNew.claim_C621	PROVED-FAITHFUL		NEWS.md:9-12 book/chapter-15-distribution-comparison.Rmd:570-578
 C622	Concordant and divergent co-moments	NNS.GapClaims.claim_C622	PROVED-FAITHFUL		man/D.LPM.Rd:10-12 man/D.LPM.Rd:26-28

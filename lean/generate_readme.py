@@ -1,4 +1,4 @@
-"""Regenerate the claim index and counterexamples in README.md."""
+"""Regenerate the claim index in README.md."""
 import csv
 import re
 import subprocess
@@ -6,11 +6,10 @@ from collections import Counter
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-PIN = '98bc42ea'
+PIN = '665e9828'
 STATUS = {
     'PROVED-FAITHFUL': 'Proved',
     'PROVED-WITH-SIDE-CONDITION': 'Proved with conditions',
-    'FALSE-AS-DOCUMENTED': 'False as documented',
     'RESIDUAL': 'Partly proved',
 }
 
@@ -73,21 +72,18 @@ def main():
     if not sep:
         raise ValueError('README.md needs a claim index heading')
 
+    unknown = {row['status'] for row in rows} - STATUS.keys()
+    if unknown:
+        raise ValueError(f'Unknown status: {", ".join(sorted(unknown))}')
     counts = Counter(row['status'] for row in rows)
     partial = ', '.join(row['claim'] for row in rows if row['status'] == 'RESIDUAL')
     body = [
         f"The index covers {len(rows)} claims. Lean proves {counts['PROVED-FAITHFUL']} as stated",
-        f"and {counts['PROVED-WITH-SIDE-CONDITION']} with conditions. It gives counterexamples for",
-        f"{counts['FALSE-AS-DOCUMENTED']}. {partial} has a partial proof.",
+        f"and {counts['PROVED-WITH-SIDE-CONDITION']} with conditions."
+        + (f' {partial} has a partial proof.' if partial else ''),
         '',
-        '### Counterexamples', '',
-        'The links show each passage as it read before the corrections in the book.', '',
     ]
-    for row in rows:
-        if row['status'] == 'FALSE-AS-DOCUMENTED':
-            body.append(f"- {row['claim']}. {row['note']} {source_link(row['sources'].split()[0])}")
-
-    body.extend(['', '### Theorems', '',
+    body.extend(['### Theorems', '',
                  f'| Claim | Theorem | Status | Documentation at `{PIN}` |',
                  '|---|---|---|---|'])
     for row in rows:

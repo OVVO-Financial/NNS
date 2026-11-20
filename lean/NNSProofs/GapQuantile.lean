@@ -369,7 +369,7 @@ theorem LPMVaR_ne_threshold_snap :
       intLPMVaR rTol 4 (1 / 10 ^ 12) ![(0 : ℝ), 1] := by
     rw [LPMVaR, ite_eq_right (by norm_num), ite_eq_left (by norm_num),
       clampP_of_mem (by norm_num)]
-  have hc := intLPMVaR_snap_counterexample
+  have hc := intLPMVaR_snap_example
   refine ⟨hv.trans hc.1, fun he => ?_⟩
   have ht := (threshold_empMeasure (d := 4) (by norm_num) (x := ![(0 : ℝ), 1]) ⟨0, 1, by simp⟩
     (a := 1 / 10 ^ 12) (by norm_num) (by norm_num)).2

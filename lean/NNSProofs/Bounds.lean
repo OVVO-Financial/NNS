@@ -411,6 +411,27 @@ theorem wSample_bounds :
     hp, hs]
   norm_num
 
+def vSample : Fin 4 → ℝ := ![1, 1, 1, 13]
+
+theorem vSample_facts :
+    mean vSample = 4 ∧ popVariance vSample = 27 ∧ LPM 2 (mean vSample) vSample = 27 / 4 := by
+  have hm : mean vSample = 4 := by
+    norm_num [mean, vSample, Fin.sum_univ_four]
+  refine ⟨hm, ?_, ?_⟩
+  · rw [popVariance, hm, centralMoment, Fin.sum_univ_four]
+    norm_num [vSample]
+  · rw [hm, LPM, Fin.sum_univ_four]
+    norm_num [lowerDev, vSample]
+
+theorem vSample_bounds :
+    pvar (empirical vSample) /
+        (pvar (empirical vSample) + (pmean (empirical vSample) - (-1)) ^ 2) = 27 / 52 ∧
+      semivar (empirical vSample) / (pmean (empirical vSample) - (-1)) ^ 2 = 27 / 100 := by
+  obtain ⟨hm, hv, hs⟩ := vSample_facts
+  rw [hm] at hs
+  simp only [pvar_empirical, pmean_empirical, semivar_empirical, hm, hv, hs]
+  norm_num
+
 end
 
 end NNS
