@@ -1,9 +1,7 @@
 ---
-title: "Getting Started with NNS: Overview"
+title: "01. Getting Started with NNS: Overview"
 author: "Fred Viole"
-output:
-  html_vignette:
-    check_title: false
+output: html_vignette
 vignette: >
   %\VignetteIndexEntry{01. Getting Started with NNS: Overview}
   %\VignetteEngine{knitr::rmarkdown}

@@ -1,9 +1,7 @@
 ---
-title: "Getting Started with NNS: Normalization and Rescaling"
+title: "04. Getting Started with NNS: Normalization and Rescaling"
 author: "Fred Viole"
-output:
-  html_vignette:
-    check_title: false
+output: html_vignette
 vignette: >
   %\VignetteIndexEntry{04. Getting Started with NNS: Normalization and Rescaling}
   %\VignetteEngine{knitr::rmarkdown}

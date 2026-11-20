@@ -1,9 +1,7 @@
 ---
-title: "Getting Started with NNS: Clustering and Regression"
+title: "07. Getting Started with NNS: Clustering and Regression"
 author: "Fred Viole"
-output:
-  rmarkdown::html_vignette:
-    check_title: false
+output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{07. Getting Started with NNS: Clustering and Regression}
   %\VignetteEngine{knitr::rmarkdown}
