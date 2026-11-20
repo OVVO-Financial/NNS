@@ -83,3 +83,10 @@ test_that("one-sided tails also work with robust = TRUE", {
   expect_true(is.numeric(left) && is.finite(left[1]) && left[2] == Inf)
   expect_true(is.numeric(right) && right[1] == -Inf && is.finite(right[2]))
 })
+
+test_that("effect bounds resample the sole observation left in either group", {
+  single <- c(10, NA_real_)
+  constant <- rep(12, 12)
+  expect_equal(bounds(anova(single, constant)), c(2, 2))
+  expect_equal(bounds(anova(constant, single, medians = TRUE)), c(-2, -2))
+})
