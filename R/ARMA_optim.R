@@ -124,6 +124,7 @@ NNS.ARMA.optim <- function(variable,
   
   denominator <- min(4, max(3, ifelse((training.set/100)%%1 < .5, floor(training.set/100), ceiling(training.set/100))))
   
+  .arma_check_periods(seasonal.factor)
   seasonal.factor <- seasonal.factor[seasonal.factor <= (training.set/denominator)]
   seasonal.factor <- unique(seasonal.factor)
   

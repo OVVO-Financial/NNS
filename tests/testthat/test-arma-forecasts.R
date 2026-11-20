@@ -58,6 +58,25 @@ test_that("weights = 'equal' works with a numeric seasonal.factor", {
                arma(ap, h = 3, seasonal.factor = c(12, 24), weights = c(1, 1)))
 })
 
+test_that("a zero period explains how to forecast a short history", {
+  x <- c(20, 18, 19, 21)
+  period <- NNS.seas(x, plot = FALSE)$best.period
+  message <- "too short to scan for a period.*seasonal.factor = 1"
+  expect_error(arma(x, h = 2), message)
+  expect_error(arma(x, h = 2, dynamic = TRUE), message)
+  expect_error(arma(x, h = 2, seasonal.factor = period), message)
+  expect_equal(arma(x, h = 2, seasonal.factor = 2, method = "lin"), c(18, 24))
+})
+
+test_that("linear forecasts reject a zero period from the scanner", {
+  expect_error(arma(c(20, 18, 19, 21), h = 2, method = "lin"), "too short to scan for a period")
+})
+
+test_that("a positive lag cannot mask a zero lag", {
+  expect_error(arma(20, h = 2, seasonal.factor = c(1, 0), method = "lin"), "seasonal.factor = 1")
+  expect_equal(arma(20, h = 2, seasonal.factor = 1, method = "lin"), c(20, 20))
+})
+
 test_that("seasonal.factor = TRUE with best.periods = NULL uses the best period", {
   best <- NNS.seas(ap, plot = FALSE)$best.period
   expect_equal(arma(ap, h = 3, seasonal.factor = TRUE, best.periods = NULL),

@@ -108,6 +108,7 @@ NNS.ARMA <- function(variable,
   
   
   if(is.numeric(seasonal.factor)){
+    .arma_check_periods(seasonal.factor)
     seasonal.plot = FALSE
     M <- matrix(seasonal.factor, ncol=1)
     colnames(M) <- "Period"
@@ -404,6 +405,7 @@ NNS.ARMA <- function(variable,
 # Lags and weights from an NNS.seas period table. seasonal.factor = TRUE takes
 # the first row; ARMA.seas.weighting(TRUE, .) expects the list, not the table.
 .arma_lag_weights <- function(sf, M){
+  if (is.data.frame(M)) .arma_check_periods(M$Period)
   if (isTRUE(sf) && is.data.frame(M) && "Period" %in% names(M)) {
     return(list(lag = M$Period[1], Weights = 1))
   }
@@ -415,4 +417,10 @@ NNS.ARMA <- function(variable,
     ASW$Weights <- rep(1 / length(ASW$lag), length(ASW$lag))
   }
   ASW
+}
+
+.arma_check_periods <- function(periods){
+  if(0 %in% periods)
+    stop("NNS.seas returns 0 when the history is too short to scan for a period. ",
+         "Pass a positive lag supported by the training data, e.g. seasonal.factor = 1.")
 }
