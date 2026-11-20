@@ -33,3 +33,24 @@ test_that("an accepted split-window correction is included in the returned score
   expect_equal(o$results, pmax(0, o$raw.results + o$bias.shift))
   expect_equal(o$obj.fn, mean((o$results - actual)^2))
 })
+
+test_that("the optimizer requires a positive forecast horizon when supplied", {
+  expect_error(run_optim(h = -1), "positive integer")
+  expect_error(run_optim(h = 0), "positive integer")
+})
+
+test_that("unknown optimizer objectives name the valid choices", {
+  expect_error(run_optim(objective = "maximize"), "objective.*'min'.*'max'")
+})
+
+test_that("an objective error restores warnings and closes the workers", {
+  withr::local_options(list(warn = 1))
+  cl <- parallel::makeCluster(2)
+  on.exit(try(parallel::stopCluster(cl), silent = TRUE), add = TRUE)
+  testthat::local_mocked_bindings(makeForkCluster = function(...) cl, .package = "parallel")
+  expect_error(NNS.ARMA.optim(AirPassengers, h = 2, seasonal.factor = c(1, 12), ncores = 2,
+                              print.trace = FALSE, obj.fn = expression(stop("metric failed"))),
+               "metric failed")
+  expect_equal(getOption("warn"), 1)
+  expect_error(parallel::clusterCall(cl, Sys.getpid))
+})

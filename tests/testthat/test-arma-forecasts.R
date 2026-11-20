@@ -138,3 +138,8 @@ test_that("the warn option is restored when NNS.ARMA fails", {
   expect_error(arma(ap, h = 2, seasonal.factor = c(12, 24), weights = 1))
   expect_equal(getOption("warn"), 1)
 })
+
+test_that("unknown forecast methods name the valid choices", {
+  expect_error(arma(1:60, h = 3, method = "linear"), "lin.*nonlin.*both.*means")
+  expect_equal(arma(1:60, h = 3, method = "LIN"), 61:63)
+})
