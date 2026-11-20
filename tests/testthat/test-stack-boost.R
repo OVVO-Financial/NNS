@@ -81,6 +81,27 @@ test_that("Stack and Boost distinguish both occurrences of a repeated hour", {
   expect_identical(actual$class.levels, control$class.levels)
 })
 
+test_that("logical predictors keep both levels for test and validation rows", {
+  set.seed(12)
+  x <- data.frame(flag = rep(TRUE, 20), num = rnorm(20))
+  y <- factor(rep(c("a", "b"), 10))
+  q <- data.frame(flag = c(FALSE, TRUE), num = c(0, 1))
+  declared <- function(d) transform(d, flag = factor(flag, levels = c(FALSE, TRUE)))
+  reg <- function(x, q, dummy) NNS.reg(x, y, point.est = q, factor.2.dummy = dummy,
+                                       plot = FALSE)$Point.probabilities
+  expect_equal(reg(x, q, TRUE), reg(declared(x), declared(q), TRUE), tolerance = 1e-12)
+  expect_equal(reg(x, q, FALSE), reg(declared(x), declared(q), FALSE), tolerance = 1e-12)
+
+  x$flag[17] <- FALSE
+  stack <- function(x, q) NNS.stack(x, y, q, ts.test = 4, folds = 1, method = 1,
+                                    seed = 1, status = FALSE, ncores = 1)$stack
+  boost <- function(x, q) NNS.boost(x, y, q, ts.test = 4, folds = 1, learner.trials = 3,
+                                    epochs = 0, seed = 1, status = FALSE,
+                                    feature.importance = FALSE)$results
+  expect_equal(stack(x, q), stack(declared(x), declared(q)), tolerance = 1e-12)
+  expect_equal(boost(x, q), boost(declared(x), declared(q)), tolerance = 1e-12)
+})
+
 test_that("NNS.stack codes a character response like the equivalent factor", {
   idx <- c(101:140, 1:100)
   x <- iris[idx, 1:4]

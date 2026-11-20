@@ -383,6 +383,7 @@
 }
 
 .nns_predictor_levels <- function(x) {
+  if (is.logical(x)) return(c("FALSE", "TRUE"))
   if (is.ordered(x)) return(levels(x))
   if (is.factor(x)) return(sort(levels(x)))
   sort(unique(as.character(x)))
@@ -518,10 +519,7 @@
 .nns_stack_predictors <- function(train, test, schema = .nns_predictor_schema(train)) {
   layout <- .nns_stack_layout(schema)
   logicals <- vapply(schema, function(col) col$kind == "logical", logical(1))
-  for (i in which(logicals)) {
-    schema[[i]]$levels <- c("FALSE", "TRUE")
-    schema[[i]]$values <- c(0, 1)
-  }
+  for (i in which(logicals)) schema[[i]]$values <- c(0, 1)
   design <- .nns_encode_predictors(train, test, !logicals, schema)
   colnames(design$x) <- layout$names
   if (!is.null(design$point.est)) colnames(design$point.est) <- layout$names
