@@ -266,7 +266,8 @@ NumericVector NNS_rescale_cpp(SEXP xSEXP, double a, double b,
     }
     if (!R_finite(xmin) || !R_finite(xmax) || xmax == xmin) {
       Rcpp::warning("All x identical: returning midpoint values");
-      for (int i = 0; i < n; ++i) out[i] = (a + b) / 2.0;
+      for (int i = 0; i < n; ++i)
+        out[i] = ISNAN(xR[i]) ? xR[i] : (a + b) / 2.0;
       return out;
     }
     for (int i = 0; i < n; ++i) {
@@ -276,6 +277,8 @@ NumericVector NNS_rescale_cpp(SEXP xSEXP, double a, double b,
   }
   
   if (method == "riskneutral") {
+    if (type != "terminal" && type != "discounted")
+      stop("Invalid type: use 'Terminal' or 'Discounted'");
     if (T_.isNull()) stop("T (time to maturity) must be provided for riskneutral method");
     double T = Rcpp::as<double>(T_);
     if (!(a > 0.0)) stop("S_0 (a) must be positive for riskneutral method");
