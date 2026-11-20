@@ -22,6 +22,10 @@
   as.numeric(solve(powers, rhs)) / scale^degree
 }
 
+.nns_dy_one_sided <- function(lo, hi) {
+  cbind(lo, lo + (hi - lo) / 2, hi)
+}
+
 # The stencil at each point in [at] for each probability width, as
 # stencils[[width]][[point]]. The sorted support and each point's lower share
 # do not depend on the width, and LPM.VaR evaluates its percentiles one by
@@ -58,9 +62,9 @@
     h <- min((hi - lo) / 2, (upper - lower) / 4)
     if (!is.finite(h) || h <= 0) h <- min(diff(support))
     nodes <- if (a == lower) {
-      a + c(0, h, 2 * h)
+      as.numeric(.nns_dy_one_sided(a, a + 2 * h))
     } else if (a == upper) {
-      a - c(2 * h, h, 0)
+      as.numeric(.nns_dy_one_sided(a - 2 * h, a))
     } else {
       c(max(lower, a - h), a, min(upper, a + h))
     }

@@ -135,3 +135,21 @@ test_that("NNS.diff leaves the complex-step derivative missing for real-only fun
   expect_identical(unname(line[c("DERIVATIVE", "Complex Step Derivative (Inferred h)"), 1]), c(1, NA_real_))
   expect_identical(unname(NNS.diff(Re, 0)["Complex Step Derivative (Inferred h)", 1]), NA_real_)
 })
+
+test_that("dy.dx has zero curvature at both ends of a line", {
+  x <- seq(0, 1, length.out = 101)
+  points <- c(1, 0, 1)
+  line <- dy.dx(x, 1 + 2 * x, points)
+  reflected <- dy.dx(-x, 1 + 2 * x, -points)
+  expect_equal(line$first.derivative, rep(2, 3), tolerance = 1e-10)
+  expect_equal(reflected$first.derivative, rep(-2, 3), tolerance = 1e-10)
+  expect_equal(line$second.derivative, numeric(3), tolerance = 1e-9)
+  expect_equal(reflected$second.derivative, numeric(3), tolerance = 1e-9)
+})
+
+test_that("dy.dx recovers endpoint curvature of a quadratic fitted surface", {
+  x <- seq(0, 1, length.out = 101)
+  local_mocked_bindings(NNS.reg = function(x, y, point.est, ...) list(Point.est = point.est^2))
+  expect_equal(dy.dx(x, x^2, c(0, 1))$second.derivative, c(2, 2), tolerance = 1e-10)
+  expect_equal(dy.dx(-x, x^2, c(0, -1))$second.derivative, c(2, 2), tolerance = 1e-10)
+})

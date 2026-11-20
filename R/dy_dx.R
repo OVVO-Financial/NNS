@@ -10,7 +10,7 @@
 #' @details
 #' \code{eval.point = "overall"} returns the mean of the \code{gradient} column of \code{NNS.reg(x, y)$Fitted.xy}. Each observation receives the slope of the unsmoothed regression segment that contains it, so the result is an observation-weighted average of segment slopes, not an average of smoothed derivatives. Very short segments between nearly coincident regression points can have extreme slopes; \code{mean(dy.dx(x, y, eval.point = x)$first.derivative)} averages the smoothed pointwise estimates instead.
 #'
-#' Numeric evaluation points use central differences of smoothed \link{NNS.reg} estimates over five steps from 2 to \code{floor(sqrt(n))} typical spacings of \code{x}. The left point is bounded below by \code{min(x)} and the right point above by \code{max(x)}. At coordinates outside that range, the differences use the extrapolated fit. \code{second.derivative} is a second difference of those estimates, and second differences amplify noise: for \code{y = x^2} plus noise with an R-squared near 0.99 and n = 400, estimates of the true value 2 at three interior points had a root mean squared error of about 5, and about one in five had the wrong sign. Treat it as a descriptive diagnostic on noisy data.
+#' Numeric evaluation points use central differences of smoothed \link{NNS.reg} estimates over five steps from 2 to \code{floor(sqrt(n))} typical spacings of \code{x}. The left point is bounded below by \code{min(x)} and the right point above by \code{max(x)}. At a support endpoint with at least three distinct observations of \code{x}, the second difference uses the midpoint of the one-sided interval. At coordinates outside that range, the differences use the extrapolated fit. \code{second.derivative} is a second difference of those estimates, and second differences amplify noise: for \code{y = x^2} plus noise with an R-squared near 0.99 and n = 400, estimates of the true value 2 at three interior points had a root mean squared error of about 5, and about one in five had the wrong sign. Treat it as a descriptive diagnostic on noisy data.
 #'
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995, 2nd edition: \url{https://ovvo-financial.github.io/NNS/book/})
@@ -59,9 +59,16 @@ dy.dx <- function(x, y, eval.point = NULL){
   points <- as.numeric(eval.point)
   root_n <- floor(sqrt(length(x)))
   h_s <- round(exp(seq(log(2), log(root_n), length.out = 5)))
-  x.spacing <- gravity(diff(sort(unique(x))))
+  support <- sort(unique(x))
+  bounds <- range(support)
+  endpoint <- points %in% bounds & length(support) >= 3L
+  x.spacing <- gravity(diff(support))
   windows <- lapply(h_s * x.spacing, function(h) {
-    cbind(pmax(min(x), points - h), points, pmin(max(x), points + h))
+    lo <- pmax(bounds[1L], points - h)
+    hi <- pmin(bounds[2L], points + h)
+    nodes <- cbind(lo, points, hi)
+    nodes[endpoint, ] <- .nns_dy_one_sided(lo[endpoint], hi[endpoint])
+    nodes
   })
   windows <- do.call(rbind, windows)
   fit <- NNS.reg(x, y, type = "REG", plot = FALSE, point.est = as.vector(windows),
@@ -76,7 +83,7 @@ dy.dx <- function(x, y, eval.point = NULL){
   second <- (rise.right / right - rise.left / left) / ((right + left) / 2)
 
   unique.points <- unique(points)
-  groups <- match(windows[, 2L], unique.points)
+  groups <- rep(match(points, unique.points), length(h_s))
   result <- data.frame(eval.point = unique.points,
                        first.derivative = vapply(split(first, groups), mean, numeric(1), USE.NAMES = FALSE),
                        second.derivative = vapply(split(second, groups), mean, numeric(1), USE.NAMES = FALSE))
