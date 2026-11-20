@@ -1,3 +1,14 @@
+.nns_with_distance_threads <- function(ncores, expr) {
+  # The TinyThread backend reads the thread count from the environment.
+  old <- Sys.getenv("RCPP_PARALLEL_NUM_THREADS", unset = NA_character_)
+  on.exit({
+    if (is.na(old)) Sys.unsetenv("RCPP_PARALLEL_NUM_THREADS")
+    else Sys.setenv(RCPP_PARALLEL_NUM_THREADS = old)
+  })
+  Sys.setenv(RCPP_PARALLEL_NUM_THREADS = as.integer(ncores))
+  force(expr)
+}
+
 NNS.distance.bulk <- function(rpm, Xtest, k, class = NULL) {
   # All R entry points use the same multi-weight NNS ensemble. The historical
   # serial kernel used inverse-distance weights alone and disagreed at k > 1.
@@ -41,8 +52,8 @@ NNS.distance.path.bulk <- function(rpm, Xtest, kmax, class = NULL, ncores = 1L) 
   is_class <- !is.null(class)
   
   # Always use the parallel C++ routine to preserve the full multi-weight ensemble formulation matching NNS.distance
-  RcppParallel::setThreadOptions(numThreads = as.integer(ncores))
-  NNS_distance_path_parallel_cpp(Xrpm, as.numeric(rpm$y.hat), Xtest, kmax, is_class, as.integer(ncores))
+  .nns_with_distance_threads(ncores,
+    NNS_distance_path_parallel_cpp(Xrpm, as.numeric(rpm$y.hat), Xtest, kmax, is_class, as.integer(ncores)))
 }
 
 
@@ -85,13 +96,8 @@ NNS.distance.path.single.bulk <- function(rpm, Xtest, k, class = NULL, ncores = 
   
   is_class <- !is.null(class)
   
-  RcppParallel::setThreadOptions(numThreads = as.integer(ncores))
-  as.numeric(NNS_distance_path_single_parallel_cpp(
-    Xrpm,
-    as.numeric(rpm$y.hat),
-    Xtest,
-    as.integer(k),
-    is_class,
-    as.integer(ncores)
-  ))
+  .nns_with_distance_threads(ncores,
+    as.numeric(NNS_distance_path_single_parallel_cpp(
+      Xrpm, as.numeric(rpm$y.hat), Xtest, as.integer(k), is_class, as.integer(ncores)
+    )))
 }
