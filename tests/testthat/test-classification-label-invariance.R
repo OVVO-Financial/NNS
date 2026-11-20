@@ -125,3 +125,39 @@ test_that("nominal Stack shares the factor coefficient names and fold columns", 
                     ncores = 1, seed = 9, status = FALSE)
   expect_equal(rowSums(rare$probabilities), rep(1, 4))
 })
+
+test_that("Stack breaks binary ties in training order for each holdout", {
+  y <- rep(c(1, 0), 12)
+  x <- data.frame(v = rep(0, length(y)), w = 1)
+  fit <- NNS.stack(x, y, x[1, , drop = FALSE], CV.size = .25, folds = 1,
+    seed = 16, optimize.threshold = FALSE, ncores = 1, status = FALSE,
+    obj.fn = expression(mean(predicted[actual == 1] == 1)), objective = "max")
+  # Row 1 is held out. Class 0 appears first in the fold and class 1 in the refit.
+  expect_equal(c(fit$OBJfn.reg, fit$OBJfn.dim.red), c(0, 0))
+  expect_equal(c(fit$reg, fit$dim.red, fit$stack), c(1, 1, 1))
+
+  pooled <- NNS.stack(x, y, method = 1, CV.size = .25, folds = 3,
+    seed = 16, optimize.threshold = FALSE, ncores = 1, status = FALSE,
+    obj.fn = expression(mean(predicted[actual == 1] == 1)), objective = "max")
+  expect_equal(pooled$OBJfn.reg, 2 / 7)
+})
+
+test_that("Stack breaks multiclass ties in training order", {
+  y <- rep(c(2, 1, 3), 12)
+  x <- data.frame(v = rep(0, length(y)))
+  fit <- NNS.stack(x, y, x[1, , drop = FALSE], type = "CLASS", method = 1,
+    CV.size = .25, folds = 1, seed = 33002, ncores = 1, status = FALSE,
+    obj.fn = expression(mean(predicted[actual == 2] == 2)), objective = "max")
+  expect_equal(fit$OBJfn.reg, 0)
+  expect_equal(fit$stack, 2)
+})
+
+test_that("Stack reports the multivariate coordinates separately from the class indices", {
+  set.seed(13)
+  x <- data.frame(signal = rep(c(0, 1), 40), nuisance = rnorm(80))
+  fit <- NNS.stack(x, x$signal, data.frame(signal = c(0, 1), nuisance = 0),
+    dim.red.method = c(signal = 0, nuisance = 1), ncores = 1, status = FALSE)
+  expect_equal(unname(fit$NNS.dim.red.variables), "nuisance")
+  expect_equal(fit$NNS.reg.variables, "signal")
+  expect_equal(fit$stack, c(0, 1))
+})

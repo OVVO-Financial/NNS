@@ -6,7 +6,8 @@
                                 balance.indices, numeric.response, status,
                                 numeric.design, tau = NULL) {
   values <- sort(unique(y))
-  tie.order <- match(unique(y), values)
+  class.order <- function(response) match(unique(response), values)
+  tie.order <- class.order(y)
   labels <- as.character(class.values)
   n <- length(y); K <- length(values)
   encode <- function(train, test) {
@@ -25,15 +26,28 @@
   decode <- function(code) {
     if (numeric.response) class.values[code] else as.numeric(code)
   }
-  choose <- function(prob, threshold = .5) {
-    if (K == 2L) {
-      ifelse(prob[, tie.order[2L]] > threshold,
-             values[tie.order[2L]], values[tie.order[1L]])
-    } else .nns_class_select(prob, values, tie.order)
+  fold.orders <- lapply(splits, function(s) class.order(y[s$train]))
+  preferred <- function(prob, priority) {
+    if (K == 2L) values[priority[1L]] else .nns_class_select(prob, values, priority)
   }
-  evaluate <- function(prob, actual) {
+  choose <- function(prob, threshold = .5, first = preferred(prob, tie.order)) {
+    if (K != 2L) return(first)
+    p <- prob[, tie.order[2L]]
+    ifelse(p == threshold, first,
+           ifelse(p > threshold, values[tie.order[2L]], values[tie.order[1L]]))
+  }
+  evaluate <- function(prob, valid) {
+    first <- integer(n)
+    # The first contributing fold breaks ties when holdouts overlap.
+    for (b in rev(seq_along(splits))) {
+      rows <- splits[[b]]$validation
+      first[rows] <- preferred(prob[rows, , drop = FALSE], fold.orders[[b]])
+    }
+    prob <- prob[valid, , drop = FALSE]
+    actual <- decode(y[valid])
+    first <- first[valid]
     thresholds <- if (K == 2L && optimize.threshold) seq(.01, .99, .01) else .5
-    loss <- vapply(thresholds, function(t) score(decode(choose(prob, t)), decode(actual)), numeric(1))
+    loss <- vapply(thresholds, function(t) score(decode(choose(prob, t, first)), actual), numeric(1))
     usable <- which(is.finite(loss))
     if (!length(usable)) stop("No classification threshold has a finite objective.")
     best <- if (objective == "min") min(loss[usable]) else max(loss[usable])
@@ -58,11 +72,14 @@
   fit <- function(train, response, test, component, candidate, select.count = NULL) {
     encoded <- design(train, response, test, component, select.count)
     task <- list(y = response, class.values = values, class.levels = labels)
-    .nns_reg_classify(encoded, task, order,
-                      if (component == 1L) candidate else NULL, dist, ncores,
-                      if (component == 2L) dim.red.method else NULL, tau = tau,
-                      dim.count = if (component == 2L) candidate else NULL,
-                      point.only = TRUE)
+    model <- .nns_reg_classify(
+      encoded, task, order,
+      if (component == 1L) candidate else NULL, dist, ncores,
+      if (component == 2L) dim.red.method else NULL, tau = tau,
+      dim.count = if (component == 2L) candidate else NULL,
+      point.only = TRUE)
+    model$variables <- colnames(encoded$x)
+    model
   }
   # The method 1 cells, class shares and distances do not depend on the
   # neighbour count, so each fold builds them once for every candidate. The
@@ -78,7 +95,7 @@
     valid <- count > 0
     probability <- matrix(NA_real_, n, K)
     probability[valid, ] <- total[valid, , drop = FALSE] / count[valid]
-    assessment <- evaluate(probability[valid, , drop = FALSE], y[valid])
+    assessment <- evaluate(probability, valid)
     c(assessment, list(candidate = candidate, probability = probability, valid = valid))
   }
   tune <- function(component, candidates, select.count = NULL) {
@@ -144,9 +161,8 @@
     weights <- .nns_stack_objective_weights(reg.fit$score, dim.fit$score, objective)
     valid <- reg.fit$valid & dim.fit$valid
     threshold <- evaluate(
-      weights[["reg"]] * reg.fit$probability[valid, , drop = FALSE] +
-        weights[["dim.red"]] * dim.fit$probability[valid, , drop = FALSE],
-      y[valid])$threshold
+      weights[["reg"]] * reg.fit$probability +
+        weights[["dim.red"]] * dim.fit$probability, valid)$threshold
   }
   # The coefficient cutoff at which NNS.reg(x, y, dim.red.method = ..., threshold
   # = cutoff) keeps the tuned number of predictors in every class index,
@@ -207,7 +223,8 @@
     dim.red.pred.int = interval(dp), stack = decode(choose(probability, threshold)),
     pred.int = interval(probability), Prediction.set = prediction.set(probability),
     probabilities = probability, reg.probabilities = rp, dim.red.probabilities = dp,
-    weights = weights, class.levels = class.values)
+    weights = weights, class.levels = class.values,
+    NNS.reg.variables = reg.final$variables)
   .NNS.out(result)
 }
 
