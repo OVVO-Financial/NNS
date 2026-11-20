@@ -7,10 +7,18 @@
 //     densities, matching the R helper term for term,
 //   - exact double-precision weighted class mode (max total, tie -> min value).
 // Row-parallel with a per-call thread count; no global RcppParallel thread state is touched.
+// R rounds each distance term before rowSums() accumulates it.
+#if defined(__clang__)
+#pragma clang fp contract(off)
+#elif defined(__GNUC__)
+#pragma GCC optimize("fp-contract=off")
+#endif
+
 #include <Rcpp.h>
 #include <RcppParallel.h>
 #include <algorithm>
 #include <cmath>
+#include <limits>
 #include <utility>
 #include <vector>
 using namespace Rcpp;
@@ -414,7 +422,7 @@ struct PredictPathWorker : public Worker {
 
   // Query r's `keep` nearest RPM rows under (distance, row), nearest first in
   // S.best, and, when `ties` is set, every row at the smallest distance in
-  // S.ties, ascending. Each visited row's distance is accumulated over the
+  // S.ties, ascending. Each retained row's distance is accumulated over the
   // columns exactly as distance() does. Candidates collect in a buffer that
   // is cut back to the `keep` best whenever it doubles; the worst of those
   // bounds every later row. A row strictly beyond that bound cannot enter,
@@ -434,6 +442,7 @@ struct PredictPathWorker : public Worker {
     const std::size_t cap = static_cast<std::size_t>(keep) * 2 + 32;
     bool seen = false;
     double limit = R_PosInf;     // a sum above this cannot matter
+    double screen = R_PosInf;
     double bound = R_PosInf;     // the distance `limit` was derived from
     double reach = R_PosInf;     // walk-axis gap beyond which no row matters
     double dmin = R_PosInf;
@@ -443,6 +452,11 @@ struct PredictPathWorker : public Worker {
       if (b == bound) return;
       bound = b;
       limit = dist_code == 1 ? l2_raw_limit(b) : b;
+      if (dist_code == 0) {
+        // Allow for rounding in the double sum before ruling out a near tie.
+        const double slack = 1.0 + 2.0 * P * std::numeric_limits<double>::epsilon();
+        screen = std::nextafter(limit * slack, R_PosInf);
+      }
       if (walk >= 0 && limit < R_PosInf) {
         // The largest normalised gap whose own term stays within the limit,
         // widened well past rounding; the floor keeps gaps whose term would
@@ -458,12 +472,18 @@ struct PredictPathWorker : public Worker {
     };
     auto visit = [&](int s) {
       const double* x = data + static_cast<std::size_t>(s) * P;
-      double acc = 0.0;
+      long double acc = 0.0L;
       if (dist_code == 0) {
-        for (int a = 0; a < P; ++a) {
+        auto nns_term = [&](int a) {
           const double z = (x[a] - q[a]) / range[a];
-          acc += std::fabs(z) + z * z;
+          return std::fabs(z) + z * z;
+        };
+        if (screen < R_PosInf) {
+          double estimate = 0.0;
+          for (int a = 0; a < P; ++a) estimate += nns_term(a);
+          if (estimate > screen) return;
         }
+        for (int a = 0; a < P; ++a) acc += nns_term(a);
       } else if (dist_code == 2) {
         for (int a = 0; a < P; ++a) {
           const double z = (x[a] - q[a]) / range[a];
@@ -475,8 +495,9 @@ struct PredictPathWorker : public Worker {
           acc += z * z;
         }
       }
-      if (acc > limit) return;
-      const double d = dist_code == 1 ? std::sqrt(acc) : acc;
+      const double sum = static_cast<double>(acc);
+      if (sum > limit) return;
+      const double d = dist_code == 1 ? std::sqrt(sum) : sum;
       const int id = row_id[s];
       if (ties) {
         if (!seen || d < dmin) { dmin = d; S.ties.clear(); seen = true; }
@@ -532,7 +553,7 @@ struct PredictPathWorker : public Worker {
   // Range-normalised distance of training row i to query r. The 1-D path uses
   // it too, so it selects neighbours and ties exactly as the generic path does.
   double distance(int i, std::size_t r) const {
-    double acc = 0.0;
+    long double acc = 0.0L;
     for (std::size_t a = 0; a < active.size(); ++a) {
       const int j = active[a];
       const double z = (rpm_x(i, j) - Xtest(r, j)) / col_range[a];
@@ -540,7 +561,8 @@ struct PredictPathWorker : public Worker {
       else if (dist_code == 0) acc += std::fabs(z) + z * z;
       else acc += z * z;
     }
-    return dist_code == 1 ? std::sqrt(acc) : acc;
+    const double sum = static_cast<double>(acc);
+    return dist_code == 1 ? std::sqrt(sum) : sum;
   }
 
   // Walk outward in |coord - t| order, then extend over distance() ties at the boundary.
@@ -823,7 +845,7 @@ NumericVector NNS_mreg_predict_cpp(const NumericMatrix& rpm_x,
       std::fill(d.begin(), d.end(), 0.0);
     } else if (dist_code == 2) {
       for (int i = 0; i < n; ++i) {
-        double acc = 0.0;
+        long double acc = 0.0L;
         for (std::size_t a = 0; a < active.size(); ++a) {
           const int j = active[a];
           acc += std::fabs((rpm_x(i, j) - Xtest(r, j)) / col_range[a]);
@@ -832,7 +854,7 @@ NumericVector NNS_mreg_predict_cpp(const NumericMatrix& rpm_x,
       }
     } else if (dist_code == 0) {
       for (int i = 0; i < n; ++i) {
-        double acc = 0.0;
+        long double acc = 0.0L;
         for (std::size_t a = 0; a < active.size(); ++a) {
           const int j = active[a];
           const double z = (rpm_x(i, j) - Xtest(r, j)) / col_range[a];
@@ -842,13 +864,13 @@ NumericVector NNS_mreg_predict_cpp(const NumericMatrix& rpm_x,
       }
     } else if (dist_code == 1) {
       for (int i = 0; i < n; ++i) {
-        double acc = 0.0;
+        long double acc = 0.0L;
         for (std::size_t a = 0; a < active.size(); ++a) {
           const int j = active[a];
           const double z = (rpm_x(i, j) - Xtest(r, j)) / col_range[a];
           acc += z * z;
         }
-        d[i] = std::sqrt(acc);
+        d[i] = std::sqrt(static_cast<double>(acc));
       }
     } else {
       stop("Unknown NNS multivariate distance code");

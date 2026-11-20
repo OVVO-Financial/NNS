@@ -40,6 +40,26 @@ test_that("native R and C++ multivariate prediction paths agree", {
   expect_equal(fit$Point.est, ref, tolerance = 1e-12)
 })
 
+test_that("rounded multivariate distances select the same rows as R", {
+  x <- cbind(a = c(1.1, -0.4, 0.6), b = c(0.3, 0.6, -1.5),
+             c = c(0.2, 0.8, 0.1))
+  y <- c(10, 3, 1)
+  q <- matrix(c(0, -0.1, -0.1), nrow = 1)
+  lo <- apply(x, 2, min)
+  hi <- apply(x, 2, max)
+  rpm <- data.frame(x, y.hat = y)
+  ref <- .nns_mreg_predict_reference(q, rpm, 3L, "L1", lo, hi, FALSE)
+  expect_equal(NNS_mreg_predict_v2_cpp(x, y, q, 3L, 2L, lo, hi, FALSE, 1L),
+               ref, tolerance = 1e-12)
+  expect_equal(NNS_mreg_predict_cpp(x, y, q, 3L, 2L, lo, hi, FALSE),
+               ref, tolerance = 1e-12)
+  path <- NNS_mreg_predict_path_v2_cpp(x, y, q, 3L, 2L, lo, hi, FALSE, 1L)
+  expect_equal(path[1, 1:2],
+               c(.nns_mreg_predict_reference(q, rpm, 1L, "L1", lo, hi, FALSE),
+                 .nns_mreg_predict_reference(q, rpm, 2L, "L1", lo, hi, FALSE)),
+               tolerance = 1e-12)
+})
+
 test_that("explicit distance modes and invalid values are handled", {
   x <- cbind(a = rnorm(12), b = rep(1:3, 4))
   y <- seq_len(12)
