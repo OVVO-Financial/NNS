@@ -33,8 +33,10 @@ NNS.copula <- function (
     independence.overlay = FALSE
 ){
   
+  X <- .nns_measure_frame(X)
   if(anyNA(X)) stop("You have some missing values, please address.")
   
+  target <- .nns_target(target)
   n <- ncol(X)
   
   if(any(class(X)%in%c("tbl","data.table"))) X <- as.data.frame(X)
@@ -76,7 +78,6 @@ NNS.copula <- function (
   # the pairwise degree-0 and degree-1 co-partial moments about the target and
   # the n-dimensional divergent moment, each measured against its independence
   # anchor from the margins' own lower-tail shares.
-  if(is.data.frame(X)) X <- as.matrix(X)
-  if(!is.double(X)) storage.mode(X) <- "double"
-  NNS_copula_cpp(X, as.numeric(target), if(continuous) TRUE else FALSE)
+  X <- .nns_copula_matrix(X)
+  NNS_copula_cpp(X, target, if(continuous) TRUE else FALSE)
 }

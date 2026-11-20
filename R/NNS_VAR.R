@@ -189,7 +189,7 @@ NNS.VAR <- function(variables,
     labels <- if (all(abs(12 * labels - months) < 1e-7)) month_labels(months) else as.character(labels)
     dates <- head(labels, length(idx))
     forecast_dates <- tail(labels, h)
-    variables <- data.frame(as.matrix(variables), check.names = FALSE)
+    variables <- data.frame(.nns_sample_matrix(variables, "variables"), check.names = FALSE)
   } else if (inherits(variables, "xts") || (nowcast && inherits(variables, "zoo"))) {
     idx <- stats::time(variables)
     calendar_index <- inherits(idx, c("yearmon", "yearqtr"))
@@ -213,11 +213,16 @@ NNS.VAR <- function(variables,
     }
     if (anyDuplicated(dates)) dates <- NULL
     if (anyDuplicated(forecast_dates)) forecast_dates <- NULL
-    variables <- data.frame(matrix(as.numeric(variables), nrow = NROW(variables),
+    variables <- data.frame(matrix(.nns_sample(variables, "variables"), nrow = NROW(variables),
                                    dimnames = list(NULL, colnames(variables))),
                             check.names = FALSE)
   } else if (any(class(variables) %in% c("tbl", "data.table"))) {
     variables <- as.data.frame(variables)
+  }
+
+  if (is.data.frame(variables)) {
+    columns <- vapply(variables, is.numeric, logical(1))
+    variables[columns] <- lapply(variables[columns], .nns_sample, arg = "variables")
   }
 
   dim.red.method <- tolower(dim.red.method)
@@ -305,21 +310,14 @@ NNS.VAR <- function(variables,
     selected_variable <- selected_variable[complete.cases(selected_variable), , drop = FALSE]
     
     h_int <- tail(index, 1) - interpolation_point
-    # ensure plain numeric to avoid classed assignment issues
-    variable_interpolation <- as.numeric(panel[,i])
-    
-    if (length(missing_index) == 0L) {
-      # ---- FIX: dataset is complete -> DO NOT SMOOTH ----
-      # keep the original series exactly
-      variable_interpolation <- as.numeric(panel[, i])
-      
-    } else if (h_int > 0) {
+    variable_interpolation <- .nns_sample(panel[, i], "variables")
+    if (length(missing_index) && h_int > 0) {
       # trailing NA(s): estimate every NA, interior ones included, with the
       # NNS.stack fit on the index that NNS 13.0 used (see .nns_var_index_fit).
       variable_interpolation[missing_index] <-
         .nns_var_index_fit(selected_variable[,1], selected_variable[,2], missing_index)
       
-    } else {
+    } else if (length(missing_index)) {
       # interior NA(s) only: fit on index, but fill ONLY the missing indices (no global smoothing)
       fitted_missing <- NNS.reg(selected_variable[,1], selected_variable[,2],
                                 order = "max", type = "REG", ncores = 1,
@@ -591,7 +589,7 @@ NNS.VAR <- function(variables,
 .nns_var_relevant <- function(IVs.train, DV.train, ts.test, obj.fn, objective,
                               dim.red.method, .validation = NULL) {
   IVs.train <- data.frame(IVs.train, check.names = FALSE)
-  DV.train <- as.numeric(DV.train)
+  DV.train <- .nns_sample(DV.train, "DV.train")
   n <- ncol(IVs.train)
   if (n == 1) return(colnames(IVs.train))
   N <- nrow(IVs.train)

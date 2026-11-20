@@ -114,12 +114,18 @@ NNS.meboot <- function(x,
                        scl.adjustment = FALSE, sym = FALSE, elaps = FALSE,
                        digits = 6,
                        colsubj, coldata, coltimes, ..., expand.residual.sd = TRUE){
-  
-  if (is.data.frame(x) && ncol(x) == 1L) x <- x[[1L]]
-  if (length(x) == 1) return(list(x = x))
+  args <- as.list(match.call())[-1L]
+  args <- lapply(args, eval, envir = parent.frame())
+  args$x <- .nns_bootstrap_series(args$x, "x")
+  vectorized <- names(args) %in% c("rho", "target_drift", "target_drift_scale")
+  scenarios <- args[vectorized]
+  if (length(args$x) < 2L && length(scenarios) && all(lengths(scenarios) > 0L))
+    stop("`x` must contain at least two observations.")
+  do.call(mapply, c(list(FUN = .nns_meboot_draw), scenarios, MoreArgs = list(args[!vectorized])))
+}
+
+.nns_meboot_draw <- function() {
   type <- tolower(type)
-  if (any(class(x) %in% c("tbl","data.table"))) x <- as.vector(unlist(x))
-  if (anyNA(x)) stop("You have some missing values, please address.")
   
   level_min <- xmin
   level_max <- xmax
@@ -353,5 +359,4 @@ NNS.meboot <- function(x,
   return(.NNS.out(final))
 }
 
-NNS.meboot <- Vectorize(NNS.meboot,
-                        vectorize.args = c("rho", "target_drift", "target_drift_scale"))
+formals(.nns_meboot_draw) <- formals(NNS.meboot)

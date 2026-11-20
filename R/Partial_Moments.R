@@ -21,19 +21,16 @@
 #' @export
 
 LPM <- function(degree, target, variable, excess_ret = FALSE) {
-  if (is.factor(target)) stop("`target` must be numeric, not a factor.")
-  if (!is.null(target)) target <- as.numeric(target)
-  if (is.factor(variable)) stop("`variable` must be numeric, not a factor.")
-  variable <- as.numeric(variable)
-  
-  if (!all(is.finite(variable))) stop("`variable` must be finite.")
-  if (!all(is.finite(target))) stop("`target` must be finite.")
-  
+  target <- .nns_target(target)
+  variable <- .nns_sample(variable, "variable", na = "reject", inf = "reject")
+  .nns_finite(target, "target")
+  degree <- .nns_degree(degree)
+
   if (!excess_ret && length(target) > 1) {
-    return(.Call("_NNS_LPM_CPv", degree, target, variable))
+    return(LPM_CPv(degree, target, variable))
   }
   
-  .Call("_NNS_LPM_RCPP", degree, target, variable, excess_ret)
+  LPM_RCPP(degree, target, variable, excess_ret)
   
 }
 
@@ -61,19 +58,16 @@ LPM <- function(degree, target, variable, excess_ret = FALSE) {
 #' @export
 
 UPM <- function(degree, target, variable, excess_ret = FALSE) {
-  if (is.factor(target)) stop("`target` must be numeric, not a factor.")
-  if (!is.null(target)) target <- as.numeric(target)
-  if (is.factor(variable)) stop("`variable` must be numeric, not a factor.")
-  variable <- as.numeric(variable)
-  
-  if (!all(is.finite(variable))) stop("`variable` must be finite.")
-  if (!all(is.finite(target))) stop("`target` must be finite.")
-  
+  target <- .nns_target(target)
+  variable <- .nns_sample(variable, "variable", na = "reject", inf = "reject")
+  .nns_finite(target, "target")
+  degree <- .nns_degree(degree)
+
   if (!excess_ret && length(target) > 1) {
-    return(.Call("_NNS_UPM_CPv", degree, target, variable))
+    return(UPM_CPv(degree, target, variable))
   }
   
-  .Call("_NNS_UPM_RCPP", degree, target, variable, excess_ret)
+  UPM_RCPP(degree, target, variable, excess_ret)
   
 }
 
@@ -94,16 +88,12 @@ UPM <- function(degree, target, variable, excess_ret = FALSE) {
 #' }
 #' @export
 Co.LPM_nD <- function(data, target, degree = 0.0, norm = TRUE) {
-  data   <- as.matrix(data)
-  if (is.factor(target)) stop("`target` must be numeric, not a factor.")
-  target <- as.numeric(target)
-  degree <- as.numeric(degree)
-  norm   <- as.logical(norm)
-  
-  if (!all(is.finite(data))) stop("`data` must be finite.")
-  if (!all(is.finite(target))) stop("`target` must be finite.")
-  
-  .Call("_NNS_CoLPM_nD_RCPP", data, target, degree, norm)
+  data <- .nns_sample_matrix(data, "data", finite = TRUE)
+  target <- .nns_thresholds(target)
+  degree <- .nns_degree(degree, form = "coerce")
+  norm <- as.logical(norm)
+
+  CoLPM_nD_RCPP(data, target, degree, norm)
 }
 
 
@@ -120,16 +110,13 @@ Co.LPM_nD <- function(data, target, degree = 0.0, norm = TRUE) {
 #' @keywords internal
 
 Co.LPM_nD.batch <- function(data, targets, degree = 0.0, norm = TRUE, strict = FALSE) {
-  data    <- as.matrix(data)
-  targets <- as.matrix(targets)
-  degree  <- as.numeric(degree)
-  norm    <- as.logical(norm)
-  strict  <- as.logical(strict)
-  
-  if (!all(is.finite(data))) stop("`data` must be finite.")
-  if (!all(is.finite(targets))) stop("`targets` must be finite.")
-  
-  .Call("_NNS_CoLPM_nD_batch_RCPP", data, targets, degree, norm, strict)
+  data <- .nns_sample_matrix(data, "data", finite = TRUE)
+  targets <- .nns_sample_matrix(targets, "targets", finite = TRUE)
+  degree <- .nns_degree(degree, form = "coerce")
+  norm <- as.logical(norm)
+  strict <- as.logical(strict)
+
+  CoLPM_nD_batch_RCPP(data, targets, degree, norm, strict)
 }
 
 
@@ -149,16 +136,12 @@ Co.LPM_nD.batch <- function(data, targets, degree = 0.0, norm = TRUE, strict = F
 #' }
 #' @export
 Co.UPM_nD <- function(data, target, degree = 0.0, norm = TRUE) {
-  data   <- as.matrix(data)
-  if (is.factor(target)) stop("`target` must be numeric, not a factor.")
-  target <- as.numeric(target)
-  degree <- as.numeric(degree)
-  norm   <- as.logical(norm)
-  
-  if (!all(is.finite(data))) stop("`data` must be finite.")
-  if (!all(is.finite(target))) stop("`target` must be finite.")
-  
-  .Call("_NNS_CoUPM_nD_RCPP", data, target, degree, norm)
+  data <- .nns_sample_matrix(data, "data", finite = TRUE)
+  target <- .nns_thresholds(target)
+  degree <- .nns_degree(degree, form = "coerce")
+  norm <- as.logical(norm)
+
+  CoUPM_nD_RCPP(data, target, degree, norm)
 }
 
 
@@ -178,16 +161,12 @@ Co.UPM_nD <- function(data, target, degree = 0.0, norm = TRUE) {
 #' }
 #' @export
 DPM_nD <- function(data, target, degree = 0.0, norm = TRUE) {
-  data   <- as.matrix(data)
-  if (is.factor(target)) stop("`target` must be numeric, not a factor.")
-  target <- as.numeric(target)
-  degree <- as.numeric(degree)
-  norm   <- as.logical(norm)
-  
-  if (!all(is.finite(data))) stop("`data` must be finite.")
-  if (!all(is.finite(target))) stop("`target` must be finite.")
-  
-  .Call("_NNS_DPM_nD_RCPP", data, target, degree, norm)
+  data <- .nns_sample_matrix(data, "data", finite = TRUE)
+  target <- .nns_thresholds(target)
+  degree <- .nns_degree(degree, form = "coerce")
+  norm <- as.logical(norm)
+
+  DPM_nD_RCPP(data, target, degree, norm)
 }
 
 
@@ -241,24 +220,12 @@ NNS.CDF <- function(variable,
                     type   = "CDF",
                     plot   = TRUE) {
   
-  # — Flatten tibbles/data.tables
-  if (any(class(variable) %in% c("tbl","data.table")) && ncol(variable)==1) {
-    variable <- as.vector(unlist(variable))
-  }
-  if (any(class(variable) %in% c("tbl","data.table"))) {
-    variable <- as.data.frame(variable)
-  }
-  if (is.factor(variable)) stop("`variable` must be numeric, not a factor.")
-
-  # — Drop missing observations (counted in n, they capped the CDF below 1)
-  if (is.null(dim(variable))) {
-    variable <- variable[!is.na(variable)]
-  } else {
-    variable <- variable[stats::complete.cases(variable), , drop = FALSE]
-  }
+  if (is.data.frame(variable) && ncol(variable) > 1L) variable <- .nns_measure_frame(variable)
+  variable <- .nns_observed(.nns_measure_column(variable), rows = TRUE)
 
   # — Bounds check
   if (!is.null(target)) {
+    .nns_no_factor(target, "target")
     if (is.null(dim(variable))||ncol(variable)==1) {
       if (target<min(variable)||target>max(variable)) stop("target out of bounds")
     } else {
@@ -285,7 +252,9 @@ NNS.CDF <- function(variable,
   # — Univariate branch
   if (is.null(dim(variable))||ncol(variable)==1) {
     x    <- sort(variable)
-    pval <- LPM.ratio(degree,x,variable)
+    degree <- .nns_degree(degree)
+    sample <- .nns_native_sample(variable, "variable")
+    pval <- LPM_ratio_RCPP(degree, .nns_target(x, native = TRUE), sample)
     DT   <- data.frame(x, pval)
     colname <- switch(type,
                       cdf="CDF",
@@ -318,7 +287,7 @@ NNS.CDF <- function(variable,
     if (is.null(target)) {
       Pv <- numeric(0)
     } else {
-      Pv <- LPM.ratio(degree,target,variable)
+      Pv <- LPM_ratio_RCPP(degree, .nns_target(target, native = TRUE), sample)
       if (type=="survival") Pv <- 1-Pv
       # The same transformation of the survival at target as the curve uses at each x.
       if (type=="hazard") Pv <- pmin(pmax(fit$Point.est / pmax(1-Pv,1e-10),0),1e6)
@@ -353,9 +322,11 @@ NNS.CDF <- function(variable,
     
     # Compute joint conditional CDF using one batched C++ call.
     # This replaces n R-level Co.LPM_nD dispatches and n parallel launches.
-    variable <- as.matrix(variable)
+    variable <- .nns_sample_matrix(variable, "data", finite = TRUE)
+    degree <- .nns_degree(degree, form = "coerce")
+    if (!is.null(target)) target <- .nns_thresholds(target)
     d <- ncol(variable)
-    CDF <- Co.LPM_nD.batch(variable, variable, degree = degree, norm = TRUE)
+    CDF <- CoLPM_nD_batch_RCPP(variable, variable, degree, TRUE)
     
     # Joint survival S(t) = P(X_1 > t_1, ..., X_d > t_d). At degree 0 use
     # inclusion-exclusion, S = sum_A (-1)^|A| F_A(t_A) over subsets A of the
@@ -365,7 +336,7 @@ NNS.CDF <- function(variable,
     # out of the degree-0 share used at a zero total, as Co.UPM_nD does.
     joint.survival <- function(points, joint_cdf) {
       points <- matrix(points, ncol = d)
-      if (degree > 0) return(Co.LPM_nD.batch(-variable, -points, degree = degree, norm = TRUE, strict = TRUE))
+      if (degree > 0) return(CoLPM_nD_batch_RCPP(-variable, -points, degree, TRUE, strict = TRUE))
       if (d > 3) {
         cols <- lapply(seq_len(d), function(j) variable[, j])
         o1 <- order(cols[[1]]); v1 <- cols[[1]][o1]; nv <- length(v1)
@@ -383,8 +354,8 @@ NNS.CDF <- function(variable,
       S <- 1 - rowSums(matrix(marginals, ncol = d))
       if (d == 3) {
         for (A in utils::combn(d, 2, simplify = FALSE)) {
-          S <- S + Co.LPM_nD.batch(variable[, A, drop = FALSE], points[, A, drop = FALSE],
-                                   degree = degree, norm = TRUE)
+          S <- S + CoLPM_nD_batch_RCPP(variable[, A, drop = FALSE], points[, A, drop = FALSE],
+                                      degree, TRUE)
         }
       }
       S + (-1)^d * joint_cdf
@@ -404,7 +375,7 @@ NNS.CDF <- function(variable,
     # Target evaluation (the same function as the rows, evaluated at target)
     Pv <- numeric(0)
     if (!is.null(target)) {
-      Pv <- Co.LPM_nD(variable, target, degree = degree)
+      Pv <- CoLPM_nD_RCPP(variable, target, degree, TRUE)
       if (type != "cdf") S_t <- joint.survival(target, Pv)
       if (type == "survival") {
         Pv <- max(0, min(1, S_t))
@@ -499,10 +470,7 @@ NNS.CDF <- function(variable,
 #' @export
 
 NNS.moments <- function(x, population = TRUE) {
-  if (is.factor(x)) stop("`x` must be numeric, not a factor.")
-  x <- as.numeric(x)
-  
-  if (!all(is.finite(x))) stop("`x` must be finite.")
+  x <- .nns_sample(x, "x", na = "reject", inf = "reject")
   
   n <- length(x)
   m <- mean(x)
@@ -575,9 +543,12 @@ NNS.moments <- function(x, population = TRUE) {
 #' PM.matrix(1, 1, target = apply(A, 2, "median"), variable = A, pop_adj = TRUE)  
 #' @export
 PM.matrix <- function(LPM_degree, UPM_degree, target, variable, pop_adj, norm = FALSE) {
-  # The vignettes and the book pass "mean" or "means" for the default target.
-  if (identical(target, "mean") || identical(target, "means")) target <- NULL
-  .Call(`_NNS_PMMatrix_RCPP`, LPM_degree, UPM_degree, target, variable, pop_adj, norm)
+  LPM_degree <- .nns_degree(LPM_degree, "LPM_degree")
+  UPM_degree <- .nns_degree(UPM_degree, "UPM_degree")
+  if (is.null(variable)) stop("variable can't be null")
+  variable <- .nns_sample_matrix(variable, "variable")
+  target <- .nns_target(target, native = TRUE, means = TRUE)
+  PMMatrix_RCPP(LPM_degree, UPM_degree, target, variable, pop_adj, norm)
 }
 
 #' @name Co.LPM
@@ -602,10 +573,13 @@ PM.matrix <- function(LPM_degree, UPM_degree, target, variable, pop_adj, norm = 
 #'   Co.LPM(0, x, y, mean(x), mean(y))
 #' @export
 Co.LPM <- function(degree_lpm, x, y, target_x, target_y, degree_y = NULL) {
-  if (is.null(degree_y)) {
-    degree_y <- degree_lpm
-  }
-  .Call(`_NNS_CoLPM_RCPP`, degree_lpm, x, y, target_x, target_y, degree_y)
+  if (is.null(degree_y)) degree_y <- degree_lpm
+  degree_lpm <- .nns_degree(degree_lpm, "degree_lpm")
+  pair <- .nns_moment_pair(x, y)
+  target_x <- .nns_target(target_x, native = TRUE)
+  target_y <- .nns_target(target_y, native = TRUE)
+  degree_y <- .nns_degree(degree_y, "degree_y")
+  CoLPM_RCPP(degree_lpm, pair$x, pair$y, target_x, target_y, degree_y)
 }
 
 
@@ -631,8 +605,137 @@ Co.LPM <- function(degree_lpm, x, y, target_x, target_y, degree_y = NULL) {
 #'   Co.UPM(0, x, y, mean(x), mean(y))
 #' @export
 Co.UPM <- function(degree_upm, x, y, target_x, target_y, degree_y = NULL) {
-  if (is.null(degree_y)) {
-    degree_y <- degree_upm
-  }
-  .Call(`_NNS_CoUPM_RCPP`, degree_upm, x, y, target_x, target_y, degree_y)
+  if (is.null(degree_y)) degree_y <- degree_upm
+  degree_upm <- .nns_degree(degree_upm, "degree_upm")
+  pair <- .nns_moment_pair(x, y)
+  target_x <- .nns_target(target_x, native = TRUE)
+  target_y <- .nns_target(target_y, native = TRUE)
+  degree_y <- .nns_degree(degree_y, "degree_y")
+  CoUPM_RCPP(degree_upm, pair$x, pair$y, target_x, target_y, degree_y)
+}
+
+#' @name LPM.ratio
+#' @title Lower Partial Moment Ratio
+#' @description
+#'   This function generates a standardized univariate lower partial moment
+#'   of any non‑negative degree for a given target.
+#' @param degree numeric; degree = 0 gives frequency (CDF), degree = 1 gives area. At degree 0 an observation equal to the target is counted (\code{variable <= target}).
+#' @param target numeric vector; threshold(s). There is no default: pass \code{NULL} to use \code{mean(variable)}.
+#' @param variable numeric vector or data‑frame column to evaluate.
+#' @return Numeric vector of standardized lower partial moments. For
+#'   \code{degree > 0}, a target at which every observation equals the target
+#'   (0/0) returns the \code{degree = 0} ratio.
+#' @author Fred Viole, OVVO Financial Systems
+#' @references
+#'   Viole, F. & Nawrocki, D. (2013) *Nonlinear Nonparametric Statistics: Using Partial Moments* (ISBN:1490523995)
+#' @references
+#'   Viole, F. (2017) Continuous CDFs and ANOVA with NNS. \doi{10.2139/ssrn.3007373}
+#' @examples
+#'   set.seed(123)
+#'   x <- rnorm(100)
+#'   LPM.ratio(0, mean(x), x)
+#' \dontrun{
+#'   plot(sort(x), LPM.ratio(0, sort(x), x))
+#'   plot(sort(x), LPM.ratio(1, sort(x), x))
+#' }
+#' @export
+LPM.ratio <- function(degree, target, variable) {
+  degree <- .nns_degree(degree)
+  force(target)
+  variable <- .nns_native_sample(variable, "variable")
+  target <- .nns_target(target, native = TRUE)
+  LPM_ratio_RCPP(degree, target, variable)
+}
+
+
+#' @name UPM.ratio
+#' @title Upper Partial Moment Ratio
+#' @description
+#'   This function generates a standardized univariate upper partial moment
+#'   of any non‑negative degree for a given target.
+#' @param degree numeric; degree = 0 gives frequency, degree = 1 gives area. At degree 0 an observation equal to the target is not counted (\code{variable > target}).
+#' @param target numeric vector; threshold(s). There is no default: pass \code{NULL} to use \code{mean(variable)}.
+#' @param variable numeric vector or data‑frame column to evaluate.
+#' @return Numeric vector of standardized upper partial moments. For
+#'   \code{degree > 0}, a target at which every observation equals the target
+#'   (0/0) returns the \code{degree = 0} ratio.
+#' @author Fred Viole, OVVO Financial Systems
+#' @references
+#'   Viole, F. & Nawrocki, D. (2013) *Nonlinear Nonparametric Statistics: Using Partial Moments* (ISBN:1490523995)
+#' @examples
+#'   set.seed(123)
+#'   x <- rnorm(100)
+#'   UPM.ratio(0, mean(x), x)
+#' \dontrun{
+#'   plot(sort(x), UPM.ratio(0, sort(x), x))
+#' }
+#' @export
+UPM.ratio <- function(degree, target, variable) {
+  degree <- .nns_degree(degree)
+  force(target)
+  variable <- .nns_native_sample(variable, "variable")
+  target <- .nns_target(target, native = TRUE)
+  UPM_ratio_RCPP(degree, target, variable)
+}
+
+
+#' @name D.LPM
+#' @title Divergent‑Lower Partial Moment
+#' @description
+#'   Computes the divergent lower partial moment (lower‑right quadrant 3)
+#'   between two equal‑length numeric vectors. \code{degree_upm} applies to \code{x}
+#'   (above \code{target_x}) and \code{degree_lpm} to \code{y} (below \code{target_y}).
+#' @param degree_lpm numeric; LPM degree = 0 gives frequency, = 1 gives area.
+#' @param degree_upm numeric; UPM degree = 0 gives frequency, = 1 gives area.
+#' @param x numeric vector of observations.
+#' @param y numeric vector of the same length as x.
+#' @param target_x numeric vector; thresholds for x. There is no default: pass \code{NULL} to use \code{mean(x)}.
+#' @param target_y numeric vector; thresholds for y. There is no default: pass \code{NULL} to use \code{mean(y)}. \code{target_x} and \code{target_y} must be non-empty and the same length, or one of them length 1.
+#' @return Numeric vector of divergent LPM values.
+#' @author Fred Viole, OVVO Financial Systems
+#' @references
+#'   Viole, F. & Nawrocki, D. (2013) *Nonlinear Nonparametric Statistics: Using Partial Moments* (ISBN:1490523995)
+#' @examples
+#'   set.seed(123)
+#'   x <- rnorm(100); y <- rnorm(100)
+#'   D.LPM(0, 0, x, y, mean(x), mean(y))
+#' @export
+D.LPM <- function(degree_lpm, degree_upm, x, y, target_x, target_y) {
+  degree_lpm <- .nns_degree(degree_lpm, "degree_lpm")
+  degree_upm <- .nns_degree(degree_upm, "degree_upm")
+  pair <- .nns_moment_pair(x, y)
+  target_x <- .nns_target(target_x, native = TRUE)
+  target_y <- .nns_target(target_y, native = TRUE)
+  DLPM_RCPP(degree_lpm, degree_upm, pair$x, pair$y, target_x, target_y)
+}
+
+
+#' @name D.UPM
+#' @title Divergent‑Upper Partial Moment
+#' @description
+#'   Computes the divergent upper partial moment (upper‑left quadrant 2)
+#'   between two equal‑length numeric vectors. \code{degree_lpm} applies to \code{x}
+#'   (below \code{target_x}) and \code{degree_upm} to \code{y} (above \code{target_y}).
+#' @param degree_lpm numeric; LPM degree = 0 gives frequency, = 1 gives area.
+#' @param degree_upm numeric; UPM degree = 0 gives frequency, = 1 gives area.
+#' @param x numeric vector of observations.
+#' @param y numeric vector of the same length as x.
+#' @param target_x numeric vector; thresholds for x. There is no default: pass \code{NULL} to use \code{mean(x)}.
+#' @param target_y numeric vector; thresholds for y. There is no default: pass \code{NULL} to use \code{mean(y)}. \code{target_x} and \code{target_y} must be non-empty and the same length, or one of them length 1.
+#' @return Numeric vector of divergent UPM values.
+#' @author Fred Viole, OVVO Financial Systems
+#' @references
+#'   Viole, F. & Nawrocki, D. (2013) *Nonlinear Nonparametric Statistics: Using Partial Moments* (ISBN:1490523995)
+#' @examples
+#'   set.seed(123)
+#'   x <- rnorm(100); y <- rnorm(100)
+#'   D.UPM(0, 0, x, y, mean(x), mean(y))
+#' @export
+D.UPM <- function(degree_lpm, degree_upm, x, y, target_x, target_y) {
+  degree_lpm <- .nns_degree(degree_lpm, "degree_lpm")
+  degree_upm <- .nns_degree(degree_upm, "degree_upm")
+  pair <- .nns_moment_pair(x, y)
+  target_x <- .nns_target(target_x, native = TRUE)
+  target_y <- .nns_target(target_y, native = TRUE)
+  DUPM_RCPP(degree_lpm, degree_upm, pair$x, pair$y, target_x, target_y)
 }

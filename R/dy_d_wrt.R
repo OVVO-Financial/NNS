@@ -12,14 +12,19 @@
 #' @export
 
 .nns_fd_weights <- function(nodes, at, degree = 1L) {
-  if (length(nodes) <= degree || length(unique(nodes)) != length(nodes))
-    return(rep(NA_real_, length(nodes)))
-  scale <- max(abs(nodes - at))
-  if (!is.finite(scale) || scale == 0) return(rep(NA_real_, length(nodes)))
-  z <- (nodes - at) / scale
+  stencil <- .nns_stencil(nodes, at, degree)
+  if (is.null(stencil)) return(rep(NA_real_, length(nodes)))
+  z <- stencil$z
   powers <- outer(seq.int(0, length(nodes) - 1L), z, function(k, value) value^k)
   rhs <- numeric(length(nodes)); rhs[degree + 1L] <- factorial(degree)
-  as.numeric(solve(powers, rhs)) / scale^degree
+  as.numeric(solve(powers, rhs)) / stencil$scale^degree
+}
+
+.nns_stencil <- function(nodes, at, degree) {
+  if (length(nodes) <= degree || length(unique(nodes)) != length(nodes)) return(NULL)
+  scale <- max(abs(nodes - at))
+  if (!is.finite(scale) || scale == 0) return(NULL)
+  list(z = (nodes - at) / scale, scale = scale)
 }
 
 # The stencil at each point in [at] for each probability width, as
@@ -148,7 +153,7 @@ dy.d_ <- function(x, y, wrt, eval.points = "obs", mixed = FALSE, messages = TRUE
   blocks <- lapply(seq_len(ncol(x)), function(j) factor_2_dummy_FR(x[, j]))
   x <- as.matrix(do.call(cbind, blocks))
   if (is.null(colnames(x))) colnames(x) <- paste0("X", seq_len(ncol(x)))
-  y <- as.numeric(y)
+  y <- .nns_sample(y, "y")
   if (length(y) != nrow(x) || any(!is.finite(c(x, y))))
     stop("x and y must have compatible finite observations.")
   if (length(wrt) != 1L || !is.finite(wrt) || wrt != floor(wrt) || wrt < 1L || wrt > ncol(x))
@@ -160,17 +165,19 @@ dy.d_ <- function(x, y, wrt, eval.points = "obs", mixed = FALSE, messages = TRUE
       apd = x[, wrt], obs = x,
       stop("Unknown eval.points option."))
   }
+  if (.nns_has_factor(eval.points))
+    stop("Derivative evaluation points must lie inside the observed coordinate support.")
   marginal <- is.null(dim(eval.points)) || ncol(eval.points) == 1L
   if (marginal) {
     # A one-column matrix or data frame holds values of the wrt regressor.
-    points <- as.numeric(unlist(eval.points, use.names = FALSE))
+    points <- .nns_evaluation_values(eval.points)
     count <- min(nrow(x), max(21L, floor(10000 / max(1L, length(points)))))
     other <- x[.nns_spread_rows(nrow(x), count), , drop = FALSE]
     contexts <- lapply(points, function(value) {
       z <- other; z[, wrt] <- value; z
     })
   } else {
-    ev <- as.matrix(eval.points)
+    ev <- .nns_sample_matrix(eval.points, "eval.points")
     if (ncol(ev) != ncol(x)) stop("eval.points must have one column per expanded predictor.")
     if (any(!is.finite(ev)) || any(sweep(ev, 2, apply(x, 2, min), "<")) ||
         any(sweep(ev, 2, apply(x, 2, max), ">")))

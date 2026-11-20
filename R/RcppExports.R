@@ -193,58 +193,11 @@ UPM_RCPP <- function(degree, target, variable, excess_ret) {
     .Call(`_NNS_UPM_RCPP`, degree, target, variable, excess_ret)
 }
 
-#' @name LPM.ratio
-#' @title Lower Partial Moment Ratio
-#' @description
-#'   This function generates a standardized univariate lower partial moment
-#'   of any non‑negative degree for a given target.
-#' @param degree numeric; degree = 0 gives frequency (CDF), degree = 1 gives area. At degree 0 an observation equal to the target is counted (\code{variable <= target}).
-#' @param target numeric vector; threshold(s). There is no default: pass \code{NULL} to use \code{mean(variable)}.
-#' @param variable numeric vector or data‑frame column to evaluate.
-#' @return Numeric vector of standardized lower partial moments. For
-#'   \code{degree > 0}, a target at which every observation equals the target
-#'   (0/0) returns the \code{degree = 0} ratio.
-#' @author Fred Viole, OVVO Financial Systems
-#' @references
-#'   Viole, F. & Nawrocki, D. (2013) *Nonlinear Nonparametric Statistics: Using Partial Moments* (ISBN:1490523995)
-#' @references
-#'   Viole, F. (2017) Continuous CDFs and ANOVA with NNS. \doi{10.2139/ssrn.3007373}
-#' @examples
-#'   set.seed(123)
-#'   x <- rnorm(100)
-#'   LPM.ratio(0, mean(x), x)
-#' \dontrun{
-#'   plot(sort(x), LPM.ratio(0, sort(x), x))
-#'   plot(sort(x), LPM.ratio(1, sort(x), x))
-#' }
-#' @export
-LPM.ratio <- function(degree, target, variable) {
+LPM_ratio_RCPP <- function(degree, target, variable) {
     .Call(`_NNS_LPM_ratio_RCPP`, degree, target, variable)
 }
 
-#' @name UPM.ratio
-#' @title Upper Partial Moment Ratio
-#' @description
-#'   This function generates a standardized univariate upper partial moment
-#'   of any non‑negative degree for a given target.
-#' @param degree numeric; degree = 0 gives frequency, degree = 1 gives area. At degree 0 an observation equal to the target is not counted (\code{variable > target}).
-#' @param target numeric vector; threshold(s). There is no default: pass \code{NULL} to use \code{mean(variable)}.
-#' @param variable numeric vector or data‑frame column to evaluate.
-#' @return Numeric vector of standardized upper partial moments. For
-#'   \code{degree > 0}, a target at which every observation equals the target
-#'   (0/0) returns the \code{degree = 0} ratio.
-#' @author Fred Viole, OVVO Financial Systems
-#' @references
-#'   Viole, F. & Nawrocki, D. (2013) *Nonlinear Nonparametric Statistics: Using Partial Moments* (ISBN:1490523995)
-#' @examples
-#'   set.seed(123)
-#'   x <- rnorm(100)
-#'   UPM.ratio(0, mean(x), x)
-#' \dontrun{
-#'   plot(sort(x), UPM.ratio(0, sort(x), x))
-#' }
-#' @export
-UPM.ratio <- function(degree, target, variable) {
+UPM_ratio_RCPP <- function(degree, target, variable) {
     .Call(`_NNS_UPM_ratio_RCPP`, degree, target, variable)
 }
 
@@ -256,53 +209,11 @@ CoUPM_RCPP <- function(degree_upm, x, y, target_x, target_y, degree_y) {
     .Call(`_NNS_CoUPM_RCPP`, degree_upm, x, y, target_x, target_y, degree_y)
 }
 
-#' @name D.LPM
-#' @title Divergent‑Lower Partial Moment
-#' @description
-#'   Computes the divergent lower partial moment (lower‑right quadrant 3)
-#'   between two equal‑length numeric vectors. \code{degree_upm} applies to \code{x}
-#'   (above \code{target_x}) and \code{degree_lpm} to \code{y} (below \code{target_y}).
-#' @param degree_lpm numeric; LPM degree = 0 gives frequency, = 1 gives area.
-#' @param degree_upm numeric; UPM degree = 0 gives frequency, = 1 gives area.
-#' @param x numeric vector of observations.
-#' @param y numeric vector of the same length as x.
-#' @param target_x numeric vector; thresholds for x. There is no default: pass \code{NULL} to use \code{mean(x)}.
-#' @param target_y numeric vector; thresholds for y. There is no default: pass \code{NULL} to use \code{mean(y)}. \code{target_x} and \code{target_y} must be non-empty and the same length, or one of them length 1.
-#' @return Numeric vector of divergent LPM values.
-#' @author Fred Viole, OVVO Financial Systems
-#' @references
-#'   Viole, F. & Nawrocki, D. (2013) *Nonlinear Nonparametric Statistics: Using Partial Moments* (ISBN:1490523995)
-#' @examples
-#'   set.seed(123)
-#'   x <- rnorm(100); y <- rnorm(100)
-#'   D.LPM(0, 0, x, y, mean(x), mean(y))
-#' @export
-D.LPM <- function(degree_lpm, degree_upm, x, y, target_x, target_y) {
+DLPM_RCPP <- function(degree_lpm, degree_upm, x, y, target_x, target_y) {
     .Call(`_NNS_DLPM_RCPP`, degree_lpm, degree_upm, x, y, target_x, target_y)
 }
 
-#' @name D.UPM
-#' @title Divergent‑Upper Partial Moment
-#' @description
-#'   Computes the divergent upper partial moment (upper‑left quadrant 2)
-#'   between two equal‑length numeric vectors. \code{degree_lpm} applies to \code{x}
-#'   (below \code{target_x}) and \code{degree_upm} to \code{y} (above \code{target_y}).
-#' @param degree_lpm numeric; LPM degree = 0 gives frequency, = 1 gives area.
-#' @param degree_upm numeric; UPM degree = 0 gives frequency, = 1 gives area.
-#' @param x numeric vector of observations.
-#' @param y numeric vector of the same length as x.
-#' @param target_x numeric vector; thresholds for x. There is no default: pass \code{NULL} to use \code{mean(x)}.
-#' @param target_y numeric vector; thresholds for y. There is no default: pass \code{NULL} to use \code{mean(y)}. \code{target_x} and \code{target_y} must be non-empty and the same length, or one of them length 1.
-#' @return Numeric vector of divergent UPM values.
-#' @author Fred Viole, OVVO Financial Systems
-#' @references
-#'   Viole, F. & Nawrocki, D. (2013) *Nonlinear Nonparametric Statistics: Using Partial Moments* (ISBN:1490523995)
-#' @examples
-#'   set.seed(123)
-#'   x <- rnorm(100); y <- rnorm(100)
-#'   D.UPM(0, 0, x, y, mean(x), mean(y))
-#' @export
-D.UPM <- function(degree_lpm, degree_upm, x, y, target_x, target_y) {
+DUPM_RCPP <- function(degree_lpm, degree_upm, x, y, target_x, target_y) {
     .Call(`_NNS_DUPM_RCPP`, degree_lpm, degree_upm, x, y, target_x, target_y)
 }
 

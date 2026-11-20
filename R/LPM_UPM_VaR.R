@@ -19,16 +19,16 @@
 #' @export
 
 LPM.VaR <- function(percentile, degree, x) {
-  x <- .NNS_prepare_VaR_x(x)
-  if (is.factor(percentile)) stop("`percentile` must be numeric, not a factor.")
-  percentile <- pmin(pmax(as.numeric(percentile), 0), 1)
-  
+  x <- .nns_var_sample(x, "x")
+  percentile <- .nns_probability(percentile)
+  degree <- .nns_degree(degree, form = "quantile")
+
   if (degree == 0) {
     return(stats::quantile(x, percentile, na.rm = TRUE))
   }
   
-  if (.NNS_is_supported_integer_degree(degree)) {
-    return(.NNS_LPM_VaR_integer(percentile, as.integer(degree), x))
+  if (is.integer(degree)) {
+    return(.NNS_LPM_VaR_integer(percentile, degree, x))
   }
   
   .NNS_LPM_VaR_optimize(percentile, degree, x)
@@ -55,16 +55,16 @@ LPM.VaR <- function(percentile, degree, x) {
 #' @export
 
 UPM.VaR <- function(percentile, degree, x) {
-  x <- .NNS_prepare_VaR_x(x)
-  if (is.factor(percentile)) stop("`percentile` must be numeric, not a factor.")
-  percentile <- pmin(pmax(as.numeric(percentile), 0), 1)
-  
+  x <- .nns_var_sample(x, "x")
+  percentile <- .nns_probability(percentile)
+  degree <- .nns_degree(degree, form = "quantile")
+
   if (degree == 0) {
     return(stats::quantile(x, 1 - percentile, na.rm = TRUE))
   }
   
-  if (.NNS_is_supported_integer_degree(degree)) {
-    return(.NNS_UPM_VaR_integer(percentile, as.integer(degree), x))
+  if (is.integer(degree)) {
+    return(.NNS_UPM_VaR_integer(percentile, degree, x))
   }
   
   .NNS_UPM_VaR_optimize(percentile, degree, x)
@@ -75,38 +75,6 @@ UPM.VaR <- function(percentile, degree, x) {
 # ==============================================================================
 # Internal helpers
 # ==============================================================================
-
-.NNS_prepare_VaR_x <- function(x) {
-  # unlist() and as.numeric() would both turn a factor column into its codes.
-  if (is.data.frame(x) && any(vapply(x, is.factor, logical(1)))) stop("`x` must be numeric, not a factor.")
-  dated_table <- is.data.frame(x) && ncol(x) > 1L &&
-    any(vapply(x, inherits, logical(1), c("Date", "POSIXt")))
-  if (inherits(x, c("tbl", "data.table"))) x <- as.numeric(unlist(x))
-  if (is.factor(x)) stop("`x` must be numeric, not a factor.")
-  
-  x <- as.numeric(x)
-  x <- x[!is.na(x)]
-  
-  if (!length(x)) {
-    stop("x must contain at least one non-NA numeric value.")
-  }
-  # Keep the original coercion and empty-sample errors for tables that already failed.
-  if (dated_table) stop("`x` must have exactly one column when a date is present.")
-  
-  x
-}
-
-
-
-.NNS_is_supported_integer_degree <- function(degree) {
-  length(degree) == 1L &&
-    is.finite(degree) &&
-    degree == as.integer(degree) &&
-    degree >= 1 &&
-    degree <= 4
-}
-
-
 
 # ------------------------------------------------------------------------------
 # General integer-degree VaR inversion for degrees 1:4
@@ -151,7 +119,7 @@ UPM.VaR <- function(percentile, degree, x) {
 
 
 .NNS_LPM_VaR_integer_R <- function(percentile, degree, x) {
-  p <- pmin(pmax(as.numeric(percentile), 0), 1)
+  p <- percentile
   
   n <- length(x)
   x_sorted <- sort(x)
@@ -407,7 +375,7 @@ UPM.VaR <- function(percentile, degree, x) {
 # ------------------------------------------------------------------------------
 
 .NNS_LPM_VaR_optimize <- function(percentile, degree, x) {
-  p <- pmin(pmax(as.numeric(percentile), 0), 1)
+  p <- percentile
   
   x_min <- min(x)
   x_max <- max(x)
@@ -422,7 +390,7 @@ UPM.VaR <- function(percentile, degree, x) {
   vapply(
     p,
     function(pp) {
-      g <- function(b) as.numeric(.Call("_NNS_LPM_ratio_RCPP", degree, b, x)) - pp
+      g <- function(b) LPM_ratio_RCPP(degree, b, x) - pp
       g_lo <- g(x_min); g_hi <- g(x_max)
       if (g_lo == 0) return(x_min)
       if (g_hi == 0) return(x_max)
@@ -438,7 +406,7 @@ UPM.VaR <- function(percentile, degree, x) {
 
 
 .NNS_UPM_VaR_optimize <- function(percentile, degree, x) {
-  p <- pmin(pmax(as.numeric(percentile), 0), 1)
+  p <- percentile
   
   x_min <- min(x)
   x_max <- max(x)
@@ -453,7 +421,7 @@ UPM.VaR <- function(percentile, degree, x) {
   vapply(
     p,
     function(pp) {
-      g <- function(b) as.numeric(.Call("_NNS_UPM_ratio_RCPP", degree, b, x)) - pp
+      g <- function(b) UPM_ratio_RCPP(degree, b, x) - pp
       g_lo <- g(x_min); g_hi <- g(x_max)
       if (g_lo == 0) return(x_min)
       if (g_hi == 0) return(x_max)

@@ -445,7 +445,7 @@ NNS.stack <- function(IVs.train,
     if (!response_was_numeric) {
       stop("A nonnumeric response requires type = 'CLASS'.", call. = FALSE)
     }
-    y <- as.numeric(DV.train)
+    y <- .nns_sample(DV.train, "DV.train")
   }
   
   if (balance && !is_class) {

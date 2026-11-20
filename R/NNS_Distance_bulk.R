@@ -30,11 +30,11 @@ NNS.distance.path.bulk <- function(rpm, Xtest, kmax, class = NULL, ncores = 1L) 
     if (is.null(cmn)) {
       stop("No common feature columns between RPM and Xtest.")
     }
-    Xrpm  <- as.matrix(Xrpm[, cmn, drop = FALSE])
-    Xtest <- as.matrix(Xtest[, cmn, drop = FALSE])
+    Xrpm  <- .nns_sample_matrix(Xrpm[, cmn, drop = FALSE], "rpm")
+    Xtest <- .nns_sample_matrix(Xtest[, cmn, drop = FALSE], "Xtest")
   } else {
-    Xrpm  <- as.matrix(Xrpm)
-    Xtest <- as.matrix(Xtest)
+    Xrpm  <- .nns_sample_matrix(Xrpm, "rpm")
+    Xtest <- .nns_sample_matrix(Xtest, "Xtest")
     if (ncol(Xrpm) != ncol(Xtest)) {
       stop("Column mismatch between RPM and Xtest and no names to align.")
     }
@@ -53,7 +53,7 @@ NNS.distance.path.bulk <- function(rpm, Xtest, kmax, class = NULL, ncores = 1L) 
   
   # Always use the parallel C++ routine to preserve the full multi-weight ensemble formulation matching NNS.distance
   .nns_with_distance_threads(ncores,
-    NNS_distance_path_parallel_cpp(Xrpm, as.numeric(rpm$y.hat), Xtest, kmax, is_class, as.integer(ncores)))
+    NNS_distance_path_parallel_cpp(Xrpm, .nns_distance_response(rpm$y.hat, class), Xtest, kmax, is_class, as.integer(ncores)))
 }
 
 
@@ -75,11 +75,11 @@ NNS.distance.path.single.bulk <- function(rpm, Xtest, k, class = NULL, ncores = 
     if (is.null(cmn)) {
       stop("No common feature columns between RPM and Xtest.")
     }
-    Xrpm  <- as.matrix(Xrpm[, cmn, drop = FALSE])
-    Xtest <- as.matrix(Xtest[, cmn, drop = FALSE])
+    Xrpm  <- .nns_sample_matrix(Xrpm[, cmn, drop = FALSE], "rpm")
+    Xtest <- .nns_sample_matrix(Xtest[, cmn, drop = FALSE], "Xtest")
   } else {
-    Xrpm  <- as.matrix(Xrpm)
-    Xtest <- as.matrix(Xtest)
+    Xrpm  <- .nns_sample_matrix(Xrpm, "rpm")
+    Xtest <- .nns_sample_matrix(Xtest, "Xtest")
     if (ncol(Xrpm) != ncol(Xtest)) {
       stop("Column mismatch between RPM and Xtest and no names to align.")
     }
@@ -98,6 +98,6 @@ NNS.distance.path.single.bulk <- function(rpm, Xtest, k, class = NULL, ncores = 
   
   .nns_with_distance_threads(ncores,
     as.numeric(NNS_distance_path_single_parallel_cpp(
-      Xrpm, as.numeric(rpm$y.hat), Xtest, as.integer(k), is_class, as.integer(ncores)
+      Xrpm, .nns_distance_response(rpm$y.hat, class), Xtest, as.integer(k), is_class, as.integer(ncores)
     )))
 }

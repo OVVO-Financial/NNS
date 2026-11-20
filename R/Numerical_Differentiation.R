@@ -28,9 +28,7 @@ NNS.diff <- function(f, point, h = abs(point) * 0.1 + 0.01, tol = 1e-10, max.ite
                      digits = 12, print.trace = FALSE, plot = FALSE){
   
   if(!is.function(f)) stop("'f' must be a function.")
-  if(!is.numeric(point) || length(point) != 1L || is.na(point) || !is.finite(point)) {
-    stop("'point' must be a single finite numeric value.")
-  }
+  point <- .nns_point(point)
   if(!is.numeric(h) || length(h) != 1L || is.na(h) || !is.finite(h) || h <= 0) {
     stop("'h' must be a single finite numeric value > 0.")
   }

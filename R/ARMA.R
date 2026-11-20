@@ -72,15 +72,11 @@ NNS.ARMA <- function(variable,
   
   if(is.numeric(weights) && dynamic) stop('Numeric "weights" cannot be used with "dynamic = TRUE", which re-selects the seasonal lags at every step.  Please set "weights" to NULL or "equal", or "dynamic = FALSE"')
   
-  if(any(class(variable)%in%c("tbl","data.table"))) variable <- as.vector(unlist(variable))
-  
-  if(anyNA(variable)) stop("You have some missing values, please address.")
+  variable <- .nns_forecast_series(variable, "variable")
   
   .arma_check_horizon(h)
   
-  method <- tolower(method)
-  if(length(method) != 1L || !method %in% c("lin", "nonlin", "both", "means"))
-    stop("[method] must be one of 'lin', 'nonlin', 'both' or 'means'.")
+  method <- .nns_forecast_method(method)
   if(method == "means") shrink <- FALSE
   
   oldw <- getOption("warn")
@@ -92,7 +88,6 @@ NNS.ARMA <- function(variable,
   # pure per-call overhead (NNS.ARMA.optim calls NNS.ARMA hundreds of times with
   # plot = FALSE).  Defer it to the plotting branch.
   label <- if (isTRUE(plot)) deparse(match.call()$variable) else NULL
-  variable <- as.numeric(variable)
   OV <- variable
   
   if(!is.null(training.set)){
@@ -403,11 +398,6 @@ NNS.ARMA <- function(variable,
 }
 
 
-.arma_check_horizon <- function(h){
-  if(!is.numeric(h) || length(h) != 1L || !is.finite(h) || h < 1 || h != round(h))
-    stop("[h] must be a positive integer.")
-}
-
 # Lags and weights from an NNS.seas period table. seasonal.factor = TRUE takes
 # the first row; ARMA.seas.weighting(TRUE, .) expects the list, not the table.
 .arma_lag_weights <- function(sf, M){
@@ -423,10 +413,4 @@ NNS.ARMA <- function(variable,
     ASW$Weights <- rep(1 / length(ASW$lag), length(ASW$lag))
   }
   ASW
-}
-
-.arma_check_periods <- function(periods){
-  if(0 %in% periods)
-    stop("NNS.seas returns 0 when the history is too short to scan for a period. ",
-         "Pass a positive lag supported by the training data, e.g. seasonal.factor = 1.")
 }

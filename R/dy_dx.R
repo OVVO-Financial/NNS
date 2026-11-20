@@ -35,28 +35,14 @@
 
 dy.dx <- function(x, y, eval.point = NULL){
   
-  if(is.null(eval.point) || length(eval.point) == 0)
-    stop("eval.point must be provided: numeric point(s) or 'overall'")
-
-  if(any(class(x)%in%c("tbl","data.table"))) x <- as.vector(unlist(x))
-  if(any(class(y)%in%c("tbl","data.table"))) y <- as.vector(unlist(y))
-  
+  points <- .nns_derivative_point(eval.point)
+  x <- .nns_derivative_x(x)
+  y <- .nns_table_values(y)
   if(anyNA(cbind(x,y))) stop("You have some missing values, please address.")
-  
-  if(!is.null(ncol(x)) && is.null(colnames(x))){
-    x <- data.frame(x)
-    x <- unlist(x)
-  }
-  
-  if(identical(unname(eval.point), "overall")){
+
+  if(identical(points, "overall")){
     return(mean(NNS.reg(x, y, type = "REG", order = NULL, plot = FALSE, ncores = 1)$Fitted.xy$gradient))
   }
-  if(!is.numeric(eval.point))
-    stop("eval.point must be numeric point(s) or 'overall'")
-  if(any(!is.finite(eval.point)))
-    stop("eval.point must contain only finite numeric values")
-
-  points <- as.numeric(eval.point)
   root_n <- floor(sqrt(length(x)))
   h_s <- round(exp(seq(log(2), log(root_n), length.out = 5)))
   x.spacing <- gravity(diff(sort(unique(x))))
