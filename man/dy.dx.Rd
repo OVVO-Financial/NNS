@@ -11,10 +11,10 @@ dy.dx(x, y, eval.point = NULL)
 
 \item{y}{a numeric vector.}
 
-\item{eval.point}{numeric or ("overall"); \code{x} point to be evaluated, must be provided.  Defaults to \code{(eval.point = NULL)}.  Set to \code{(eval.point = "overall")} to find an overall partial derivative estimate (1st derivative only).}
+\item{eval.point}{Numeric points in the observed range of \code{x}, or \code{"overall"} for the average first derivative.}
 }
 \value{
-Returns a \code{data.frame} of eval.point along with both 1st and 2nd derivative.
+For numeric points, a \code{data.frame} with the first and second derivatives in the supplied order, including repeated points. For \code{"overall"}, a single first derivative.
 }
 \description{
 Returns the numerical partial derivative of \code{y} wrt \code{x} for a point of interest.
