@@ -22,7 +22,7 @@ NNS.diff(
 
 \item{h}{numeric [0, ...]; Initial step for secant projection. Defaults to \code{(h = abs(point) * 0.1 + 0.01)}.}
 
-\item{tol}{numeric; Stopping tolerance. The search stops when the inferred \code{h} is below \code{tol} or when the bracket on the y-intercept fixes the derivative to within about \code{tol * max(1, abs(derivative))}. Defaults to \code{(tol = 1e-10)}.}
+\item{tol}{numeric; Stopping tolerance. The search stops when the inferred \code{h} is below \code{tol} or when the bracket on the y-intercept fixes the derivative to within about \code{tol * max(1, abs(derivative))}. If the initial intercepts coincide within numerical precision or the point is near zero, the search halves the step until successive centered slopes and the extrapolated one-sided slopes agree within that tolerance. Defaults to \code{(tol = 1e-10)}.}
 
 \item{max.iter}{integer; \code{NULL} (default) Maximum number of bisection iterations. \code{NULL} sets the limit to \code{100L}. For noisy functions the bisection may stall before \code{tol} is reached; \code{max.iter} provides a hard upper bound.}
 

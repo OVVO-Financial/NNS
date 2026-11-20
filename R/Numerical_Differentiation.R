@@ -5,7 +5,7 @@
 #' @param f an expression or call or a formula with no lhs.
 #' @param point numeric; Point to be evaluated for derivative of a given function \code{f}.
 #' @param h numeric [0, ...]; Initial step for secant projection. Defaults to \code{(h = abs(point) * 0.1 + 0.01)}.
-#' @param tol numeric; Stopping tolerance. The search stops when the inferred \code{h} is below \code{tol} or when the bracket on the y-intercept fixes the derivative to within about \code{tol * max(1, abs(derivative))}. Defaults to \code{(tol = 1e-10)}.
+#' @param tol numeric; Stopping tolerance. The search stops when the inferred \code{h} is below \code{tol} or when the bracket on the y-intercept fixes the derivative to within about \code{tol * max(1, abs(derivative))}. If the initial intercepts coincide within numerical precision or the point is near zero, the search halves the step until successive centered slopes and the extrapolated one-sided slopes agree within that tolerance. Defaults to \code{(tol = 1e-10)}.
 #' @param max.iter integer; \code{NULL} (default) Maximum number of bisection iterations. \code{NULL} sets the limit to \code{100L}. For noisy functions the bisection may stall before \code{tol} is reached; \code{max.iter} provides a hard upper bound.
 #' @param digits numeric; Sets the number of digits specification of the output. Defaults to \code{(digits = 12)}.
 #' @param print.trace logical; \code{FALSE} (default) Displays each iteration, lower y-intercept, upper y-intercept and inferred \code{h}.
@@ -79,10 +79,6 @@ NNS.diff <- function(f, point, h = abs(point) * 0.1 + 0.01, tol = 1e-10, max.ite
     r
   }
   
-  Bs <- numeric()
-  Bl <- numeric()
-  Bu <- numeric()
-  
   f.x <- f(point)
   if(!is.numeric(f.x) || length(f.x) != 1L || is.na(f.x) || !is.finite(f.x)) {
     stop("'f(point)' must return a single finite numeric value.")
@@ -107,55 +103,54 @@ NNS.diff <- function(f, point, h = abs(point) * 0.1 + 0.01, tol = 1e-10, max.ite
   lower.B <- low.B
   upper.B <- high.B
   
-  # ---------------------------------------------------------------------------
-  # FIX 1:
-  # If both projected secants share the same intercept, that usually means
-  # the local slope is already identified, not that the derivative fails.
-  # Return the common secant slope and associated diagnostics.
-  # ---------------------------------------------------------------------------
-  if(isTRUE(all.equal(lower.B, upper.B, tolerance = .Machine$double.eps^0.5))) {
-    
-    initial.fs <- c(
-      "f(x-h)" = left.slope,
-      "f(x+h)" = right.slope,
-      "Averaged Finite Step" = mean(c(left.slope, right.slope))
-    )
-    
-    slope <- mean(c(left.slope, right.slope))
-    inferred.h <- 0
-    i <- 0L
-    converged <- TRUE
-    termination.code <- 0L
-    final.B <- B1
-    
-    return(round(
-      as.matrix(
-        c("Value of f(x) at point" = unname(f.x),
-          "Final y-intercept (B)" = unname(final.B),
-          "DERIVATIVE" = unname(slope),
-          "Inferred h" = unname(inferred.h),
-          "iterations" = unname(i),
-          "converged" = unname(as.integer(converged)),
-          "termination.code" = unname(termination.code),
-          "Initial h finite step: f(x-h)" = unname(initial.fs["f(x-h)"]),
-          "Initial h finite step: f(x+h)" = unname(initial.fs["f(x+h)"]),
-          "Initial h averaged finite step" = unname(initial.fs["Averaged Finite Step"]),
-          "Inferred h finite step: f(x-h)" = NA_real_,
-          "Inferred h finite step: f(x+h)" = NA_real_,
-          "Inferred h averaged finite step" = NA_real_,
-          "Complex Step Derivative (Inferred h)" = NA_real_)
-      ),
-      digits
-    ))
-  }
-  
   new.B <- mean(c(lower.B, upper.B))
-  i <- 1L
+  Bs <- new.B
+  Bl <- lower.B
+  Bu <- upper.B
   converged <- FALSE
   termination.code <- 2L
   inferred.h <- NA_real_
   
-  while(i >= 1L){
+  # A collapsed projection gives no bound on the slope at a smaller step.
+  refine.step <- abs(point) < .Machine$double.eps^0.5 || lower.B == upper.B ||
+    abs(left.slope - right.slope) <= sqrt(.Machine$double.eps) *
+      max(1, abs(left.slope), abs(right.slope))
+  if(refine.step) {
+    inferred.h <- h
+    steps <- c(left.slope, right.slope)
+    slope <- mean(steps)
+  }
+  for(i in seq_len(max.iter)) {
+    if(refine.step) {
+      half <- inferred.h / 2
+      left <- point - half
+      right <- point + half
+      if(left == point || right == point) break
+      next.steps <- c((f.x - f(left)) / (point - left), (f(right) - f.x) / (right - point))
+      if(any(!is.finite(next.steps))) break
+
+      # Extrapolate each one-sided slope to check that both sides agree.
+      limits <- 2 * next.steps - steps
+      previous <- slope
+      steps <- next.steps
+      slope <- mean(steps)
+      inferred.h <- half
+      Bs[i] <- f.x - slope * point
+      bounds <- range(f.x - steps * point)
+      Bl[i] <- bounds[1L]
+      Bu[i] <- bounds[2L]
+      if(print.trace) print(c(Iteration = i, h = half, "Lower B" = Bl[i], "Upper B" = Bu[i]))
+      threshold <- tol * max(1, abs(slope))
+      # Rounding f(point) alone can hide slope changes below this scale.
+      if(.Machine$double.eps * abs(f.x) / half > threshold) break
+      if(max(abs(c(previous, limits) - slope)) <= threshold) {
+        converged <- TRUE
+        termination.code <- 0L
+        break
+      }
+      if(i == max.iter) termination.code <- 1L
+      next
+    }
     
     Bl[i] <- lower.B
     Bu[i] <- upper.B
@@ -215,19 +210,16 @@ NNS.diff <- function(f, point, h = abs(point) * 0.1 + 0.01, tol = 1e-10, max.ite
       termination.code <- 0L
       break
     }
-    i <- i + 1L
   }
   
-  final.B <- mean(c(upper.B, lower.B))
-  
-  if(is.finite(inferred.h)) inferred.h <- abs(inferred.h)
-  
-  if(abs(point) < .Machine$double.eps^0.5) {
-    slope <- mean(Finite.step(f, point, h)[c("f(x-h)", "f(x+h)")])
+  if(refine.step) {
+    final.B <- f.x - slope * point
   } else {
+    final.B <- mean(c(upper.B, lower.B))
     slope <- (f.x - final.B) / point
+    if(is.finite(inferred.h)) inferred.h <- abs(inferred.h)
   }
-  
+
   complex.step <- NA_real_
   if(is.finite(inferred.h) && inferred.h != 0) {
     z <- complex(real = point, imaginary = inferred.h)
@@ -239,7 +231,9 @@ NNS.diff <- function(f, point, h = abs(point) * 0.1 + 0.01, tol = 1e-10, max.ite
   
   initial.fs <- Finite.step(f, point, h)
   
-  inferred.fs <- if(is.finite(inferred.h) && inferred.h != 0) {
+  inferred.fs <- if(refine.step) {
+    setNames(c(steps, slope), names(initial.fs))
+  } else if(is.finite(inferred.h) && inferred.h != 0) {
     Finite.step(f, point, inferred.h)
   } else {
     c("f(x-h)" = NA_real_,

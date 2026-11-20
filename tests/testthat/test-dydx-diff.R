@@ -53,3 +53,29 @@ test_that("NNS.diff is unaffected by a constant added to f", {
   expect_equal(d(1000, tol = 1e-4)["DERIVATIVE", 1],
                d(0, tol = 1e-4)["DERIVATIVE", 1], tolerance = 1e-8)
 })
+
+test_that("NNS.diff refines a step when projected intercepts coincide", {
+  origin <- NNS.diff(exp, 0)
+  expect_equal(unname(origin["converged", 1]), 1)
+  expect_gt(origin["iterations", 1], 0)
+  expect_lt(abs(origin["DERIVATIVE", 1] - 1), 1e-6)
+
+  inflection <- NNS.diff(sin, 2 * pi)
+  expect_equal(unname(inflection["converged", 1]), 1)
+  expect_lt(abs(inflection["DERIVATIVE", 1] - 1), 1e-6)
+})
+
+test_that("NNS.diff respects the iteration limit when the intercepts coincide", {
+  limited <- NNS.diff(function(x) (x - 1)^3, 1, max.iter = 1)
+  expect_equal(unname(limited["converged", 1]), 0)
+  expect_equal(unname(limited["termination.code", 1]), 1)
+  expect_equal(unname(limited["Inferred h", 1]), 0.055)
+})
+
+test_that("NNS.diff flags unresolved one-sided slopes and roundoff at zero", {
+  cusp <- NNS.diff(abs, 0, max.iter = 5)
+  expect_equal(unname(cusp["converged", 1]), 0)
+  offset <- NNS.diff(function(x) 1e12 + exp(x), 0)
+  expect_equal(unname(offset["converged", 1]), 0)
+  expect_equal(unname(offset["termination.code", 1]), 2)
+})
