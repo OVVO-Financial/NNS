@@ -103,3 +103,11 @@ test_that("force.clt spreads replicate means like means of n observations (#101)
   expect_lt(abs(s80 / s20 - 1), 0.2)
   expect_equal(s80, sd(x) / sqrt(length(x)), tolerance = 0.2)
 })
+
+test_that("a bootstrap path retains its monthly calendar", {
+  set.seed(1)
+  paths <- NNS.meboot(AirPassengers, reps = 3, rho = 1)["replicates", ][[1]]
+  expect_equal(frequency(paths[, 1]), 12)
+  expect_equal(start(paths[, 1]), c(1949, 1))
+  expect_length(window(paths[, 1], start = 1950, end = c(1950, 12)), 12)
+})

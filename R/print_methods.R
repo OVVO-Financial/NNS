@@ -23,7 +23,7 @@
     }
   } else if (is.matrix(x)) {
     if (!inherits(x, "NNS.matrix")) {
-      class(x) <- c("NNS.matrix", "matrix", "array")
+      class(x) <- c("NNS.matrix", union(class(x), c("matrix", "array")))
     }
   }
   
