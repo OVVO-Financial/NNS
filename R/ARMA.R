@@ -76,10 +76,11 @@ NNS.ARMA <- function(variable,
   
   if(anyNA(variable)) stop("You have some missing values, please address.")
   
-  if(!is.numeric(h) || length(h) != 1L || !is.finite(h) || h < 1 || h != round(h))
-    stop("[h] must be a positive integer.")
+  .arma_check_horizon(h)
   
   method <- tolower(method)
+  if(length(method) != 1L || !method %in% c("lin", "nonlin", "both", "means"))
+    stop("[method] must be one of 'lin', 'nonlin', 'both' or 'means'.")
   if(method == "means") shrink <- FALSE
   
   oldw <- getOption("warn")
@@ -400,6 +401,11 @@ NNS.ARMA <- function(variable,
   }
 }
 
+
+.arma_check_horizon <- function(h){
+  if(!is.numeric(h) || length(h) != 1L || !is.finite(h) || h < 1 || h != round(h))
+    stop("[h] must be a positive integer.")
+}
 
 # Lags and weights from an NNS.seas period table. seasonal.factor = TRUE takes
 # the first row; ARMA.seas.weighting(TRUE, .) expects the list, not the table.
