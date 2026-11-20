@@ -20,9 +20,11 @@ NNS.ANOVA.bin <- function(control, treatment,
     if(medians) {
       mean.of.means <- median(c(control, treatment))
     } else if (isTRUE(constant.1 == constant.2)) {
-      # Multiplication/division in a weighted mean can move a shared constant
-      # by one ULP, spuriously turning its zero deviation area into a step.
       mean.of.means <- constant.1
+    } else if (isTRUE(mean(control) == mean(treatment))) {
+      # The weighted mean of two equal means can round one ULP away from them,
+      # spuriously turning a constant group's zero deviation area into a step.
+      mean.of.means <- mean(control)
     } else {
       mean.of.means <- (length(control) * mean(control) + length(treatment) * mean(treatment)) /
         (length(control) + length(treatment))
