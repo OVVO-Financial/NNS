@@ -18,6 +18,7 @@
 #include <RcppParallel.h>
 #include <algorithm>
 #include <cmath>
+#include <limits>
 #include <utility>
 #include <vector>
 using namespace Rcpp;
@@ -421,7 +422,7 @@ struct PredictPathWorker : public Worker {
 
   // Query r's `keep` nearest RPM rows under (distance, row), nearest first in
   // S.best, and, when `ties` is set, every row at the smallest distance in
-  // S.ties, ascending. Each visited row's distance is accumulated over the
+  // S.ties, ascending. Each retained row's distance is accumulated over the
   // columns exactly as distance() does. Candidates collect in a buffer that
   // is cut back to the `keep` best whenever it doubles; the worst of those
   // bounds every later row. A row strictly beyond that bound cannot enter,
@@ -441,6 +442,7 @@ struct PredictPathWorker : public Worker {
     const std::size_t cap = static_cast<std::size_t>(keep) * 2 + 32;
     bool seen = false;
     double limit = R_PosInf;     // a sum above this cannot matter
+    double screen = R_PosInf;
     double bound = R_PosInf;     // the distance `limit` was derived from
     double reach = R_PosInf;     // walk-axis gap beyond which no row matters
     double dmin = R_PosInf;
@@ -450,6 +452,11 @@ struct PredictPathWorker : public Worker {
       if (b == bound) return;
       bound = b;
       limit = dist_code == 1 ? l2_raw_limit(b) : b;
+      if (dist_code == 0) {
+        // Allow for rounding in the double sum before ruling out a near tie.
+        const double slack = 1.0 + 2.0 * P * std::numeric_limits<double>::epsilon();
+        screen = std::nextafter(limit * slack, R_PosInf);
+      }
       if (walk >= 0 && limit < R_PosInf) {
         // The largest normalised gap whose own term stays within the limit,
         // widened well past rounding; the floor keeps gaps whose term would
@@ -467,10 +474,16 @@ struct PredictPathWorker : public Worker {
       const double* x = data + static_cast<std::size_t>(s) * P;
       long double acc = 0.0L;
       if (dist_code == 0) {
-        for (int a = 0; a < P; ++a) {
+        auto nns_term = [&](int a) {
           const double z = (x[a] - q[a]) / range[a];
-          acc += std::fabs(z) + z * z;
+          return std::fabs(z) + z * z;
+        };
+        if (screen < R_PosInf) {
+          double estimate = 0.0;
+          for (int a = 0; a < P; ++a) estimate += nns_term(a);
+          if (estimate > screen) return;
         }
+        for (int a = 0; a < P; ++a) acc += nns_term(a);
       } else if (dist_code == 2) {
         for (int a = 0; a < P; ++a) {
           const double z = (x[a] - q[a]) / range[a];
