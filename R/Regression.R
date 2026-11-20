@@ -264,8 +264,14 @@
   out
 }
 
+.nns_reg_levels <- function(x) {
+  if (is.ordered(x)) return(levels(x))
+  if (is.factor(x)) return(sort(levels(x)))
+  sort(unique(as.character(x)))
+}
+
 .nns_reg_encode_predictors <- function(x, point.est = NULL,
-                                       factor.2.dummy = TRUE) {
+                                       factor.2.dummy = TRUE, coefficient.names = NULL) {
   factor.2.dummy <- .nns_reg_scalar_logical(factor.2.dummy, "factor.2.dummy")
   # A plain numeric vector is the single numeric predictor "x", as
   # data.frame(x = x) below names it; building that data frame was most of the
@@ -287,6 +293,7 @@
     return(list(
       x = matrix(as.numeric(x), ncol = 1L, dimnames = list(NULL, "x")),
       point.est = point.matrix,
+      stack.index = FALSE,
       raw.names = "x",
       encoded.names = "x",
       metadata = list(list(name = "x", categorical = FALSE, levels = NULL))
@@ -295,6 +302,20 @@
   train <- .nns_reg_as_frame(x)
   points <- .nns_reg_prepare_points(point.est, names(train))
   
+  stack.index <- FALSE
+  categorical <- vapply(train, function(z) is.factor(z) || is.character(z) || is.logical(z),
+                        logical(1L))
+  if (!is.null(coefficient.names) && factor.2.dummy && ncol(train) > 1L && any(categorical)) {
+    blocks <- Map(function(nm, z) {
+      if (is.factor(z) || is.character(z))
+        paste0(nm, "__", make.names(.nns_reg_levels(z), unique = TRUE))
+      else nm
+    }, names(train), train)
+    stack.names <- make.unique(unlist(blocks, use.names = FALSE), sep = "_")
+    stack.index <- length(coefficient.names) == length(stack.names) &&
+      setequal(coefficient.names, stack.names)
+  }
+
   train.parts <- list()
   point.parts <- if (is.null(points)) NULL else list()
   meta <- vector("list", ncol(train))
@@ -304,14 +325,12 @@
     z <- train[[j]]
     zp <- if (is.null(points)) NULL else points[[j]]
     
-    categorical <- is.factor(z) || is.character(z) || is.logical(z)
-    
-    if (categorical) {
+    if (categorical[j]) {
       # A factor's declared levels are part of its training support even when
       # a resampled fold or subset has no row at one of them; sorting the
       # unordered levels keeps the encoding independent of level order.
-      levels.train <- if (is.ordered(z)) levels(z) else
-        if (is.factor(z)) sort(levels(z)) else sort(unique(as.character(z)))
+      single.logical <- stack.index && is.logical(z)
+      levels.train <- if (single.logical) c("FALSE", "TRUE") else .nns_reg_levels(z)
       values.train <- as.character(z)
       if (anyNA(values.train)) {
         stop(sprintf("Predictor '%s' contains missing values.", nm), call. = FALSE)
@@ -331,7 +350,7 @@
         values.point <- NULL
       }
       
-      if (factor.2.dummy) {
+      if (factor.2.dummy && !single.logical) {
         tr <- outer(values.train, levels.train, FUN = function(a, b) as.numeric(a == b))
         if (is.null(dim(tr))) tr <- matrix(tr, nrow = length(values.train),
                                            ncol = length(levels.train))
@@ -346,11 +365,11 @@
           point.parts[[length(point.parts) + 1L]] <- pt
         }
       } else {
-        tr <- matrix(match(values.train, levels.train), ncol = 1L,
+        tr <- matrix(match(values.train, levels.train) - as.integer(single.logical), ncol = 1L,
                      dimnames = list(NULL, nm))
         train.parts[[length(train.parts) + 1L]] <- tr
         if (!is.null(points)) {
-          pt <- matrix(match(values.point, levels.train), ncol = 1L,
+          pt <- matrix(match(values.point, levels.train) - as.integer(single.logical), ncol = 1L,
                        dimnames = list(NULL, nm))
           point.parts[[length(point.parts) + 1L]] <- pt
         }
@@ -387,10 +406,15 @@
   storage.mode(x.matrix) <- "double"
   point.matrix <- if (is.null(points)) NULL else do.call(cbind, point.parts)
   if (!is.null(point.matrix)) storage.mode(point.matrix) <- "double"
+  if (stack.index) {
+    colnames(x.matrix) <- stack.names
+    if (!is.null(point.matrix)) colnames(point.matrix) <- stack.names
+  }
   
   list(
     x = x.matrix,
     point.est = point.matrix,
+    stack.index = stack.index,
     raw.names = names(train),
     encoded.names = colnames(x.matrix),
     metadata = meta
@@ -706,11 +730,13 @@
   coef
 }
 
-.nns_reg_dimreduce <- function(x, point.est, y, dim.red.method, tau, threshold) {
+.nns_reg_dimreduce <- function(x, point.est, y, dim.red.method, tau, threshold,
+                               stack.index = FALSE) {
   coef <- .nns_reg_dimred_coefficients(x, y, dim.red.method, tau, threshold)
   mins <- apply(x, 2L, min)
   maxs <- apply(x, 2L, max)
   ranges <- maxs - mins
+  if (stack.index) ranges[!is.finite(ranges) | ranges == 0] <- 1
   
   normalize <- function(m) {
     out <- matrix(0.5, nrow = nrow(m), ncol = ncol(m),
@@ -953,7 +979,8 @@ NNS.reg <- function(x, y,
   y.numeric <- task$y
   if (any(!is.finite(y.numeric))) stop("[y] must contain finite values.", call. = FALSE)
   
-  encoded <- .nns_reg_encode_predictors(x, point.est, factor.2.dummy)
+  encoded <- .nns_reg_encode_predictors(x, point.est, factor.2.dummy,
+                                        if (is.numeric(dim.red.method)) names(dim.red.method))
   if (nrow(encoded$x) != length(y.numeric)) {
     stop(sprintf("[x] has %d rows but [y] has %d values.",
                  nrow(encoded$x), length(y.numeric)), call. = FALSE)
@@ -1007,7 +1034,7 @@ NNS.reg <- function(x, y,
                   "per class applies to classification."), call. = FALSE)
     }
     dr <- .nns_reg_dimreduce(encoded$x, encoded$point.est, y.numeric,
-                             dim.red.method, tau, threshold)
+                             dim.red.method, tau, threshold, encoded$stack.index)
     ux <- dr$x.star
     up <- dr$point.star
     synthetic.x.equation <- dr$equation
