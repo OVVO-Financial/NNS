@@ -7,7 +7,7 @@
 #' @param k \code{n.best} from \link{NNS.reg}
 #' @param class if classification problem.
 #'
-#' @return The predicted response or class. Equal distances are ordered by RPM row.
+#' @return A single numeric prediction at \code{dist.estimate}, in the units of \code{y.hat} for regression or a numeric class code for classification. Equal distances are ordered by RPM row.
 #'
 #'
 #' @export

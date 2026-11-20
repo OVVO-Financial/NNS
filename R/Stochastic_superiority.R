@@ -15,6 +15,8 @@
 #' When \code{confidence.interval = TRUE}, confidence bounds for \code{P^*}
 #' are computed from \code{\link{NNS.meboot}} bootstrap replicates using
 #' \code{\link{LPM.VaR}} and \code{\link{UPM.VaR}} with \code{degree = 0}.
+#' These bounds can be too narrow under serial dependence. The bootstrap
+#' uses an independent-observations scale for the mean.
 #'
 #' @usage
 #' NNS.SS(
