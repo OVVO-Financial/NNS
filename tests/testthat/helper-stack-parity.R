@@ -10,7 +10,8 @@ expect_numeric_close <- function(actual, expected, tolerance = 1e-12) {
   a <- as.numeric(actual)
   b <- as.numeric(expected)
   testthat::expect_identical(is.na(a), is.na(b))
-  keep <- is.finite(a) & is.finite(b)
+  testthat::expect_identical(a[is.infinite(b)], b[is.infinite(b)])
+  keep <- is.finite(b)
   if (any(keep)) {
     testthat::expect_lte(max(abs(a[keep] - b[keep])), tolerance)
   }

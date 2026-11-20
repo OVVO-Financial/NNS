@@ -14,7 +14,9 @@ test_that("vectorised LPM/UPM (> 32 targets) match the direct scan at every degr
       expect_equal(l, direct_lpm(d, t, x), tolerance = 1e-10)
       expect_equal(u, direct_upm(d, t, x), tolerance = 1e-10)
       r <- LPM.ratio(d, t, x)
-      expect_true(all(r >= 0 & r <= 1, na.rm = TRUE))
+      expect_true(all(r >= 0 & r <= 1))
+      reference <- vapply(t, function(tt) LPM.ratio(d, tt, x), numeric(1))
+      expect_equal(r, reference, tolerance = 1e-10)
     }
   }
   # Degree 2 just below the maximum used to come out negative.
