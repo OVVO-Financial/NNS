@@ -336,10 +336,13 @@
 .nns_mreg_default_nbest <- function(X, y, rpm.rows) {
   # This is an unsigned smoothing heuristic. Retain the directional copula,
   # but average the response orientations so a sign convention cannot change k.
+  # k counts regression points, so it scales with their number rather than
+  # with n: the point count stops growing with n at a fixed order, and a
+  # sqrt(n) count then averages over nearly every point.
   dep <- tryCatch(mean(c(NNS.copula(cbind(X, y)),
                         NNS.copula(cbind(X, -y)))), error = function(e) NA_real_)
   if (!is.finite(dep)) dep <- 0.5
-  k <- max(1L, as.integer(floor((1 - dep) * sqrt(nrow(X)))))
+  k <- max(1L, as.integer(floor((1 - dep) * sqrt(rpm.rows))))
   min(k, rpm.rows)
 }
 

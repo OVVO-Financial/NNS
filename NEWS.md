@@ -70,6 +70,18 @@
   predictors and `folds = 2`, `NNS.stack` takes 1.3 s and `NNS.boost` 1.3 s at
   n = 1000 (0.9 s and 0.12 s before), and 5.8 s and 8.0 s at n = 5000
   (2.6 s and 1.2 s before).
+* The default neighbour count of multivariate `NNS.reg` (`n.best = NULL`) is
+  `floor((1 - D) * sqrt(R))` for R regression points, instead of
+  `sqrt(n)` (#153). At a fixed order the number of regression points stops
+  growing with n, so the `sqrt(n)` count averaged over nearly every point and
+  pulled class probabilities, fitted values and `dy.d_` partial derivatives
+  toward their means as n grew. On simulated two-predictor problems with known
+  targets, at n = 5000 the mean absolute error falls from 0.17 to 0.04 for
+  class probabilities and from 0.17 to 0.03 for regression, the error of the
+  best fixed count, and it halves for a `dy.d_` partial derivative. With four
+  predictors, where the number of regression points grows with n, the two
+  rules give similar errors. Explicit `n.best` and `NNS.stack`'s
+  cross-validated count are unaffected.
 * Gravity retains its location blend with corrected quartiles and observed bin
   centers. Mode retains distinct continuous and class behavior. Changes to
   these defaults can affect regression, optimization, and forecasts.
