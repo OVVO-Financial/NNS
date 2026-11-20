@@ -1405,7 +1405,7 @@ E[\mathbf{1}\{X\le t_X\}\mathbf{1}\{Y\le t_Y\}]
 <li><p><strong>Bayesian path</strong>: prior <span class="math inline">\(\pi(\theta)\)</span> → likelihood <span class="math inline">\(L(D \mid \theta)\)</span> → posterior <span class="math inline">\(\pi(\theta \mid D)\)</span> → posterior predictive <span class="math inline">\(P_B = \int P_\theta\,\pi(d\theta \mid D)\)</span> → compute <span class="math inline">\(L_n(t;\,X)\)</span>, <span class="math inline">\(U_n(t;\,X)\)</span> with <span class="math inline">\(X \sim P_B\)</span>.</p></li>
 <li><p><strong>Frequentist path</strong>: empirical law <span class="math inline">\(\hat{P}_n = \frac{1}{n}\sum_{i=1}^n \delta_{X_i}\)</span> → compute <span class="math inline">\(L_n(t;\,X)\)</span>, <span class="math inline">\(U_n(t;\,X)\)</span> with <span class="math inline">\(X \sim \hat{P}_n\)</span>.</p></li>
 </ul>
-<p>Because both pipelines reduce to the same partial-moment operators applied to different input distributions, <strong>any two models that agree on the distribution of <span class="math inline">\(X\)</span> will produce identical partial moments</strong> — not just the normalized degree-one weights, but all partial moments of all degrees. The formula stays the same; only the input distribution changes. This is the formal sense in which partial moments are a practical lingua franca between Bayesian and frequentist workflows.</p>
+<p>At the same targets, models that agree on the distribution of <span class="math inline">\(X\)</span> give the same univariate partial moments at every degree. For co-partial moments and joint weights, agreement on the joint distribution gives the same results wherever those quantities are defined.</p>
 <p>The directional formulation of Bayes’ theorem in Sections 13.5–13.6 is therefore paradigm-agnostic: it holds whether the joint distribution is constructed from a posterior predictive, an empirical distribution, or any other probability measure fed into the co-partial moment operators.</p>
 <hr />
 </div>
@@ -1419,7 +1419,7 @@ E[\mathbf{1}\{X\le t_X\}\mathbf{1}\{Y\le t_Y\}]
 <li><strong>Bayes’ theorem follows directly from co-partial moment identities</strong>, holds symmetrically in both the lower and upper tails, and requires no distributional assumptions.</li>
 <li><strong>Bayesian updating corresponds to renormalizing the four-quadrant probability partition</strong> after conditioning on one marginal.</li>
 <li><strong>Degree-one co-partial moments are distributional generators</strong>: the mixed second derivative of the hinge surface recovers the joint CDF at all continuity points, and the mixed fourth derivative recovers the joint density when it exists. Degree zero, the joint CDF, is already complete; degree one is a continuous complete representation with the stated derivative qualifications.</li>
-<li><strong>Partial moments are law-invariant</strong>: they depend only on the induced distribution of <span class="math inline">\(X\)</span>, making them identical across Bayesian and frequentist pipelines whenever those pipelines agree on the distribution of outcomes.</li>
+<li><strong>Partial moments are law-invariant</strong>. Univariate moments depend on the distribution of <span class="math inline">\(X\)</span>. Co-partial moments and joint weights depend on the joint distribution.</li>
 </ul>
 <p>The next chapter extends these conditional-probability tools to directional causation — asking not merely how probability mass is distributed across variables, but which variable is doing the driving.</p>
 

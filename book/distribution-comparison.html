@@ -1639,8 +1639,8 @@ x_1, \dots, x_n \sim X, \qquad y_1, \dots, y_m \sim Y,
 F_X(t) \le F_Y(t) \quad \text{for all } t,
 \]</span></p>
 <p>with strict inequality for at least one <span class="math inline">\(t\)</span>.</p>
-<p>Equivalently, <span class="math inline">\(X\)</span> dominates <span class="math inline">\(Y\)</span> in the first order if and only if every non-decreasing utility function assigns at least as high an expected value to <span class="math inline">\(X\)</span> as to <span class="math inline">\(Y\)</span>. This means any decision-maker who prefers more to less will prefer <span class="math inline">\(X\)</span>.</p>
-<p>In terms of the empirical CDF, <span class="math inline">\(X \succ_1 Y\)</span> whenever the distribution of <span class="math inline">\(X\)</span> lies entirely to the right of the distribution of <span class="math inline">\(Y\)</span> across all quantiles.</p>
+<p>Equivalently, <span class="math inline">\(X\)</span> dominates <span class="math inline">\(Y\)</span> in the first order if and only if every non-decreasing utility function with finite expectations assigns at least as high an expected value to <span class="math inline">\(X\)</span> as to <span class="math inline">\(Y\)</span>, and at least one assigns a higher value to <span class="math inline">\(X\)</span>.</p>
+<p>For empirical distributions, <span class="math inline">\(X \succ_1 Y\)</span> if its quantiles are at least as high as <span class="math inline">\(Y\)</span>’s at every probability and higher at some probability.</p>
 </div>
 <div id="second-order-stochastic-dominance" class="section level4 hasAnchor" number="15.4.5.2">
 <h4><span class="header-section-number">15.4.5.2</span> Second-Order Stochastic Dominance<a href="distribution-comparison.html#second-order-stochastic-dominance" class="anchor-section" aria-label="Anchor link to header"></a></h4>
@@ -1668,7 +1668,7 @@ F_X(t) \le F_Y(t) \quad \text{for all } t,
 <p><span class="math display">\[
 LPM_0(t, X) \le LPM_0(t, Y) \quad \text{for all } t.
 \]</span></p>
-<p>Because <span class="math inline">\(LPM_0(t, X) = F_X(t)\)</span>, this is the direct CDF criterion.</p>
+<p>The inequality must be strict for at least one threshold. Because <span class="math inline">\(LPM_0(t, X) = F_X(t)\)</span>, this is the direct CDF criterion.</p>
 <p>Second-order dominance can be expressed through the degree-one lower partial moment:</p>
 <p><span class="math display">\[
 LPM_1(t, X) \le LPM_1(t, Y) \quad \text{for all } t.
@@ -1687,7 +1687,7 @@ LPM_2(t, X) \le LPM_2(t, Y) \quad \text{for all } t.
 <p><span class="math display">\[
 \hat F_X(t) \le \hat F_Y(t)
 \]</span></p>
-<p>holds for all evaluation points <span class="math inline">\(t\)</span> in the combined support of the data. If the condition holds everywhere, <span class="math inline">\(X\)</span> first-order stochastically dominates <span class="math inline">\(Y\)</span>. If it fails at some points, the distributions intersect and neither dominates at the first order.</p>
+<p>holds for all evaluation points <span class="math inline">\(t\)</span> in the combined support of the data, with strict inequality at least once. The test also checks the reverse ordering. If the ordering changes direction or the CDFs are identical, neither sample dominates.</p>
 <p>Second- and third-order tests replace the empirical CDF with degree-one and degree-two lower partial moments. The implementation also checks between-knot extrema where required and enforces the TSD mean condition; checking support endpoints alone is not sufficient for every piecewise-polynomial criterion.</p>
 <p>The default <code>NNS.FSD(..., type = "discrete")</code>, <code>NNS.SSD()</code>, and <code>NNS.TSD()</code> perform these empirical comparisons and report the direction when strict dominance exists.</p>
 </div>

@@ -1198,17 +1198,17 @@ X \le g.
 <p><span class="math display">\[
 P(X \le g)\le \frac{\sigma^2}{\sigma^2+(\mu-g)^2}.
 \]</span></p>
-<p>(Half of Chebyshev’s two-sided bound, <span class="math inline">\(\tfrac12\left(\sigma/(\mu-g)\right)^2\)</span>, holds only for symmetric distributions; Chapter 4 gives a counterexample.)</p>
+<p>(Symmetry guarantees that half of Chebyshev’s two-sided bound, <span class="math inline">\(\tfrac12\left(\sigma/(\mu-g)\right)^2\)</span>, bounds the lower-tail probability. Chapter 4 gives an asymmetric example where it fails.)</p>
 <p>A directional refinement replaces symmetric standard deviation with semideviation:</p>
 <p><span class="math display">\[
 P(X \le g)\le \left(\frac{\sigma_-}{\mu-g}\right)^2,
 \]</span></p>
 <p>where <span class="math inline">\(\sigma_-^2 = E[(\mu-X)_+^2]\)</span> measures only downside dispersion. It is Markov’s inequality applied to the lower partial moment, so it holds for every distribution.</p>
-<p>A more general bound uses lower partial moments of degree <span class="math inline">\(\alpha\)</span>. Define</p>
+<p>A more general bound uses lower partial moments. For a positive degree <span class="math inline">\(\alpha\)</span>, define</p>
 <p><span class="math display">\[
 \theta(t,\alpha)=\left(E[(t-X)_+^\alpha]\right)^{1/\alpha}.
 \]</span></p>
-<p>Then, for <span class="math inline">\(g \le t\)</span>,</p>
+<p>The following bound holds for thresholds strictly below the target.</p>
 <p><span class="math display">\[
 P(X\le g)\le \left(\frac{\theta(t,\alpha)}{t-g}\right)^\alpha.
 \]</span></p>

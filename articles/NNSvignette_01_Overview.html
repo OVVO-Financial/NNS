@@ -127,8 +127,8 @@ analysis around a chosen target
 (often the mean or a benchmark).</li>
 <li>At
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>t</mi><mo>=</mo><msub><mi>μ</mi><mi>X</mi></msub></mrow><annotation encoding="application/x-tex">t=\mu_X</annotation></semantics></math>:
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">Var</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mi>X</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mrow><mi mathvariant="normal">UPM</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mn>2</mn><mo>,</mo><msub><mi>μ</mi><mi>X</mi></msub><mo>,</mo><mi>X</mi><mo stretchy="false" form="postfix">)</mo><mo>+</mo><mrow><mi mathvariant="normal">LPM</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mn>2</mn><mo>,</mo><msub><mi>μ</mi><mi>X</mi></msub><mo>,</mo><mi>X</mi><mo stretchy="false" form="postfix">)</mo><mspace width="1.0em"></mspace><mtext mathvariant="normal">(exact empirical identity)</mtext><mi>.</mi></mrow><annotation encoding="application/x-tex">
-\operatorname{Var}(X) = \operatorname{UPM}(2,\mu_X,X) + \operatorname{LPM}(2,\mu_X,X)\quad\text{(exact empirical identity)}.
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">Var</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mi>X</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mrow><mi mathvariant="normal">UPM</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mn>2</mn><mo>,</mo><msub><mi>μ</mi><mi>X</mi></msub><mo>,</mo><mi>X</mi><mo stretchy="false" form="postfix">)</mo><mo>+</mo><mrow><mi mathvariant="normal">LPM</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mn>2</mn><mo>,</mo><msub><mi>μ</mi><mi>X</mi></msub><mo>,</mo><mi>X</mi><mo stretchy="false" form="postfix">)</mo><mspace width="1.0em"></mspace><mrow><mtext mathvariant="normal">(empirical variance with divisor </mtext><mspace width="0.333em"></mspace></mrow><mi>n</mi><mtext mathvariant="normal">)</mtext><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\operatorname{Var}(X) = \operatorname{UPM}(2,\mu_X,X) + \operatorname{LPM}(2,\mu_X,X)\quad\text{(empirical variance with divisor } n\text{)}.
 </annotation></semantics></math> This <strong>is not</strong> the same
 as splitting conditional variances around a threshold; partial moments
 use a <em>global</em> reference, preserving the between‑group
@@ -153,8 +153,8 @@ contribution.</li>
 <span><span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">3000</span><span class="op">)</span></span>
 <span><span class="va">mu</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span></span>
 <span><span class="va">L2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/LPM.html">LPM</a></span><span class="op">(</span><span class="fl">2</span>, <span class="va">mu</span>, <span class="va">y</span><span class="op">)</span>; <span class="va">U2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/UPM.html">UPM</a></span><span class="op">(</span><span class="fl">2</span>, <span class="va">mu</span>, <span class="va">y</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"LPM2 + UPM2 = %.6f vs var(y)=%.6f\n"</span>, <span class="op">(</span><span class="va">L2</span><span class="op">+</span><span class="va">U2</span><span class="op">)</span><span class="op">*</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span> <span class="op">/</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">var</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## LPM2 + UPM2 = 1.011889 vs var(y)=1.011889</span></span></code></pre>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"Bessel-adjusted sum of second partial moments = %.6f vs var(y) = %.6f\n"</span>, <span class="op">(</span><span class="va">L2</span><span class="op">+</span><span class="va">U2</span><span class="op">)</span><span class="op">*</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span> <span class="op">/</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">var</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## Bessel-adjusted sum of second partial moments = 1.011889 vs var(y) = 1.011889</span></span></code></pre>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Empirical CDF via LPM.ratio(0, t, x)</span></span>
 <span><span class="kw">for</span> <span class="op">(</span><span class="va">t</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>,<span class="fl">0</span>,<span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
@@ -169,9 +169,8 @@ contribution.</li>
 <span><span class="va">z</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Exponential.html" class="external-link">rexp</a></span><span class="op">(</span><span class="fl">3000</span><span class="op">)</span><span class="op">-</span><span class="fl">1</span>; <span class="va">mu_z</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">z</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"Skewed z: LPM2=%.4f, UPM2=%.4f (expect imbalance)\n"</span>, <span class="fu"><a href="../reference/LPM.html">LPM</a></span><span class="op">(</span><span class="fl">2</span>,<span class="va">mu_z</span>,<span class="va">z</span><span class="op">)</span>, <span class="fu"><a href="../reference/UPM.html">UPM</a></span><span class="op">(</span><span class="fl">2</span>,<span class="va">mu_z</span>,<span class="va">z</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Skewed z: LPM2=0.2780, UPM2=0.7682 (expect imbalance)</span></span></code></pre>
-<p><strong>Interpretation.</strong> The equality
-<code>LPM2 + UPM2 == var(x)</code> (Bessel adjustment used) holds
-because deviations are measured against the <em>global</em> mean.
+<p><strong>Interpretation.</strong> The Bessel-adjusted sum of the
+second partial moments about the sample mean equals the sample variance.
 <code>LPM.ratio(0, t, x)</code> constructs an empirical CDF directly
 from partial‑moment counts.</p>
 <hr>
@@ -183,11 +182,9 @@ from partial‑moment counts.</p>
 <div class="section level3">
 <h3 id="higher-moments-from-partial-moments">2.1 Higher moments from partial moments<a class="anchor" aria-label="anchor" href="#higher-moments-from-partial-moments"></a>
 </h3>
-<p>Define asymmetric analogues of skewness/kurtosis using
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mrow><mi mathvariant="normal">UPM</mi><mo>⁡</mo></mrow><mn>3</mn></msub><annotation encoding="application/x-tex">\operatorname{UPM}_3</annotation></semantics></math>,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mrow><mi mathvariant="normal">LPM</mi><mo>⁡</mo></mrow><mn>3</mn></msub><annotation encoding="application/x-tex">\operatorname{LPM}_3</annotation></semantics></math>
-(and degree 4), yielding robust tail diagnostics without parametric
-assumptions.</p>
+<p><code><a href="../reference/NNS.moments.html">NNS.moments()</a></code> reports the mean, variance, skewness and
+excess kurtosis. To compare the two tails separately, compute the upper
+and lower third or fourth partial moments.</p>
 <p><strong>Header.</strong></p>
 <ul>
 <li><code>NNS.moments(x)</code></li>
@@ -1108,8 +1105,8 @@ partial moment (away from <code>target</code>).</li>
 <code>NNS.CDF(x, target = NULL, points = NULL, plot = TRUE/FALSE)</code>
 — CDF from partial moments.</li>
 <li>
-<code>NNS.moments(x)</code> — mean/var/skew/kurtosis via partial
-moments.</li>
+<code>NNS.moments(x)</code> returns the mean, variance, skewness and
+excess kurtosis.</li>
 </ul>
 </div>
 <div class="section level3">

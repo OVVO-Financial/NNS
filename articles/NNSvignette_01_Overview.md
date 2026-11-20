@@ -56,7 +56,7 @@ sums are discrete analogues of Lebesgue integrals.
   around a chosen target $`t`$ (often the mean or a benchmark).
 - At $`t=\mu_X`$:
   ``` math
-  \operatorname{Var}(X) = \operatorname{UPM}(2,\mu_X,X) + \operatorname{LPM}(2,\mu_X,X)\quad\text{(exact empirical identity)}.
+  \operatorname{Var}(X) = \operatorname{UPM}(2,\mu_X,X) + \operatorname{LPM}(2,\mu_X,X)\quad\text{(empirical variance with divisor } n\text{)}.
   ```
   This **is not** the same as splitting conditional variances around a
   threshold; partial moments use a *global* reference, preserving the
@@ -77,10 +77,10 @@ set.seed(42)
 y <- rnorm(3000)
 mu <- mean(y)
 L2 <- LPM(2, mu, y); U2 <- UPM(2, mu, y)
-cat(sprintf("LPM2 + UPM2 = %.6f vs var(y)=%.6f\n", (L2+U2)*(length(y) / (length(y) - 1)), var(y)))
+cat(sprintf("Bessel-adjusted sum of second partial moments = %.6f vs var(y) = %.6f\n", (L2+U2)*(length(y) / (length(y) - 1)), var(y)))
 ```
 
-    ## LPM2 + UPM2 = 1.011889 vs var(y)=1.011889
+    ## Bessel-adjusted sum of second partial moments = 1.011889 vs var(y) = 1.011889
 
 ``` r
 
@@ -104,10 +104,10 @@ cat(sprintf("Skewed z: LPM2=%.4f, UPM2=%.4f (expect imbalance)\n", LPM(2,mu_z,z)
 
     ## Skewed z: LPM2=0.2780, UPM2=0.7682 (expect imbalance)
 
-**Interpretation.** The equality `LPM2 + UPM2 == var(x)` (Bessel
-adjustment used) holds because deviations are measured against the
-*global* mean. `LPM.ratio(0, t, x)` constructs an empirical CDF directly
-from partial‑moment counts.
+**Interpretation.** The Bessel-adjusted sum of the second partial
+moments about the sample mean equals the sample variance.
+`LPM.ratio(0, t, x)` constructs an empirical CDF directly from
+partial‑moment counts.
 
 ------------------------------------------------------------------------
 
@@ -115,9 +115,10 @@ from partial‑moment counts.
 
 ### 2.1 Higher moments from partial moments
 
-Define asymmetric analogues of skewness/kurtosis using
-$`\operatorname{UPM}_3`$, $`\operatorname{LPM}_3`$ (and degree 4),
-yielding robust tail diagnostics without parametric assumptions.
+[`NNS.moments()`](https://OVVO-Financial.github.io/NNS/reference/NNS.moments.md)
+reports the mean, variance, skewness and excess kurtosis. To compare the
+two tails separately, compute the upper and lower third or fourth
+partial moments.
 
 **Header.**
 
@@ -1077,7 +1078,8 @@ Section 1.
   (away from `target`).
 - `NNS.CDF(x, target = NULL, points = NULL, plot = TRUE/FALSE)` — CDF
   from partial moments.
-- `NNS.moments(x)` — mean/var/skew/kurtosis via partial moments.
+- `NNS.moments(x)` returns the mean, variance, skewness and excess
+  kurtosis.
 
 ### 2. Descriptive Statistics & Distributions
 

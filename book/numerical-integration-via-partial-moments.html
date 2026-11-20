@@ -1302,17 +1302,17 @@ The classical one-sided bound, Cantelli’s inequality, controls this lower-tail
 <span class="math display">\[
 P(X\le g)\le \frac{\sigma^2}{\sigma^2+(\mu-g)^2}.
 \]</span>
-This bound depends only on the mean and variance, so it remains distribution-free, but it does not distinguish between upper and lower deviations. Halving Chebyshev’s two-sided bound, <span class="math inline">\(\tfrac12\left(\sigma/(\mu-g)\right)^2\)</span>, is not a valid alternative: it holds for symmetric distributions only. The sample <span class="math inline">\(\{-1, 1/3, 1/3, 1/3\}\)</span> has mean 0 and variance <span class="math inline">\(1/3\)</span> and puts probability <span class="math inline">\(1/4\)</span> at <span class="math inline">\(X\le -1\)</span>, above the halved bound of <span class="math inline">\(1/6\)</span> and equal to Cantelli’s.</p>
+This bound depends only on the mean and variance, so it remains distribution-free, but it does not distinguish between upper and lower deviations. Symmetry guarantees that half of Chebyshev’s two-sided bound, <span class="math inline">\(\tfrac12\left(\sigma/(\mu-g)\right)^2\)</span>, is a valid lower-tail bound. Some asymmetric distributions also satisfy it. It fails for the sample <span class="math inline">\(\{-1, 1/3, 1/3, 1/3\}\)</span>, which has mean 0 and variance <span class="math inline">\(1/3\)</span> and puts probability <span class="math inline">\(1/4\)</span> at <span class="math inline">\(X\le -1\)</span>, above the halved bound of <span class="math inline">\(1/6\)</span> and equal to Cantelli’s.</p>
 <p>A directional refinement replaces symmetric variance with semivariance:
 <span class="math display">\[
 P(X\le g)\le \left(\frac{\sigma_-}{\mu-g}\right)^2,
 \]</span>
 where <span class="math inline">\(\sigma_-^2 = L_2(\mu;X) = E[(\mu-X)_+^2]\)</span> measures dispersion only on the adverse side of the mean. This is Markov’s inequality for <span class="math inline">\((\mu-X)_+^2\)</span>, which is at least <span class="math inline">\((\mu-g)^2\)</span> whenever <span class="math inline">\(X\le g\)</span>, so it holds for every distribution. For a symmetric distribution <span class="math inline">\(\sigma_-^2=\sigma^2/2\)</span> and the bound reduces to the halved form above, which is why that form holds in the symmetric case. The estimation-error literature highlights the importance of this refinement through the Berck–Hihn result, which links semivariance directly to a strong boundary form of Chebyshev’s inequality.</p>
-<p>A further generalization uses lower partial moments of degree <span class="math inline">\(\alpha\)</span>. Define
+<p>A further generalization uses lower partial moments. For a positive degree <span class="math inline">\(\alpha\)</span>, define
 <span class="math display">\[
 \theta(t,\alpha)=\big(E[(t-X)_+^\alpha]\big)^{1/\alpha}.
 \]</span>
-Then, for <span class="math inline">\(g\le t\)</span>,
+The following bound holds for thresholds strictly below the target.
 <span class="math display">\[
 P(X\le g)\le \left(\frac{\theta(t,\alpha)}{t-g}\right)^\alpha.
 \]</span>
@@ -1337,7 +1337,7 @@ The central theme is that tail-probability control need not be built from a sepa
 <span class="math display">\[
 P(X\le g)?
 \]</span>
-Classical methods answer this using symmetric dispersion summaries. The directional framework answers it more precisely by measuring deviations on the relevant side of the benchmark.</p>
+Classical methods answer this using symmetric dispersion summaries. The directional bound uses deviations on the adverse side of the benchmark. Which bound is tighter depends on the distribution and threshold.</p>
 <p>The quantity
 <span class="math display">\[
 L_\alpha(t;X)=E[(t-X)_+^\alpha]
