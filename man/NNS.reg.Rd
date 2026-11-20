@@ -69,7 +69,7 @@ NNS.reg(
 
 \item{dist}{options:(NULL, "NNS", "L1", "L2", "FACTOR") the method of distance calculation. \code{dist = NULL} is the default and selects the native blended NNS distance, \eqn{sum(abs(z) + z^2)}, over range-normalized coordinates. \code{dist = "NNS"} is an explicit alias for the default. \code{dist = "L2"} selects Euclidean distance; \code{dist = "L1"} selects Manhattan distance; \code{dist = "FACTOR"} uses a frequency.}
 
-\item{ncores}{Integer thread count for multivariate predictions. With \code{NULL} (default), small predictions use one thread. Large predictions use one fewer than the available cores (at least one), capped by any thread limit set with \code{RcppParallel::setThreadOptions()}. The estimates do not depend on the number of threads.}
+\item{ncores}{Integer thread count for multivariate predictions. With \code{NULL} (default), small predictions use one thread. Large predictions use one fewer than the available cores (at least one), capped by any thread limit set with \code{RcppParallel::setThreadOptions()}. With the optional TinyThread backend, parallel predictions use its session thread count or, if unset, its hardware default. The estimates do not depend on the number of threads.}
 
 \item{point.only}{Internal argument for abbreviated output.}
 

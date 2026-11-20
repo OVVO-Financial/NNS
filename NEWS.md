@@ -226,5 +226,6 @@
   cores for large predictions. Small fits still use one thread. `NNS.reg` and
   `NNS.stack` cap automatic thread counts at the RcppParallel session limit
   when set. Estimates do not depend on the number of cores. Under the
-  `R CMD check` core limit, both functions use two at most. The package now
-  links the BLAS that R uses.
+  `R CMD check` core limit, both functions request two at most. The default
+  TBB backend honors this count. TinyThread uses its own worker count for
+  parallel predictions. The package now links the BLAS that R uses.
