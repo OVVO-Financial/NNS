@@ -192,8 +192,12 @@ NNS.VAR <- function(variables,
     variables <- data.frame(as.matrix(variables), check.names = FALSE)
   } else if (inherits(variables, "xts") || (nowcast && inherits(variables, "zoo"))) {
     idx <- stats::time(variables)
-    if (inherits(idx, c("yearmon", "yearqtr"))) idx <- as.Date(idx)
+    calendar_index <- inherits(idx, c("yearmon", "yearqtr"))
+    if (calendar_index) idx <- as.Date(idx)
     dates <- as.character(idx)
+    step <- unique(diff(as.numeric(idx)))
+    if (length(step) == 1L && step > 0)
+      forecast_dates <- as.character(tail(idx, 1) + seq_len(h) * step)
     if (inherits(idx, c("Date", "POSIXt"))) {
       calendar <- as.POSIXlt(idx)
       months <- (calendar$year + 1900L) * 12L + calendar$mon
@@ -202,14 +206,10 @@ NNS.VAR <- function(variables,
         dates <- month_labels(months)
         if (nowcast) spacing <- 1L
       }
-      if (length(spacing) == 1L && spacing > 0) {
+      if ((nowcast || calendar_index || is.null(forecast_dates)) &&
+          length(spacing) == 1L && spacing > 0) {
         forecast_dates <- month_labels(tail(months, 1) + seq_len(h) * spacing)
       }
-    }
-    if (is.null(forecast_dates)) {
-      spacing <- unique(diff(as.numeric(idx)))
-      if (length(spacing) == 1L && spacing > 0)
-        forecast_dates <- as.character(tail(idx, 1) + seq_len(h) * spacing)
     }
     if (anyDuplicated(dates)) dates <- NULL
     if (anyDuplicated(forecast_dates)) forecast_dates <- NULL
