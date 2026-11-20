@@ -486,8 +486,8 @@
   actual.order <- NA_integer_
   
   if (identical(order, "max")) {
-    split.y <- split(y, x)
-    rx <- as.numeric(names(split.y))
+    rx <- sort(unique(as.numeric(x)))
+    split.y <- split(y, match(x, rx))
     ry <- unname(vapply(split.y, reducer, numeric(1L)))
     actual.order <- as.integer(length(rx))
   } else {
@@ -513,15 +513,11 @@
     rx <- rx[o]
     ry <- ry[o]
   }
-  # Equal x values (after the character rounding split() applies) share one
-  # reduced point.
   merge.ties <- function() {
-    groups <- split(ry, rx)
-    rx <<- as.numeric(names(groups))
+    keys <- unique(as.numeric(rx))
+    groups <- split(ry, match(rx, keys))
+    rx <<- keys
     ry <<- unname(vapply(groups, reducer, numeric(1L)))
-    o <- order(rx, method = "radix")
-    rx <<- rx[o]
-    ry <<- ry[o]
   }
   if (anyDuplicated(rx)) merge.ties()
 

@@ -88,8 +88,8 @@ test_that("regression points match the data frame construction", {
   reference <- function(x, y, order, noise.reduction = "off") {
     reducer <- function(z) NNS:::.nns_reg_reduce_value(z, noise.reduction, FALSE)
     if (identical(order, "max")) {
-      s <- split(y, x)
-      rp <- data.frame(x = as.numeric(names(s)), y = vapply(s, reducer, numeric(1L)))
+      keys <- sort(unique(as.numeric(x)))
+      rp <- data.frame(x = keys, y = vapply(keys, function(key) reducer(y[x == key]), numeric(1L)))
     } else {
       part <- NNS.part(x, y, type = "XONLY", order = order, obs.req = 0,
                        min.obs.stop = TRUE, noise.reduction = noise.reduction)
@@ -99,9 +99,8 @@ test_that("regression points match the data frame construction", {
     rp <- rp[order(rp$x, method = "radix"), , drop = FALSE]
     merge <- function(rp) {
       if (!anyDuplicated(rp$x)) return(rp)
-      g <- split(rp$y, rp$x)
-      rp <- data.frame(x = as.numeric(names(g)), y = vapply(g, reducer, numeric(1L)))
-      rp[order(rp$x, method = "radix"), , drop = FALSE]
+      keys <- sort(unique(as.numeric(rp$x)))
+      data.frame(x = keys, y = vapply(keys, function(key) reducer(rp$y[rp$x == key]), numeric(1L)))
     }
     rp <- merge(rp)
     rp <- rbind(rp, data.frame(x = c(min(x), max(x)),

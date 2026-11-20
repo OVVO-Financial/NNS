@@ -190,6 +190,14 @@ test_that("missing and nonfinite prediction values fail", {
   )
 })
 
+test_that("maximum order groups the original numeric coordinates", {
+  x <- 1.7e9 + c(2, 0, 1, 1) * 1e-6
+  fit <- NNS.reg(x, c(8, 2, 4, 6), type = "REG", order = "max",
+                 noise.reduction = "mean", point.est = x, plot = FALSE)
+  expect_identical(fit$regression.points$x, sort(unique(x)))
+  expect_equal(fit$Point.est, c(8, 2, 5, 5))
+})
+
 test_that("NNS.part order max never passes a character value to C++", {
   fit <- NNS.part(c(1, 1, 2, 3), c(1, 3, 4, 9),
                   order = "max", type = "XONLY")
