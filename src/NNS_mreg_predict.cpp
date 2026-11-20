@@ -7,6 +7,13 @@
 //     densities, matching the R helper term for term,
 //   - exact double-precision weighted class mode (max total, tie -> min value).
 // Row-parallel with a per-call thread count; no global RcppParallel thread state is touched.
+// R rounds each distance term before rowSums() accumulates it.
+#if defined(__clang__)
+#pragma clang fp contract(off)
+#elif defined(__GNUC__)
+#pragma GCC optimize("fp-contract=off")
+#endif
+
 #include <Rcpp.h>
 #include <RcppParallel.h>
 #include <algorithm>
@@ -458,7 +465,7 @@ struct PredictPathWorker : public Worker {
     };
     auto visit = [&](int s) {
       const double* x = data + static_cast<std::size_t>(s) * P;
-      double acc = 0.0;
+      long double acc = 0.0L;
       if (dist_code == 0) {
         for (int a = 0; a < P; ++a) {
           const double z = (x[a] - q[a]) / range[a];
@@ -475,8 +482,9 @@ struct PredictPathWorker : public Worker {
           acc += z * z;
         }
       }
-      if (acc > limit) return;
-      const double d = dist_code == 1 ? std::sqrt(acc) : acc;
+      const double sum = static_cast<double>(acc);
+      if (sum > limit) return;
+      const double d = dist_code == 1 ? std::sqrt(sum) : sum;
       const int id = row_id[s];
       if (ties) {
         if (!seen || d < dmin) { dmin = d; S.ties.clear(); seen = true; }
@@ -532,7 +540,7 @@ struct PredictPathWorker : public Worker {
   // Range-normalised distance of training row i to query r. The 1-D path uses
   // it too, so it selects neighbours and ties exactly as the generic path does.
   double distance(int i, std::size_t r) const {
-    double acc = 0.0;
+    long double acc = 0.0L;
     for (std::size_t a = 0; a < active.size(); ++a) {
       const int j = active[a];
       const double z = (rpm_x(i, j) - Xtest(r, j)) / col_range[a];
@@ -540,7 +548,8 @@ struct PredictPathWorker : public Worker {
       else if (dist_code == 0) acc += std::fabs(z) + z * z;
       else acc += z * z;
     }
-    return dist_code == 1 ? std::sqrt(acc) : acc;
+    const double sum = static_cast<double>(acc);
+    return dist_code == 1 ? std::sqrt(sum) : sum;
   }
 
   // Walk outward in |coord - t| order, then extend over distance() ties at the boundary.
@@ -823,7 +832,7 @@ NumericVector NNS_mreg_predict_cpp(const NumericMatrix& rpm_x,
       std::fill(d.begin(), d.end(), 0.0);
     } else if (dist_code == 2) {
       for (int i = 0; i < n; ++i) {
-        double acc = 0.0;
+        long double acc = 0.0L;
         for (std::size_t a = 0; a < active.size(); ++a) {
           const int j = active[a];
           acc += std::fabs((rpm_x(i, j) - Xtest(r, j)) / col_range[a]);
@@ -832,7 +841,7 @@ NumericVector NNS_mreg_predict_cpp(const NumericMatrix& rpm_x,
       }
     } else if (dist_code == 0) {
       for (int i = 0; i < n; ++i) {
-        double acc = 0.0;
+        long double acc = 0.0L;
         for (std::size_t a = 0; a < active.size(); ++a) {
           const int j = active[a];
           const double z = (rpm_x(i, j) - Xtest(r, j)) / col_range[a];
@@ -842,13 +851,13 @@ NumericVector NNS_mreg_predict_cpp(const NumericMatrix& rpm_x,
       }
     } else if (dist_code == 1) {
       for (int i = 0; i < n; ++i) {
-        double acc = 0.0;
+        long double acc = 0.0L;
         for (std::size_t a = 0; a < active.size(); ++a) {
           const int j = active[a];
           const double z = (rpm_x(i, j) - Xtest(r, j)) / col_range[a];
           acc += z * z;
         }
-        d[i] = std::sqrt(acc);
+        d[i] = std::sqrt(static_cast<double>(acc));
       }
     } else {
       stop("Unknown NNS multivariate distance code");
