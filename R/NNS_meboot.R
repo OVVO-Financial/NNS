@@ -10,10 +10,9 @@
 #' @param target_drift numerical; \code{target_drift = NULL} (default) Specifies the desired drift when \code{drift = TRUE}, i.e. a risk-free rate of return.  A drift other than the original is centred so the replicates keep \code{mean(x)}.
 #' @param target_drift_scale numerical; instead of calculating a \code{target_drift}, provide a scalar to the existing drift when \code{drift = TRUE}.
 #' @param trim numeric [0,1]; The mean trimming proportion, defaults to \code{trim = 0.1}.
-#' @param xmin numeric; the lower limit for the left tail.
-#' @param xmax numeric; the upper limit for the right tail.
-#' @param reachbnd logical; If \code{TRUE} potentially reached bounds (xmin = smallest value - trimmed mean and
-#' xmax = largest value + trimmed mean) are given when the random draw happens to be equal to 0 and 1, respectively.
+#' @param xmin numeric; optional lower limit on reconstructed levels before rounding.
+#' @param xmax numeric; optional upper limit on reconstructed levels before rounding.
+#' @param reachbnd logical; If \code{TRUE}, the residual tails reach the endpoints reported in \code{xmin} and \code{xmax} at probabilities 0 and 1. If \code{FALSE}, each tail is shifted to its desired interval mean.
 #' @param expand.sd logical; If \code{TRUE} the standard deviation in the ensemble is expanded. See \code{expand.sd} in \code{meboot::meboot}.  The expansion toward \code{sd(x)} is skipped when \code{drift = FALSE}, \code{target_drift} or \code{target_drift_scale} replaces the original drift, since \code{sd(x)} includes that drift.  A target equal to the original drift up to rounding (relative tolerance \code{sqrt(.Machine$double.eps)}, plus an allowance for rounding in the slope fit that grows with \code{max(abs(x))}) keeps the original reconstruction.
 #' @param force.clt logical; If \code{TRUE} the replicate means are assigned an iid normal-reference scale: the replicate means are spread as a normal sample centred on \code{mean(x)} with standard deviation \code{sd(x) / sqrt(n)}, the standard error of the mean of the \code{n} observations, whatever the number of \code{reps}.  See \code{force.clt} in \code{meboot::meboot}, whose code divides by the number of replicates instead (its comment says \code{n}).  When \code{drift = FALSE}, \code{target_drift} or \code{target_drift_scale} replaces the original drift, the replicate means are centred and spread using the new baseline plus the original residuals instead of \code{x}.
 #' @param scl.adjustment logical; If \code{TRUE} scale adjustment is performed to ensure that the population variance of the resampled residuals equals the variance of the detrended data.
@@ -36,8 +35,8 @@
 #' \item{z} class intervals limits.
 #' \item{dv} deviations of consecutive data values.
 #' \item{dvtrim} trimmed mean of dv.
-#' \item{xmin} data minimum for ensemble=xx[1]-dvtrim.
-#' \item{xmax} data x maximum for ensemble=xx[n]+dvtrim.
+#' \item{xmin} left residual tail endpoint before any recentering, \code{xx[1] - dvtrim}.
+#' \item{xmax} right residual tail endpoint before any recentering, \code{xx[n] + dvtrim}.
 #' \item{desintxb} desired interval means.
 #' \item{ordxx} ordered x values.
 #' \item{kappa} scale adjustment to the variance of ME density.
@@ -121,8 +120,9 @@ NNS.meboot <- function(x,
   if (any(class(x) %in% c("tbl","data.table"))) x <- as.vector(unlist(x))
   if (anyNA(x)) stop("You have some missing values, please address.")
   
-  trim <- list(trim = trim, xmin = xmin, xmax = xmax)
-  trimval <- if (is.null(trim$trim)) 0.1 else trim$trim
+  level_min <- xmin
+  level_max <- xmax
+  trimval <- if (is.null(trim)) 0.1 else trim
   n <- length(x)
   
   # --- Fit original linear trend ONCE (time order) and get residuals
@@ -174,13 +174,12 @@ NNS.meboot <- function(x,
   dv     <- abs(diff(as.numeric(rr)))
   dvtrim <- mean(dv, trim = trimval)
   
-  if (is.list(trim)) {
-    xmin <- if (is.null(trim$xmin)) xx[1] - dvtrim else trim$xmin
-    xmax <- if (is.null(trim$xmax)) xx[n] + dvtrim else trim$xmax
-    if (!is.null(trim$xmin) || !is.null(trim$xmax)) {
-      if (isTRUE(force.clt)) { expand.sd <- FALSE; force.clt <- FALSE }
-    }
-  } else { xmin <- xx[1] - dvtrim; xmax <- xx[n] + dvtrim }
+  xmin <- xx[1] - dvtrim
+  xmax <- xx[n] + dvtrim
+  if ((!is.null(level_min) || !is.null(level_max)) && isTRUE(force.clt)) {
+    expand.sd <- FALSE
+    force.clt <- FALSE
+  }
   
   # Theil–Laitinen interval means on residuals
   aux <- colSums(t(cbind(xx[-c(1,2)], xx[-c(1,n)], xx[-c((n-1),n)])) * c(0.25, 0.5, 0.25))
@@ -325,8 +324,8 @@ NNS.meboot <- function(x,
   # in place (ensemble[]) so the matrix dim/dimnames are preserved: pmax/pmin
   # copy attributes from their FIRST argument, so pmax(scalar, matrix) would
   # silently drop the dim and break the later dimnames() assignment.
-  if (!is.null(trim[[2]])) ensemble[] <- pmax(ensemble, trim[[2]])
-  if (!is.null(trim[[3]])) ensemble[] <- pmin(ensemble, trim[[3]])
+  if (!is.null(level_min)) ensemble[] <- pmax(ensemble, level_min)
+  if (!is.null(level_max)) ensemble[] <- pmin(ensemble, level_max)
   
   # ts attributes
   if (is.ts(x)) {

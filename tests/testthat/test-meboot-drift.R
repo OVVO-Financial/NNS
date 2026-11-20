@@ -53,6 +53,21 @@ test_that("force.clt spreads changed-drift replicate means on the residual scale
   expect_equal(sd(sloped), sd(ref) / sqrt(100), tolerance = 1e-5)
 })
 
+test_that("level limits clip reconstructed paths drawn from the same residual tails", {
+  x <- as.numeric(AirPassengers) - min(AirPassengers) + 1
+  draw <- function(...) {
+    set.seed(1)
+    NNS.meboot(x, reps = 5, rho = 1, ...)
+  }
+  raw <- draw(expand.sd = FALSE, force.clt = FALSE)
+  bounded <- draw(xmin = 0, xmax = 400)
+  paths <- raw["replicates", ][[1]]
+  expect_lt(min(paths), 0)
+  expect_gt(max(paths), 400)
+  expect_identical(bounded["replicates", ][[1]], pmin(pmax(paths, 0), 400))
+  expect_identical(bounded[c("xmin", "xmax"), ], raw[c("xmin", "xmax"), ])
+})
+
 test_that("drift = FALSE keeps mean(x) as the replicate level", {
   for (clt in c(TRUE, FALSE)) {
     R <- meboot_reps(drift = FALSE, force.clt = clt)

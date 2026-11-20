@@ -46,12 +46,11 @@ NNS.meboot(
 
 \item{trim}{numeric [0,1]; The mean trimming proportion, defaults to \code{trim = 0.1}.}
 
-\item{xmin}{numeric; the lower limit for the left tail.}
+\item{xmin}{numeric; optional lower limit on reconstructed levels before rounding.}
 
-\item{xmax}{numeric; the upper limit for the right tail.}
+\item{xmax}{numeric; optional upper limit on reconstructed levels before rounding.}
 
-\item{reachbnd}{logical; If \code{TRUE} potentially reached bounds (xmin = smallest value - trimmed mean and
-xmax = largest value + trimmed mean) are given when the random draw happens to be equal to 0 and 1, respectively.}
+\item{reachbnd}{logical; If \code{TRUE}, the residual tails reach the endpoints reported in \code{xmin} and \code{xmax} at probabilities 0 and 1. If \code{FALSE}, each tail is shifted to its desired interval mean.}
 
 \item{expand.sd}{logical; If \code{TRUE} the standard deviation in the ensemble is expanded. See \code{expand.sd} in \code{meboot::meboot}.  The expansion toward \code{sd(x)} is skipped when \code{drift = FALSE}, \code{target_drift} or \code{target_drift_scale} replaces the original drift, since \code{sd(x)} includes that drift.  A target equal to the original drift up to rounding (relative tolerance \code{sqrt(.Machine$double.eps)}, plus an allowance for rounding in the slope fit that grows with \code{max(abs(x))}) keeps the original reconstruction.}
 
@@ -86,8 +85,8 @@ Returns the following row names in a matrix:
 \item{z} class intervals limits.
 \item{dv} deviations of consecutive data values.
 \item{dvtrim} trimmed mean of dv.
-\item{xmin} data minimum for ensemble=xx[1]-dvtrim.
-\item{xmax} data x maximum for ensemble=xx[n]+dvtrim.
+\item{xmin} left residual tail endpoint before any recentering, \code{xx[1] - dvtrim}.
+\item{xmax} right residual tail endpoint before any recentering, \code{xx[n] + dvtrim}.
 \item{desintxb} desired interval means.
 \item{ordxx} ordered x values.
 \item{kappa} scale adjustment to the variance of ME density.
