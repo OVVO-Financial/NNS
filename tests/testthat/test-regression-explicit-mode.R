@@ -54,3 +54,39 @@ test_that("numeric derivative responses use regression even when binary", {
   expect_equal(dy.dx(seq_along(y), y, eval.point = "overall"), 1 / 29)
   expect_equal(dy.dx(seq_along(y), 10 * y - 5, eval.point = "overall"), 10 / 29)
 })
+
+test_that("inferred indices keep both logical indicators in regression and classification", {
+  set.seed(170)
+  x <- data.frame(g = factor(rep(c("10", "2", "1"), 20)),
+                  flag = rep(c(TRUE, FALSE), each = 2, length.out = 60),
+                  z = runif(60))
+  y <- 2 * x$flag + x$z + rnorm(60, sd = .2)
+  weights <- c(g_X1 = 1, g_X10 = 1, g_X2 = 1, flag_FALSE. = 1, flag_TRUE. = 1, z = 1)
+  fit <- function(y, method, type) NNS.reg(x, y, point.est = x[1:6, ],
+    type = type, dim.red.method = method, ncores = 1, plot = FALSE)
+  reg <- fit(y, "equal", "REG")
+  expected <- fit(y, weights, "REG")
+  expect_identical(reg$equation, expected$equation)
+  expect_identical(reg$Point.est, expected$Point.est)
+  labels <- cut(y, 3)
+  cls <- fit(labels, "equal", "CLASS")
+  expected <- fit(labels, weights, "CLASS")
+  expect_identical(cls$equation, expected$equation)
+  expect_identical(cls$Point.probabilities, expected$Point.probabilities)
+  expect_identical(cls$Point.est, expected$Point.est)
+})
+
+test_that("Stack and NNS.reg refit the same categorical index", {
+  x <- data.frame(g = factor(rep(c("no", "yes"), 30)), flag = rep(c(TRUE, FALSE), each = 30))
+  y <- as.numeric(x$g == "yes")
+  weights <- c(flag = 0, g__yes = 2, g__no = -1)
+  fit <- NNS.stack(x, y, method = 2, dim.red.method = weights, folds = 2,
+                   ncores = 1, seed = 5, status = FALSE)
+  refit <- NNS.reg(x, y, point.est = x[1:2, ], dim.red.method = weights,
+                   threshold = fit$NNS.dim.red.threshold, ncores = 1, plot = FALSE)
+  expect_equal(refit$equation, fit$NNS.dim.red.coefficients)
+  expect_equal(refit$Point.est, c(0, 1))
+  legacy <- c(g_no = -1, g_yes = 2, flag_FALSE. = 0, flag_TRUE. = 0)
+  expect_equal(NNS.reg(x, y, point.est = x[1:2, ], dim.red.method = legacy,
+                       ncores = 1, plot = FALSE)$Point.est, c(0, 1))
+})
