@@ -71,3 +71,24 @@ test_that("partial-selection and single-k kernels match references", {
     }
   }
 })
+
+test_that("NNS.reg keeps both nearest rows in a batch", {
+  x <- data.frame(a = c(-2, 2, seq(1e6, 1e8, length.out = 64)),
+                  b = c(rep(0, 65), 1))
+  y <- c(0, 10, rep(3, 64))
+  q <- data.frame(a = 0, b = 0)
+  batch <- q[rep(1, 4), , drop = FALSE]
+  fit <- function(query, dist = "NNS") {
+    NNS.reg(x, y, type = "REG", order = "max", n.best = 1, ncores = 1,
+            point.est = query, dist = dist, plot = FALSE, point.only = TRUE)
+  }
+
+  one <- fit(q)
+  ref <- .nns_mreg_predict_reference(as.matrix(batch), one$RPM, 1L, "NNS",
+                                     vapply(x, min, 0), vapply(x, max, 0), FALSE)
+  expect_equal(ref, rep(5, 4), tolerance = 1e-12)
+  expect_equal(rep(one$Point.est, 4), ref, tolerance = 1e-12)
+  expect_equal(fit(batch)$Point.est, ref, tolerance = 1e-12)
+  expect_equal(fit(batch, "L1")$Point.est, ref, tolerance = 1e-12)
+  expect_equal(fit(batch, "L2")$Point.est, ref, tolerance = 1e-12)
+})
