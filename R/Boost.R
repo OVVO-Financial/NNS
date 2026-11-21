@@ -426,7 +426,7 @@ NNS.boost <- function(IVs.train,
     if (!(is.numeric(DV.train) || is.integer(DV.train))) {
       stop("A nonnumeric response requires type = 'CLASS'.", call. = FALSE)
     }
-    y <- as.numeric(DV.train)
+    y <- .nns_sample(DV.train, "DV.train")
   }
   
   if (is.null(IVs.test)) {

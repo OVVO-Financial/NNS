@@ -44,48 +44,17 @@ NNS.dep <- function(x,
                      p.value   = FALSE,
                      print.map = FALSE) {
   
-  # ---- helper coercion ------------------------------------------------------
-  .coerce_vec <- function(z, nm) {
-    if (is.null(z)) return(NULL)
-    
-    if (any(class(z) %in% c("tbl", "data.table"))) {
-      if (!is.null(ncol(z)) && ncol(z) == 1L) {
-        z <- as.vector(unlist(z))
-      } else {
-        stop(sprintf("%s must be a vector or single-column object in the bivariate path.", nm))
-      }
-    }
-    
-    if (is.data.frame(z)) {
-      if (ncol(z) == 1L) {
-        z <- z[[1L]]
-      } else {
-        stop(sprintf("%s must be a vector or single-column object in the bivariate path.", nm))
-      }
-    }
-    
-    as.numeric(z)
-  }
-  
-  # ---- class coercions ------------------------------------------------------
   if (!is.null(y)) {
-    x <- .coerce_vec(x, "x")
-    y <- .coerce_vec(y, "y")
+    pair <- .nns_dependence_pair(x, y)
+    x <- pair$x
+    y <- pair$y
   } else {
-    if (any(class(x) %in% c("tbl", "data.table"))) x <- as.data.frame(x)
-    if (is.data.frame(x)) x <- data.matrix(x)
+    x <- .nns_dependence_matrix(x)
   }
-  
-  # ---- missing values -------------------------------------------------------
-  if (anyNA(x)) stop("x has missing values, please address.")
-  if (!is.null(y) && anyNA(y)) stop("y has missing values, please address.")
-  if (any(is.infinite(x))) stop("x must be finite.")
-  if (!is.null(y) && any(is.infinite(y))) stop("y must be finite.")
-  
+
   # ---- p.value permutation setup --------------------------------------------
   if (p.value) {
     if (is.null(y)) stop("p.value = TRUE requires both x and y.")
-    if (length(x) != length(y)) stop("x and y must have the same length.")
     
     y_p <- replicate(100L, sample.int(length(y)))
     same <- .nns_dep_perm_matches(x, y, y_p, asym)
@@ -165,7 +134,6 @@ NNS.dep <- function(x,
   }
   
   # ---- bivariate path -------------------------------------------------------
-  if (length(x) != length(y)) stop("x and y must have the same length.")
   
   l   <- length(x)
   obs <- max(8L, as.integer(l / 8L))
@@ -194,7 +162,7 @@ NNS.dep <- function(x,
       qyx <- part(y, x, "XONLY")
       qj <- part(x, y, NULL)
     }
-    return(NNS_dep_pair_cpp(x = as.numeric(x), y = as.numeric(y),
+    return(NNS_dep_pair_cpp(x = x, y = y,
                             quad_xy = qxy, quad_yx = qyx, quad_joint = qj,
                             asym = isTRUE(asym),
                             x_ties_known = as.integer(anyDuplicated(x) > 0L),
@@ -223,8 +191,8 @@ NNS.dep <- function(x,
   }
   
   NNS_dep_pair_cpp(
-    x          = as.numeric(x),
-    y          = as.numeric(y),
+    x          = x,
+    y          = y,
     quad_xy    = as.character(PART_xy$dt$quadrant),
     quad_yx    = qyx,
     quad_joint = qj,
@@ -266,7 +234,6 @@ NNS.dep <- function(x,
 # fine-scale signal-to-noise measure (see NNS_dep_local_cpp); NNS.dep itself
 # reports the multi-level measure.
 .nns_dep_local <- function(x, y, asym = TRUE) {
-  x <- as.numeric(x); y <- as.numeric(y)
   l <- length(x)
   obs <- max(8L, as.integer(l / 8L))
   ord <- max(ceiling(log(l, 2)), 1L)
@@ -298,7 +265,6 @@ NNS.dep <- function(x,
 # whether it has repeated values. Neither depends on the other variable, so a
 # caller pairing a variable with many others finds them once.
 .nns_dep_native <- function(x, y, own.x, own.y, asym, part, ties.x, ties.y) {
-  x <- as.numeric(x); y <- as.numeric(y)
   if (isTRUE(asym)) {
     NNS_dep_pair_cpp(x = x, y = y, quad_xy = own.x, quad_yx = character(0),
                      quad_joint = character(0), asym = TRUE,

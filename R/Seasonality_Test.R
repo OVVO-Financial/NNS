@@ -45,21 +45,14 @@ NNS.seas <- function(variable,
                      nperm = 100L,
                      dispersion = c("auto", "absolute")) {
   dispersion <- match.arg(dispersion)
-  # API per NNS manual / Rd (arguments & defaults)  :contentReference[oaicite:3]{index=3}
-  # Coerce tbl/data.table to numeric vector (repo reference)  :contentReference[oaicite:4]{index=4}
-  if (any(class(variable) %in% c("tbl", "data.table"))) {
-    variable <- as.vector(unlist(variable, use.names = FALSE))
-  }
-  if (!is.numeric(variable)) stop("Variable must be numeric")
-  if (anyNA(variable)) stop("You have some missing values, please address.")
-  if (any(is.infinite(variable))) stop("Infinite values not allowed")
+  variable <- .nns_seasonal_series(variable, "variable")
   if (!is.null(max.period) && (!is.numeric(max.period) || length(max.period) != 1L ||
                                !is.finite(max.period) || max.period < 1))
     stop("max.period must be NULL or a single number >= 1.")
   if (isTRUE(p.value) && (!is.numeric(nperm) || length(nperm) != 1L || !is.finite(nperm) || nperm < 1))
     stop("nperm must be a single number >= 1.")
 
-  x <- as.numeric(variable)
+  x <- variable
   if (dispersion == "absolute") x <- x - mean(x)
   n <- length(x)
   # Remove the linear trend, keeping the mean level: a trend inflates every

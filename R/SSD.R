@@ -20,20 +20,8 @@
 
 NNS.SSD <- function(x, y, plot = TRUE){
 
-  to_numeric_vector <- function(v, arg_name){
-    if(is.factor(v)) stop(sprintf("%s must be numeric, not a factor.", arg_name))
-    if(any(class(v)%in%c("tbl","data.table")) || is.data.frame(v) || is.matrix(v) || any(class(v) %in% c("xts", "zoo"))){
-      if(!is.null(dim(v)) && ncol(v) > 1){
-        stop(sprintf("%s must be a single-column object or numeric vector.", arg_name))
-      }
-      v <- as.vector(unlist(v, use.names = FALSE))
-    }
-    
-    as.numeric(v)
-  }
-  
-  x <- to_numeric_vector(x, "x")
-  y <- to_numeric_vector(y, "y")
+  x <- .nns_sd_column(x, "x")
+  y <- .nns_sd_column(y, "y")
 
   if(anyNA(x) || anyNA(y)) stop("You have some missing values, please address.")
 

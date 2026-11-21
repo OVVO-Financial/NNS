@@ -26,5 +26,5 @@
 
 NNS.SD.efficient.set <- function(x, degree, type = "discrete", status = TRUE) {
   .Call(`_NNS_NNS_SD_efficient_set_parallel_cpp`,
-        as.matrix(x), as.integer(degree), as.character(type), as.logical(status))
+        as.matrix(.nns_measure_frame(x)), as.integer(degree), as.character(type), as.logical(status))
 }

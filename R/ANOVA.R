@@ -123,14 +123,8 @@ NNS.ANOVA <- function(
   }
   
   if (!missing(treatment) && !is.null(treatment)) {
-    # Two-sample path: directly compare control vs. treatment.
-    # with treatment
-    if (any(class(control)   %in% c("tbl","data.table"))) control   <- as.vector(unlist(control))
-    if (any(class(treatment) %in% c("tbl","data.table"))) treatment <- as.vector(unlist(treatment))
-
-    # Missing values are omitted, as in the multi-group path (na.omit per column).
-    control   <- control[!is.na(control)]
-    treatment <- treatment[!is.na(treatment)]
+    control <- .nns_observed(control)
+    treatment <- .nns_observed(treatment)
 
     if (robust) {
       # ---------------------------
@@ -233,6 +227,8 @@ NNS.ANOVA <- function(
       A <- as.data.frame(control)
     } else {
       if (any(class(control) %in% "list")) {
+        .nns_no_factor(control, "control")
+        control <- lapply(control, .nns_measure_column)
         # Pad unequal-length vectors to a rectangular matrix for pairwise scans.
         A <- do.call(cbind, lapply(control, `length<-`, max(lengths(control))))
       } else {
@@ -243,6 +239,7 @@ NNS.ANOVA <- function(
     A <- control
   }
   
+  groups <- lapply(seq_len(n), function(i) na.omit(unlist(A[, i])))
   if (medians) {
     mean.of.means <- median(unlist(A), na.rm = TRUE)
   } else {
@@ -253,15 +250,15 @@ NNS.ANOVA <- function(
     # Aggregate mode: compute one global certainty across all group pairs.
     # Continuous CDF for each variable from grand statistic
     if (medians) {
-      LPM_ratio <- sapply(1:n, function(b) LPM.ratio(0, mean.of.means, na.omit(unlist(A[, b]))))
+      LPM_ratio <- sapply(1:n, function(b) LPM.ratio(0, mean.of.means, groups[[b]]))
     } else {
-      LPM_ratio <- sapply(1:n, function(b) LPM.ratio(1, mean.of.means, na.omit(unlist(A[, b]))))
+      LPM_ratio <- sapply(1:n, function(b) LPM.ratio(1, mean.of.means, groups[[b]]))
     }
     
     # UPM.VaR(p, 1, x) is LPM.VaR(1 - p, 1, x), and LPM.VaR solves its
     # percentiles one by one, so one call per group gives all four thresholds.
     group.var <- vapply(1:n, function(i) {
-      LPM.VaR(c(.25, .75, .125, .875), 1, na.omit(unlist(A[,i])))
+      LPM.VaR(c(.25, .75, .125, .875), 1, groups[[i]])
     }, numeric(4L))
     lower.25.target  <- mean(group.var[1L, ])
     upper.25.target  <- mean(group.var[2L, ])
@@ -274,8 +271,8 @@ NNS.ANOVA <- function(
       raw.certainties[[i]] <- sapply(
         (i + 1):n,
         function(b) NNS.ANOVA.bin(
-          na.omit(unlist(A[, i])),
-          na.omit(unlist(A[, b])),
+          groups[[i]],
+          groups[[b]],
           means.only = means.only,
           medians = medians,
           mean.of.means = mean.of.means,
@@ -313,8 +310,8 @@ NNS.ANOVA <- function(
     raw.certainties[[i]] <- sapply(
       (i + 1):n,
       function(b) NNS.ANOVA.bin(
-        na.omit(unlist(A[, i])),
-        na.omit(unlist(A[, b])),
+        groups[[i]],
+        groups[[b]],
         means.only = means.only,
         medians = medians,
         plot = FALSE

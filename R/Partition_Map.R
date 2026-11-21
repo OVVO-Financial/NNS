@@ -56,54 +56,9 @@ NNS.part <- function(x, y, Voronoi = FALSE, type = NULL,
   x.expr <- substitute(x)
   y.expr <- substitute(y)
   
-  if (inherits(x, c("tbl", "data.table")) || is.data.frame(x)) {
-    if (NCOL(x) != 1L) {
-      stop("[x] must be a vector or one-column object.", call. = FALSE)
-    }
-    x <- x[[1L]]
-  }
-  if (inherits(y, c("tbl", "data.table")) || is.data.frame(y)) {
-    if (NCOL(y) != 1L) {
-      stop("[y] must be a vector or one-column object.", call. = FALSE)
-    }
-    y <- y[[1L]]
-  }
-  if (is.matrix(x)) {
-    if (ncol(x) != 1L) {
-      stop("[x] must be a vector or one-column object.", call. = FALSE)
-    }
-    x <- x[, 1L]
-  }
-  if (is.matrix(y)) {
-    if (ncol(y) != 1L) {
-      stop("[y] must be a vector or one-column object.", call. = FALSE)
-    }
-    y <- y[, 1L]
-  }
-  
-  if (length(x) != length(y)) {
-    stop("[x] and [y] must have the same length.", call. = FALSE)
-  }
-  if (length(x) < 1L) {
-    stop("[x] and [y] must not be empty.", call. = FALSE)
-  }
-  
-  x <- as.numeric(x)
-  y <- as.numeric(y)
-  
-  # Complete-case handling: drop pairs with NA/NaN in either variable but
-  # keep infinities, matching the historical NNS.part contract.
-  complete <- !(is.na(x) | is.na(y))
-  if (!all(complete)) {
-    x <- x[complete]
-    y <- y[complete]
-  }
-  if (length(x) < 1L) {
-    stop(
-      "[x] and [y] must contain at least one complete (non-missing) pair.",
-      call. = FALSE
-    )
-  }
+  pair <- .nns_partition_pair(x, y)
+  x <- pair$x
+  y <- pair$y
   
   Voronoi <- .nns_reg_scalar_logical(Voronoi, "Voronoi")
   min.obs.stop <- .nns_reg_scalar_logical(min.obs.stop, "min.obs.stop")

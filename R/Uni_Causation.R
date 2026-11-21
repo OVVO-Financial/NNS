@@ -188,70 +188,7 @@ signed_from_cp <- function(cp){
 }
 
 
-# Core causation computation (no permutation logic).
-NNS.caus_core <- function(x, y = NULL,
-                          factor.2.dummy = FALSE,
-                          tau = 0,
-                          plot = FALSE,
-                          p.value = FALSE,
-                          nperm = 100L,
-                          permute = c("auto", "y", "x", "both", "shift"),
-                          seed = NULL,
-                          conf.int = 0.95){
-  if(!is.null(y))  if(anyNA(x) || anyNA(y)) stop("You have some missing values, please address.")
-  if(is.null(y))  if(anyNA(x)) stop("You have some missing values, please address.")
-
-  orig.tau <- tau
-  orig.plot <- plot
-
-  if(is.data.frame(x) && ncol(x) == 1) x <- x[[1L]]
-  if(any(class(x)%in%c("tbl","data.table"))) x <- as.data.frame(x)
-  if(is.data.frame(y) && ncol(y) == 1) y <- y[[1L]]
-
-  if(factor.2.dummy){
-    if(!is.null(dim(x))){
-      if(!is.numeric(x)){
-        x <- do.call(cbind, lapply(x, factor_2_dummy_FR))
-      } else {
-        x <- apply(x, 2, as.double)
-      }
-      if(is.list(x)){
-        x <- do.call(cbind, x)
-        x <- apply(x, 2, as.double)
-      }
-    } else {
-      x <- factor_2_dummy(x)
-      if(is.null(dim(x))){
-        x <- as.double(x)
-      } else {
-        x <- apply(x, 2, as.double)
-      }
-    }
-  }
-
-  if(is.null(y)) {
-    return(NNS.caus.matrix(x, tau = orig.tau, factor.2.dummy = factor.2.dummy, plot = orig.plot,
-                           p.value = p.value, nperm = nperm, conf.int = conf.int, seed = seed,
-                           permute = match.arg(permute)))
-  }
-
-  if(is.factor(y)) y <- as.numeric(y)
-
-  # ---- input validation ---------------------------------------------------
-  if(NCOL(x) > 1 || NCOL(y) > 1)
-    stop("x and y must each be a single variable (factor.2.dummy = TRUE turns a factor with k levels into k - 1 columns).")
-  if(length(x) != length(y)) stop("x and y must have the same length.")
-  if(any(is.infinite(x)) || any(is.infinite(y))) stop("x and y must be finite.")
-  if(length(unique(x)) < 2 || length(unique(y)) < 2)
-    stop("x and y must not be constant: causation is undefined for a variable with no variation.")
-  if(!(identical(tau, "cs") || identical(tau, "ts"))){
-    if(!is.numeric(tau) || length(tau) != 1 || !is.finite(tau) || tau < 0 ||
-       tau != round(tau) || tau >= length(x) - 2)
-      stop("tau must be \"cs\", \"ts\" or a single non-negative integer smaller than length(x) - 2.")
-  }
-
-  x <- as.numeric(x); y <- as.numeric(y)
-
+.nns_caus_observed <- function(x, y, tau, plot = FALSE) {
   if(identical(tau, "cs")) {
     tau_use <- 0L
   } else if(identical(tau, "ts")) {

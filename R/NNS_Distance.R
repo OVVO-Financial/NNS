@@ -18,9 +18,9 @@ NNS.distance <- function(rpm, dist.estimate, k = "all", class = NULL) {
   if (!"y.hat" %in% names(rpm)) stop("rpm must contain column 'y.hat'")
   
   # 1) target vector
-  dest <- unlist(dist.estimate, use.names = TRUE)
+  dest <- .nns_coordinates(dist.estimate, "dist.estimate")
   n <- length(dest)
-  y.hat <- as.numeric(rpm$y.hat)
+  y.hat <- .nns_distance_response(rpm$y.hat, class)
   
   # 2) candidate feature columns, drop y.hat
   feat_all <- setdiff(names(rpm), "y.hat")
@@ -37,7 +37,7 @@ NNS.distance <- function(rpm, dist.estimate, k = "all", class = NULL) {
     dest <- dest[feat]
   }
 
-  X <- as.matrix(rpm[, feat, drop = FALSE])
+  X <- .nns_sample_matrix(rpm[, feat, drop = FALSE], "rpm")
   if (ncol(X) != n) {
     stop(sprintf(
       "after alignment, ncol(X)=%d != length(dist.estimate)=%d",
@@ -58,7 +58,7 @@ NNS.distance <- function(rpm, dist.estimate, k = "all", class = NULL) {
   }
   
   # 5) call the C++ core
-  NNS_distance_cpp(X, y.hat, as.numeric(dest), as.integer(k), !is.null(class))
+  NNS_distance_cpp(X, y.hat, dest, as.integer(k), !is.null(class))
 }
 
 .nns_distance_names <- function(supplied, available) {

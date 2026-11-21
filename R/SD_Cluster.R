@@ -55,8 +55,8 @@ NNS.SD.cluster <- function(data, degree = 1, type = "discrete", min_cluster = 1,
   variable_names <- colnames(data)
   if(is.null(variable_names)) variable_names <- paste0("X_", seq_len(n))
   
-  remaining_data <- as.matrix(data)
-  colnames(remaining_data) <- as.character(seq_len(n))
+  remaining_data <- as.matrix(.nns_measure_frame(data))
+  if (ncol(remaining_data)) colnames(remaining_data) <- as.character(seq_len(n))
   
   
   # Continue clustering until the number of remaining columns is less than or equal to min_cluster
@@ -72,9 +72,6 @@ NNS.SD.cluster <- function(data, degree = 1, type = "discrete", min_cluster = 1,
     
     # Remove the identified SD set from remaining_data
     remaining_data <- remaining_data[, !(colnames(remaining_data) %in% SD_set), drop = FALSE]
-    
-    # Ensure remaining_data remains a matrix
-    remaining_data <- as.matrix(remaining_data)
     
     iteration <- iteration + 1
     

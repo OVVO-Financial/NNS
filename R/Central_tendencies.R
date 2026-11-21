@@ -18,7 +18,8 @@
 
 
 NNS.mode <- function(x, discrete = FALSE, multi = TRUE) {
-    .Call(`_NNS_NNS_mode_cpp`, as.numeric(x), as.logical(discrete), as.logical(multi))
+  x <- .nns_sample(x, "x")
+  .Call(`_NNS_NNS_mode_cpp`, x, as.logical(discrete), as.logical(multi))
 }
 
 
@@ -45,7 +46,8 @@ mode_class <- function(x) NNS.mode(x, discrete = TRUE, multi = FALSE)
 #' @export
 
 NNS.gravity <- function(x, discrete = FALSE) {
-  .Call(`_NNS_NNS_gravity_cpp`, as.numeric(x), as.logical(discrete))
+  x <- .nns_sample(x, "x")
+  .Call(`_NNS_NNS_gravity_cpp`, x, as.logical(discrete))
 }
 
 gravity <- function(x) NNS.gravity(x, discrete = FALSE)
@@ -88,6 +90,10 @@ gravity_class <- function(x) NNS.gravity(x, discrete = TRUE)
 #' @export
 
 NNS.rescale <- function(x, a, b, method = "minmax", T = NULL, type = "Terminal") {
-  .Call(`_NNS_NNS_rescale_cpp`, as.numeric(x), as.numeric(a), as.numeric(b),
-        as.character(method), if (is.null(T)) NULL else as.numeric(T), as.character(type))
+  x <- .nns_sample(x, "x")
+  a <- .nns_sample(a, "a")
+  b <- .nns_sample(b, "b")
+  method <- as.character(method)
+  maturity <- if (identical(tolower(unname(method)), "riskneutral") && !is.null(T)) .nns_sample(T, "T")
+  .Call(`_NNS_NNS_rescale_cpp`, x, a, b, method, maturity, as.character(type))
 }

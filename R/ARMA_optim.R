@@ -88,21 +88,16 @@ NNS.ARMA.optim <- function(variable,
                            plot = FALSE,
                            bias.correction = c("none", "split")){
   
-  if(any(class(variable)%in%c("tbl","data.table"))) variable <- as.vector(unlist(variable))
-  
-  if(anyNA(variable)) stop("You have some missing values, please address.")
+  variable <- .nns_forecast_series(variable, "variable")
   
   n <- length(variable)
   
   bias.correction <- match.arg(bias.correction)
   if(is.null(obj.fn)){ stop("Please provide an objective function")}
-  objective <- tolower(objective)
-  if(length(objective) != 1L || !objective %in% c("min", "max"))
-    stop("[objective] must be 'min' or 'max'.")
+  objective <- .nns_forecast_objective(objective)
   
   if(is.null(training.set) && is.null(h)) stop("Please use the length of the variable less the desired forecast period as the [training.set] value, or provide a value for [h].")
   
-  variable <- as.numeric(variable)
   OV <- variable
   
   if(!is.null(h)) .arma_check_horizon(h)

@@ -75,25 +75,14 @@ NNS.caus <- function(x, y = NULL,
     if (isTRUE(p.value)) set.seed(seed)
   }
 
-  # Unwrap single-column data frames here as well as in the core: the
-  # permutation loop below calls sample() on x and y, which on a data frame
-  # would shuffle its one column as a single element and leave the rows in
-  # place, so every null value would equal the observed statistic.
-  if(is.data.frame(x) && ncol(x) == 1) x <- x[[1L]]
-  if(is.data.frame(y) && ncol(y) == 1) y <- y[[1L]]
-  
-  # Base causation (delegates to core)
-  cp <- NNS.caus_core(x = x, y = y,
-                      factor.2.dummy = factor.2.dummy,
-                      tau = tau,
-                      plot = plot,
-                      p.value = p.value,
-                      nperm = nperm,
-                      permute = permute,
-                      seed = seed,
-                      conf.int = conf.int)
-  
-  if (is.null(y)) return(cp)
+  pair <- .nns_causation_inputs(x, y, factor.2.dummy, tau)
+  x <- pair$x
+  y <- pair$y
+  if (is.null(y))
+    return(NNS.caus.matrix(x, tau = tau, factor.2.dummy = factor.2.dummy, plot = plot,
+                           p.value = p.value, nperm = nperm, conf.int = conf.int,
+                           seed = seed, permute = permute))
+  cp <- .nns_caus_observed(x, y, tau, plot)
   if (!isTRUE(p.value)) return(cp)
   
   # Compute observed signed statistic x -> y
@@ -102,31 +91,27 @@ NNS.caus <- function(x, y = NULL,
   # One numeric lag for the observed statistic and every permutation (#96):
   # tau = "ts" is resolved once on the observed series, so a permuted series
   # without a usable period can't fail, and the null compares like with like.
-  xv <- as.numeric(x); yv <- as.numeric(y)
-  tau_num <- if (identical(tau, "ts")) .nns_caus_ts_lag(xv, yv) else if (identical(tau, "cs")) 0L else as.integer(tau)
+  tau_num <- if (identical(tau, "ts")) .nns_caus_ts_lag(x, y) else if (identical(tau, "cs")) 0L else as.integer(tau)
   # Time series keep their own dynamics under a circular shift; cross-sections
   # are shuffled.
   if (permute == "auto") permute <- if (tau_num > 0L) "shift" else "y"
   if (permute == "shift") {
-    offsets <- .nns_caus_shift_draw(length(yv), tau_num, nperm)
+    offsets <- .nns_caus_shift_draw(length(y), tau_num, nperm)
     nperm <- length(offsets)
   }
   
   # Build null distribution via permutations
   null_vals <- numeric(nperm)
   for(b in seq_len(nperm)){
-    x_perm <- xv; y_perm <- yv
-    if(permute == "y") y_perm <- sample(yv, length(yv), replace = FALSE)
-    if(permute == "x") x_perm <- sample(xv, length(xv), replace = FALSE)
+    x_perm <- x; y_perm <- y
+    if(permute == "y") y_perm <- sample(y, length(y), replace = FALSE)
+    if(permute == "x") x_perm <- sample(x, length(x), replace = FALSE)
     if(permute == "both"){
-      x_perm <- sample(xv, length(xv), replace = FALSE)
-      y_perm <- sample(yv, length(yv), replace = FALSE)
+      x_perm <- sample(x, length(x), replace = FALSE)
+      y_perm <- sample(y, length(y), replace = FALSE)
     }
-    if(permute == "shift") y_perm <- .nns_caus_shift(yv, offsets[b])
-    cp_perm <- NNS.caus_core(x = x_perm, y = y_perm,
-                             factor.2.dummy = FALSE,
-                             tau = tau_num,
-                             plot = FALSE)
+    if(permute == "shift") y_perm <- .nns_caus_shift(y, offsets[b])
+    cp_perm <- .nns_caus_observed(x_perm, y_perm, tau_num)
     null_vals[b] <- signed_from_cp(cp_perm)
   }
   

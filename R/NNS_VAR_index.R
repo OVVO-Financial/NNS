@@ -44,9 +44,9 @@
 # Estimates at x.new from observed values y at index positions x. `points`
 # supplies the regression points directly (tests only).
 .nns_var_index_fit <- function(x, y, x.new, points = NULL) {
-  x <- as.numeric(x)
-  y <- as.numeric(y)
-  x.new <- as.numeric(x.new)
+  x <- .nns_sample(x, "x")
+  y <- .nns_sample(y, "y")
+  x.new <- .nns_sample(x.new, "x.new")
   if (length(y) < 2L)
     return(rep(if (length(y)) y[length(y)] else NA_real_, length(x.new)))
 

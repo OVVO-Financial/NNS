@@ -56,7 +56,7 @@
     class.values <- sort(unique(y.numeric))
     class.levels <- as.character(class.values)
   } else {
-    y.numeric <- as.numeric(y)
+    y.numeric <- .nns_sample(y, "y")
     class.values <- if (is.class) sort(unique(y.numeric)) else NULL
     class.levels <- if (is.class) as.character(class.values) else NULL
   }
@@ -291,11 +291,11 @@
         stop("[point.est] predictor 'x' must contain only finite numeric values.",
              call. = FALSE)
       }
-      point.matrix <- matrix(as.numeric(point.est), ncol = 1L,
+      point.matrix <- matrix(.nns_sample(point.est, "point.est"), ncol = 1L,
                              dimnames = list(NULL, "x"))
     }
     return(list(
-      x = matrix(as.numeric(x), ncol = 1L, dimnames = list(NULL, "x")),
+      x = matrix(.nns_sample(x, "x"), ncol = 1L, dimnames = list(NULL, "x")),
       point.est = point.matrix,
       stack.index = FALSE,
       raw.names = "x",
@@ -381,7 +381,7 @@
       
       meta[[j]] <- list(name = nm, categorical = TRUE, levels = levels.train)
     } else {
-      tr <- suppressWarnings(as.numeric(z))
+      tr <- suppressWarnings(.nns_sample(z, nm))
       if (length(tr) != length(z) || any(!is.finite(tr))) {
         stop(sprintf("Predictor '%s' must contain only finite numeric values.", nm),
              call. = FALSE)
@@ -390,11 +390,7 @@
       train.parts[[length(train.parts) + 1L]] <- tr
       
       if (!is.null(points)) {
-        pt <- if (is.factor(zp) || is.character(zp)) {
-          suppressWarnings(as.numeric(as.character(zp)))
-        } else {
-          suppressWarnings(as.numeric(zp))
-        }
+        pt <- suppressWarnings(.nns_numeric_labels(zp, "point.est"))
         if (length(pt) != length(zp) || any(!is.finite(pt))) {
           stop(sprintf("[point.est] predictor '%s' must contain only finite numeric values.",
                        nm), call. = FALSE)
