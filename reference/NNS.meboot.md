@@ -44,16 +44,22 @@ NNS.meboot(
 
 - rho:
 
-  numeric \[-1,1\] (vectorized); A `rho` must be provided, otherwise a
-  blank list will be returned. The dependence target is applied to each
-  individual `replicate` (every replicate is mixed to the requested
-  dependence with the original series); it is **not** applied to the
-  `ensemble`. See `Note`.
+  numeric \[-1,1\] (vectorized); Supply `rho`, `target_drift` or
+  `target_drift_scale` to generate scenarios. With none supplied, or
+  with an explicitly supplied `NULL` scenario argument, the result is an
+  empty list. The dependence target is applied to each individual
+  `replicate` (every replicate is mixed to the requested dependence with
+  the original series); it is **not** applied to the `ensemble`. See
+  `Note`.
 
 - type:
 
   options("spearman", "pearson", "NNScor", "NNSdep");
-  `type = "spearman"`(default) dependence metric desired.
+  `type = "spearman"`(default) dependence metric desired. `"NNScor"`
+  targets the signed correlation from
+  [NNS.dep](https://OVVO-Financial.github.io/NNS/reference/NNS.dep.md)
+  and `"NNSdep"` its unsigned dependence. Unrecognised strings also use
+  signed correlation.
 
 - drift:
 
@@ -128,7 +134,7 @@ NNS.meboot(
 
 - elaps:
 
-  logical; If `TRUE` elapsed time during computations is displayed.
+  Unused.
 
 - digits:
 
@@ -136,20 +142,15 @@ NNS.meboot(
 
 - colsubj:
 
-  numeric; the column in `x` that contains the individual index. It is
-  ignored if the input data `x` is not a `pdata.frame` object.
+  Unused. May be omitted.
 
 - coldata:
 
-  numeric; the column in `x` that contains the data of the variable to
-  create the ensemble. It is ignored if the input data `x` is not a
-  `pdata.frame` object.
+  Unused. May be omitted.
 
 - coltimes:
 
-  numeric; an optional argument indicating the column that contains the
-  times at which the observations for each individual are observed. It
-  is ignored if the input data `x` is not a `pdata.frame` object.
+  Unused. May be omitted.
 
 - ...:
 
@@ -164,7 +165,9 @@ NNS.meboot(
 
 ## Value
 
-Returns the following row names in a matrix:
+Returns a list matrix with one column per scenario and the following
+named rows. For example, `boots["replicates", 1][[1]]` extracts the
+replicate matrix for the first scenario.
 
 - x input vector, or the extracted column for a one-column data frame.
 
@@ -195,8 +198,6 @@ Returns the following row names in a matrix:
 - ordxx ordered x values.
 
 - kappa scale adjustment to the variance of ME density.
-
-- elaps elapsed time.
 
 ## Note
 

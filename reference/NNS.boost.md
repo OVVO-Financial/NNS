@@ -1,8 +1,9 @@
 # NNS Boost
 
-Ensemble method for classification using the NNS multivariate regression
-[NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md) as
-the base learner instead of trees.
+Ensemble method for classification and regression. Each base learner
+fits
+[NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md) on
+a sampled subset of predictors.
 
 ## Usage
 
@@ -57,8 +58,9 @@ NNS.boost(
 
 - type:
 
-  Set to `"CLASS"` for classification. Factor responses yield one-based
-  numeric codes. Use `NULL` (default) for a continuous response.
+  With `NULL` (default), Boost selects classification for factor,
+  character or logical responses. Use `"CLASS"` for other numeric
+  labels.
 
 - depth:
 
@@ -90,7 +92,7 @@ NNS.boost(
 - balance:
 
   logical; `FALSE` (default) Uses both up and down sampling to balance
-  the classes. `type="CLASS"` required.
+  the classes. With `type = NULL`, balancing selects classification.
 
 - ts.test:
 
@@ -143,8 +145,8 @@ NNS.boost(
 
 - pred.int:
 
-  numeric \[0,1\]; `NULL` (default) Returns the associated prediction
-  intervals for the final estimate.
+  Prediction interval level strictly between 0 and 1 for regression or
+  binary classification. Defaults to `NULL`.
 
 - status:
 
@@ -152,9 +154,9 @@ NNS.boost(
 
 - seed:
 
-  Optional integer random seed used for reproducible resampling, fold
-  construction, and stochastic fitting steps. If \`NULL\`, the current
-  random-number-generator state is used.
+  Integer seed for resampling and fitting. The default is `123L`. With
+  `seed = NULL`, the fit uses the current RNG state and restores it on
+  return.
 
 - dist:
 
@@ -164,7 +166,10 @@ NNS.boost(
   and
   [NNS.stack](https://OVVO-Financial.github.io/NNS/reference/NNS.stack.md)
   calls. `dist = NULL` is the default and selects the native blended NNS
-  distance; `dist = "NNS"` is an explicit alias for the default.
+  distance; `dist = "NNS"` is an explicit alias for the default. `"L1"`
+  and `"L2"` use Manhattan and Euclidean distance, respectively, on
+  range-normalized coordinates. `"FACTOR"` uses the proportion of
+  encoded predictor columns that differ.
 
 - folds:
 
@@ -175,15 +180,16 @@ NNS.boost(
 
 ## Value
 
-Returns a vector of fitted values for the dependent variable test set
-`$results`, prediction intervals `$pred.int`, the final feature loadings
-`$feature.weights`, final feature frequencies `$feature.frequency`, and
-(for classification) the class labels `$class.levels`. Factor and
-character responses return one-based numeric codes. Use
-`class.levels[results]` to recover the labels. Observed factor labels
-follow their declared order. Character labels are sorted. Numeric and
-logical classes retain their values. The objective function receives the
-same values as the predictions.
+With `features.only = FALSE`, returns a list containing the test
+predictions `$results`, `$pred.int` (prediction intervals when requested
+for regression or binary classification, otherwise `NULL`), the final
+feature loadings `$feature.weights`, final feature frequencies
+`$feature.frequency`, and (for classification) the class labels
+`$class.levels`. Factor and character responses return one-based numeric
+codes. Use `class.levels[results]` to recover the labels. Observed
+factor labels follow their declared order. Character labels are sorted.
+Numeric and logical classes retain their values. The objective function
+receives the same values as the predictions.
 
 ## Note
 

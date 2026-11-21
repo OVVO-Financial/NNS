@@ -99,7 +99,7 @@
 
 
 <dt id="arg-dist">dist<a class="anchor" aria-label="anchor" href="#arg-dist"></a></dt>
-<dd><p>options:(NULL, "NNS", "L1", "L2", "FACTOR") the method of distance calculation. <code>dist = NULL</code> is the default and selects the native blended NNS distance; <code>dist = "NNS"</code> is an explicit alias for the default. <code>dist = "L2"</code> selects Euclidean distance; <code>dist = "L1"</code> selects Manhattan distance; <code>dist = "FACTOR"</code> uses a frequency.</p></dd>
+<dd><p>options:(NULL, "NNS", "L1", "L2", "FACTOR") the method of distance calculation. <code>dist = NULL</code> is the default and selects the native blended NNS distance; <code>dist = "NNS"</code> is an explicit alias for the default. <code>dist = "L2"</code> selects Euclidean distance; <code>dist = "L1"</code> selects Manhattan distance; <code>dist = "FACTOR"</code> uses the proportion of encoded predictor columns that differ.</p></dd>
 
 
 <dt id="arg-cv-size">CV.size<a class="anchor" aria-label="anchor" href="#arg-cv-size"></a></dt>
@@ -107,7 +107,7 @@
 
 
 <dt id="arg-balance">balance<a class="anchor" aria-label="anchor" href="#arg-balance"></a></dt>
-<dd><p>logical; <code>FALSE</code> (default) Uses both up and down sampling to balance the classes.  <code>type="CLASS"</code> required.</p></dd>
+<dd><p>logical; <code>FALSE</code> (default) Uses both up and down sampling to balance the classes.  With <code>type = NULL</code>, balancing selects classification.</p></dd>
 
 
 <dt id="arg-ts-test">ts.test<a class="anchor" aria-label="anchor" href="#arg-ts-test"></a></dt>
@@ -147,7 +147,7 @@
 
 
 <dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
-<dd><p>Optional integer random seed used for reproducible resampling, fold construction, and stochastic fitting steps. If `NULL`, the current random-number-generator state is used.</p></dd>
+<dd><p>Integer seed for resampling and fitting. The default is <code>123L</code>. With <code>seed = NULL</code>, the fit uses the current RNG state and restores it on return.</p></dd>
 
 
 <dt id="arg--validation">.validation<a class="anchor" aria-label="anchor" href="#arg--validation"></a></dt>
@@ -156,7 +156,7 @@
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>Returns a vector of fitted values for the dependent variable test set for all models.</p><ul><li><p><code>"NNS.reg.n.best"</code> returns the optimum <code>"n.best"</code> parameter for the <a href="NNS.reg.html">NNS.reg</a> multivariate regression; when all regression points (for classification, all cells) are selected, their number in the final fit. <code>NA</code> for a single predictor in regression, whose univariate <a href="NNS.reg.html">NNS.reg</a> fit has no <code>n.best</code> to tune (use <code>cbind(x, x)</code> to search one), and when <code>method</code> does not include 1.  <code>"SSE.reg"</code> returns the SSE for the <a href="NNS.reg.html">NNS.reg</a> multivariate regression.</p></li>
+    <p>Returns a list of model predictions, tuning results and weights.</p><ul><li><p><code>"NNS.reg.n.best"</code> returns the optimum <code>"n.best"</code> parameter for the <a href="NNS.reg.html">NNS.reg</a> multivariate regression; when all regression points (for classification, all cells) are selected, their number in the final fit. <code>NA</code> for a single predictor in regression, whose univariate <a href="NNS.reg.html">NNS.reg</a> fit has no <code>n.best</code> to tune (use <code>cbind(x, x)</code> to search one), and when <code>method</code> does not include 1.</p></li>
 <li><p><code>"OBJfn.reg"</code> returns the best <code>obj.fn</code> value of the <a href="NNS.reg.html">NNS.reg</a> regression's tuning on the out-of-fold predictions; it is selection-optimized, not an estimate of out-of-sample performance.</p></li>
 <li><p><code>"NNS.dim.red.threshold"</code> returns the coefficient cutoff at which <a href="NNS.reg.html">NNS.reg</a> on <code>(IVs.train, DV.train)</code> with the same <code>dim.red.method</code> keeps the tuned number of predictors: the smallest kept coefficient magnitude, or 0 when every predictor is kept. Ties at the cutoff keep every tied predictor. For classification it is one number when every class index shares the cutoff, as two-class indices always do, and otherwise one cutoff per class, which <a href="NNS.reg.html">NNS.reg</a> accepts as <code>threshold</code>. <code>NA</code> when <code>method</code> does not include 2.</p></li>
 <li><p><code>"NNS.reg.variables"</code> returns the encoded predictor names used by the final multivariate classification fit. <code>NULL</code> when classification uses only method 2.</p></li>

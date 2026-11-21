@@ -480,22 +480,24 @@ We can also obtain confidence intervals for the tie-adjusted superiority
 probability using maximum entropy bootstrap replicates.
 
 ``` r
+
+set.seed(123)
 NNS.SS(x, y, confidence.interval = TRUE, reps = 999, ci = 0.95)[1:5]
 
-$p_gt
-[1] 0.233915
-
-$p_tie
-[1] 0
-
-$p_star
-[1] 0.233915
-
-$lower
-[1] 0.2105631
-
-$upper
-[1] 0.2537789
+#> $p_gt
+#> [1] 0.233915
+#>
+#> $p_tie
+#> [1] 0
+#>
+#> $p_star
+#> [1] 0.233915
+#>
+#> $lower
+#> [1] 0.2191905
+#>
+#> $upper
+#> [1] 0.2587136
 ```
 
 This provides an interpretable effect size for directional comparison
@@ -536,7 +538,7 @@ fragile global parametric forms.
 
 **Headers.**
 
-- `NNS.reg(x, y, order=NULL, smooth=TRUE, ncores=1, ...)` →
+- `NNS.reg(x, y, order=NULL, smooth=FALSE, ncores=NULL, ...)` →
   `$Fitted.xy`, `$Point.est`, …
 - `NNS.boost(IVs.train, DV.train, IVs.test, epochs, learner.trials, status, balance, type, folds)`
 - `NNS.stack(IVs.train, DV.train, IVs.test, type, balance, ncores, folds)`
@@ -1136,18 +1138,18 @@ Classification](https://OVVO-Financial.github.io/NNS/articles/NNSvignette_08_Cla
 
 ### 7. Differentiation & Slope Measures
 
-- `dy.dx(x, y)` — numerical derivative of `y` with respect to `x` via
-  `NNS.reg`.
-- `dy.d_(x, Y, var)` — partial derivative of multivariate `Y` w.r.t.
-  `var`.
-- `NNS.diff(x, y)` — derivative via secant projections.
+- `dy.dx(x, y, eval.point)` estimates derivatives at the requested
+  points.
+- `dy.d_(x, y, wrt, ...)` estimates the partial derivative of `y` with
+  respect to predictor `wrt`.
+- `NNS.diff(f, point, ...)` estimates the derivative of `f` at `point`
+  by secant projections.
 
 ### 8. Time Series & Forecasting
 
 - `NNS.ARMA(...)`, `NNS.ARMA.optim(...)` — nonlinear ARMA modeling.
 - `NNS.seas(...)` — detect seasonality.
 - `NNS.VAR(...)` — nonlinear VAR modeling.
-- `NNS.nowcast(x, h, ...)` — near-term nonlinear forecast.
 
 See NNS Vignette: [Getting Started with NNS:
 Forecasting](https://OVVO-Financial.github.io/NNS/articles/NNSvignette_09_Forecasting.md)

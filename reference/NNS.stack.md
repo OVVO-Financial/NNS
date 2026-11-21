@@ -88,7 +88,8 @@ NNS.stack(
   calculation. `dist = NULL` is the default and selects the native
   blended NNS distance; `dist = "NNS"` is an explicit alias for the
   default. `dist = "L2"` selects Euclidean distance; `dist = "L1"`
-  selects Manhattan distance; `dist = "FACTOR"` uses a frequency.
+  selects Manhattan distance; `dist = "FACTOR"` uses the proportion of
+  encoded predictor columns that differ.
 
 - CV.size:
 
@@ -102,7 +103,7 @@ NNS.stack(
 - balance:
 
   logical; `FALSE` (default) Uses both up and down sampling to balance
-  the classes. `type="CLASS"` required.
+  the classes. With `type = NULL`, balancing selects classification.
 
 - ts.test:
 
@@ -175,9 +176,9 @@ NNS.stack(
 
 - seed:
 
-  Optional integer random seed used for reproducible resampling, fold
-  construction, and stochastic fitting steps. If \`NULL\`, the current
-  random-number-generator state is used.
+  Integer seed for resampling and fitting. The default is `123L`. With
+  `seed = NULL`, the fit uses the current RNG state and restores it on
+  return.
 
 - .validation:
 
@@ -194,8 +195,7 @@ NNS.stack(
 
 ## Value
 
-Returns a vector of fitted values for the dependent variable test set
-for all models.
+Returns a list of model predictions, tuning results and weights.
 
 - `"NNS.reg.n.best"` returns the optimum `"n.best"` parameter for the
   [NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md)
@@ -204,9 +204,7 @@ for all models.
   fit. `NA` for a single predictor in regression, whose univariate
   [NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md)
   fit has no `n.best` to tune (use `cbind(x, x)` to search one), and
-  when `method` does not include 1. `"SSE.reg"` returns the SSE for the
-  [NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md)
-  multivariate regression.
+  when `method` does not include 1.
 
 - `"OBJfn.reg"` returns the best `obj.fn` value of the
   [NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md)

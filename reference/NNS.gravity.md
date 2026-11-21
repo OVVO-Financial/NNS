@@ -18,8 +18,10 @@ NNS.gravity(x, discrete = FALSE)
 
 - discrete:
 
-  logical; `FALSE` (default) for continuous distributions, `TRUE` for
-  discrete distributions.
+  logical; `FALSE` (default) for continuous distributions, `TRUE` rounds
+  the result to the nearest integer, with half-integers rounded up. A
+  constant sample of four or more finite observations returns its common
+  value.
 
 ## Value
 

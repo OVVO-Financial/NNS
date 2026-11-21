@@ -109,7 +109,7 @@ into the previous cluster if it has fewer than <code>min_cluster</code> members.
 <span class="r-in"><span><span class="va">z</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">A</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">z</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Perform SD-based clustering (degree 1), requiring at least 2 elements per cluster</span></span></span>
+<span class="r-in"><span><span class="co"># Perform SD-based clustering (degree 1), stop peeling when at most two variables remain</span></span></span>
 <span class="r-in"><span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu">NNS.SD.cluster</span><span class="op">(</span>data <span class="op">=</span> <span class="va">A</span>, degree <span class="op">=</span> <span class="fl">1</span>, min_cluster <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">results</span><span class="op">$</span><span class="va">Clusters</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>

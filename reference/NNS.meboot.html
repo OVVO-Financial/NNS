@@ -80,11 +80,11 @@
 
 
 <dt id="arg-rho">rho<a class="anchor" aria-label="anchor" href="#arg-rho"></a></dt>
-<dd><p>numeric [-1,1] (vectorized); A <code>rho</code> must be provided, otherwise a blank list will be returned.  The dependence target is applied to each individual <code>replicate</code> (every replicate is mixed to the requested dependence with the original series); it is <strong>not</strong> applied to the <code>ensemble</code>.  See <code>Note</code>.</p></dd>
+<dd><p>numeric [-1,1] (vectorized); Supply <code>rho</code>, <code>target_drift</code> or <code>target_drift_scale</code> to generate scenarios. With none supplied, or with an explicitly supplied <code>NULL</code> scenario argument, the result is an empty list.  The dependence target is applied to each individual <code>replicate</code> (every replicate is mixed to the requested dependence with the original series); it is <strong>not</strong> applied to the <code>ensemble</code>.  See <code>Note</code>.</p></dd>
 
 
 <dt id="arg-type">type<a class="anchor" aria-label="anchor" href="#arg-type"></a></dt>
-<dd><p>options("spearman", "pearson", "NNScor", "NNSdep"); <code>type = "spearman"</code>(default) dependence metric desired.</p></dd>
+<dd><p>options("spearman", "pearson", "NNScor", "NNSdep"); <code>type = "spearman"</code>(default) dependence metric desired. <code>"NNScor"</code> targets the signed correlation from <a href="NNS.dep.html">NNS.dep</a> and <code>"NNSdep"</code> its unsigned dependence. Unrecognised strings also use signed correlation.</p></dd>
 
 
 <dt id="arg-drift">drift<a class="anchor" aria-label="anchor" href="#arg-drift"></a></dt>
@@ -132,7 +132,7 @@
 
 
 <dt id="arg-elaps">elaps<a class="anchor" aria-label="anchor" href="#arg-elaps"></a></dt>
-<dd><p>logical; If <code>TRUE</code> elapsed time during computations is displayed.</p></dd>
+<dd><p>Unused.</p></dd>
 
 
 <dt id="arg-digits">digits<a class="anchor" aria-label="anchor" href="#arg-digits"></a></dt>
@@ -140,16 +140,15 @@
 
 
 <dt id="arg-colsubj">colsubj<a class="anchor" aria-label="anchor" href="#arg-colsubj"></a></dt>
-<dd><p>numeric; the column in <code>x</code> that contains the individual index. It is ignored if the input data <code>x</code> is not a <code>pdata.frame</code> object.</p></dd>
+<dd><p>Unused. May be omitted.</p></dd>
 
 
 <dt id="arg-coldata">coldata<a class="anchor" aria-label="anchor" href="#arg-coldata"></a></dt>
-<dd><p>numeric; the column in <code>x</code> that contains the data of the variable to create the ensemble. It is ignored if the input data <code>x</code> is not a <code>pdata.frame</code> object.</p></dd>
+<dd><p>Unused. May be omitted.</p></dd>
 
 
 <dt id="arg-coltimes">coltimes<a class="anchor" aria-label="anchor" href="#arg-coltimes"></a></dt>
-<dd><p>numeric; an optional argument indicating the column that contains the times at which the observations for each individual are observed. It is ignored if the input data <code>x</code>
-is not a <code>pdata.frame</code> object.</p></dd>
+<dd><p>Unused. May be omitted.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -162,7 +161,7 @@ is not a <code>pdata.frame</code> object.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>Returns the following row names in a matrix:</p><ul><li><p>x input vector, or the extracted column for a one-column data frame.</p></li>
+    <p>Returns a list matrix with one column per scenario and the following named rows. For example, <code>boots["replicates", 1][[1]]</code> extracts the replicate matrix for the first scenario.</p><ul><li><p>x input vector, or the extracted column for a one-column data frame.</p></li>
 <li><p>replicates maximum entropy bootstrap replicates.</p></li>
 <li><p>ensemble average observation over all replicates.  Being a per-observation mean it is a central summary, not a single series carrying the target dependence; a rank or linear correlation taken directly on the <code>ensemble</code> tends to read higher than <code>rho</code> (averaging amplifies the shared order), so assess <code>rho</code> on the <code>replicates</code>.</p></li>
 <li><p>xx sorted order stats (xx[1] is minimum value).</p></li>
@@ -174,7 +173,6 @@ is not a <code>pdata.frame</code> object.</p></dd>
 <li><p>desintxb desired interval means.</p></li>
 <li><p>ordxx ordered x values.</p></li>
 <li><p>kappa scale adjustment to the variance of ME density.</p></li>
-<li><p>elaps elapsed time.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>

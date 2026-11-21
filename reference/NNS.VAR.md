@@ -70,11 +70,10 @@ mean((predicted - actual)^2)/.denom
 
 - obj.fn:
 
-  expression;
-  `expression(mean((predicted - actual)^2)) / (Sum of NNS Co-partial moments)`
-  (default) MSE / co-movements is the default objective function. Any
-  `expression(...)` using the specific terms `predicted` and `actual`
-  can be used.
+  The default objective divides mean squared error by the sum of the
+  lower and upper co-partial moments of predictions and observations
+  about their respective means. A zero denominator gives `Inf`. A custom
+  expression can use `predicted` and `actual`.
 
 - objective:
 

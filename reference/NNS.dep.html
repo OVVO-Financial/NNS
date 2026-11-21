@@ -70,7 +70,9 @@
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>Returns the bi-variate <code>"Correlation"</code> and <code>"Dependence"</code> or correlation / dependence matrix for matrix input.</p>
+    <p>A list with <code>Correlation</code> and <code>Dependence</code>, each a number for two vectors or a pairwise matrix for matrix input.
+With <code>p.value = TRUE</code>, the list also contains <code>Correlation p.value</code> and <code>Dependence p.value</code>, each a number,
+and <code>Correlation 95% CIs</code> and <code>Dependence 95% CIs</code>, each a pair of lower and upper permutation-null bounds.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>

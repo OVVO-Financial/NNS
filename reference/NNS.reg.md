@@ -161,8 +161,11 @@ NNS.reg(
   classification, D is the mean over predictors of each predictor's
   strongest dependence with a class indicator. `(n.best = "all")` will
   select and weight all generated regression points. Analogous to `k` in
-  a `k Nearest Neighbors` algorithm. Different values of `n.best` are
-  tested using cross-validation in
+  a `k Nearest Neighbors` algorithm. In multivariate regression with
+  `n.best = 1`, ties at the nearest distance return the
+  [NNS.gravity](https://OVVO-Financial.github.io/NNS/reference/NNS.gravity.md)
+  of the tied regression-point responses. Different values of `n.best`
+  are tested using cross-validation in
   [NNS.stack](https://OVVO-Financial.github.io/NNS/reference/NNS.stack.md).
   `NA` selects the default, as `NULL` does.
 
@@ -183,8 +186,9 @@ NNS.reg(
   restricted partitions, while `(noise.reduction = "mode")` uses modes
   instead of means for
   [NNS.dep](https://OVVO-Financial.github.io/NNS/reference/NNS.dep.md)
-  restricted partitions. `(noise.reduction = "off")` uses an overall
-  central tendency measure for partitions.
+  restricted partitions. In regression, `(noise.reduction = "off")` uses
+  [NNS.gravity](https://OVVO-Financial.github.io/NNS/reference/NNS.gravity.md)
+  for partition centres.
 
 - dist:
 
@@ -193,7 +197,8 @@ NNS.reg(
   blended NNS distance, \\sum(abs(z) + z^2)\\, over range-normalized
   coordinates. `dist = "NNS"` is an explicit alias for the default.
   `dist = "L2"` selects Euclidean distance; `dist = "L1"` selects
-  Manhattan distance; `dist = "FACTOR"` uses a frequency.
+  Manhattan distance; `dist = "FACTOR"` uses the proportion of encoded
+  predictor columns that differ.
 
 - ncores:
 
@@ -216,7 +221,8 @@ NNS.reg(
 
 ## Value
 
-UNIVARIATE REGRESSION RETURNS THE FOLLOWING VALUES:
+Univariate and dimension reduction regression return the following
+values:
 
 - `"R2"` is squared Pearson correlation between fitted and observed
   responses (Racine–Hastie goodness of fit), or fitted classification
@@ -225,8 +231,12 @@ UNIVARIATE REGRESSION RETURNS THE FOLLOWING VALUES:
 - `"SE"` returns the overall standard error of the estimate between `y`
   and `y.hat`;
 
-- `"Prediction.Accuracy"` returns the proportion of fitted class
-  decisions equal to the observed class;
+- `"Prediction.Accuracy"` and `class.levels` are `NULL` for regression;
+
+- `"equation"` gives the synthetic predictor coefficients in dimension
+  reduction. Its last row gives the denominator, the number of nonzero
+  coefficients. `x.star` gives the synthetic predictor for the training
+  rows. Both fields are `NULL` for a single encoded predictor column;
 
 - `"derivative"` for the coefficient of the `x` and its applicable
   range;
@@ -239,22 +249,20 @@ UNIVARIATE REGRESSION RETURNS THE FOLLOWING VALUES:
 - `"regression.points"` provides the points used in the regression
   equation for the given order of partitions;
 
-- `"Fitted.xy"` returns a `data.frame` of `x`, `y`, `y.hat`, `resid`,
-  `NNS.ID`, `gradient`;
+- `"Fitted.xy"` returns a `data.frame` of `x`, `y`, `y.hat`, `NNS.ID`,
+  `gradient` and `residuals`. With `confidence.interval` it also
+  contains `conf.int.neg` and `conf.int.pos`;
 
-MULTIVARIATE REGRESSION RETURNS THE FOLLOWING VALUES:
+Full multivariate regression returns the following values:
 
 - `"R2"` is squared Pearson correlation between fitted and observed
   responses (Racine–Hastie goodness of fit), or fitted classification
   accuracy;
 
-- `"equation"` returns the numerator of the synthetic X\* dimension
-  reduction equation as a `data.frame` consisting of regressor and its
-  coefficient. Denominator is the number of non-zero coefficients
-  (`abs(coefficient) > 0`), returned in last row of `equation`
-  `data.frame`.
+- `"n.best"` gives the nominal number of nearest regression points. With
+  `n.best = 1`, all points tied at the nearest distance contribute;
 
-- `"x.star"` returns the synthetic X\* as a vector;
+- `"dist"` gives the distance method;
 
 - `"rhs.partitions"` returns the partition points for each regressor
   `x`;
@@ -268,10 +276,31 @@ MULTIVARIATE REGRESSION RETURNS THE FOLLOWING VALUES:
   `"Point.est"` returned using the `"confidence.interval"` provided;
 
 - `"Fitted.xy"` returns a `data.frame` of the regressors, `y`, `y.hat`,
-  `NNS.ID` and `residuals` for full multivariate regression, or of the
-  synthetic `x`, `y`, `y.hat`, `NNS.ID`, `gradient` and `residuals` for
-  dimension reduction regression. `confidence.interval` adds
-  `conf.int.neg` and `conf.int.pos`.
+  `NNS.ID` and `residuals`. `confidence.interval` adds `conf.int.neg`
+  and `conf.int.pos`.
+
+For classification, `R2` and `Prediction.Accuracy` give fitted accuracy.
+`Fitted` and `Fitted.xy` contain the same table of predictors, observed
+and fitted classes, `NNS.ID` and errors. `NNS.ID` is the cell ID in full
+classification and the training row index in reduced classification.
+`Fitted.probabilities` and `Point.probabilities` give class
+probabilities for training and prediction rows. `class.levels` and
+`class.values` map labels to output values. `Point.est` gives predicted
+classes. `Prediction.set` gives a set for each prediction row when
+`confidence.interval` is supplied. Without prediction rows, `Point.est`,
+`Point.probabilities` and `Prediction.set` are `NULL`. `SE`, `x.star`,
+`derivative` and `pred.int` are `NULL`. In the full classifier, `RPM`
+and `regression.points` give the cell centres, `RPM.probabilities` their
+class frequencies, `rhs.partitions` the partition boundaries and
+`n.best` the nominal neighbour count. Neighbour weighting includes all
+cells tied at the cutoff. With a single continuous predictor, the
+classifier interpolates cell probabilities regardless of `n.best`. Here
+`equation` is `NULL`. With dimension reduction, `equation` contains one
+equation per class, the cell and partition fields are `NULL` and
+`n.best` is `NA`.
+
+With `point.only = TRUE`, fitted tables, fitted probabilities and fit
+statistics are `NULL`.
 
 ## Details
 
@@ -397,7 +426,7 @@ NNS.reg(iris[,1:4], iris[,5], point.est = iris[1:10, 1:4], type = "CLASS")$Point
 
 ## To call fitted values:
 x <- rnorm(100) ; y <- rnorm(100)
-NNS.reg(x, y)$Fitted
+NNS.reg(x, y)$Fitted.xy
 
 ## To call partial derivative (univariate regression only):
 NNS.reg(x, y)$derivative

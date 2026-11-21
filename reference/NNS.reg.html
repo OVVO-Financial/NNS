@@ -133,7 +133,7 @@
 
 <dt id="arg-n-best">n.best<a class="anchor" aria-label="anchor" href="#arg-n-best"></a></dt>
 <dd><p>integer; <code>NULL</code> (default) Sets the number of nearest regression points to use in weighting for multivariate regression at <code>floor((1 - D) * sqrt(R))</code>, where R is the number of regression points (at least 1), and D averages the copula summaries with response y and -y so the smoothing choice is unchanged by response reflection. For classification, D is the mean over predictors of each predictor's strongest dependence with a class indicator.  <code>(n.best = "all")</code> will select and weight all generated regression points.  Analogous to <code>k</code> in a
-<code>k Nearest Neighbors</code> algorithm.  Different values of <code>n.best</code> are tested using cross-validation in <a href="NNS.stack.html">NNS.stack</a>. <code>NA</code> selects the default, as <code>NULL</code> does.</p></dd>
+<code>k Nearest Neighbors</code> algorithm. In multivariate regression with <code>n.best = 1</code>, ties at the nearest distance return the <a href="NNS.gravity.html">NNS.gravity</a> of the tied regression-point responses. Different values of <code>n.best</code> are tested using cross-validation in <a href="NNS.stack.html">NNS.stack</a>. <code>NA</code> selects the default, as <code>NULL</code> does.</p></dd>
 
 
 <dt id="arg-smooth">smooth<a class="anchor" aria-label="anchor" href="#arg-smooth"></a></dt>
@@ -141,11 +141,11 @@
 
 
 <dt id="arg-noise-reduction">noise.reduction<a class="anchor" aria-label="anchor" href="#arg-noise-reduction"></a></dt>
-<dd><p>the method of determining regression points options: ("mean", "median", "mode", "off"); In low signal:noise situations,<code>(noise.reduction = "mean")</code>  uses means for <a href="NNS.dep.html">NNS.dep</a> restricted partitions, <code>(noise.reduction = "median")</code> uses medians instead of means for <a href="NNS.dep.html">NNS.dep</a> restricted partitions, while <code>(noise.reduction = "mode")</code>  uses modes instead of means for <a href="NNS.dep.html">NNS.dep</a> restricted partitions.  <code>(noise.reduction = "off")</code> uses an overall central tendency measure for partitions.</p></dd>
+<dd><p>the method of determining regression points options: ("mean", "median", "mode", "off"); In low signal:noise situations,<code>(noise.reduction = "mean")</code>  uses means for <a href="NNS.dep.html">NNS.dep</a> restricted partitions, <code>(noise.reduction = "median")</code> uses medians instead of means for <a href="NNS.dep.html">NNS.dep</a> restricted partitions, while <code>(noise.reduction = "mode")</code>  uses modes instead of means for <a href="NNS.dep.html">NNS.dep</a> restricted partitions.  In regression, <code>(noise.reduction = "off")</code> uses <a href="NNS.gravity.html">NNS.gravity</a> for partition centres.</p></dd>
 
 
 <dt id="arg-dist">dist<a class="anchor" aria-label="anchor" href="#arg-dist"></a></dt>
-<dd><p>options:(NULL, "NNS", "L1", "L2", "FACTOR") the method of distance calculation. <code>dist = NULL</code> is the default and selects the native blended NNS distance, \(sum(abs(z) + z^2)\), over range-normalized coordinates. <code>dist = "NNS"</code> is an explicit alias for the default. <code>dist = "L2"</code> selects Euclidean distance; <code>dist = "L1"</code> selects Manhattan distance; <code>dist = "FACTOR"</code> uses a frequency.</p></dd>
+<dd><p>options:(NULL, "NNS", "L1", "L2", "FACTOR") the method of distance calculation. <code>dist = NULL</code> is the default and selects the native blended NNS distance, \(sum(abs(z) + z^2)\), over range-normalized coordinates. <code>dist = "NNS"</code> is an explicit alias for the default. <code>dist = "L2"</code> selects Euclidean distance; <code>dist = "L1"</code> selects Manhattan distance; <code>dist = "FACTOR"</code> uses the proportion of encoded predictor columns that differ.</p></dd>
 
 
 <dt id="arg-ncores">ncores<a class="anchor" aria-label="anchor" href="#arg-ncores"></a></dt>
@@ -162,23 +162,35 @@
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>UNIVARIATE REGRESSION RETURNS THE FOLLOWING VALUES:</p><ul><li><p><code>"R2"</code> is squared Pearson correlation between fitted and observed responses (Racine–Hastie goodness of fit), or fitted classification accuracy;</p></li>
+    <p>Univariate and dimension reduction regression return the following values:</p><ul><li><p><code>"R2"</code> is squared Pearson correlation between fitted and observed responses (Racine–Hastie goodness of fit), or fitted classification accuracy;</p></li>
 <li><p><code>"SE"</code> returns the overall standard error of the estimate between <code>y</code> and <code>y.hat</code>;</p></li>
-<li><p><code>"Prediction.Accuracy"</code> returns the proportion of fitted class decisions equal to the observed class;</p></li>
+<li><p><code>"Prediction.Accuracy"</code> and <code>class.levels</code> are <code>NULL</code> for regression;</p></li>
+<li><p><code>"equation"</code> gives the synthetic predictor coefficients in dimension reduction. Its last row gives the denominator, the number of nonzero coefficients. <code>x.star</code> gives the synthetic predictor for the training rows. Both fields are <code>NULL</code> for a single encoded predictor column;</p></li>
 <li><p><code>"derivative"</code> for the coefficient of the <code>x</code> and its applicable range;</p></li>
 <li><p><code>"Point.est"</code> for the predicted value generated;</p></li>
 <li><p><code>"pred.int"</code> lower and upper prediction intervals for the <code>"Point.est"</code> returned using the <code>"confidence.interval"</code> provided;</p></li>
 <li><p><code>"regression.points"</code> provides the points used in the regression equation for the given order of partitions;</p></li>
-<li><p><code>"Fitted.xy"</code> returns a <code>data.frame</code> of <code>x</code>, <code>y</code>, <code>y.hat</code>, <code>resid</code>, <code>NNS.ID</code>, <code>gradient</code>;</p></li>
-</ul><p>MULTIVARIATE REGRESSION RETURNS THE FOLLOWING VALUES:</p><ul><li><p><code>"R2"</code> is squared Pearson correlation between fitted and observed responses (Racine–Hastie goodness of fit), or fitted classification accuracy;</p></li>
-<li><p><code>"equation"</code> returns the numerator of the synthetic X* dimension reduction equation as a <code>data.frame</code> consisting of regressor and its coefficient.  Denominator is the number of non-zero coefficients (<code>abs(coefficient) &gt; 0</code>), returned in last row of <code>equation</code> <code>data.frame</code>.</p></li>
-<li><p><code>"x.star"</code> returns the synthetic X* as a vector;</p></li>
+<li><p><code>"Fitted.xy"</code> returns a <code>data.frame</code> of <code>x</code>, <code>y</code>, <code>y.hat</code>, <code>NNS.ID</code>, <code>gradient</code> and <code>residuals</code>. With <code>confidence.interval</code> it also contains <code>conf.int.neg</code> and <code>conf.int.pos</code>;</p></li>
+</ul><p>Full multivariate regression returns the following values:</p><ul><li><p><code>"R2"</code> is squared Pearson correlation between fitted and observed responses (Racine–Hastie goodness of fit), or fitted classification accuracy;</p></li>
+<li><p><code>"n.best"</code> gives the nominal number of nearest regression points. With <code>n.best = 1</code>, all points tied at the nearest distance contribute;</p></li>
+<li><p><code>"dist"</code> gives the distance method;</p></li>
 <li><p><code>"rhs.partitions"</code> returns the partition points for each regressor <code>x</code>;</p></li>
 <li><p><code>"RPM"</code> provides the Regression Point Matrix, the points for each <code>x</code> used in the regression equation for the given order of partitions;</p></li>
 <li><p><code>"Point.est"</code> returns the predicted value generated;</p></li>
 <li><p><code>"pred.int"</code> lower and upper prediction intervals for the <code>"Point.est"</code> returned using the <code>"confidence.interval"</code> provided;</p></li>
-<li><p><code>"Fitted.xy"</code> returns a <code>data.frame</code> of the regressors, <code>y</code>, <code>y.hat</code>, <code>NNS.ID</code> and <code>residuals</code> for full multivariate regression, or of the synthetic <code>x</code>, <code>y</code>, <code>y.hat</code>, <code>NNS.ID</code>, <code>gradient</code> and <code>residuals</code> for dimension reduction regression.  <code>confidence.interval</code> adds <code>conf.int.neg</code> and <code>conf.int.pos</code>.</p></li>
-</ul></div>
+<li><p><code>"Fitted.xy"</code> returns a <code>data.frame</code> of the regressors, <code>y</code>, <code>y.hat</code>, <code>NNS.ID</code> and <code>residuals</code>.  <code>confidence.interval</code> adds <code>conf.int.neg</code> and <code>conf.int.pos</code>.</p></li>
+</ul><p>For classification, <code>R2</code> and <code>Prediction.Accuracy</code> give fitted accuracy.
+<code>Fitted</code> and <code>Fitted.xy</code> contain the same table of predictors, observed and fitted classes, <code>NNS.ID</code> and errors. <code>NNS.ID</code> is the cell ID in full classification and the training row index in reduced classification.
+<code>Fitted.probabilities</code> and <code>Point.probabilities</code> give class probabilities for training and prediction rows.
+<code>class.levels</code> and <code>class.values</code> map labels to output values. <code>Point.est</code> gives predicted classes.
+<code>Prediction.set</code> gives a set for each prediction row when <code>confidence.interval</code> is supplied.
+Without prediction rows, <code>Point.est</code>, <code>Point.probabilities</code> and <code>Prediction.set</code> are <code>NULL</code>.
+<code>SE</code>, <code>x.star</code>, <code>derivative</code> and <code>pred.int</code> are <code>NULL</code>.
+In the full classifier, <code>RPM</code> and <code>regression.points</code> give the cell centres, <code>RPM.probabilities</code> their class frequencies,
+<code>rhs.partitions</code> the partition boundaries and <code>n.best</code> the nominal neighbour count. Neighbour weighting includes all cells tied at the cutoff. With a single continuous predictor, the classifier interpolates cell probabilities regardless of <code>n.best</code>. Here <code>equation</code> is <code>NULL</code>.
+With dimension reduction, <code>equation</code> contains one equation per class, the cell and partition fields are <code>NULL</code> and <code>n.best</code> is <code>NA</code>.</p>
+<p>With <code>point.only = TRUE</code>, fitted tables, fitted probabilities and fit statistics are <code>NULL</code>.</p>
+    </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>For regression, <code>R2</code> measures association between fitted and observed responses: it is \(cor(y, \hat y)^2\), with the package's finite constant-vector convention. It is not \(1-SSE/SST\); a biased or incorrectly scaled prediction can have <code>R2 = 1</code>. Evaluate held-out prediction errors for predictive accuracy.</p>
@@ -243,7 +255,7 @@
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## To call fitted values:</span></span></span>
 <span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span> ; <span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">NNS.reg</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span><span class="op">$</span><span class="va">Fitted</span></span></span>
+<span class="r-in"><span><span class="fu">NNS.reg</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span><span class="op">$</span><span class="va">Fitted.xy</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## To call partial derivative (univariate regression only):</span></span></span>
 <span class="r-in"><span><span class="fu">NNS.reg</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span><span class="op">$</span><span class="va">derivative</span></span></span>

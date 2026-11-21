@@ -25,7 +25,8 @@ NNS.FSD(x, y, type = "discrete", plot = TRUE)
   first-order stochastic dominance. The legacy option `"continuous"`
   compares degree-one ratios \\L_1/(L_1+U_1)\\, equivalently
   Omega/expectile order; it does not carry the ordinary FSD guarantee
-  for every increasing utility.
+  for every increasing utility. For other strings the function warns and
+  uses the continuous comparison.
 
 - plot:
 

@@ -88,3 +88,11 @@ centres `cx` and `cy`, the digit for the default joint partition
 (`type = NULL`) is `1 + (x <= cx) + 2 * (y <= cy)`: 1 = upper-right, 2 =
 upper-left, 3 = lower-right, 4 = lower-left. For `type = "XONLY"` the
 digit is 1 for `x <= cx` and 2 for `x > cx`.
+
+## Examples
+
+``` r
+NNS.part(1:8, (1:8)^2, order = 1)$regression.points
+#>   quadrant   x     y
+#> 1       pq 4.5 19.25
+```

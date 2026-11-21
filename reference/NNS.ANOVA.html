@@ -65,11 +65,11 @@ with central and tail benchmarks, without selecting a parametric family.</p>
 
 
 <dl><dt id="arg-control">control<a class="anchor" aria-label="anchor" href="#arg-control"></a></dt>
-<dd><p>Numeric vector of control group observations</p></dd>
+<dd><p>Numeric vector of control observations, or a matrix, data frame or list with one group per column or list element.</p></dd>
 
 
 <dt id="arg-treatment">treatment<a class="anchor" aria-label="anchor" href="#arg-treatment"></a></dt>
-<dd><p>Numeric vector of treatment group observations</p></dd>
+<dd><p>Numeric vector of treatment observations. Omit when <code>control</code> contains all groups.</p></dd>
 
 
 <dt id="arg-means-only">means.only<a class="anchor" aria-label="anchor" href="#arg-means-only"></a></dt>
@@ -85,7 +85,7 @@ with central and tail benchmarks, without selecting a parametric family.</p>
 
 
 <dt id="arg-tails">tails<a class="anchor" aria-label="anchor" href="#arg-tails"></a></dt>
-<dd><p>Character; specifies CI tail(s): "both", "left", or "right"</p></dd>
+<dd><p>Choose <code>"both"</code> (default), <code>"left"</code> or <code>"right"</code> (case-insensitive). For effect size, <code>"left"</code> sets the upper bound to <code>Inf</code>, and <code>"right"</code> sets the lower bound to <code>-Inf</code>.</p></dd>
 
 
 <dt id="arg-pairwise">pairwise<a class="anchor" aria-label="anchor" href="#arg-pairwise"></a></dt>
@@ -102,7 +102,7 @@ with central and tail benchmarks, without selecting a parametric family.</p>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>Returns a list containing:</p><ul><li><p><code>Control</code>: Mean/median of control group</p></li>
+    <p>With separate <code>control</code> and <code>treatment</code> vectors, returns a list containing:</p><ul><li><p><code>Control</code>: Mean/median of control group</p></li>
 <li><p><code>Treatment</code>: Mean/median of treatment group</p></li>
 <li><p><code>Grand_Statistic</code>: Mean/median of all observations pooled</p></li>
 <li><p><code>Control_CDF</code>: CDF value at grand statistic (control)</p></li>
@@ -113,7 +113,10 @@ with central and tail benchmarks, without selecting a parametric family.</p>
 <li><p><code>Effect_Size_LB</code>: Lower bound of treatment effect (if confidence.interval requested)</p></li>
 <li><p><code>Effect_Size_UB</code>: Upper bound of treatment effect (if confidence.interval requested)</p></li>
 <li><p><code>Confidence_Level</code>: Confidence level used (if confidence.interval requested)</p></li>
-</ul></div>
+</ul><p>With <code>robust = TRUE</code>, finite effect-size bounds include their percentile in the name, e.g. <code>Effect_Size_LB.2.5%</code> and <code>Effect_Size_UB.97.5%</code>.
+The list also includes <code>Robust Certainty Estimate</code> and the requested certainty bounds, e.g. <code>Lower 95% CI</code> and <code>Upper 95% CI</code>, or <code>Lower 95% bound</code> or <code>Upper 95% bound</code> for one tail.
+With all groups in <code>control</code>, returns a single numeric value named <code>Certainty</code>, or a symmetric matrix of pairwise certainties with ones on the diagonal if <code>pairwise = TRUE</code>.</p>
+    </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The key output, <code>Certainty</code>, is a descriptive agreement index in

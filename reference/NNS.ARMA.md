@@ -37,10 +37,8 @@ NNS.ARMA(
 
 - training.set:
 
-  numeric; `NULL` (default) Sets the number of variable observations
-
-  `(variable[1 : training.set])` to monitor performance of forecast over
-  in-sample range.
+  Index of the last observation used to fit the forecast. With `NULL`
+  (default), forecasts start after the full series.
 
 - seasonal.factor:
 

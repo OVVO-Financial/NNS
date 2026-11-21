@@ -156,40 +156,41 @@ underlying distribution
 <p>Viewing the first 10 samples from each of the <code>degree</code>s
 compared to our original
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>X</mi><annotation encoding="application/x-tex">X</annotation></semantics></math>.</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>degree.<span class="fl">0.</span>samples <span class="ot">=</span> <span class="fu">LPM.VaR</span>(<span class="at">percentile =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">length.out =</span> <span class="dv">100</span>), <span class="at">degree =</span> <span class="dv">0</span>, <span class="at">x =</span> x)</span>
-<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>degree.<span class="dv">0</span>.<span class="fl">25.</span>samples <span class="ot">=</span> <span class="fu">LPM.VaR</span>(<span class="at">percentile =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">length.out =</span> <span class="dv">100</span>), <span class="at">degree =</span> <span class="fl">0.25</span>, <span class="at">x =</span> x)</span>
-<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>degree.<span class="dv">0</span>.<span class="fl">5.</span>samples <span class="ot">=</span> <span class="fu">LPM.VaR</span>(<span class="at">percentile =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">length.out =</span> <span class="dv">100</span>), <span class="at">degree =</span> <span class="fl">0.5</span>, <span class="at">x =</span> x)</span>
-<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>degree.<span class="fl">1.</span>samples <span class="ot">=</span> <span class="fu">LPM.VaR</span>(<span class="at">percentile =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">length.out =</span> <span class="dv">100</span>), <span class="at">degree =</span> <span class="dv">1</span>, <span class="at">x =</span> x)</span>
-<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>degree.<span class="fl">2.</span>samples <span class="ot">=</span> <span class="fu">LPM.VaR</span>(<span class="at">percentile =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">length.out =</span> <span class="dv">100</span>), <span class="at">degree =</span> <span class="dv">2</span>, <span class="at">x =</span> x)</span>
-<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a></span>
-<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">data.frame</span>(<span class="at">check.names =</span> <span class="cn">FALSE</span>, <span class="fu">cbind</span>(<span class="st">"original x"</span> <span class="ot">=</span> <span class="fu">sort</span>(x), degree.<span class="fl">0.</span>samples, </span>
-<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a>                                                          degree.<span class="dv">0</span>.<span class="fl">25.</span>samples, </span>
-<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a>                                                          degree.<span class="dv">0</span>.<span class="fl">5.</span>samples, </span>
-<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a>                                                          degree.<span class="fl">1.</span>samples, </span>
-<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a>                                                          degree.<span class="fl">2.</span>samples)), <span class="dv">10</span>)</span>
-<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a></span>
-<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a>     original x degree.<span class="fl">0.</span>samples degree.<span class="dv">0</span>.<span class="fl">25.</span>samples degree.<span class="dv">0</span>.<span class="fl">5.</span>samples</span>
-<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a>  <span class="dv">1</span><span class="sc">:</span>  <span class="sc">-</span><span class="fl">2.309169</span>        <span class="sc">-</span><span class="fl">2.309169</span>           <span class="sc">-</span><span class="fl">2.309097</span>         <span class="sc">-</span><span class="fl">2.3090915</span></span>
-<span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a>  <span class="dv">2</span><span class="sc">:</span>  <span class="sc">-</span><span class="fl">1.966617</span>        <span class="sc">-</span><span class="fl">1.966617</span>           <span class="sc">-</span><span class="fl">1.941190</span>         <span class="sc">-</span><span class="fl">1.6935509</span></span>
-<span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a>  <span class="dv">3</span><span class="sc">:</span>  <span class="sc">-</span><span class="fl">1.686693</span>        <span class="sc">-</span><span class="fl">1.686693</span>           <span class="sc">-</span><span class="fl">1.599486</span>         <span class="sc">-</span><span class="fl">1.4541494</span></span>
-<span id="cb10-17"><a href="#cb10-17" tabindex="-1"></a>  <span class="dv">4</span><span class="sc">:</span>  <span class="sc">-</span><span class="fl">1.548753</span>        <span class="sc">-</span><span class="fl">1.548753</span>           <span class="sc">-</span><span class="fl">1.382553</span>         <span class="sc">-</span><span class="fl">1.2462731</span></span>
-<span id="cb10-18"><a href="#cb10-18" tabindex="-1"></a>  <span class="dv">5</span><span class="sc">:</span>  <span class="sc">-</span><span class="fl">1.265396</span>        <span class="sc">-</span><span class="fl">1.265396</span>           <span class="sc">-</span><span class="fl">1.250823</span>         <span class="sc">-</span><span class="fl">1.1453748</span></span>
-<span id="cb10-19"><a href="#cb10-19" tabindex="-1"></a>  <span class="dv">6</span><span class="sc">:</span>  <span class="sc">-</span><span class="fl">1.265061</span>        <span class="sc">-</span><span class="fl">1.265061</span>           <span class="sc">-</span><span class="fl">1.176436</span>         <span class="sc">-</span><span class="fl">1.0745440</span></span>
-<span id="cb10-20"><a href="#cb10-20" tabindex="-1"></a>  <span class="dv">7</span><span class="sc">:</span>  <span class="sc">-</span><span class="fl">1.220718</span>        <span class="sc">-</span><span class="fl">1.220718</span>           <span class="sc">-</span><span class="fl">1.119655</span>         <span class="sc">-</span><span class="fl">1.0252742</span></span>
-<span id="cb10-21"><a href="#cb10-21" tabindex="-1"></a>  <span class="dv">8</span><span class="sc">:</span>  <span class="sc">-</span><span class="fl">1.138137</span>        <span class="sc">-</span><span class="fl">1.138137</span>           <span class="sc">-</span><span class="fl">1.067793</span>         <span class="sc">-</span><span class="fl">0.9868693</span></span>
-<span id="cb10-22"><a href="#cb10-22" tabindex="-1"></a>  <span class="dv">9</span><span class="sc">:</span>  <span class="sc">-</span><span class="fl">1.123109</span>        <span class="sc">-</span><span class="fl">1.123109</span>           <span class="sc">-</span><span class="fl">1.026429</span>         <span class="sc">-</span><span class="fl">0.9322105</span></span>
-<span id="cb10-23"><a href="#cb10-23" tabindex="-1"></a> <span class="dv">10</span><span class="sc">:</span>  <span class="sc">-</span><span class="fl">1.071791</span>        <span class="sc">-</span><span class="fl">1.071791</span>           <span class="sc">-</span><span class="fl">1.014276</span>         <span class="sc">-</span><span class="fl">0.8710942</span></span>
-<span id="cb10-24"><a href="#cb10-24" tabindex="-1"></a>     degree.<span class="fl">1.</span>samples degree.<span class="fl">2.</span>samples</span>
-<span id="cb10-25"><a href="#cb10-25" tabindex="-1"></a>  <span class="dv">1</span><span class="sc">:</span>       <span class="sc">-</span><span class="fl">2.3091021</span>       <span class="sc">-</span><span class="fl">2.3091170</span></span>
-<span id="cb10-26"><a href="#cb10-26" tabindex="-1"></a>  <span class="dv">2</span><span class="sc">:</span>       <span class="sc">-</span><span class="fl">1.4744653</span>       <span class="sc">-</span><span class="fl">1.1614908</span></span>
-<span id="cb10-27"><a href="#cb10-27" tabindex="-1"></a>  <span class="dv">3</span><span class="sc">:</span>       <span class="sc">-</span><span class="fl">1.2159961</span>       <span class="sc">-</span><span class="fl">0.9709972</span></span>
-<span id="cb10-28"><a href="#cb10-28" tabindex="-1"></a>  <span class="dv">4</span><span class="sc">:</span>       <span class="sc">-</span><span class="fl">1.0823023</span>       <span class="sc">-</span><span class="fl">0.8610192</span></span>
-<span id="cb10-29"><a href="#cb10-29" tabindex="-1"></a>  <span class="dv">5</span><span class="sc">:</span>       <span class="sc">-</span><span class="fl">0.9968028</span>       <span class="sc">-</span><span class="fl">0.7810300</span></span>
-<span id="cb10-30"><a href="#cb10-30" tabindex="-1"></a>  <span class="dv">6</span><span class="sc">:</span>       <span class="sc">-</span><span class="fl">0.9290505</span>       <span class="sc">-</span><span class="fl">0.7169770</span></span>
-<span id="cb10-31"><a href="#cb10-31" tabindex="-1"></a>  <span class="dv">7</span><span class="sc">:</span>       <span class="sc">-</span><span class="fl">0.8666886</span>       <span class="sc">-</span><span class="fl">0.6631888</span></span>
-<span id="cb10-32"><a href="#cb10-32" tabindex="-1"></a>  <span class="dv">8</span><span class="sc">:</span>       <span class="sc">-</span><span class="fl">0.8090433</span>       <span class="sc">-</span><span class="fl">0.6170691</span></span>
-<span id="cb10-33"><a href="#cb10-33" tabindex="-1"></a>  <span class="dv">9</span><span class="sc">:</span>       <span class="sc">-</span><span class="fl">0.7556644</span>       <span class="sc">-</span><span class="fl">0.5765608</span></span>
-<span id="cb10-34"><a href="#cb10-34" tabindex="-1"></a> <span class="dv">10</span><span class="sc">:</span>       <span class="sc">-</span><span class="fl">0.7069835</span>       <span class="sc">-</span><span class="fl">0.5403318</span></span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">degree.0.samples</span> <span class="op">=</span> <span class="fu"><a href="../reference/LPM.VaR.html">LPM.VaR</a></span><span class="op">(</span>percentile <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, length.out <span class="op">=</span> <span class="fl">100</span><span class="op">)</span>, degree <span class="op">=</span> <span class="fl">0</span>, x <span class="op">=</span> <span class="va">x</span><span class="op">)</span></span>
+<span><span class="va">degree.0.25.samples</span> <span class="op">=</span> <span class="fu"><a href="../reference/LPM.VaR.html">LPM.VaR</a></span><span class="op">(</span>percentile <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, length.out <span class="op">=</span> <span class="fl">100</span><span class="op">)</span>, degree <span class="op">=</span> <span class="fl">0.25</span>, x <span class="op">=</span> <span class="va">x</span><span class="op">)</span></span>
+<span><span class="va">degree.0.5.samples</span> <span class="op">=</span> <span class="fu"><a href="../reference/LPM.VaR.html">LPM.VaR</a></span><span class="op">(</span>percentile <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, length.out <span class="op">=</span> <span class="fl">100</span><span class="op">)</span>, degree <span class="op">=</span> <span class="fl">0.5</span>, x <span class="op">=</span> <span class="va">x</span><span class="op">)</span></span>
+<span><span class="va">degree.1.samples</span> <span class="op">=</span> <span class="fu"><a href="../reference/LPM.VaR.html">LPM.VaR</a></span><span class="op">(</span>percentile <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, length.out <span class="op">=</span> <span class="fl">100</span><span class="op">)</span>, degree <span class="op">=</span> <span class="fl">1</span>, x <span class="op">=</span> <span class="va">x</span><span class="op">)</span></span>
+<span><span class="va">degree.2.samples</span> <span class="op">=</span> <span class="fu"><a href="../reference/LPM.VaR.html">LPM.VaR</a></span><span class="op">(</span>percentile <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, length.out <span class="op">=</span> <span class="fl">100</span><span class="op">)</span>, degree <span class="op">=</span> <span class="fl">2</span>, x <span class="op">=</span> <span class="va">x</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>check.names <span class="op">=</span> <span class="cn">FALSE</span>, <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="st">"original x"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>, <span class="va">degree.0.samples</span>, </span>
+<span>                                                          <span class="va">degree.0.25.samples</span>, </span>
+<span>                                                          <span class="va">degree.0.5.samples</span>, </span>
+<span>                                                          <span class="va">degree.1.samples</span>, </span>
+<span>                                                          <span class="va">degree.2.samples</span><span class="op">)</span><span class="op">)</span>, <span class="fl">10</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">#&gt;           original x degree.0.samples degree.0.25.samples degree.0.5.samples degree.1.samples</span></span>
+<span><span class="co">#&gt; 0.000000%  -2.309169        -2.309169           -2.309169         -2.3091689       -2.3091689</span></span>
+<span><span class="co">#&gt; 1.010101%  -1.966617        -1.966617           -1.941187         -1.6935534       -1.4744855</span></span>
+<span><span class="co">#&gt; 2.020202%  -1.686693        -1.686693           -1.599486         -1.4541184       -1.2160087</span></span>
+<span><span class="co">#&gt; 3.030303%  -1.548753        -1.548753           -1.382558         -1.2462537       -1.0823025</span></span>
+<span><span class="co">#&gt; 4.040404%  -1.265396        -1.265396           -1.250804         -1.1454066       -0.9968077</span></span>
+<span><span class="co">#&gt; 5.050505%  -1.265061        -1.265061           -1.176437         -1.0745549       -0.9290647</span></span>
+<span><span class="co">#&gt; 6.060606%  -1.220718        -1.220718           -1.119649         -1.0252637       -0.8666875</span></span>
+<span><span class="co">#&gt; 7.070707%  -1.138137        -1.138137           -1.067817         -0.9868700       -0.8090628</span></span>
+<span><span class="co">#&gt; 8.080808%  -1.123109        -1.123109           -1.026420         -0.9322146       -0.7556675</span></span>
+<span><span class="co">#&gt; 9.090909%  -1.071791        -1.071791           -1.014290         -0.8710985       -0.7070109</span></span>
+<span><span class="co">#&gt;           degree.2.samples</span></span>
+<span><span class="co">#&gt; 0.000000%       -2.3091689</span></span>
+<span><span class="co">#&gt; 1.010101%       -1.1614823</span></span>
+<span><span class="co">#&gt; 2.020202%       -0.9710028</span></span>
+<span><span class="co">#&gt; 3.030303%       -0.8610022</span></span>
+<span><span class="co">#&gt; 4.040404%       -0.7810056</span></span>
+<span><span class="co">#&gt; 5.050505%       -0.7169391</span></span>
+<span><span class="co">#&gt; 6.060606%       -0.6632142</span></span>
+<span><span class="co">#&gt; 7.070707%       -0.6170757</span></span>
+<span><span class="co">#&gt; 8.080808%       -0.5765594</span></span>
+<span><span class="co">#&gt; 9.090909%       -0.5403627</span></span></code></pre></div>
 </div>
 </div>
 </div>
@@ -223,7 +224,8 @@ and then plot the results compared to our original
 wrapper function for this functionality of
 <strong><code>NNS.meboot</code></strong>.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">boots</span> <span class="op">=</span> <span class="fu"><a href="../reference/NNS.MC.html">NNS.MC</a></span><span class="op">(</span><span class="va">x</span>, reps <span class="op">=</span> <span class="fl">1</span>, lower_rho <span class="op">=</span> <span class="op">-</span><span class="fl">1</span>, upper_rho <span class="op">=</span> <span class="fl">1</span>, by <span class="op">=</span> <span class="fl">.5</span><span class="op">)</span><span class="op">$</span><span class="va">replicates</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
+<span><span class="va">boots</span> <span class="op">=</span> <span class="fu"><a href="../reference/NNS.MC.html">NNS.MC</a></span><span class="op">(</span><span class="va">x</span>, reps <span class="op">=</span> <span class="fl">1</span>, lower_rho <span class="op">=</span> <span class="op">-</span><span class="fl">1</span>, upper_rho <span class="op">=</span> <span class="fl">1</span>, by <span class="op">=</span> <span class="fl">.5</span><span class="op">)</span><span class="op">$</span><span class="va">replicates</span></span>
 <span><span class="va">reps</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">cbind</span>, <span class="va">boots</span><span class="op">)</span></span>
 <span></span>
 <span></span>
@@ -231,10 +233,11 @@ wrapper function for this functionality of
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">x</span>, type <span class="op">=</span> <span class="st">"l"</span>, lwd <span class="op">=</span> <span class="fl">3</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">reps</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">reps</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="images/NNSmc_1.png"></p>
 <p>Checking our replicate correlations:</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="fu">sapply</span>(boots, <span class="cf">function</span>(r) <span class="fu">cor</span>(r, x, <span class="at">method =</span> <span class="st">"spearman"</span>))</span>
-<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a></span>
-<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>    rho <span class="ot">=</span> <span class="dv">1</span>   rho <span class="ot">=</span> <span class="fl">0.5</span>     rho <span class="ot">=</span> <span class="dv">0</span>  rho <span class="ot">=</span> <span class="sc">-</span><span class="fl">0.5</span>    rho <span class="ot">=</span> <span class="sc">-</span><span class="dv">1</span> </span>
-<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a> <span class="fl">0.99732373</span>  <span class="fl">0.51147915</span>  <span class="fl">0.01036904</span> <span class="sc">-</span><span class="fl">0.48720072</span> <span class="sc">-</span><span class="fl">0.98294629</span> </span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">boots</span>, <span class="kw">function</span><span class="op">(</span><span class="va">r</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">cor</a></span><span class="op">(</span><span class="va">r</span>, <span class="va">x</span>, method <span class="op">=</span> <span class="st">"spearman"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">#&gt;     rho = 1   rho = 0.5     rho = 0  rho = -0.5    rho = -1</span></span>
+<span><span class="co">#&gt;  0.99840384  0.50357036  0.01478548 -0.46829883 -0.97912991</span></span></code></pre></div>
 <p>More replicates and ensembles thereof can be generated for any number
 of
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ρ</mi><annotation encoding="application/x-tex">\rho</annotation></semantics></math>
@@ -334,11 +337,9 @@ severity modelling, with their changed target stated explicitly.</p>
 <p>Alternatively, if we wish to keep the simulated values close to the
 original data, we can apply the <strong><code>NNS.meboot</code></strong>
 procedure to each of the variables.</p>
-<p>We will generate 1 replicate (for brevity) of
+<p>We generate 100 replicates per column at
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ρ</mi><mo>=</mo><mn>0.95</mn></mrow><annotation encoding="application/x-tex">\rho = 0.95</annotation></semantics></math>
-to our <code>original.data</code>, use their <code>ensemble</code> and
-note the multivariate dependence among our
-<code>new.boot.dep.data</code>.</p>
+and compare the column ensembles with the original data.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Apply bootstrap to each variable</span></span>
 <span><span class="va">new.boot.dep.data</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">original.data</span>, <span class="fl">2</span>, <span class="kw">function</span><span class="op">(</span><span class="va">r</span><span class="op">)</span> <span class="fu"><a href="../reference/NNS.meboot.html">NNS.meboot</a></span><span class="op">(</span><span class="va">r</span>, reps <span class="op">=</span> <span class="fl">100</span>, rho <span class="op">=</span> <span class="fl">.95</span><span class="op">)</span><span class="op">)</span></span>
@@ -350,12 +351,13 @@ note the multivariate dependence among our
 <span><span class="va">new.boot.dep.matrix</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">cbind</span>, <span class="va">boot.ensemble.vectors</span><span class="op">)</span></span></code></pre></div>
 <p>Checking <code>ensemble</code> correlations with
 <code>original.data</code>:</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>) <span class="fu">print</span>(<span class="fu">cor</span>(new.boot.dep.matrix[,i], original.data[,i], <span class="at">method =</span> <span class="st">"spearman"</span>))</span>
-<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a></span>
-<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.9885851</span></span>
-<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.9965075</span></span>
-<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.9906302</span></span>
-<span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.9901535</span></span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw">for</span><span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">cor</a></span><span class="op">(</span><span class="va">new.boot.dep.matrix</span><span class="op">[</span>,<span class="va">i</span><span class="op">]</span>, <span class="va">original.data</span><span class="op">[</span>,<span class="va">i</span><span class="op">]</span>, method <span class="op">=</span> <span class="st">"spearman"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">#&gt; [1] 0.9885851</span></span>
+<span><span class="co">#&gt; [1] 0.9965075</span></span>
+<span><span class="co">#&gt; [1] 0.9906302</span></span>
+<span><span class="co">#&gt; [1] 0.9901535</span></span></code></pre></div>
 <blockquote>
 <p><strong>Reading these numbers.</strong> Here <code>ensemble</code> is
 the per-observation mean of the replicates, a central summary. Its
@@ -371,28 +373,30 @@ requested output.</p>
 <p>Column-wise scenario generation does not guarantee preservation of
 the full joint law or every multivariate dependence statistic. Compare
 the achieved structure explicitly.</p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a><span class="fu">NNS.copula</span>(original.data)</span>
-<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a><span class="fu">NNS.copula</span>(new.boot.dep.matrix)</span>
-<span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a></span>
-<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.4743531</span></span>
-<span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.4704039</span></span></code></pre></div>
-<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="fu">head</span>(original.data)</span>
-<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a><span class="fu">head</span>(new.boot.dep.matrix)</span>
-<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a></span>
-<span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a>               x           y          z           x</span>
-<span id="cb18-5"><a href="#cb18-5" tabindex="-1"></a>[<span class="dv">1</span>,] <span class="sc">-</span><span class="fl">0.56047565</span> <span class="sc">-</span><span class="fl">0.99579872</span> <span class="sc">-</span><span class="fl">0.5116037</span> <span class="sc">-</span><span class="fl">0.56047565</span></span>
-<span id="cb18-6"><a href="#cb18-6" tabindex="-1"></a>[<span class="dv">2</span>,] <span class="sc">-</span><span class="fl">0.23017749</span> <span class="sc">-</span><span class="fl">1.03995504</span>  <span class="fl">0.2369379</span> <span class="sc">-</span><span class="fl">0.23017749</span></span>
-<span id="cb18-7"><a href="#cb18-7" tabindex="-1"></a>[<span class="dv">3</span>,]  <span class="fl">1.55870831</span> <span class="sc">-</span><span class="fl">0.01798024</span> <span class="sc">-</span><span class="fl">0.5415892</span>  <span class="fl">1.55870831</span></span>
-<span id="cb18-8"><a href="#cb18-8" tabindex="-1"></a>[<span class="dv">4</span>,]  <span class="fl">0.07050839</span> <span class="sc">-</span><span class="fl">0.13217513</span>  <span class="fl">1.2192276</span>  <span class="fl">0.07050839</span></span>
-<span id="cb18-9"><a href="#cb18-9" tabindex="-1"></a>[<span class="dv">5</span>,]  <span class="fl">0.12928774</span> <span class="sc">-</span><span class="fl">2.54934277</span>  <span class="fl">0.1741359</span>  <span class="fl">0.12928774</span></span>
-<span id="cb18-10"><a href="#cb18-10" tabindex="-1"></a>[<span class="dv">6</span>,]  <span class="fl">1.71506499</span>  <span class="fl">1.04057346</span> <span class="sc">-</span><span class="fl">0.6152683</span>  <span class="fl">1.71506499</span></span>
-<span id="cb18-11"><a href="#cb18-11" tabindex="-1"></a>                   x          y          z          x</span>
-<span id="cb18-12"><a href="#cb18-12" tabindex="-1"></a>ensemble1 <span class="sc">-</span><span class="fl">0.4268047</span> <span class="sc">-</span><span class="fl">0.7794553</span> <span class="sc">-</span><span class="fl">0.6364458</span> <span class="sc">-</span><span class="fl">0.4642642</span></span>
-<span id="cb18-13"><a href="#cb18-13" tabindex="-1"></a>ensemble2 <span class="sc">-</span><span class="fl">0.2965744</span> <span class="sc">-</span><span class="fl">1.0682197</span>  <span class="fl">0.3297265</span> <span class="sc">-</span><span class="fl">0.2531178</span></span>
-<span id="cb18-14"><a href="#cb18-14" tabindex="-1"></a>ensemble3  <span class="fl">1.3302149</span>  <span class="fl">0.3054734</span> <span class="sc">-</span><span class="fl">0.4014515</span>  <span class="fl">1.4914884</span></span>
-<span id="cb18-15"><a href="#cb18-15" tabindex="-1"></a>ensemble4  <span class="fl">0.2257378</span>  <span class="fl">0.3108846</span>  <span class="fl">1.0603892</span>  <span class="fl">0.1728540</span></span>
-<span id="cb18-16"><a href="#cb18-16" tabindex="-1"></a>ensemble5  <span class="fl">0.4716743</span> <span class="sc">-</span><span class="fl">3.3344967</span> <span class="sc">-</span><span class="fl">0.1917697</span>  <span class="fl">0.4309379</span></span>
-<span id="cb18-17"><a href="#cb18-17" tabindex="-1"></a>ensemble6  <span class="fl">1.3984978</span>  <span class="fl">1.1881374</span> <span class="sc">-</span><span class="fl">0.5295386</span>  <span class="fl">1.5326055</span></span></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/NNS.copula.html">NNS.copula</a></span><span class="op">(</span><span class="va">original.data</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/NNS.copula.html">NNS.copula</a></span><span class="op">(</span><span class="va">new.boot.dep.matrix</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">#&gt; [1] 0.4452914</span></span>
+<span><span class="co">#&gt; [1] 0.4423774</span></span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">original.data</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">new.boot.dep.matrix</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">#&gt;                x           y          z      x_copy</span></span>
+<span><span class="co">#&gt; [1,] -0.56047565 -0.99579872 -0.5116037 -0.56047565</span></span>
+<span><span class="co">#&gt; [2,] -0.23017749 -1.03995504  0.2369379 -0.23017749</span></span>
+<span><span class="co">#&gt; [3,]  1.55870831 -0.01798024 -0.5415892  1.55870831</span></span>
+<span><span class="co">#&gt; [4,]  0.07050839 -0.13217513  1.2192276  0.07050839</span></span>
+<span><span class="co">#&gt; [5,]  0.12928774 -2.54934277  0.1741359  0.12928774</span></span>
+<span><span class="co">#&gt; [6,]  1.71506499  1.04057346 -0.6152683  1.71506499</span></span>
+<span><span class="co">#&gt;                     x           y          z      x_copy</span></span>
+<span><span class="co">#&gt; ensemble1 -0.50534918 -0.99114837 -0.5599005 -0.53374834</span></span>
+<span><span class="co">#&gt; ensemble2 -0.25336404 -1.10495674  0.1277390 -0.20297478</span></span>
+<span><span class="co">#&gt; ensemble3  1.62035927  0.07462431 -0.5952796  1.61734635</span></span>
+<span><span class="co">#&gt; ensemble4 -0.02471890  0.01657279  1.2773063  0.05897732</span></span>
+<span><span class="co">#&gt; ensemble5  0.05586323 -1.48844305  0.1384859  0.12920777</span></span>
+<span><span class="co">#&gt; ensemble6  1.80768833  0.82770106 -0.6056424  1.83212766</span></span></code></pre></div>
 </div>
 </div>
 </div>

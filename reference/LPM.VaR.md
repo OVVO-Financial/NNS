@@ -1,7 +1,7 @@
 # LPM VaR
 
-Generates a value at risk (VaR) quantile based on the Lower Partial
-Moment ratio.
+Degree zero returns the lower-tail empirical quantile and degree one
+returns the lower-tail expectile.
 
 ## Usage
 

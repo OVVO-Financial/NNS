@@ -25,11 +25,13 @@ NNS.ANOVA(
 
 - control:
 
-  Numeric vector of control group observations
+  Numeric vector of control observations, or a matrix, data frame or
+  list with one group per column or list element.
 
 - treatment:
 
-  Numeric vector of treatment group observations
+  Numeric vector of treatment observations. Omit when `control` contains
+  all groups.
 
 - means.only:
 
@@ -48,7 +50,9 @@ NNS.ANOVA(
 
 - tails:
 
-  Character; specifies CI tail(s): "both", "left", or "right"
+  Choose `"both"` (default), `"left"` or `"right"` (case-insensitive).
+  For effect size, `"left"` sets the upper bound to `Inf`, and `"right"`
+  sets the lower bound to `-Inf`.
 
 - pairwise:
 
@@ -72,7 +76,8 @@ NNS.ANOVA(
 
 ## Value
 
-Returns a list containing:
+With separate `control` and `treatment` vectors, returns a list
+containing:
 
 - `Control`: Mean/median of control group
 
@@ -96,6 +101,15 @@ Returns a list containing:
 
 - `Confidence_Level`: Confidence level used (if confidence.interval
   requested)
+
+With `robust = TRUE`, finite effect-size bounds include their percentile
+in the name, e.g. `Effect_Size_LB.2.5%` and `Effect_Size_UB.97.5%`. The
+list also includes `Robust Certainty Estimate` and the requested
+certainty bounds, e.g. `Lower 95% CI` and `Upper 95% CI`, or
+`Lower 95% bound` or `Upper 95% bound` for one tail. With all groups in
+`control`, returns a single numeric value named `Certainty`, or a
+symmetric matrix of pairwise certainties with ones on the diagonal if
+`pairwise = TRUE`.
 
 ## Details
 

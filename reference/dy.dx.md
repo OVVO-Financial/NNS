@@ -21,8 +21,8 @@ dy.dx(x, y, eval.point = NULL)
 
 - eval.point:
 
-  Finite numeric points, or `"overall"` for the average first
-  derivative.
+  Required. Supply finite numeric points, or `"overall"` for the average
+  first derivative.
 
 ## Value
 

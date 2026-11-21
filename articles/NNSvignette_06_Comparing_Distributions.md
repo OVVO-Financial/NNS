@@ -357,22 +357,24 @@ We can also obtain confidence intervals for the tie-adjusted superiority
 probability using maximum entropy bootstrap replicates.
 
 ``` r
+
+set.seed(123)
 NNS.SS(x, y, confidence.interval = TRUE, reps = 999, ci = 0.95)[1:5]
 
-$p_gt
-[1] 0.233915
-
-$p_tie
-[1] 0
-
-$p_star
-[1] 0.233915
-
-$lower
-[1] 0.2105631
-
-$upper
-[1] 0.2537789
+#> $p_gt
+#> [1] 0.233915
+#>
+#> $p_tie
+#> [1] 0
+#>
+#> $p_star
+#> [1] 0.233915
+#>
+#> $lower
+#> [1] 0.2191905
+#>
+#> $upper
+#> [1] 0.2587136
 ```
 
 This provides an interpretable effect size for directional comparison

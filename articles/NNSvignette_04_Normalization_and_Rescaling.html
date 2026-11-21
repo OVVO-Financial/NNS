@@ -207,73 +207,77 @@ ratios of column means, so the columns should have positive means. A
 mean near zero, or of the opposite sign to the others, gives a very
 large or negative factor (see the note at the end of this vignette); the
 columns below are all positive.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a></span>
-<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>A <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">100</span>, <span class="at">mean =</span> <span class="dv">5</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span>
-<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>B <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">100</span>, <span class="at">mean =</span> <span class="dv">20</span>, <span class="at">sd =</span> <span class="dv">5</span>)</span>
-<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>C <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">100</span>, <span class="at">mean =</span> <span class="dv">10</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span>
-<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>D <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">100</span>, <span class="at">mean =</span> <span class="dv">50</span>, <span class="at">sd =</span> <span class="dv">10</span>)</span>
-<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a></span>
-<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(A, B, C, D)</span>
-<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a></span>
-<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co"># Linear scaling</span></span>
-<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>lin_norm <span class="ot">&lt;-</span> <span class="fu">NNS.norm</span>(X, <span class="at">linear =</span> <span class="cn">TRUE</span>, <span class="at">chart.type =</span> <span class="cn">NULL</span>)</span>
-<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="fu">head</span>(lin_norm)</span>
-<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>     A Normalized B Normalized C Normalized D Normalized</span>
-<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a>[<span class="dv">1</span>,]     <span class="fl">18.38264</span>     <span class="fl">17.81323</span>     <span class="fl">25.40626</span>     <span class="fl">18.19440</span></span>
-<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a>[<span class="dv">2</span>,]     <span class="fl">19.75029</span>     <span class="fl">23.05113</span>     <span class="fl">23.56018</span>     <span class="fl">18.03539</span></span>
-<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a>[<span class="dv">3</span>,]     <span class="fl">27.15749</span>     <span class="fl">20.32425</span>     <span class="fl">20.27462</span>     <span class="fl">17.24622</span></span>
-<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a>[<span class="dv">4</span>,]     <span class="fl">20.99534</span>     <span class="fl">19.77814</span>     <span class="fl">21.95814</span>     <span class="fl">16.76224</span></span>
-<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a>[<span class="dv">5</span>,]     <span class="fl">21.23872</span>     <span class="fl">16.50706</span>     <span class="fl">19.96390</span>     <span class="fl">19.37523</span></span>
-<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a>[<span class="dv">6</span>,]     <span class="fl">27.80492</span>     <span class="fl">21.41627</span>     <span class="fl">19.83496</span>     <span class="fl">22.63783</span></span>
-<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a></span>
-<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a><span class="co"># Verify means are equal</span></span>
-<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a><span class="fu">apply</span>(lin_norm, <span class="dv">2</span>, <span class="cf">function</span>(x) <span class="fu">c</span>(<span class="at">mean =</span> <span class="fu">mean</span>(x), <span class="at">sd =</span> <span class="fu">sd</span>(x)))</span>
-<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a></span>
-<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a>     A Normalized B Normalized C Normalized D Normalized</span>
-<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a>mean    <span class="fl">21.077727</span>    <span class="fl">21.077727</span>    <span class="fl">21.077727</span>    <span class="fl">21.077727</span></span>
-<span id="cb3-26"><a href="#cb3-26" tabindex="-1"></a>sd       <span class="fl">3.779676</span>     <span class="fl">5.236256</span>     <span class="fl">1.978297</span>     <span class="fl">4.410985</span></span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">A</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">100</span>, mean <span class="op">=</span> <span class="fl">5</span>, sd <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">B</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">100</span>, mean <span class="op">=</span> <span class="fl">20</span>, sd <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
+<span><span class="va">C</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">100</span>, mean <span class="op">=</span> <span class="fl">10</span>, sd <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">D</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">100</span>, mean <span class="op">=</span> <span class="fl">50</span>, sd <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="va">A</span>, <span class="va">B</span>, <span class="va">C</span>, <span class="va">D</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Linear scaling</span></span>
+<span><span class="va">lin_norm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/NNS.norm.html">NNS.norm</a></span><span class="op">(</span><span class="va">X</span>, linear <span class="op">=</span> <span class="cn">TRUE</span>, chart.type <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">lin_norm</span><span class="op">)</span></span>
+<span><span class="co">#&gt;      A Normalized B Normalized C Normalized D Normalized</span></span>
+<span><span class="co">#&gt; [1,]     18.38264     17.81323     25.40626     18.19440</span></span>
+<span><span class="co">#&gt; [2,]     19.75029     23.05113     23.56018     18.03539</span></span>
+<span><span class="co">#&gt; [3,]     27.15749     20.32425     20.27462     17.24622</span></span>
+<span><span class="co">#&gt; [4,]     20.99534     19.77814     21.95814     16.76224</span></span>
+<span><span class="co">#&gt; [5,]     21.23872     16.50706     19.96390     19.37523</span></span>
+<span><span class="co">#&gt; [6,]     27.80492     21.41627     19.83496     22.63783</span></span>
+<span></span>
+<span><span class="co"># Verify means are equal</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">lin_norm</span>, <span class="fl">2</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>mean <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>, sd <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html" class="external-link">sd</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">#&gt;      A Normalized B Normalized C Normalized D Normalized</span></span>
+<span><span class="co">#&gt; mean    21.077727    21.077727    21.077727    21.077727</span></span>
+<span><span class="co">#&gt; sd       3.779676     5.236256     1.978297     4.410985</span></span></code></pre></div>
 <p>Each column keeps its coefficient of variation and its correlations
 with the others, because it is multiplied by a single positive
 factor.</p>
 <p>Now compare with <strong>nonlinear scaling</strong>:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>nonlin_norm <span class="ot">&lt;-</span> <span class="fu">NNS.norm</span>(X, <span class="at">linear =</span> <span class="cn">FALSE</span>, <span class="at">chart.type =</span> <span class="cn">NULL</span>)</span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="fu">head</span>(nonlin_norm)</span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>     A Normalized B Normalized C Normalized D Normalized</span>
-<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>[<span class="dv">1</span>,]     <span class="fl">2.082162</span>     <span class="fl">4.690344</span>     <span class="fl">4.098285</span>     <span class="fl">11.04240</span></span>
-<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>[<span class="dv">2</span>,]     <span class="fl">2.237074</span>     <span class="fl">6.069519</span>     <span class="fl">3.800493</span>     <span class="fl">10.94589</span></span>
-<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>[<span class="dv">3</span>,]     <span class="fl">3.076072</span>     <span class="fl">5.351514</span>     <span class="fl">3.270500</span>     <span class="fl">10.46693</span></span>
-<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>[<span class="dv">4</span>,]     <span class="fl">2.378098</span>     <span class="fl">5.207720</span>     <span class="fl">3.542068</span>     <span class="fl">10.17321</span></span>
-<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>[<span class="dv">5</span>,]     <span class="fl">2.405665</span>     <span class="fl">4.346421</span>     <span class="fl">3.220377</span>     <span class="fl">11.75906</span></span>
-<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>[<span class="dv">6</span>,]     <span class="fl">3.149404</span>     <span class="fl">5.639050</span>     <span class="fl">3.199579</span>     <span class="fl">13.73917</span></span>
-<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a></span>
-<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="fu">apply</span>(nonlin_norm, <span class="dv">2</span>, <span class="cf">function</span>(x) <span class="fu">c</span>(<span class="at">mean =</span> <span class="fu">mean</span>(x), <span class="at">sd =</span> <span class="fu">sd</span>(x)))</span>
-<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a></span>
-<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a>     A Normalized B Normalized C Normalized D Normalized</span>
-<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a>mean    <span class="fl">2.3874296</span>     <span class="fl">5.549909</span>    <span class="fl">3.4000486</span>     <span class="fl">12.79232</span></span>
-<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a>sd      <span class="fl">0.4281159</span>     <span class="fl">1.378742</span>    <span class="fl">0.3191192</span>      <span class="fl">2.67708</span></span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">nonlin_norm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/NNS.norm.html">NNS.norm</a></span><span class="op">(</span><span class="va">X</span>, linear <span class="op">=</span> <span class="cn">FALSE</span>, chart.type <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">nonlin_norm</span><span class="op">)</span></span>
+<span><span class="co">#&gt;      A Normalized B Normalized C Normalized D Normalized</span></span>
+<span><span class="co">#&gt; [1,]     2.082162     4.690344     4.098285     11.04240</span></span>
+<span><span class="co">#&gt; [2,]     2.237074     6.069519     3.800493     10.94589</span></span>
+<span><span class="co">#&gt; [3,]     3.076072     5.351514     3.270500     10.46693</span></span>
+<span><span class="co">#&gt; [4,]     2.378098     5.207720     3.542068     10.17321</span></span>
+<span><span class="co">#&gt; [5,]     2.405665     4.346421     3.220377     11.75906</span></span>
+<span><span class="co">#&gt; [6,]     3.149404     5.639050     3.199579     13.73917</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">nonlin_norm</span>, <span class="fl">2</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>mean <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>, sd <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html" class="external-link">sd</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">#&gt;      A Normalized B Normalized C Normalized D Normalized</span></span>
+<span><span class="co">#&gt; mean    2.3874296     5.549909    3.4000486     12.79232</span></span>
+<span><span class="co">#&gt; sd      0.4281159     1.378742    0.3191192      2.67708</span></span></code></pre></div>
 <p>Note that the means differ and the standard deviations are smaller
 than in the linear case, reflecting the dependence structure.</p>
 <div class="section level5">
 <h5 id="normalize-list-of-unequal-vector-lengths">Normalize list of unequal vector lengths<a class="anchor" aria-label="anchor" href="#normalize-list-of-unequal-vector-lengths"></a>
 </h5>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>vec1 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="at">n =</span> <span class="dv">10</span>, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>vec2 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="at">n =</span> <span class="dv">5</span>, <span class="at">mean =</span> <span class="dv">5</span>, <span class="at">sd =</span> <span class="dv">5</span>)</span>
-<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>vec3 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="at">n =</span> <span class="dv">8</span>, <span class="at">mean =</span> <span class="dv">10</span>, <span class="at">sd =</span> <span class="dv">10</span>)</span>
-<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a></span>
-<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>vec_list <span class="ot">&lt;-</span> <span class="fu">list</span>(vec1, vec2, vec3)</span>
-<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a></span>
-<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="fu">NNS.norm</span>(vec_list)</span>
-<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a></span>
-<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="sc">$</span><span class="st">`</span><span class="at">x_1 Normalized</span><span class="st">`</span></span>
-<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a> [<span class="dv">1</span>]  <span class="fl">13.074058</span>  <span class="sc">-</span><span class="fl">3.004912</span> <span class="sc">-</span><span class="fl">11.745878</span>  <span class="fl">25.406891</span>  <span class="sc">-</span><span class="fl">4.647966</span>  <span class="sc">-</span><span class="fl">5.481229</span>   <span class="fl">6.225165</span>   <span class="fl">5.920719</span>   <span class="fl">6.113733</span>   <span class="fl">9.640242</span></span>
-<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a></span>
-<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="sc">$</span><span class="st">`</span><span class="at">x_2 Normalized</span><span class="st">`</span></span>
-<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a>[<span class="dv">1</span>]  <span class="fl">2.875960212</span>  <span class="fl">0.008876158</span>  <span class="fl">1.230826150</span>  <span class="fl">5.855582361</span> <span class="fl">10.779166523</span></span>
-<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a></span>
-<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a><span class="sc">$</span><span class="st">`</span><span class="at">x_3 Normalized</span><span class="st">`</span></span>
-<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a>[<span class="dv">1</span>]  <span class="fl">4.0749062</span>  <span class="fl">2.2395840</span>  <span class="fl">0.4067264</span>  <span class="fl">0.7457562</span> <span class="fl">15.6445780</span>  <span class="fl">5.1941416</span>  <span class="fl">2.3326665</span>  <span class="fl">2.5622994</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
+<span><span class="va">vec1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">10</span>, mean <span class="op">=</span> <span class="fl">0</span>, sd <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">vec2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">5</span>, mean <span class="op">=</span> <span class="fl">5</span>, sd <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
+<span><span class="va">vec3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">8</span>, mean <span class="op">=</span> <span class="fl">10</span>, sd <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">vec_list</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">vec1</span>, <span class="va">vec2</span>, <span class="va">vec3</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/NNS.norm.html">NNS.norm</a></span><span class="op">(</span><span class="va">vec_list</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">#&gt; $`x_1 Normalized`</span></span>
+<span><span class="co">#&gt;  [1] -36.069834 -14.813246 100.311851   4.537621   8.320410 110.374303  29.662611 -81.413972 -44.202934</span></span>
+<span><span class="co">#&gt; [10] -28.680913</span></span>
+<span><span class="co">#&gt;</span></span>
+<span><span class="co">#&gt; $`x_2 Normalized`</span></span>
+<span><span class="co">#&gt; [1] 8.166785 4.993210 5.143606 4.078405 1.630943</span></span>
+<span><span class="co">#&gt;</span></span>
+<span><span class="co">#&gt; $`x_3 Normalized`</span></span>
+<span><span class="co">#&gt; [1] 17.1735020  9.2300466 -5.9564833 10.4840867  3.2487621 -0.4179429  4.8189910 -0.1602445</span></span></code></pre></div>
 <hr>
 </div>
 </div>
@@ -413,52 +417,54 @@ above, because:</p>
 <div class="section level3">
 <h3 id="risk-neutral-example">Risk-Neutral Example<a class="anchor" aria-label="anchor" href="#risk-neutral-example"></a>
 </h3>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
-<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>S0 <span class="ot">&lt;-</span> <span class="dv">100</span></span>
-<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>r <span class="ot">&lt;-</span> <span class="fl">0.05</span></span>
-<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>T <span class="ot">&lt;-</span> <span class="dv">1</span></span>
-<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a></span>
-<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="co"># Simulate a price path</span></span>
-<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>prices <span class="ot">&lt;-</span> S0 <span class="sc">*</span> <span class="fu">exp</span>(<span class="fu">cumsum</span>(<span class="fu">rnorm</span>(<span class="dv">250</span>, <span class="fl">0.0005</span>, <span class="fl">0.02</span>)))</span>
-<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a></span>
-<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a>rn_terminal <span class="ot">&lt;-</span> <span class="fu">NNS.rescale</span>(</span>
-<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a>  <span class="at">x =</span> prices,</span>
-<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a>  <span class="at">a =</span> S0,</span>
-<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a>  <span class="at">b =</span> r,</span>
-<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">"riskneutral"</span>,</span>
-<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a>  <span class="at">T =</span> T,</span>
-<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">"Terminal"</span></span>
-<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a>)</span>
-<span id="cb8-17"><a href="#cb8-17" tabindex="-1"></a></span>
-<span id="cb8-18"><a href="#cb8-18" tabindex="-1"></a><span class="fu">c</span>(</span>
-<span id="cb8-19"><a href="#cb8-19" tabindex="-1"></a>  <span class="at">mean_original =</span> <span class="fu">mean</span>(prices),</span>
-<span id="cb8-20"><a href="#cb8-20" tabindex="-1"></a>  <span class="at">mean_rescaled =</span> <span class="fu">mean</span>(rn_terminal),</span>
-<span id="cb8-21"><a href="#cb8-21" tabindex="-1"></a>  <span class="at">target =</span> S0 <span class="sc">*</span> <span class="fu">exp</span>(r <span class="sc">*</span> T)</span>
-<span id="cb8-22"><a href="#cb8-22" tabindex="-1"></a>)</span>
-<span id="cb8-23"><a href="#cb8-23" tabindex="-1"></a></span>
-<span id="cb8-24"><a href="#cb8-24" tabindex="-1"></a>mean_original mean_rescaled        target </span>
-<span id="cb8-25"><a href="#cb8-25" tabindex="-1"></a>     <span class="fl">109.7019</span>      <span class="fl">105.1271</span>      <span class="fl">105.1271</span> </span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
+<span><span class="va">S0</span> <span class="op">&lt;-</span> <span class="fl">100</span></span>
+<span><span class="va">r</span> <span class="op">&lt;-</span> <span class="fl">0.05</span></span>
+<span><span class="cn">T</span> <span class="op">&lt;-</span> <span class="fl">1</span></span>
+<span></span>
+<span><span class="co"># Simulate a price path</span></span>
+<span><span class="va">prices</span> <span class="op">&lt;-</span> <span class="va">S0</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cumsum.html" class="external-link">cumsum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">250</span>, <span class="fl">0.0005</span>, <span class="fl">0.02</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">rn_terminal</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/NNS.rescale.html">NNS.rescale</a></span><span class="op">(</span></span>
+<span>  x <span class="op">=</span> <span class="va">prices</span>,</span>
+<span>  a <span class="op">=</span> <span class="va">S0</span>,</span>
+<span>  b <span class="op">=</span> <span class="va">r</span>,</span>
+<span>  method <span class="op">=</span> <span class="st">"riskneutral"</span>,</span>
+<span>  T <span class="op">=</span> <span class="cn">T</span>,</span>
+<span>  type <span class="op">=</span> <span class="st">"Terminal"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  mean_original <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">prices</span><span class="op">)</span>,</span>
+<span>  mean_rescaled <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">rn_terminal</span><span class="op">)</span>,</span>
+<span>  target <span class="op">=</span> <span class="va">S0</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="va">r</span> <span class="op">*</span> <span class="cn">T</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">#&gt; mean_original mean_rescaled        target</span></span>
+<span><span class="co">#&gt;      109.7019      105.1271      105.1271</span></span></code></pre></div>
 <hr>
 </div>
 <div class="section level3">
 <h3 id="discounted-example">Discounted Example<a class="anchor" aria-label="anchor" href="#discounted-example"></a>
 </h3>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>rn_discounted <span class="ot">&lt;-</span> <span class="fu">NNS.rescale</span>(</span>
-<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>  <span class="at">x =</span> prices,</span>
-<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>  <span class="at">a =</span> S0,</span>
-<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>  <span class="at">b =</span> r,</span>
-<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">"riskneutral"</span>,</span>
-<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>  <span class="at">T =</span> T,</span>
-<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">"Discounted"</span></span>
-<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a>)</span>
-<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a></span>
-<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a><span class="fu">c</span>(</span>
-<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a>  <span class="at">mean_rescaled =</span> <span class="fu">mean</span>(rn_discounted),</span>
-<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a>  <span class="at">target_discounted_mean =</span> S0</span>
-<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a>)</span>
-<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a></span>
-<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a>         mean_rescaled target_discounted_mean </span>
-<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a>                   <span class="dv">100</span>                    <span class="dv">100</span> </span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">rn_discounted</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/NNS.rescale.html">NNS.rescale</a></span><span class="op">(</span></span>
+<span>  x <span class="op">=</span> <span class="va">prices</span>,</span>
+<span>  a <span class="op">=</span> <span class="va">S0</span>,</span>
+<span>  b <span class="op">=</span> <span class="va">r</span>,</span>
+<span>  method <span class="op">=</span> <span class="st">"riskneutral"</span>,</span>
+<span>  T <span class="op">=</span> <span class="cn">T</span>,</span>
+<span>  type <span class="op">=</span> <span class="st">"Discounted"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  mean_rescaled <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">rn_discounted</span><span class="op">)</span>,</span>
+<span>  target_discounted_mean <span class="op">=</span> <span class="va">S0</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">#&gt;          mean_rescaled target_discounted_mean</span></span>
+<span><span class="co">#&gt;                    100                    100</span></span></code></pre></div>
 <hr>
 </div>
 </div>

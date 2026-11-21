@@ -41,7 +41,8 @@ LPM(degree, target, variable, excess_ret = FALSE)
 
 ## Value
 
-LPM of variable
+Numeric vector with one value per target. A `NULL` target or
+`excess_ret = TRUE` gives one value.
 
 ## References
 

@@ -61,7 +61,11 @@ NNS.MC(
 - type:
 
   options("spearman", "pearson", "NNScor", "NNSdep");
-  `type = "spearman"`(default) dependence metric desired.
+  `type = "spearman"`(default) dependence metric desired. `"NNScor"`
+  targets the signed correlation from
+  [NNS.dep](https://OVVO-Financial.github.io/NNS/reference/NNS.dep.md)
+  and `"NNSdep"` its unsigned dependence. Unrecognised strings also use
+  signed correlation.
 
 - drift:
 

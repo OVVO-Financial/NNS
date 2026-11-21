@@ -151,6 +151,7 @@ large or negative factor (see the note at the end of this vignette); the
 columns below are all positive.
 
 ``` r
+
 set.seed(123)
 
 A <- rnorm(100, mean = 5, sd = 1)
@@ -163,20 +164,20 @@ X <- data.frame(A, B, C, D)
 # Linear scaling
 lin_norm <- NNS.norm(X, linear = TRUE, chart.type = NULL)
 head(lin_norm)
-     A Normalized B Normalized C Normalized D Normalized
-[1,]     18.38264     17.81323     25.40626     18.19440
-[2,]     19.75029     23.05113     23.56018     18.03539
-[3,]     27.15749     20.32425     20.27462     17.24622
-[4,]     20.99534     19.77814     21.95814     16.76224
-[5,]     21.23872     16.50706     19.96390     19.37523
-[6,]     27.80492     21.41627     19.83496     22.63783
+#>      A Normalized B Normalized C Normalized D Normalized
+#> [1,]     18.38264     17.81323     25.40626     18.19440
+#> [2,]     19.75029     23.05113     23.56018     18.03539
+#> [3,]     27.15749     20.32425     20.27462     17.24622
+#> [4,]     20.99534     19.77814     21.95814     16.76224
+#> [5,]     21.23872     16.50706     19.96390     19.37523
+#> [6,]     27.80492     21.41627     19.83496     22.63783
 
 # Verify means are equal
 apply(lin_norm, 2, function(x) c(mean = mean(x), sd = sd(x)))
 
-     A Normalized B Normalized C Normalized D Normalized
-mean    21.077727    21.077727    21.077727    21.077727
-sd       3.779676     5.236256     1.978297     4.410985
+#>      A Normalized B Normalized C Normalized D Normalized
+#> mean    21.077727    21.077727    21.077727    21.077727
+#> sd       3.779676     5.236256     1.978297     4.410985
 ```
 
 Each column keeps its coefficient of variation and its correlations with
@@ -185,21 +186,22 @@ the others, because it is multiplied by a single positive factor.
 Now compare with **nonlinear scaling**:
 
 ``` r
+
 nonlin_norm <- NNS.norm(X, linear = FALSE, chart.type = NULL)
 head(nonlin_norm)
-     A Normalized B Normalized C Normalized D Normalized
-[1,]     2.082162     4.690344     4.098285     11.04240
-[2,]     2.237074     6.069519     3.800493     10.94589
-[3,]     3.076072     5.351514     3.270500     10.46693
-[4,]     2.378098     5.207720     3.542068     10.17321
-[5,]     2.405665     4.346421     3.220377     11.75906
-[6,]     3.149404     5.639050     3.199579     13.73917
+#>      A Normalized B Normalized C Normalized D Normalized
+#> [1,]     2.082162     4.690344     4.098285     11.04240
+#> [2,]     2.237074     6.069519     3.800493     10.94589
+#> [3,]     3.076072     5.351514     3.270500     10.46693
+#> [4,]     2.378098     5.207720     3.542068     10.17321
+#> [5,]     2.405665     4.346421     3.220377     11.75906
+#> [6,]     3.149404     5.639050     3.199579     13.73917
 
 apply(nonlin_norm, 2, function(x) c(mean = mean(x), sd = sd(x)))
 
-     A Normalized B Normalized C Normalized D Normalized
-mean    2.3874296     5.549909    3.4000486     12.79232
-sd      0.4281159     1.378742    0.3191192      2.67708
+#>      A Normalized B Normalized C Normalized D Normalized
+#> mean    2.3874296     5.549909    3.4000486     12.79232
+#> sd      0.4281159     1.378742    0.3191192      2.67708
 ```
 
 Note that the means differ and the standard deviations are smaller than
@@ -208,6 +210,7 @@ in the linear case, reflecting the dependence structure.
 ##### Normalize list of unequal vector lengths
 
 ``` r
+
 set.seed(123)
 vec1 <- rnorm(n = 10, mean = 0, sd = 1)
 vec2 <- rnorm(n = 5, mean = 5, sd = 5)
@@ -217,14 +220,15 @@ vec_list <- list(vec1, vec2, vec3)
 
 NNS.norm(vec_list)
 
-$`x_1 Normalized`
- [1]  13.074058  -3.004912 -11.745878  25.406891  -4.647966  -5.481229   6.225165   5.920719   6.113733   9.640242
-
-$`x_2 Normalized`
-[1]  2.875960212  0.008876158  1.230826150  5.855582361 10.779166523
-
-$`x_3 Normalized`
-[1]  4.0749062  2.2395840  0.4067264  0.7457562 15.6445780  5.1941416  2.3326665  2.5622994
+#> $`x_1 Normalized`
+#>  [1] -36.069834 -14.813246 100.311851   4.537621   8.320410 110.374303  29.662611 -81.413972 -44.202934
+#> [10] -28.680913
+#>
+#> $`x_2 Normalized`
+#> [1] 8.166785 4.993210 5.143606 4.078405 1.630943
+#>
+#> $`x_3 Normalized`
+#> [1] 17.1735020  9.2300466 -5.9564833 10.4840867  3.2487621 -0.4179429  4.8189910 -0.1602445
 ```
 
 ------------------------------------------------------------------------
@@ -371,6 +375,7 @@ factor as above, because:
 ### Risk-Neutral Example
 
 ``` r
+
 set.seed(123)
 S0 <- 100
 r <- 0.05
@@ -394,8 +399,8 @@ c(
   target = S0 * exp(r * T)
 )
 
-mean_original mean_rescaled        target 
-     109.7019      105.1271      105.1271 
+#> mean_original mean_rescaled        target
+#>      109.7019      105.1271      105.1271
 ```
 
 ------------------------------------------------------------------------
@@ -403,6 +408,7 @@ mean_original mean_rescaled        target
 ### Discounted Example
 
 ``` r
+
 rn_discounted <- NNS.rescale(
   x = prices,
   a = S0,
@@ -417,8 +423,8 @@ c(
   target_discounted_mean = S0
 )
 
-         mean_rescaled target_discounted_mean 
-                   100                    100 
+#>          mean_rescaled target_discounted_mean
+#>                    100                    100
 ```
 
 ------------------------------------------------------------------------

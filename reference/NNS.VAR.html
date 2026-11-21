@@ -87,8 +87,7 @@
 
 
 <dt id="arg-obj-fn">obj.fn<a class="anchor" aria-label="anchor" href="#arg-obj-fn"></a></dt>
-<dd><p>expression;
-<code>expression(mean((predicted - actual)^2)) / (Sum of NNS Co-partial moments)</code> (default) MSE / co-movements is the default objective function.  Any <code>expression(...)</code> using the specific terms <code>predicted</code> and <code>actual</code> can be used.</p></dd>
+<dd><p>The default objective divides mean squared error by the sum of the lower and upper co-partial moments of predictions and observations about their respective means. A zero denominator gives <code>Inf</code>. A custom expression can use <code>predicted</code> and <code>actual</code>.</p></dd>
 
 
 <dt id="arg-objective">objective<a class="anchor" aria-label="anchor" href="#arg-objective"></a></dt>

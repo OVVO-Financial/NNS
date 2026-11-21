@@ -1,7 +1,7 @@
 # UPM VaR
 
-Generates an upside value at risk (VaR) quantile based on the Upper
-Partial Moment ratio.
+Degree zero returns the upper-tail empirical quantile and degree one
+returns the upper-tail expectile.
 
 ## Usage
 

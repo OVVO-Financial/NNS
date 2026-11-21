@@ -391,22 +391,24 @@ is less likely to exceed a draw from
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>y</mi><annotation encoding="application/x-tex">y</annotation></semantics></math>.</p>
 <p>We can also obtain confidence intervals for the tie-adjusted
 superiority probability using maximum entropy bootstrap replicates.</p>
-<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="fu">NNS.SS</span>(x, y, <span class="at">confidence.interval =</span> <span class="cn">TRUE</span>, <span class="at">reps =</span> <span class="dv">999</span>, <span class="at">ci =</span> <span class="fl">0.95</span>)[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>]</span>
-<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a></span>
-<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a><span class="sc">$</span>p_gt</span>
-<span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.233915</span></span>
-<span id="cb18-5"><a href="#cb18-5" tabindex="-1"></a></span>
-<span id="cb18-6"><a href="#cb18-6" tabindex="-1"></a><span class="sc">$</span>p_tie</span>
-<span id="cb18-7"><a href="#cb18-7" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">0</span></span>
-<span id="cb18-8"><a href="#cb18-8" tabindex="-1"></a></span>
-<span id="cb18-9"><a href="#cb18-9" tabindex="-1"></a><span class="sc">$</span>p_star</span>
-<span id="cb18-10"><a href="#cb18-10" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.233915</span></span>
-<span id="cb18-11"><a href="#cb18-11" tabindex="-1"></a></span>
-<span id="cb18-12"><a href="#cb18-12" tabindex="-1"></a><span class="sc">$</span>lower</span>
-<span id="cb18-13"><a href="#cb18-13" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.2105631</span></span>
-<span id="cb18-14"><a href="#cb18-14" tabindex="-1"></a></span>
-<span id="cb18-15"><a href="#cb18-15" tabindex="-1"></a><span class="sc">$</span>upper</span>
-<span id="cb18-16"><a href="#cb18-16" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.2537789</span></span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/NNS.SS.html">NNS.SS</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, confidence.interval <span class="op">=</span> <span class="cn">TRUE</span>, reps <span class="op">=</span> <span class="fl">999</span>, ci <span class="op">=</span> <span class="fl">0.95</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span></span>
+<span></span>
+<span><span class="co">#&gt; $p_gt</span></span>
+<span><span class="co">#&gt; [1] 0.233915</span></span>
+<span><span class="co">#&gt;</span></span>
+<span><span class="co">#&gt; $p_tie</span></span>
+<span><span class="co">#&gt; [1] 0</span></span>
+<span><span class="co">#&gt;</span></span>
+<span><span class="co">#&gt; $p_star</span></span>
+<span><span class="co">#&gt; [1] 0.233915</span></span>
+<span><span class="co">#&gt;</span></span>
+<span><span class="co">#&gt; $lower</span></span>
+<span><span class="co">#&gt; [1] 0.2191905</span></span>
+<span><span class="co">#&gt;</span></span>
+<span><span class="co">#&gt; $upper</span></span>
+<span><span class="co">#&gt; [1] 0.2587136</span></span></code></pre></div>
 <p>This provides an interpretable effect size for directional comparison
 between two distributions without requiring identical distributions or
 equal variances.</p>

@@ -60,8 +60,8 @@ mean((predicted - actual)^2)/.denom
 
 - lin.only:
 
-  logical; `FALSE` (default) For fast optimization of the linear
-  regression method. More robust than `lin.only = TRUE`.
+  With `TRUE`, search only the linear method. The default `FALSE`
+  compares linear, nonlinear and combined forecasts.
 
 - negative.values:
 

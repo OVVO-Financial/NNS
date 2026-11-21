@@ -46,8 +46,11 @@ NNS.dep(x, y = NULL, asym = FALSE, p.value = FALSE, print.map = FALSE)
 
 ## Value
 
-Returns the bi-variate `"Correlation"` and `"Dependence"` or correlation
-/ dependence matrix for matrix input.
+A list with `Correlation` and `Dependence`, each a number for two
+vectors or a pairwise matrix for matrix input. With `p.value = TRUE`,
+the list also contains `Correlation p.value` and `Dependence p.value`,
+each a number, and `Correlation 95% CIs` and `Dependence 95% CIs`, each
+a pair of lower and upper permutation-null bounds.
 
 ## Details
 

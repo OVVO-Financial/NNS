@@ -22,9 +22,10 @@ NNS.norm(X, linear = FALSE, chart.type = NULL, location = "topleft")
   correlation /
   [NNS.dep](https://OVVO-Financial.github.io/NNS/reference/NNS.dep.md)
   dependence with the other variables). `TRUE` performs a linear scaling
-  normalization, resulting in equal means for all variables. Both scale
-  by ratios of means, so they assume variables with positive means; a
-  zero mean is replaced by 1e-10 (giving extreme scale factors).
+  normalization, resulting in equal means for all variables. Lists of
+  unequal lengths use linear scaling. Both scale by ratios of means, so
+  they assume variables with positive means; a zero mean is replaced by
+  1e-10 (giving extreme scale factors).
 
 - chart.type:
 
