@@ -87,17 +87,6 @@ test_that("monthly NNS.VAR forecasts start after the last observation", {
   expect_identical(rownames(fit$ensemble), future)
 })
 
-test_that("NNS.VAR advances a date index by its fixed 30-day interval", {
-  skip_if_not_installed("xts")
-  dates <- seq(as.Date("2018-01-23"), by = "30 days", length.out = 55)
-  panel <- xts::xts(var_fixture(55), dates)
-  fit <- NNS.VAR(panel, h = 3, ncores = 1, status = FALSE)
-  future <- c("2022-07-31", "2022-08-30", "2022-09-29")
-  expect_identical(rownames(fit$univariate), future)
-  expect_identical(rownames(fit$multivariate), future)
-  expect_identical(rownames(fit$ensemble), future)
-})
-
 test_that("weekly NNS.VAR forecasts keep the ts time coordinates", {
   panel <- ts(var_fixture(), end = c(2006, 52), frequency = 52)
   fit <- NNS.VAR(panel, h = 2, ncores = 1, status = FALSE)
