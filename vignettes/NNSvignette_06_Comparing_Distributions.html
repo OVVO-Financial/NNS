@@ -489,9 +489,9 @@ certain these two means are equal.</p>
 </div>
 <div id="test-if-means-are-unequal" class="section level2">
 <h2>Test if means are Unequal</h2>
-<p>By altering the mean of the <code>y</code> variable, we can start to
-see the sensitivity of the results from the two methods, where both
-firmly reject the null hypothesis of identical means.</p>
+<p>After shifting the mean of <code>y</code>, Welch’s test rejects equal
+means. The NNS <code>Certainty</code> score describes the
+disagreement.</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
 <span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>x <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">1000</span>, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span>
 <span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>y <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">1000</span>, <span class="at">mean =</span> <span class="dv">1</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span>
@@ -546,10 +546,8 @@ firmly reject the null hypothesis of identical means.</p>
 ## sample estimates:
 ##  mean of x  mean of y 
 ## 0.01612787 1.04246525</code></pre>
-<p>The effect size from <strong><code>NNS.ANOVA()</code></strong> is
-calculated from the confidence interval of the control mean and the
-specified <code>y</code> shift of 1 is within the provided lower and
-upper effect boundaries.</p>
+<p>The NNS bootstrap interval for the treatment mean minus the control
+mean lies above zero and includes the specified shift of 1.</p>
 </div>
 <div id="medians" class="section level2">
 <h2>Medians</h2>
@@ -641,22 +639,23 @@ higher mean, the stochastic superiority probability for <span class="math inline
 <span class="math inline">\(y\)</span>.</p>
 <p>We can also obtain confidence intervals for the tie-adjusted
 superiority probability using maximum entropy bootstrap replicates.</p>
-<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="fu">NNS.SS</span>(x, y, <span class="at">confidence.interval =</span> <span class="cn">TRUE</span>, <span class="at">reps =</span> <span class="dv">999</span>, <span class="at">ci =</span> <span class="fl">0.95</span>)[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>]</span>
-<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a></span>
-<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a><span class="sc">$</span>p_gt</span>
-<span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.233915</span></span>
-<span id="cb18-5"><a href="#cb18-5" tabindex="-1"></a></span>
-<span id="cb18-6"><a href="#cb18-6" tabindex="-1"></a><span class="sc">$</span>p_tie</span>
-<span id="cb18-7"><a href="#cb18-7" tabindex="-1"></a>[<span class="dv">1</span>] <span class="dv">0</span></span>
-<span id="cb18-8"><a href="#cb18-8" tabindex="-1"></a></span>
-<span id="cb18-9"><a href="#cb18-9" tabindex="-1"></a><span class="sc">$</span>p_star</span>
-<span id="cb18-10"><a href="#cb18-10" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.233915</span></span>
-<span id="cb18-11"><a href="#cb18-11" tabindex="-1"></a></span>
-<span id="cb18-12"><a href="#cb18-12" tabindex="-1"></a><span class="sc">$</span>lower</span>
-<span id="cb18-13"><a href="#cb18-13" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.2105631</span></span>
-<span id="cb18-14"><a href="#cb18-14" tabindex="-1"></a></span>
-<span id="cb18-15"><a href="#cb18-15" tabindex="-1"></a><span class="sc">$</span>upper</span>
-<span id="cb18-16"><a href="#cb18-16" tabindex="-1"></a>[<span class="dv">1</span>] <span class="fl">0.2537789</span></span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a><span class="fu">NNS.SS</span>(x, y, <span class="at">confidence.interval =</span> <span class="cn">TRUE</span>, <span class="at">reps =</span> <span class="dv">999</span>, <span class="at">ci =</span> <span class="fl">0.95</span>)[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>]</span>
+<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a></span>
+<span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a><span class="co">#&gt; $p_gt</span></span>
+<span id="cb18-5"><a href="#cb18-5" tabindex="-1"></a><span class="co">#&gt; [1] 0.233915</span></span>
+<span id="cb18-6"><a href="#cb18-6" tabindex="-1"></a><span class="co">#&gt;</span></span>
+<span id="cb18-7"><a href="#cb18-7" tabindex="-1"></a><span class="co">#&gt; $p_tie</span></span>
+<span id="cb18-8"><a href="#cb18-8" tabindex="-1"></a><span class="co">#&gt; [1] 0</span></span>
+<span id="cb18-9"><a href="#cb18-9" tabindex="-1"></a><span class="co">#&gt;</span></span>
+<span id="cb18-10"><a href="#cb18-10" tabindex="-1"></a><span class="co">#&gt; $p_star</span></span>
+<span id="cb18-11"><a href="#cb18-11" tabindex="-1"></a><span class="co">#&gt; [1] 0.233915</span></span>
+<span id="cb18-12"><a href="#cb18-12" tabindex="-1"></a><span class="co">#&gt;</span></span>
+<span id="cb18-13"><a href="#cb18-13" tabindex="-1"></a><span class="co">#&gt; $lower</span></span>
+<span id="cb18-14"><a href="#cb18-14" tabindex="-1"></a><span class="co">#&gt; [1] 0.2191905</span></span>
+<span id="cb18-15"><a href="#cb18-15" tabindex="-1"></a><span class="co">#&gt;</span></span>
+<span id="cb18-16"><a href="#cb18-16" tabindex="-1"></a><span class="co">#&gt; $upper</span></span>
+<span id="cb18-17"><a href="#cb18-17" tabindex="-1"></a><span class="co">#&gt; [1] 0.2587136</span></span></code></pre></div>
 <p>This provides an interpretable effect size for directional comparison
 between two distributions without requiring identical distributions or
 equal variances.</p>

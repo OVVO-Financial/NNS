@@ -476,39 +476,39 @@ columns below are all positive.</p>
 <span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co"># Linear scaling</span></span>
 <span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>lin_norm <span class="ot">&lt;-</span> <span class="fu">NNS.norm</span>(X, <span class="at">linear =</span> <span class="cn">TRUE</span>, <span class="at">chart.type =</span> <span class="cn">NULL</span>)</span>
 <span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="fu">head</span>(lin_norm)</span>
-<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>     A Normalized B Normalized C Normalized D Normalized</span>
-<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a>[<span class="dv">1</span>,]     <span class="fl">18.38264</span>     <span class="fl">17.81323</span>     <span class="fl">25.40626</span>     <span class="fl">18.19440</span></span>
-<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a>[<span class="dv">2</span>,]     <span class="fl">19.75029</span>     <span class="fl">23.05113</span>     <span class="fl">23.56018</span>     <span class="fl">18.03539</span></span>
-<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a>[<span class="dv">3</span>,]     <span class="fl">27.15749</span>     <span class="fl">20.32425</span>     <span class="fl">20.27462</span>     <span class="fl">17.24622</span></span>
-<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a>[<span class="dv">4</span>,]     <span class="fl">20.99534</span>     <span class="fl">19.77814</span>     <span class="fl">21.95814</span>     <span class="fl">16.76224</span></span>
-<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a>[<span class="dv">5</span>,]     <span class="fl">21.23872</span>     <span class="fl">16.50706</span>     <span class="fl">19.96390</span>     <span class="fl">19.37523</span></span>
-<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a>[<span class="dv">6</span>,]     <span class="fl">27.80492</span>     <span class="fl">21.41627</span>     <span class="fl">19.83496</span>     <span class="fl">22.63783</span></span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="co">#&gt;      A Normalized B Normalized C Normalized D Normalized</span></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="co">#&gt; [1,]     18.38264     17.81323     25.40626     18.19440</span></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="co">#&gt; [2,]     19.75029     23.05113     23.56018     18.03539</span></span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="co">#&gt; [3,]     27.15749     20.32425     20.27462     17.24622</span></span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a><span class="co">#&gt; [4,]     20.99534     19.77814     21.95814     16.76224</span></span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="co">#&gt; [5,]     21.23872     16.50706     19.96390     19.37523</span></span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a><span class="co">#&gt; [6,]     27.80492     21.41627     19.83496     22.63783</span></span>
 <span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a></span>
 <span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a><span class="co"># Verify means are equal</span></span>
 <span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a><span class="fu">apply</span>(lin_norm, <span class="dv">2</span>, <span class="cf">function</span>(x) <span class="fu">c</span>(<span class="at">mean =</span> <span class="fu">mean</span>(x), <span class="at">sd =</span> <span class="fu">sd</span>(x)))</span>
 <span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a></span>
-<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a>     A Normalized B Normalized C Normalized D Normalized</span>
-<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a>mean    <span class="fl">21.077727</span>    <span class="fl">21.077727</span>    <span class="fl">21.077727</span>    <span class="fl">21.077727</span></span>
-<span id="cb3-26"><a href="#cb3-26" tabindex="-1"></a>sd       <span class="fl">3.779676</span>     <span class="fl">5.236256</span>     <span class="fl">1.978297</span>     <span class="fl">4.410985</span></span></code></pre></div>
+<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a><span class="co">#&gt;      A Normalized B Normalized C Normalized D Normalized</span></span>
+<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a><span class="co">#&gt; mean    21.077727    21.077727    21.077727    21.077727</span></span>
+<span id="cb3-26"><a href="#cb3-26" tabindex="-1"></a><span class="co">#&gt; sd       3.779676     5.236256     1.978297     4.410985</span></span></code></pre></div>
 <p>Each column keeps its coefficient of variation and its correlations
 with the others, because it is multiplied by a single positive
 factor.</p>
 <p>Now compare with <strong>nonlinear scaling</strong>:</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>nonlin_norm <span class="ot">&lt;-</span> <span class="fu">NNS.norm</span>(X, <span class="at">linear =</span> <span class="cn">FALSE</span>, <span class="at">chart.type =</span> <span class="cn">NULL</span>)</span>
 <span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="fu">head</span>(nonlin_norm)</span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>     A Normalized B Normalized C Normalized D Normalized</span>
-<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>[<span class="dv">1</span>,]     <span class="fl">2.082162</span>     <span class="fl">4.690344</span>     <span class="fl">4.098285</span>     <span class="fl">11.04240</span></span>
-<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>[<span class="dv">2</span>,]     <span class="fl">2.237074</span>     <span class="fl">6.069519</span>     <span class="fl">3.800493</span>     <span class="fl">10.94589</span></span>
-<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>[<span class="dv">3</span>,]     <span class="fl">3.076072</span>     <span class="fl">5.351514</span>     <span class="fl">3.270500</span>     <span class="fl">10.46693</span></span>
-<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>[<span class="dv">4</span>,]     <span class="fl">2.378098</span>     <span class="fl">5.207720</span>     <span class="fl">3.542068</span>     <span class="fl">10.17321</span></span>
-<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>[<span class="dv">5</span>,]     <span class="fl">2.405665</span>     <span class="fl">4.346421</span>     <span class="fl">3.220377</span>     <span class="fl">11.75906</span></span>
-<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>[<span class="dv">6</span>,]     <span class="fl">3.149404</span>     <span class="fl">5.639050</span>     <span class="fl">3.199579</span>     <span class="fl">13.73917</span></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="co">#&gt;      A Normalized B Normalized C Normalized D Normalized</span></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="co">#&gt; [1,]     2.082162     4.690344     4.098285     11.04240</span></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="co">#&gt; [2,]     2.237074     6.069519     3.800493     10.94589</span></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co">#&gt; [3,]     3.076072     5.351514     3.270500     10.46693</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co">#&gt; [4,]     2.378098     5.207720     3.542068     10.17321</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co">#&gt; [5,]     2.405665     4.346421     3.220377     11.75906</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co">#&gt; [6,]     3.149404     5.639050     3.199579     13.73917</span></span>
 <span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a></span>
 <span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="fu">apply</span>(nonlin_norm, <span class="dv">2</span>, <span class="cf">function</span>(x) <span class="fu">c</span>(<span class="at">mean =</span> <span class="fu">mean</span>(x), <span class="at">sd =</span> <span class="fu">sd</span>(x)))</span>
 <span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a></span>
-<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a>     A Normalized B Normalized C Normalized D Normalized</span>
-<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a>mean    <span class="fl">2.3874296</span>     <span class="fl">5.549909</span>    <span class="fl">3.4000486</span>     <span class="fl">12.79232</span></span>
-<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a>sd      <span class="fl">0.4281159</span>     <span class="fl">1.378742</span>    <span class="fl">0.3191192</span>      <span class="fl">2.67708</span></span></code></pre></div>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="co">#&gt;      A Normalized B Normalized C Normalized D Normalized</span></span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="co">#&gt; mean    2.3874296     5.549909    3.4000486     12.79232</span></span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="co">#&gt; sd      0.4281159     1.378742    0.3191192      2.67708</span></span></code></pre></div>
 <p>Note that the means differ and the standard deviations are smaller
 than in the linear case, reflecting the dependence structure.</p>
 <div id="normalize-list-of-unequal-vector-lengths" class="section level4">
@@ -522,14 +522,15 @@ than in the linear case, reflecting the dependence structure.</p>
 <span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a></span>
 <span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="fu">NNS.norm</span>(vec_list)</span>
 <span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a></span>
-<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="sc">$</span><span class="st">`</span><span class="at">x_1 Normalized</span><span class="st">`</span></span>
-<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a> [<span class="dv">1</span>]  <span class="fl">13.074058</span>  <span class="sc">-</span><span class="fl">3.004912</span> <span class="sc">-</span><span class="fl">11.745878</span>  <span class="fl">25.406891</span>  <span class="sc">-</span><span class="fl">4.647966</span>  <span class="sc">-</span><span class="fl">5.481229</span>   <span class="fl">6.225165</span>   <span class="fl">5.920719</span>   <span class="fl">6.113733</span>   <span class="fl">9.640242</span></span>
-<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a></span>
-<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="sc">$</span><span class="st">`</span><span class="at">x_2 Normalized</span><span class="st">`</span></span>
-<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a>[<span class="dv">1</span>]  <span class="fl">2.875960212</span>  <span class="fl">0.008876158</span>  <span class="fl">1.230826150</span>  <span class="fl">5.855582361</span> <span class="fl">10.779166523</span></span>
-<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a></span>
-<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a><span class="sc">$</span><span class="st">`</span><span class="at">x_3 Normalized</span><span class="st">`</span></span>
-<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a>[<span class="dv">1</span>]  <span class="fl">4.0749062</span>  <span class="fl">2.2395840</span>  <span class="fl">0.4067264</span>  <span class="fl">0.7457562</span> <span class="fl">15.6445780</span>  <span class="fl">5.1941416</span>  <span class="fl">2.3326665</span>  <span class="fl">2.5622994</span></span></code></pre></div>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="co">#&gt; $`x_1 Normalized`</span></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a><span class="co">#&gt;  [1] -36.069834 -14.813246 100.311851   4.537621   8.320410 110.374303  29.662611 -81.413972 -44.202934</span></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a><span class="co">#&gt; [10] -28.680913</span></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="co">#&gt;</span></span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a><span class="co">#&gt; $`x_2 Normalized`</span></span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a><span class="co">#&gt; [1] 8.166785 4.993210 5.143606 4.078405 1.630943</span></span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a><span class="co">#&gt;</span></span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a><span class="co">#&gt; $`x_3 Normalized`</span></span>
+<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a><span class="co">#&gt; [1] 17.1735020  9.2300466 -5.9564833 10.4840867  3.2487621 -0.4179429  4.8189910 -0.1602445</span></span></code></pre></div>
 <hr />
 </div>
 </div>
@@ -677,8 +678,8 @@ applies the same multiplicative factor as above, because:</p>
 <span id="cb8-21"><a href="#cb8-21" tabindex="-1"></a>  <span class="at">target =</span> S0 <span class="sc">*</span> <span class="fu">exp</span>(r <span class="sc">*</span> T)</span>
 <span id="cb8-22"><a href="#cb8-22" tabindex="-1"></a>)</span>
 <span id="cb8-23"><a href="#cb8-23" tabindex="-1"></a></span>
-<span id="cb8-24"><a href="#cb8-24" tabindex="-1"></a>mean_original mean_rescaled        target </span>
-<span id="cb8-25"><a href="#cb8-25" tabindex="-1"></a>     <span class="fl">109.7019</span>      <span class="fl">105.1271</span>      <span class="fl">105.1271</span> </span></code></pre></div>
+<span id="cb8-24"><a href="#cb8-24" tabindex="-1"></a><span class="co">#&gt; mean_original mean_rescaled        target</span></span>
+<span id="cb8-25"><a href="#cb8-25" tabindex="-1"></a><span class="co">#&gt;      109.7019      105.1271      105.1271</span></span></code></pre></div>
 <hr />
 </div>
 <div id="discounted-example" class="section level2">
@@ -697,8 +698,8 @@ applies the same multiplicative factor as above, because:</p>
 <span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a>  <span class="at">target_discounted_mean =</span> S0</span>
 <span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a>)</span>
 <span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a></span>
-<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a>         mean_rescaled target_discounted_mean </span>
-<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a>                   <span class="dv">100</span>                    <span class="dv">100</span> </span></code></pre></div>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a><span class="co">#&gt;          mean_rescaled target_discounted_mean</span></span>
+<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a><span class="co">#&gt;                    100                    100</span></span></code></pre></div>
 <hr />
 </div>
 </div>

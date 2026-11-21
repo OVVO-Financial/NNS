@@ -172,28 +172,28 @@ head(data.frame(check.names = FALSE, cbind("original x" = sort(x), degree.0.samp
                                                           degree.1.samples, 
                                                           degree.2.samples)), 10)
 
-     original x degree.0.samples degree.0.25.samples degree.0.5.samples
-  1:  -2.309169        -2.309169           -2.309097         -2.3090915
-  2:  -1.966617        -1.966617           -1.941190         -1.6935509
-  3:  -1.686693        -1.686693           -1.599486         -1.4541494
-  4:  -1.548753        -1.548753           -1.382553         -1.2462731
-  5:  -1.265396        -1.265396           -1.250823         -1.1453748
-  6:  -1.265061        -1.265061           -1.176436         -1.0745440
-  7:  -1.220718        -1.220718           -1.119655         -1.0252742
-  8:  -1.138137        -1.138137           -1.067793         -0.9868693
-  9:  -1.123109        -1.123109           -1.026429         -0.9322105
- 10:  -1.071791        -1.071791           -1.014276         -0.8710942
-     degree.1.samples degree.2.samples
-  1:       -2.3091021       -2.3091170
-  2:       -1.4744653       -1.1614908
-  3:       -1.2159961       -0.9709972
-  4:       -1.0823023       -0.8610192
-  5:       -0.9968028       -0.7810300
-  6:       -0.9290505       -0.7169770
-  7:       -0.8666886       -0.6631888
-  8:       -0.8090433       -0.6170691
-  9:       -0.7556644       -0.5765608
- 10:       -0.7069835       -0.5403318
+#>           original x degree.0.samples degree.0.25.samples degree.0.5.samples degree.1.samples
+#> 0.000000%  -2.309169        -2.309169           -2.309169         -2.3091689       -2.3091689
+#> 1.010101%  -1.966617        -1.966617           -1.941187         -1.6935534       -1.4744855
+#> 2.020202%  -1.686693        -1.686693           -1.599486         -1.4541184       -1.2160087
+#> 3.030303%  -1.548753        -1.548753           -1.382558         -1.2462537       -1.0823025
+#> 4.040404%  -1.265396        -1.265396           -1.250804         -1.1454066       -0.9968077
+#> 5.050505%  -1.265061        -1.265061           -1.176437         -1.0745549       -0.9290647
+#> 6.060606%  -1.220718        -1.220718           -1.119649         -1.0252637       -0.8666875
+#> 7.070707%  -1.138137        -1.138137           -1.067817         -0.9868700       -0.8090628
+#> 8.080808%  -1.123109        -1.123109           -1.026420         -0.9322146       -0.7556675
+#> 9.090909%  -1.071791        -1.071791           -1.014290         -0.8710985       -0.7070109
+#>           degree.2.samples
+#> 0.000000%       -2.3091689
+#> 1.010101%       -1.1614823
+#> 2.020202%       -0.9710028
+#> 3.030303%       -0.8610022
+#> 4.040404%       -0.7810056
+#> 5.050505%       -0.7169391
+#> 6.060606%       -0.6632142
+#> 7.070707%       -0.6170757
+#> 8.080808%       -0.5765594
+#> 9.090909%       -0.5403627
 ```
 
 # Simulation
@@ -207,6 +207,7 @@ Specified rank-correlation targets explore a chosen range of scenario shapes. Th
 We will generate 1 replicate of $X$ for each value of a sequence of $\rho$ values (the $ensemble$), and then plot the results compared to our original $X$ (black line). **`NNS.MC`** is a streamlined wrapper function for this functionality of **`NNS.meboot`**.
 
 ```{r, fig.align='center', fig.width=8, fig.height=8, eval=FALSE}
+set.seed(123)
 boots = NNS.MC(x, reps = 1, lower_rho = -1, upper_rho = 1, by = .5)$replicates
 reps = do.call(cbind, boots)
 
@@ -222,8 +223,8 @@ Checking our replicate correlations:
 ```{r, eval = FALSE}
 sapply(boots, function(r) cor(r, x, method = "spearman"))
 
-    rho = 1   rho = 0.5     rho = 0  rho = -0.5    rho = -1 
- 0.99732373  0.51147915  0.01036904 -0.48720072 -0.98294629 
+#>     rho = 1   rho = 0.5     rho = 0  rho = -0.5    rho = -1
+#>  0.99840384  0.50357036  0.01478548 -0.46829883 -0.97912991
 ```
 
 More replicates and ensembles thereof can be generated for any number of $\rho$ values.
@@ -286,7 +287,7 @@ for directional severity modelling, with their changed target stated explicitly.
 
 Alternatively, if we wish to keep the simulated values close to the original data, we can apply the **`NNS.meboot`** procedure to each of the variables.
 
-We will generate 1 replicate (for brevity) of $\rho = 0.95$ to our `original.data`, use their `ensemble` and note the multivariate dependence among our `new.boot.dep.data`.
+We generate 100 replicates per column at $\rho = 0.95$ and compare the column ensembles with the original data.
 
 ```{r, eval=FALSE}
 # Apply bootstrap to each variable
@@ -304,10 +305,10 @@ Checking `ensemble` correlations with `original.data`:
 ```{r, eval=FALSE}
 for(i in 1:4) print(cor(new.boot.dep.matrix[,i], original.data[,i], method = "spearman"))
 
-[1] 0.9885851
-[1] 0.9965075
-[1] 0.9906302
-[1] 0.9901535
+#> [1] 0.9885851
+#> [1] 0.9965075
+#> [1] 0.9906302
+#> [1] 0.9901535
 ```
 
 > **Reading these numbers.** Here `ensemble` is the per-observation mean of the replicates, a central summary. Its correlation with the input is not the requested per-replicate target. Alignment is applied to individual residual paths; averaging and trend reconstruction can change the measured correlation. Treat the ensemble as a representative path and inspect achieved correlations for the requested output.
@@ -320,28 +321,28 @@ Column-wise scenario generation does not guarantee preservation of the full join
 NNS.copula(original.data)
 NNS.copula(new.boot.dep.matrix)
 
-[1] 0.4743531
-[1] 0.4704039
+#> [1] 0.4452914
+#> [1] 0.4423774
 ```
 
 ```{r, eval=FALSE}
 head(original.data)
 head(new.boot.dep.matrix)
 
-               x           y          z           x
-[1,] -0.56047565 -0.99579872 -0.5116037 -0.56047565
-[2,] -0.23017749 -1.03995504  0.2369379 -0.23017749
-[3,]  1.55870831 -0.01798024 -0.5415892  1.55870831
-[4,]  0.07050839 -0.13217513  1.2192276  0.07050839
-[5,]  0.12928774 -2.54934277  0.1741359  0.12928774
-[6,]  1.71506499  1.04057346 -0.6152683  1.71506499
-                   x          y          z          x
-ensemble1 -0.4268047 -0.7794553 -0.6364458 -0.4642642
-ensemble2 -0.2965744 -1.0682197  0.3297265 -0.2531178
-ensemble3  1.3302149  0.3054734 -0.4014515  1.4914884
-ensemble4  0.2257378  0.3108846  1.0603892  0.1728540
-ensemble5  0.4716743 -3.3344967 -0.1917697  0.4309379
-ensemble6  1.3984978  1.1881374 -0.5295386  1.5326055
+#>                x           y          z      x_copy
+#> [1,] -0.56047565 -0.99579872 -0.5116037 -0.56047565
+#> [2,] -0.23017749 -1.03995504  0.2369379 -0.23017749
+#> [3,]  1.55870831 -0.01798024 -0.5415892  1.55870831
+#> [4,]  0.07050839 -0.13217513  1.2192276  0.07050839
+#> [5,]  0.12928774 -2.54934277  0.1741359  0.12928774
+#> [6,]  1.71506499  1.04057346 -0.6152683  1.71506499
+#>                     x           y          z      x_copy
+#> ensemble1 -0.50534918 -0.99114837 -0.5599005 -0.53374834
+#> ensemble2 -0.25336404 -1.10495674  0.1277390 -0.20297478
+#> ensemble3  1.62035927  0.07462431 -0.5952796  1.61734635
+#> ensemble4 -0.02471890  0.01657279  1.2773063  0.05897732
+#> ensemble5  0.05586323 -1.48844305  0.1384859  0.12920777
+#> ensemble6  1.80768833  0.82770106 -0.6056424  1.83212766
 ```
 
 # References {#references}
