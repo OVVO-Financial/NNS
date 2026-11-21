@@ -45,7 +45,9 @@ Numeric evaluation points use central differences of smoothed
 [NNS.reg](https://OVVO-Financial.github.io/NNS/reference/NNS.reg.md)
 estimates over five steps from 2 to `floor(sqrt(n))` typical spacings of
 `x`. The left point is bounded below by `min(x)` and the right point
-above by `max(x)`. At coordinates outside that range, the differences
+above by `max(x)`. At a support endpoint with at least three distinct
+observations of `x`, the second difference uses the midpoint of the
+one-sided interval. At coordinates outside that range, the differences
 use the extrapolated fit. `second.derivative` is a second difference of
 those estimates, and second differences amplify noise: for `y = x^2`
 plus noise with an R-squared near 0.99 and n = 400, estimates of the
