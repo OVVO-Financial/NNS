@@ -33,7 +33,7 @@ NNS.MC(
 
 \item{exp}{positive finite numeric; \code{1} default will exponentially weight maximum rho value if \code{exp > 1}.  Shrinks values towards \code{upper_rho}, keeping them within \code{[lower_rho, upper_rho]}.}
 
-\item{type}{options("spearman", "pearson", "NNScor", "NNSdep"); \code{type = "spearman"}(default) dependence metric desired.}
+\item{type}{options("spearman", "pearson", "NNScor", "NNSdep"); \code{type = "spearman"}(default) dependence metric desired. \code{"NNScor"} targets the signed correlation from \link{NNS.dep} and \code{"NNSdep"} its unsigned dependence. Unrecognised strings also use signed correlation.}
 
 \item{drift}{logical; \code{drift = TRUE} (default) preserves the drift of the original series.}
 

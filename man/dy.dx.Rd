@@ -11,7 +11,7 @@ dy.dx(x, y, eval.point = NULL)
 
 \item{y}{a numeric vector.}
 
-\item{eval.point}{Finite numeric points, or \code{"overall"} for the average first derivative.}
+\item{eval.point}{Required. Supply finite numeric points, or \code{"overall"} for the average first derivative.}
 }
 \value{
 For numeric points, a \code{data.frame} with the first and second derivatives in the supplied order, including repeated points. For \code{"overall"}, a single first derivative.

@@ -6,7 +6,7 @@
 #' @param h integer; \code{NULL} (default) Number of periods to forecast out of sample.  If \code{NULL}, \code{h = length(variable) - training.set}.
 #' @param training.set integer; \code{NULL} (default) Sets the number of variable observations as the training set.  See \code{Note} below for recommended uses.
 #' @param seasonal.factor integers; Multiple frequency integers considered for \link{NNS.ARMA} model, i.e. \code{(seasonal.factor = c(12, 24, 36))}.
-#' @param lin.only logical; \code{FALSE} (default) For fast optimization of the linear regression method.  More robust than \code{lin.only = TRUE}.
+#' @param lin.only With \code{TRUE}, search only the linear method. The default \code{FALSE} compares linear, nonlinear and combined forecasts.
 #' @param negative.values logical; \code{FALSE} (default) If the variable can be negative, set to
 #' \code{(negative.values = TRUE)}.  It will automatically select \code{(negative.values = TRUE)} if the training data \code{variable[1 : training.set]} has a negative value, and for the out-of-sample forecast if \code{variable} does.
 #' @param obj.fn expression;

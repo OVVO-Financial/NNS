@@ -35,7 +35,7 @@ NNS.boost(
 
 \item{IVs.test}{a matrix or data frame of variables of numeric or factor data types with compatible dimensions to \code{(IVs.train)}.  If NULL, will use \code{(IVs.train)} as default.  Columns are matched to \code{(IVs.train)} by name when the two share the same predictor names, and positionally when they share no names at all (as in \code{cbind(test.x_1, test.x_2)} against \code{cbind(x_1, x_2)}).  A CSV UTF-8 byte-order mark in the first header (for example, \code{Male} becoming \code{X...Male}) is repaired before matching names. Other partial overlaps, including misspelled predictors, are ambiguous and return an error.}
 
-\item{type}{Set to \code{"CLASS"} for classification. Factor responses yield one-based numeric codes. Use \code{NULL} (default) for a continuous response.}
+\item{type}{With \code{NULL} (default), Boost selects classification for factor, character or logical responses. Use \code{"CLASS"} for other numeric labels.}
 
 \item{depth}{options: (integer, NULL, "max"); \code{(depth = NULL)}(default) Specifies the \code{order} parameter in the \link{NNS.reg} routine, assigning a number of splits in the regressors, analogous to tree depth.}
 
@@ -45,7 +45,7 @@ NNS.boost(
 
 \item{CV.size}{numeric [0, 1]; \code{NULL} (default) Sets the cross-validation size.  Defaults to a random value between 0.2 and 0.33 for a random sampling of the training set.}
 
-\item{balance}{logical; \code{FALSE} (default) Uses both up and down sampling to balance the classes.  \code{type="CLASS"} required.}
+\item{balance}{logical; \code{FALSE} (default) Uses both up and down sampling to balance the classes.  With \code{type = NULL}, balancing selects classification.}
 
 \item{ts.test}{integer; NULL (default) Sets the length of the test set for time-series data; typically \code{2*h} parameter value from \link{NNS.ARMA} or double known periods to forecast.}
 
@@ -62,21 +62,21 @@ NNS.boost(
 
 \item{feature.importance}{logical; \code{TRUE} (default) Draws a two-panel diagnostic: the learner-trial objective distribution with its \link{LPM.VaR} cutoff, and the frequency of features used in the final estimate.}
 
-\item{pred.int}{numeric [0,1]; \code{NULL} (default) Returns the associated prediction intervals for the final estimate.}
+\item{pred.int}{Prediction interval level strictly between 0 and 1 for regression or binary classification. Defaults to \code{NULL}.}
 
 \item{status}{logical; \code{TRUE} (default) Prints status update message in console.}
 
-\item{seed}{Optional integer random seed used for reproducible resampling, fold construction, and stochastic fitting steps. If `NULL`, the current random-number-generator state is used.}
+\item{seed}{Integer seed for resampling and fitting. The default is \code{123L}. With \code{seed = NULL}, the fit uses the current RNG state and restores it on return.}
 
-\item{dist}{options:(NULL, "NNS", "L1", "L2", "FACTOR") the method of distance calculation passed to delegated \link{NNS.reg} and \link{NNS.stack} calls. \code{dist = NULL} is the default and selects the native blended NNS distance; \code{dist = "NNS"} is an explicit alias for the default.}
+\item{dist}{options:(NULL, "NNS", "L1", "L2", "FACTOR") the method of distance calculation passed to delegated \link{NNS.reg} and \link{NNS.stack} calls. \code{dist = NULL} is the default and selects the native blended NNS distance; \code{dist = "NNS"} is an explicit alias for the default. \code{"L1"} and \code{"L2"} use Manhattan and Euclidean distance, respectively, on range-normalized coordinates. \code{"FACTOR"} uses the proportion of encoded predictor columns that differ.}
 
 \item{folds}{integer; 5 (default) Number of cross-validation \code{folds} passed to the final \link{NNS.stack} call.}
 }
 \value{
-Returns a vector of fitted values for the dependent variable test set \code{$results}, prediction intervals \code{$pred.int}, the final feature loadings \code{$feature.weights}, final feature frequencies \code{$feature.frequency}, and (for classification) the class labels \code{$class.levels}.  Factor and character responses return one-based numeric codes. Use \code{class.levels[results]} to recover the labels. Observed factor labels follow their declared order. Character labels are sorted. Numeric and logical classes retain their values. The objective function receives the same values as the predictions.
+With \code{features.only = FALSE}, returns a list containing the test predictions \code{$results}, \code{$pred.int} (prediction intervals when requested for regression or binary classification, otherwise \code{NULL}), the final feature loadings \code{$feature.weights}, final feature frequencies \code{$feature.frequency}, and (for classification) the class labels \code{$class.levels}.  Factor and character responses return one-based numeric codes. Use \code{class.levels[results]} to recover the labels. Observed factor labels follow their declared order. Character labels are sorted. Numeric and logical classes retain their values. The objective function receives the same values as the predictions.
 }
 \description{
-Ensemble method for classification using the NNS multivariate regression \link{NNS.reg} as the base learner instead of trees.
+Ensemble method for classification and regression. Each base learner fits \link{NNS.reg} on a sampled subset of predictors.
 }
 \note{
 \itemize{

@@ -4,8 +4,8 @@
 #'
 #' @param x vector of data or a one-column data frame.
 #' @param reps numeric; number of replicates to generate.
-#' @param rho numeric [-1,1] (vectorized); A \code{rho} must be provided, otherwise a blank list will be returned.  The dependence target is applied to each individual \code{replicate} (every replicate is mixed to the requested dependence with the original series); it is \strong{not} applied to the \code{ensemble}.  See \code{Note}.
-#' @param type options("spearman", "pearson", "NNScor", "NNSdep"); \code{type = "spearman"}(default) dependence metric desired.
+#' @param rho numeric [-1,1] (vectorized); Supply \code{rho}, \code{target_drift} or \code{target_drift_scale} to generate scenarios. With none supplied, or with an explicitly supplied \code{NULL} scenario argument, the result is an empty list.  The dependence target is applied to each individual \code{replicate} (every replicate is mixed to the requested dependence with the original series); it is \strong{not} applied to the \code{ensemble}.  See \code{Note}.
+#' @param type options("spearman", "pearson", "NNScor", "NNSdep"); \code{type = "spearman"}(default) dependence metric desired. \code{"NNScor"} targets the signed correlation from \link{NNS.dep} and \code{"NNSdep"} its unsigned dependence. Unrecognised strings also use signed correlation.
 #' @param drift logical; \code{drift = TRUE} (default) preserves the drift of the original series.  \code{drift = FALSE} removes it: replicates are a flat baseline at \code{mean(x)} plus the resampled residuals.
 #' @param target_drift numerical; \code{target_drift = NULL} (default) Specifies the desired drift when \code{drift = TRUE}, i.e. a risk-free rate of return.  A drift other than the original is centred so the replicates keep \code{mean(x)}.
 #' @param target_drift_scale numerical; instead of calculating a \code{target_drift}, provide a scalar to the existing drift when \code{drift = TRUE}.
@@ -17,16 +17,15 @@
 #' @param force.clt logical; If \code{TRUE} the replicate means are assigned an iid normal-reference scale: the replicate means are spread as a normal sample centred on \code{mean(x)} with standard deviation \code{sd(x) / sqrt(n)}, the standard error of the mean of the \code{n} observations, whatever the number of \code{reps}.  See \code{force.clt} in \code{meboot::meboot}, whose code divides by the number of replicates instead (its comment says \code{n}).  When \code{drift = FALSE}, \code{target_drift} or \code{target_drift_scale} replaces the original drift, the replicate means are centred and spread using the new baseline plus the original residuals instead of \code{x}.
 #' @param scl.adjustment logical; If \code{TRUE} the scale factor matches the population variance of a raw residual draw to the sample variance of the detrended data. Dependence targeting, SD expansion and forcing path means can change the variance pooled across paths.
 #' @param sym logical; If \code{TRUE} an adjustment is performed to ensure that the ME density is symmetric.
-#' @param elaps logical; If \code{TRUE} elapsed time during computations is displayed.
+#' @param elaps Unused.
 #' @param digits integer; 6 (default) number of digits to round output to.
-#' @param colsubj numeric; the column in \code{x} that contains the individual index. It is ignored if the input data \code{x} is not a \code{pdata.frame} object.
-#' @param coldata numeric; the column in \code{x} that contains the data of the variable to create the ensemble. It is ignored if the input data \code{x} is not a \code{pdata.frame} object.
-#' @param coltimes numeric; an optional argument indicating the column that contains the times at which the observations for each individual are observed. It is ignored if the input data \code{x}
-#' is not a \code{pdata.frame} object.
+#' @param colsubj Unused. May be omitted.
+#' @param coldata Unused. May be omitted.
+#' @param coltimes Unused. May be omitted.
 #' @param expand.residual.sd logical; \code{TRUE} (default) retains the residual-space SD expansion before trend reconstruction. Set to \code{FALSE} to leave the generated residual scales unexpanded; this is separate from the later level-space \code{expand.sd} switch.
 #' @param ... possible argument \code{fiv} to be passed to \code{expand.sd}.
 #'
-#' @return Returns the following row names in a matrix:
+#' @return Returns a list matrix with one column per scenario and the following named rows. For example, \code{boots["replicates", 1][[1]]} extracts the replicate matrix for the first scenario.
 #' \itemize{
 #'   \item{x} input vector, or the extracted column for a one-column data frame.
 #' \item{replicates} maximum entropy bootstrap replicates.
@@ -40,7 +39,6 @@
 #' \item{desintxb} desired interval means.
 #' \item{ordxx} ordered x values.
 #' \item{kappa} scale adjustment to the variance of ME density.
-#' \item{elaps} elapsed time.
 #' }
 #' 
 #' @note These are dependence-targeted synthetic scenarios. Zero Spearman or Pearson correlation does not imply independence; interior-rho mixtures can retain nonlinear dependence and change the residual marginal distribution. Matching ranks or path moments does not by itself calibrate sampling confidence intervals. The \code{force.clt} scale \code{sd(x)/sqrt(n)} is an iid finite-variance reference, not a long-run standard error under serial dependence, and does not calibrate uncertainty of other statistics.

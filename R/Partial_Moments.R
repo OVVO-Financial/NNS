@@ -11,7 +11,7 @@
 #'   partial moment to an element-wise excess-deviation calculation. For \code{LPM}, this computes
 #'   \code{pmax(target - variable, 0)} raised to \code{degree} and averaged. In this mode, \code{target}
 #'   must have length 1 or the same length as \code{variable}.
-#' @return LPM of variable
+#' @return Numeric vector with one value per target. A \code{NULL} target or \code{excess_ret = TRUE} gives one value.
 #' @author Fred Viole, OVVO Financial Systems
 #' @references Viole, F. and Nawrocki, D. (2013) "Nonlinear Nonparametric Statistics: Using Partial Moments" (ISBN: 1490523995, 2nd edition: \url{https://ovvo-financial.github.io/NNS/book/})
 #' @examples

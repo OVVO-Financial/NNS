@@ -1,6 +1,6 @@
 #' LPM VaR
 #'
-#' Generates a value at risk (VaR) quantile based on the Lower Partial Moment ratio.
+#' Degree zero returns the lower-tail empirical quantile and degree one returns the lower-tail expectile.
 #'
 #' @param percentile numeric [0, 1]; The percentile for left-tail VaR.  Values outside [0, 1] are clamped to it.
 #' @param degree numeric; \code{(degree = 0)} gives the interpolated empirical quantile (\code{quantile(x, percentile, type = 7)}), which on tied data need not be an exact inverse of \code{LPM.ratio(0, ., x)}. Use it for probability statements, such as a VaR exceeded with a given frequency.  \code{(degree = 1)} gives an area-weighted (severity-weighted) threshold, the \code{percentile}-expectile of \code{x} (Newey and Powell 1987): \code{percentile} of the area of deviations, not of the observations, lies below it, so it is not a quantile of \code{x} (for exponential data the degree-1 5\% point has about a quarter of the observations below it).  Higher degrees weight large deviations more.
@@ -38,7 +38,7 @@ LPM.VaR <- function(percentile, degree, x) {
 
 #' UPM VaR
 #'
-#' Generates an upside value at risk (VaR) quantile based on the Upper Partial Moment ratio.
+#' Degree zero returns the upper-tail empirical quantile and degree one returns the upper-tail expectile.
 #'
 #' @param percentile numeric [0, 1]; The percentile for right-tail VaR.  Values outside [0, 1] are clamped to it.
 #' @param degree numeric; \code{(degree = 0)} gives the interpolated empirical quantile (\code{quantile(x, 1 - percentile, type = 7)}), which on tied data need not be an exact inverse of \code{UPM.ratio(0, ., x)}. Use it for probability statements.  \code{(degree = 1)} gives an area-weighted (severity-weighted) threshold, the (1 - \code{percentile})-expectile of \code{x} (Newey and Powell 1987): \code{percentile} of the area of deviations, not of the observations, lies above it, so it is not a quantile of \code{x}.  Higher degrees weight large deviations more.

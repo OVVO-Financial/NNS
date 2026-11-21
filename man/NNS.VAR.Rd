@@ -35,8 +35,7 @@ NNS.VAR(
 
 \item{naive.weights}{logical; \code{TRUE} (default) Equal weights applied to univariate and multivariate outputs in ensemble.  \code{FALSE} will apply weights based on the number of relevant variables detected.}
 
-\item{obj.fn}{expression;
-\code{expression(mean((predicted - actual)^2)) / (Sum of NNS Co-partial moments)} (default) MSE / co-movements is the default objective function.  Any \code{expression(...)} using the specific terms \code{predicted} and \code{actual} can be used.}
+\item{obj.fn}{The default objective divides mean squared error by the sum of the lower and upper co-partial moments of predictions and observations about their respective means. A zero denominator gives \code{Inf}. A custom expression can use \code{predicted} and \code{actual}.}
 
 \item{objective}{options: ("min", "max") \code{"min"} (default) Select whether to minimize or maximize the objective function \code{obj.fn}.}
 

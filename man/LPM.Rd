@@ -21,7 +21,7 @@ partial moment to an element-wise excess-deviation calculation. For \code{LPM}, 
 must have length 1 or the same length as \code{variable}.}
 }
 \value{
-LPM of variable
+Numeric vector with one value per target. A \code{NULL} target or \code{excess_ret = TRUE} gives one value.
 }
 \description{
 This function generates a univariate lower partial moment for any degree or target.

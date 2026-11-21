@@ -48,7 +48,7 @@ y <- rnorm(100)
 z <- rnorm(100)
 A <- cbind(x, y, z)
 
-# Perform SD-based clustering (degree 1), requiring at least 2 elements per cluster
+# Perform SD-based clustering (degree 1), stop peeling when at most two variables remain
 results <- NNS.SD.cluster(data = A, degree = 1, min_cluster = 2)
 print(results$Clusters)
 

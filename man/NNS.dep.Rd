@@ -18,7 +18,9 @@ NNS.dep(x, y = NULL, asym = FALSE, p.value = FALSE, print.map = FALSE)
 \item{print.map}{logical; \code{FALSE} (default) Plots quadrant means, or p-value replicates.}
 }
 \value{
-Returns the bi-variate \code{"Correlation"} and \code{"Dependence"} or correlation / dependence matrix for matrix input.
+A list with \code{Correlation} and \code{Dependence}, each a number for two vectors or a pairwise matrix for matrix input.
+With \code{p.value = TRUE}, the list also contains \code{Correlation p.value} and \code{Dependence p.value}, each a number,
+and \code{Correlation 95\% CIs} and \code{Dependence 95\% CIs}, each a pair of lower and upper permutation-null bounds.
 }
 \description{
 Returns the dependence and nonlinear correlation between two variables based on higher order partial moment matrices measured by frequency or area.

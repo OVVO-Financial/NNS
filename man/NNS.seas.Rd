@@ -51,7 +51,7 @@ The historical column names \code{Coefficient.of.Variation} and \code{Variable.C
 set.seed(123)
 x <- rnorm(100)
 
-## To call strongest period based on coefficient of variation:
+## Return the selected fundamental period:
 NNS.seas(x, plot = FALSE)$best.period
 
 ## Using modulos for logical seasonal inference:

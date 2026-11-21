@@ -42,6 +42,8 @@
 #' (\code{type = NULL}) is \code{1 + (x <= cx) + 2 * (y <= cy)}: 1 = upper-right,
 #' 2 = upper-left, 3 = lower-right, 4 = lower-left. For \code{type = "XONLY"}
 #' the digit is 1 for \code{x <= cx} and 2 for \code{x > cx}.
+#' @examples
+#' NNS.part(1:8, (1:8)^2, order = 1)$regression.points
 #' @export
 #' 
 #' 
