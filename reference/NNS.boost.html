@@ -83,7 +83,7 @@
 
 
 <dt id="arg-type">type<a class="anchor" aria-label="anchor" href="#arg-type"></a></dt>
-<dd><p><code>NULL</code> (default).  To perform a classification of discrete integer classes from factor target variable <code>(DV.train)</code> with a base category of 1, set to <code>(type = "CLASS")</code>, else for continuous <code>(DV.train)</code> set to <code>(type = NULL)</code>.</p></dd>
+<dd><p>Set to <code>"CLASS"</code> for classification. Factor responses yield one-based numeric codes. Use <code>NULL</code> (default) for a continuous response.</p></dd>
 
 
 <dt id="arg-depth">depth<a class="anchor" aria-label="anchor" href="#arg-depth"></a></dt>
@@ -157,7 +157,7 @@
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>Returns a vector of fitted values for the dependent variable test set <code>$results</code>, prediction intervals <code>$pred.int</code>, the final feature loadings <code>$feature.weights</code>, final feature frequencies <code>$feature.frequency</code>, and (for classification) the class labels <code>$class.levels</code>.  Classification results are numeric: a factor or character <code>DV.train</code> yields integer class codes with a base category of 1 (label recoverable as <code>class.levels[results]</code>), and a numeric <code>DV.train</code> yields its original numeric class values.</p>
+    <p>Returns a vector of fitted values for the dependent variable test set <code>$results</code>, prediction intervals <code>$pred.int</code>, the final feature loadings <code>$feature.weights</code>, final feature frequencies <code>$feature.frequency</code>, and (for classification) the class labels <code>$class.levels</code>.  Factor and character responses return one-based numeric codes. Use <code>class.levels[results]</code> to recover the labels. Observed factor labels follow their declared order. Character labels are sorted. Numeric and logical classes retain their values. The objective function receives the same values as the predictions.</p>
     </div>
     <div class="section level2">
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>

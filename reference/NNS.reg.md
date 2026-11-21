@@ -311,15 +311,16 @@ distance-weights those probability vectors. Class labels never enter
 numeric interpolation. `Point.probabilities`, `Fitted.probabilities`,
 and `RPM.probabilities` expose the corresponding vectors. Tied class
 decisions follow first appearance in the training response. Factor and
-character responses retain numeric output codes with `class.levels`;
-numeric responses retain their supplied values. For dimension reduction,
-one signed NNS index is fitted per class indicator, and the resulting
-probabilities are normalized across classes; `equation` is then a list
-indexed by class. `confidence.interval` returns `Prediction.set`, the
-smallest leading set of classes attaining the requested estimated
-probability mass. These are descriptive probability sets, not calibrated
-coverage guarantees; nominal classes have no numeric prediction
-interval.
+character responses return one-based numeric codes for the labels in
+`class.levels`. Factor labels follow their declared order. Character
+labels are sorted. Numeric and logical responses retain their supplied
+values. For dimension reduction, one signed NNS index is fitted per
+class indicator, and the resulting probabilities are normalized across
+classes; `equation` is then a list indexed by class.
+`confidence.interval` returns `Prediction.set`, the smallest leading set
+of classes attaining the requested estimated probability mass. These are
+descriptive probability sets, not calibrated coverage guarantees;
+nominal classes have no numeric prediction interval.
 
 ## Note
 

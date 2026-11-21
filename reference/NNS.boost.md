@@ -57,10 +57,8 @@ NNS.boost(
 
 - type:
 
-  `NULL` (default). To perform a classification of discrete integer
-  classes from factor target variable `(DV.train)` with a base category
-  of 1, set to `(type = "CLASS")`, else for continuous `(DV.train)` set
-  to `(type = NULL)`.
+  Set to `"CLASS"` for classification. Factor responses yield one-based
+  numeric codes. Use `NULL` (default) for a continuous response.
 
 - depth:
 
@@ -180,11 +178,12 @@ NNS.boost(
 Returns a vector of fitted values for the dependent variable test set
 `$results`, prediction intervals `$pred.int`, the final feature loadings
 `$feature.weights`, final feature frequencies `$feature.frequency`, and
-(for classification) the class labels `$class.levels`. Classification
-results are numeric: a factor or character `DV.train` yields integer
-class codes with a base category of 1 (label recoverable as
-`class.levels[results]`), and a numeric `DV.train` yields its original
-numeric class values.
+(for classification) the class labels `$class.levels`. Factor and
+character responses return one-based numeric codes. Use
+`class.levels[results]` to recover the labels. Observed factor labels
+follow their declared order. Character labels are sorted. Numeric and
+logical classes retain their values. The objective function receives the
+same values as the predictions.
 
 ## Note
 

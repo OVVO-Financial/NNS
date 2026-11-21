@@ -293,10 +293,11 @@ that blend. `OBJfn.reg` and `OBJfn.dim.red` are the best scores of that
 search on the same predictions, so they are selection-optimized and
 overstate held-out performance; assess the final model on an independent
 test set. Custom objectives receive original numeric or logical response
-values, and factor/character codes as identified by `class.levels`.
-Relabelling is invariant for label-invariant objectives such as
-accuracy; a custom loss assigning different costs to classes can
-deliberately change the result.
+values and one-based numeric codes for factor or character responses. In
+`class.levels`, factor labels follow their declared order and character
+labels are sorted. Relabelling is invariant for label-invariant
+objectives such as accuracy; a custom loss assigning different costs to
+classes can deliberately change the result.
 
 Named numeric dimension-reduction coefficients are matched to encoded
 predictor names in both regression and classification. Factor columns
