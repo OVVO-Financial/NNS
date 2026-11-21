@@ -132,8 +132,8 @@
   X <- encoded$x
   Q <- encoded$point.est
   values <- task$class.values
-  labels <- if (length(task$class.levels) == length(values)) task$class.levels else
-    task$class.levels[values]
+  labels <- task$labels
+  output <- values
   indicators <- outer(task$y, values, "==") * 1
   colnames(indicators) <- labels
   tie.order <- match(unique(task$y), values)
@@ -145,7 +145,7 @@
     class.threshold <- if (length(threshold) <= 1L) {
       rep(threshold, length(values))
     } else if (!is.null(names(threshold)) && all(labels %in% names(threshold))) {
-      unname(threshold[labels])
+      unname(threshold[match(labels, names(threshold))])
     } else if (length(threshold) == length(values)) {
       unname(threshold)
     } else {
@@ -191,17 +191,17 @@
     boundaries <- fit$boundaries; ids <- fit$ids; k <- fit$k
   }
   if (!is.null(point.prob)) colnames(point.prob) <- labels
-  point.pred <- .nns_class_select(point.prob, values, tie.order)
+  point.pred <- .nns_class_select(point.prob, output, tie.order)
   # Fitted classes are not computed for point-only calls, which return none.
   fitted <- fitted.pred <- accuracy <- NULL
   if (!point.only) {
     colnames(fitted.prob) <- labels
-    fitted.pred <- .nns_class_select(fitted.prob, values, tie.order)
+    fitted.pred <- .nns_class_select(fitted.prob, output, tie.order)
     fitted <- as.data.frame(X)
     names(fitted) <- .nns_reg_predictor_names(names(fitted), c("y", "y.hat", "NNS.ID", "error"))
-    fitted$y <- task$y; fitted$y.hat <- fitted.pred
-    fitted$NNS.ID <- ids; fitted$error <- as.numeric(fitted.pred != task$y)
-    accuracy <- mean(fitted.pred == task$y)
+    fitted$y <- output[match(task$y, values)]; fitted$y.hat <- fitted.pred
+    fitted$NNS.ID <- ids; fitted$error <- as.numeric(fitted.pred != fitted$y)
+    accuracy <- mean(fitted.pred == fitted$y)
   }
   if (plot && !point.only && ncol(X) == 1L) {
     graphics::plot(X[, 1], task$y, xlab = colnames(X)[1], ylab = "Class", pch = 1)
@@ -212,7 +212,7 @@
     lapply(seq_len(nrow(point.prob)), function(i) {
       o <- tie.order[order(point.prob[i, tie.order], decreasing = TRUE)]
       keep <- seq_len(which(cumsum(point.prob[i, o]) >= confidence.interval - 1e-12)[1])
-      values[o[keep]]
+      output[o[keep]]
     })
   .NNS.out(list(R2 = if (point.only) NULL else accuracy, SE = NULL,
     Prediction.Accuracy = if (point.only) NULL else accuracy,
@@ -224,5 +224,5 @@
     Fitted.xy = if (point.only) NULL else fitted, Fitted = if (point.only) NULL else fitted,
     Fitted.probabilities = if (point.only) NULL else fitted.prob,
     Point.probabilities = point.prob, n.best = k,
-    class.levels = task$class.levels, class.values = values))
+    class.levels = task$class.levels, class.values = output))
 }

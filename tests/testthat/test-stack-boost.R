@@ -41,6 +41,67 @@ test_that("NNS.boost returns -5/5 response values for a -5/5 numeric response", 
   expect_equal(unname(as.matrix(f$pred.int)), cbind(c(5, 5, 5, -5, -5, -5), c(5, 5, 5, -5, -5, -5)))
 })
 
+test_that("stack uses the response column's ordered levels", {
+  x <- iris[1:100, 1:2]
+  y <- ordered(iris$Species[1:100], levels = rev(levels(iris$Species)))
+  fit <- function(y) NNS.stack(x, y, x[c(1, 100), ], method = 1, folds = 2,
+    optimize.threshold = FALSE, status = FALSE, ncores = 1, seed = 17)
+  control <- fit(y)
+  expect_identical(fit(data.frame(y))$class.levels, control$class.levels)
+  expect_equal(fit(data.frame(y))$probabilities, control$probabilities)
+  unordered <- factor(y, levels = levels(y), ordered = FALSE)
+  expect_identical(fit(unordered)$class.levels, control$class.levels)
+})
+
+test_that("Stack and Boost keep Date responses in days", {
+  x <- rep(1:3, each = 8)
+  day <- as.Date("2020-01-01") + x
+  stack <- function(y) NNS.stack(x, y, 1:3, method = 1, folds = 2, order = "max",
+                                 seed = 17, status = FALSE, ncores = 1)$stack
+  boost <- function(y) NNS.boost(x, y, 1:3, type = "CLASS", epochs = 0, folds = 2,
+                                 learner.trials = 1, seed = 17, status = FALSE,
+                                 feature.importance = FALSE)$results
+  expect_equal(stack(data.frame(day)), stack(as.numeric(day)), tolerance = 1e-12)
+  expect_equal(boost(data.frame(day)), boost(as.numeric(day)), tolerance = 1e-12)
+})
+
+test_that("Stack and Boost distinguish both occurrences of a repeated hour", {
+  x <- rep(1:3, each = 8)
+  time <- as.POSIXct("2026-11-01 05:30:00", tz = "UTC") + (x - 1) * 3600
+  attr(time, "tzone") <- "America/New_York"
+  stack <- function(y) NNS.stack(x, y, 1:3, type = "CLASS", method = 1, folds = 2,
+                                 seed = 17, status = FALSE, ncores = 1)
+  boost <- function(y) NNS.boost(x, y, 1:3, type = "CLASS", epochs = 0, folds = 2,
+                                 learner.trials = 1, seed = 17, status = FALSE,
+                                 feature.importance = FALSE)
+  expect_equal(stack(data.frame(time))$stack, stack(as.numeric(time))$stack, tolerance = 1e-12)
+  actual <- boost(data.frame(time))
+  control <- boost(as.numeric(time))
+  expect_equal(actual$results, control$results, tolerance = 1e-12)
+  expect_identical(actual$class.levels, control$class.levels)
+})
+
+test_that("logical predictors keep both levels for test and validation rows", {
+  set.seed(12)
+  x <- data.frame(flag = rep(TRUE, 20), num = rnorm(20))
+  y <- factor(rep(c("a", "b"), 10))
+  q <- data.frame(flag = c(FALSE, TRUE), num = c(0, 1))
+  declared <- function(d) transform(d, flag = factor(flag, levels = c(FALSE, TRUE)))
+  reg <- function(x, q, dummy) NNS.reg(x, y, point.est = q, factor.2.dummy = dummy,
+                                       plot = FALSE)$Point.probabilities
+  expect_equal(reg(x, q, TRUE), reg(declared(x), declared(q), TRUE), tolerance = 1e-12)
+  expect_equal(reg(x, q, FALSE), reg(declared(x), declared(q), FALSE), tolerance = 1e-12)
+
+  x$flag[17] <- FALSE
+  stack <- function(x, q) NNS.stack(x, y, q, ts.test = 4, folds = 1, method = 1,
+                                    seed = 1, status = FALSE, ncores = 1)$stack
+  boost <- function(x, q) NNS.boost(x, y, q, ts.test = 4, folds = 1, learner.trials = 3,
+                                    epochs = 0, seed = 1, status = FALSE,
+                                    feature.importance = FALSE)$results
+  expect_equal(stack(x, q), stack(declared(x), declared(q)), tolerance = 1e-12)
+  expect_equal(boost(x, q), boost(declared(x), declared(q)), tolerance = 1e-12)
+})
+
 test_that("NNS.stack codes a character response like the equivalent factor", {
   idx <- c(101:140, 1:100)
   x <- iris[idx, 1:4]

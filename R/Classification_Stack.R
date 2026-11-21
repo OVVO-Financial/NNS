@@ -1,31 +1,25 @@
 # Cross-validated NNS classification aggregates class probability vectors.
 # Regression and its existing native search are kept in NNS.stack itself.
-.nns_stack_classify <- function(x, y, z, class.values, splits, method, stack,
+.nns_stack_classify <- function(x, y, z, response, splits, method, stack,
                                 dim.red.method, order, dist, ncores,
                                 optimize.threshold, pred.int, score, objective,
-                                balance.indices, numeric.response, status,
-                                numeric.design, tau = NULL) {
+                                balance.indices, status,
+                                tau = NULL) {
   values <- sort(unique(y))
   class.order <- function(response) match(unique(response), values)
   tie.order <- class.order(y)
-  labels <- as.character(class.values)
-  n <- length(y); K <- length(values)
-  encode <- function(train, test) {
-    # Keep Stack's predictor names and factor columns in every fold. Scaling
-    # remains in the NNS geometry and dimension-reduction routines below.
-    design <- numeric.design(train, test, scale = FALSE)
-    list(x = as.matrix(design$train), point.est = as.matrix(design$test),
-         metadata = lapply(train, function(column) {
-           list(categorical = is.factor(column) || is.logical(column))
-         }))
+  labels <- response$labels
+  decode <- response$decode
+  fold.response <- function(codes) {
+    task <- response
+    task$y <- decode(codes)
+    task
   }
-  full <- encode(x, z)
+  n <- length(y); K <- length(values)
+  full <- .nns_stack_predictors(x, z)
   p <- ncol(full$x)
   balanced <- lapply(splits, function(s) balance.indices(y[s$train]))
   final.rows <- balance.indices(y)
-  decode <- function(code) {
-    if (numeric.response) class.values[code] else as.numeric(code)
-  }
   validation <- lapply(splits, `[[`, "validation")
   validation.rows <- unlist(validation, use.names = FALSE)
   count <- tabulate(validation.rows, n)
@@ -75,7 +69,7 @@
     list(score = loss[take], threshold = thresholds[take])
   }
   design <- function(train, response, test, component, select.count = NULL) {
-    encoded <- encode(train, test)
+    encoded <- .nns_stack_predictors(train, test)
     if (component == 1L && stack && !is.null(select.count) && select.count < ncol(encoded$x)) {
       ind <- outer(response, values, "==") * 1
       importance <- vapply(seq_len(ncol(encoded$x)), function(j) {
@@ -90,9 +84,8 @@
   }
   fit <- function(train, response, test, component, candidate, select.count = NULL) {
     encoded <- design(train, response, test, component, select.count)
-    task <- list(y = response, class.values = values, class.levels = labels)
     model <- .nns_reg_classify(
-      encoded, task, order,
+      encoded, fold.response(response), order,
       if (component == 1L) candidate else NULL, dist, ncores,
       if (component == 2L) dim.red.method else NULL, tau = tau,
       dim.count = if (component == 2L) candidate else NULL,
@@ -151,7 +144,7 @@
         }
         fitted <- .nns_reg_classify(
           prepared[[b]]$encoded,
-          list(y = y[tr], class.values = values, class.levels = labels),
+          fold.response(y[tr]),
           order, NULL, dist, ncores, dim.red.method, tau = tau,
           dim.count = candidate, point.only = TRUE,
           coef.cache = prepared[[b]]$cache)
@@ -241,7 +234,7 @@
     dim.red.pred.int = interval(dp), stack = decode(choose(probability, threshold)),
     pred.int = interval(probability), Prediction.set = prediction.set(probability),
     probabilities = probability, reg.probabilities = rp, dim.red.probabilities = dp,
-    weights = weights, class.levels = class.values,
+    weights = weights, class.levels = response$class.levels,
     NNS.reg.variables = reg.final$variables)
   .NNS.out(result)
 }

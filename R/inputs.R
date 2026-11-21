@@ -381,3 +381,281 @@
     stop("[objective] must be 'min' or 'max'.")
   objective
 }
+
+.nns_predictor_levels <- function(x) {
+  if (is.logical(x)) return(c("FALSE", "TRUE"))
+  if (is.ordered(x)) return(levels(x))
+  if (is.factor(x)) return(sort(levels(x)))
+  sort(unique(as.character(x)))
+}
+
+.nns_predictor_frames <- function(train, test) {
+  schema <- .nns_predictor_schema(train)
+  for (j in seq_along(train)) {
+    column <- schema[[j]]
+    nm <- column$name
+    tr <- train[[j]]
+    te <- test[[j]]
+
+    if (column$kind == "Date") {
+      if (!inherits(te, "Date")) {
+        stop(sprintf("Test predictor [%s] must also be a Date.", nm),
+             call. = FALSE)
+      }
+      train[[j]] <- as.numeric(tr)
+      test[[j]] <- as.numeric(te)
+    } else if (column$kind == "datetime") {
+      if (!inherits(te, c("POSIXct", "POSIXlt"))) {
+        stop(sprintf("Test predictor [%s] must also be a date-time value.", nm),
+             call. = FALSE)
+      }
+      train[[j]] <- as.numeric(tr)
+      test[[j]] <- as.numeric(te)
+    } else if (column$categorical && column$kind != "logical") {
+      tr_chr <- as.character(tr)
+      te_chr <- as.character(te)
+      lev <- column$levels
+      unseen <- setdiff(unique(te_chr), lev)
+      if (length(unseen)) {
+        stop(sprintf(
+          "Test predictor [%s] contains unseen level(s): %s.",
+          nm, paste(unseen, collapse = ", ")
+        ), call. = FALSE)
+      }
+      if (is.factor(tr)) train[[j]] <- factor(tr_chr, levels = lev, ordered = is.ordered(tr))
+      test[[j]] <- factor(te_chr, levels = lev, ordered = is.ordered(tr))
+    } else if (column$kind == "logical") {
+      if (!is.logical(te)) {
+        stop(sprintf("Test predictor [%s] must also be logical.", nm),
+             call. = FALSE)
+      }
+    } else if (is.numeric(tr) || is.integer(tr)) {
+      if (!(is.numeric(te) || is.integer(te))) {
+        stop(sprintf("Test predictor [%s] must be numeric.", nm),
+             call. = FALSE)
+      }
+      train[[j]] <- as.numeric(tr)
+      test[[j]] <- as.numeric(te)
+    } else {
+      stop(sprintf("Unsupported predictor type for [%s].", nm),
+           call. = FALSE)
+    }
+  }
+  list(train = train, test = test)
+}
+
+.nns_check_predictors <- function(x, name) {
+  if (anyNA(x)) stop(sprintf("[%s] contains missing values.", name), call. = FALSE)
+  for (j in seq_along(x)) {
+    if (is.numeric(x[[j]]) && any(!is.finite(x[[j]]))) {
+      stop(sprintf("[%s] predictor [%s] contains non-finite values.",
+                   name, names(x)[j]), call. = FALSE)
+    }
+  }
+}
+
+.nns_declare_characters <- function(x) {
+  chars <- vapply(x, is.character, logical(1))
+  x[chars] <- lapply(x[chars], factor)
+  x
+}
+
+.nns_predictor_schema <- function(train) {
+  unname(Map(function(x, name) {
+    kind <- if (is.ordered(x)) "ordered" else if (is.factor(x)) "factor" else
+      if (is.character(x)) "character" else if (is.logical(x)) "logical" else
+      if (inherits(x, "Date")) "Date" else if (inherits(x, "POSIXt")) "datetime" else "numeric"
+    categorical <- kind %in% c("ordered", "factor", "character", "logical")
+    list(name = name, kind = kind, categorical = categorical,
+         levels = if (categorical) .nns_predictor_levels(x))
+  }, train, names(train)))
+}
+
+.nns_stack_layout <- function(schema) {
+  blocks <- lapply(schema, function(col) {
+    if (col$categorical && col$kind != "logical")
+      paste0(col$name, "__", make.names(col$levels, unique = TRUE))
+    else col$name
+  })
+  names <- make.unique(unlist(blocks, use.names = FALSE), sep = "_")
+  list(names = names, source = rep(vapply(schema, `[[`, "", "name"), lengths(blocks)))
+}
+
+.nns_design_matrix <- function(frame, schema, dummy, label) {
+  if (is.null(frame)) return(NULL)
+  blocks <- Map(function(x, col, expand) {
+    nm <- col$name
+    if (!col$categorical) {
+      value <- if (label == "point.est") suppressWarnings(.nns_numeric_labels(x, label)) else
+        suppressWarnings(.nns_sample(x, nm))
+      if (length(value) != length(x) || any(!is.finite(value)))
+        stop(sprintf("%s '%s' must contain only finite numeric values.",
+                     if (label == "point.est") "[point.est] predictor" else "Predictor", nm), call. = FALSE)
+    } else {
+      labels <- as.character(x)
+      prefix <- if (label == "point.est") "[point.est] predictor" else "Predictor"
+      if (anyNA(labels)) stop(sprintf("%s '%s' contains missing values.", prefix, nm), call. = FALSE)
+      code <- match(labels, col$levels)
+      if (anyNA(code)) stop(sprintf("%s '%s' contains unseen level(s): %s", prefix, nm,
+                                    paste(unique(labels[is.na(code)]), collapse = ", ")), call. = FALSE)
+      if (expand) {
+        block <- outer(code, seq_along(col$levels), "==") * 1
+        colnames(block) <- paste0(nm, "_", make.names(col$levels, unique = TRUE))
+        return(block)
+      }
+      value <- if (is.null(col$values)) code else col$values[code]
+    }
+    matrix(as.numeric(value), ncol = 1L, dimnames = list(NULL, nm))
+  }, frame, schema, dummy)
+  do.call(cbind, unname(blocks))
+}
+
+.nns_encode_predictors <- function(train, test, dummy, schema) {
+  list(x = .nns_design_matrix(train, schema, dummy, "x"),
+       point.est = .nns_design_matrix(test, schema, dummy, "point.est"),
+       metadata = schema)
+}
+
+.nns_stack_predictors <- function(train, test, schema = .nns_predictor_schema(train)) {
+  layout <- .nns_stack_layout(schema)
+  logicals <- vapply(schema, function(col) col$kind == "logical", logical(1))
+  for (i in which(logicals)) schema[[i]]$values <- c(0, 1)
+  design <- .nns_encode_predictors(train, test, !logicals, schema)
+  colnames(design$x) <- layout$names
+  if (!is.null(design$point.est)) colnames(design$point.est) <- layout$names
+  design$source <- layout$source
+  design
+}
+
+.nns_reg_encode_predictors <- function(x, point.est = NULL,
+                                       factor.2.dummy = TRUE, coefficient.names = NULL) {
+  factor.2.dummy <- .nns_reg_scalar_logical(factor.2.dummy, "factor.2.dummy")
+  # A plain numeric vector is the single numeric predictor "x", as
+  # data.frame(x = x) below names it; building that data frame was most of the
+  # encoding time for short series. Plain numeric points are its values.
+  if (is.numeric(x) && is.null(dim(x)) && is.null(oldClass(x)) &&
+      length(x) && all(is.finite(x)) &&
+      (is.null(point.est) ||
+         (is.numeric(point.est) && is.null(dim(point.est)) &&
+            is.null(oldClass(point.est))))) {
+    point.matrix <- NULL
+    if (!is.null(point.est)) {
+      if (any(!is.finite(point.est))) {
+        stop("[point.est] predictor 'x' must contain only finite numeric values.",
+             call. = FALSE)
+      }
+      point.matrix <- matrix(.nns_sample(point.est, "point.est"), ncol = 1L,
+                             dimnames = list(NULL, "x"))
+    }
+    return(list(
+      x = matrix(.nns_sample(x, "x"), ncol = 1L, dimnames = list(NULL, "x")),
+      point.est = point.matrix,
+      stack.index = FALSE,
+      raw.names = "x",
+      encoded.names = "x",
+      metadata = list(list(name = "x", kind = "numeric", categorical = FALSE, levels = NULL))
+    ))
+  }
+  train <- .nns_reg_as_frame(x)
+  points <- .nns_reg_prepare_points(point.est, names(train))
+
+  schema <- .nns_predictor_schema(train)
+  stack.index <- FALSE
+  if (!is.null(coefficient.names) && factor.2.dummy && ncol(train) > 1L &&
+      any(vapply(schema, `[[`, logical(1), "categorical"))) {
+    stack.names <- .nns_stack_layout(schema)$names
+    stack.index <- length(coefficient.names) == length(stack.names) && setequal(coefficient.names, stack.names)
+  }
+  design <- if (stack.index) .nns_stack_predictors(train, points, schema) else
+    .nns_encode_predictors(train, points, factor.2.dummy, schema)
+  list(x = design$x, point.est = design$point.est, stack.index = stack.index,
+       raw.names = names(train), encoded.names = colnames(design$x), metadata = design$metadata)
+}
+
+.nns_encode_response <- function(y, type) {
+  is.class <- identical(type, "class")
+  nominal <- is.factor(y) || is.character(y)
+  if (nominal) {
+    if (is.factor(y)) {
+      labels <- levels(y)
+      if (is.class) labels <- labels[tabulate(y, length(labels)) > 0L]
+      # An explicit NA level has a code distinct from a missing observation.
+      value <- as.numeric(match(levels(y), labels)[as.integer(y)])
+    } else {
+      labels <- sort(unique(y))
+      value <- as.numeric(match(y, labels))
+    }
+  } else {
+    value <- .nns_sample(y, "y")
+    labels <- NULL
+  }
+  values <- codes <- NULL
+  if (is.class || nominal || is.logical(y)) {
+    values <- sort(unique(value))
+    codes <- as.numeric(match(value, values))
+    if (is.class && is.logical(y)) values <- as.logical(values)
+    if (!nominal) labels <- values
+  }
+  list(type = type, is.class = is.class, is.xonly = identical(type, "xonly"),
+       y = value, codes = codes, class.levels = labels, class.values = values,
+       labels = if (nominal) labels[values] else as.character(values),
+       decode = function(code) values[code])
+}
+
+.nns_response_vector <- function(y, name = "y") {
+  if (!is.data.frame(y) && !is.matrix(y)) return(y)
+  if (ncol(y) != 1L) {
+    message <- if (name == "y") "[y] must be a vector or one-column object." else
+      "[DV.train] must contain exactly one response column."
+    stop(message, call. = FALSE)
+  }
+  if (is.data.frame(y)) y[[1L]] else y[, 1L]
+}
+
+.nns_ensemble_response_vector <- function(y) {
+  value <- .nns_response_vector(y, "DV.train")
+  if (is.data.frame(y) && inherits(value, c("Date", "POSIXct"))) as.numeric(value) else value
+}
+
+.nns_fold_columns <- function(fold, train, source) {
+  # Two level labels can share a syntactic name, so match their original levels.
+  by.predictor <- split(seq_along(source), source)
+  columns <- lapply(names(train), function(nm) {
+    idx <- by.predictor[[nm]]
+    if (is.factor(fold[[nm]])) return(idx[match(levels(fold[[nm]]), levels(train[[nm]]))])
+    if (is.factor(train[[nm]])) return(NA_integer_)
+    idx
+  })
+  unlist(columns, use.names = FALSE)
+}
+
+.nns_reg_response <- function(y, type) {
+  if (!is.null(type)) {
+    if (!is.character(type) || length(type) != 1L || is.na(type)) {
+      stop("[type] must be NULL, 'REG', 'CLASS', or 'XONLY'.", call. = FALSE)
+    }
+    type <- tolower(type)
+    if (!type %in% c("reg", "class", "xonly")) {
+      stop("[type] must be NULL, 'REG', 'CLASS', or 'XONLY'.", call. = FALSE)
+    }
+  }
+  if (identical(type, "reg") && !is.numeric(y)) {
+    stop("[type = 'REG'] requires a numeric response.", call. = FALSE)
+  }
+
+  # The automatic test hashes y, so it only runs when no type was given.
+  is.class <- identical(type, "class") ||
+    (is.null(type) &&
+       (is.factor(y) || is.character(y) || is.logical(y) ||
+          (is.numeric(y) && length(unique(y)) == 2L &&
+             setequal(sort(unique(as.numeric(y))), c(0, 1)))))
+  task <- .nns_encode_response(y, if (is.class) "class" else type)
+  if (!is.null(task$class.levels)) task$class.levels <- as.character(task$class.levels)
+  task
+}
+
+.nns_boost_response <- function(y, type) {
+  if (identical(type, "class") && !is.numeric(y) && !is.factor(y) &&
+      !is.logical(y) && !is.character(y)) y <- factor(y)
+  .nns_encode_response(y, type)
+}

@@ -47,7 +47,7 @@
 #' @references Viole, F. (2016) "Classification Using NNS Clustering Analysis"  \doi{10.2139/ssrn.2864711}
 #'
 #' @details
-#' Classification tunes and combines class-probability vectors from the NNS predictor cells, preserving nominal label identity. \code{probabilities}, \code{reg.probabilities}, and \code{dim.red.probabilities} return the final probability matrices. Ties at the binary decision threshold or at the largest multiclass probability follow first appearance in the fit's training response, after any class balancing. When repeated holdouts predict the same row, a tie in the pooled probabilities goes to the tied class with the earliest original row index among all training rows used by those fits. The neighbour count and the dimension count are chosen by optimizing \code{obj.fn} on the pooled out-of-fold predictions; the default classification objective is accuracy. As in NNS 13.0, the two models' probability vectors are then blended with weights proportional to their squared objective scores (inverse squares when \code{objective = "min"}), so models with nearly equal scores are blended nearly equally, and the binary probability threshold is tuned on the out-of-fold predictions of that blend. \code{OBJfn.reg} and \code{OBJfn.dim.red} are the best scores of that search on the same predictions, so they are selection-optimized and overstate held-out performance; assess the final model on an independent test set. Custom objectives receive original numeric or logical response values, and factor/character codes as identified by \code{class.levels}. Relabelling is invariant for label-invariant objectives such as accuracy; a custom loss assigning different costs to classes can deliberately change the result.
+#' Classification tunes and combines class-probability vectors from the NNS predictor cells, preserving nominal label identity. \code{probabilities}, \code{reg.probabilities}, and \code{dim.red.probabilities} return the final probability matrices. Ties at the binary decision threshold or at the largest multiclass probability follow first appearance in the fit's training response, after any class balancing. When repeated holdouts predict the same row, a tie in the pooled probabilities goes to the tied class with the earliest original row index among all training rows used by those fits. The neighbour count and the dimension count are chosen by optimizing \code{obj.fn} on the pooled out-of-fold predictions; the default classification objective is accuracy. As in NNS 13.0, the two models' probability vectors are then blended with weights proportional to their squared objective scores (inverse squares when \code{objective = "min"}), so models with nearly equal scores are blended nearly equally, and the binary probability threshold is tuned on the out-of-fold predictions of that blend. \code{OBJfn.reg} and \code{OBJfn.dim.red} are the best scores of that search on the same predictions, so they are selection-optimized and overstate held-out performance; assess the final model on an independent test set. Custom objectives receive original numeric or logical response values and one-based numeric codes for factor or character responses. In \code{class.levels}, factor labels follow their declared order and character labels are sorted. Relabelling is invariant for label-invariant objectives such as accuracy; a custom loss assigning different costs to classes can deliberately change the result.
 #' 
 #' Named numeric dimension-reduction coefficients are matched to encoded predictor names in both regression and classification. Factor columns use \code{predictor__level} names; unnamed vectors follow encoded column order. Classification dimension reduction uses one signed index per class indicator. Its reported coefficients are a list of class-specific equations. The tuned dimension count is returned as \code{NNS.dim.red.count}, and \code{NNS.dim.red.threshold} gives the coefficient cutoff that keeps that count in every class index: one number when the class indices share it, as two-class indices always do, and otherwise one cutoff per class. The field \code{NNS.dim.red.variables} is the union of their active encoded columns. These equations describe the synthetic indices, not a complete saved prediction model: reconstruction also requires training-fitted scaling, the predictor cells, their class frequencies, and the selected smoothing controls. With \code{stack = TRUE}, the multivariate classification component retains the selected number of actual encoded coordinates ranked by maximum class-indicator dependence. \code{Prediction.set} contains classes attaining the requested estimated probability mass. Binary interval fields contain the range of this set for compatibility; multiclass interval fields are NULL. The sets do not assert calibrated coverage.
 #' 
@@ -192,72 +192,6 @@ NNS.stack <- function(IVs.train,
     x
   }
   
-  .align_predictors <- function(train, test) {
-    for (j in seq_along(train)) {
-      nm <- names(train)[j]
-      tr <- train[[j]]
-      te <- test[[j]]
-      
-      if (inherits(tr, "Date")) {
-        if (!inherits(te, "Date")) {
-          stop(sprintf("Test predictor [%s] must also be a Date.", nm),
-               call. = FALSE)
-        }
-        train[[j]] <- as.numeric(tr)
-        test[[j]] <- as.numeric(te)
-      } else if (inherits(tr, c("POSIXct", "POSIXlt"))) {
-        if (!inherits(te, c("POSIXct", "POSIXlt"))) {
-          stop(sprintf("Test predictor [%s] must also be a date-time value.", nm),
-               call. = FALSE)
-        }
-        train[[j]] <- as.numeric(tr)
-        test[[j]] <- as.numeric(te)
-      } else if (is.factor(tr) || is.character(tr)) {
-        tr_chr <- as.character(tr)
-        te_chr <- as.character(te)
-        # Sorted levels, as factor() and NNS.boost use, so row order does not
-        # matter. A factor's declared levels remain valid test values even when
-        # the training rows do not contain every level.
-        lev <- if (is.ordered(tr)) levels(tr) else
-          if (is.factor(tr)) sort(levels(tr)) else sort(unique(tr_chr))
-        unseen <- setdiff(unique(te_chr), lev)
-        if (length(unseen)) {
-          stop(sprintf(
-            "Test predictor [%s] contains unseen level(s): %s.",
-            nm, paste(unseen, collapse = ", ")
-          ), call. = FALSE)
-        }
-        train[[j]] <- factor(tr_chr, levels = lev, ordered = is.ordered(tr))
-        test[[j]] <- factor(te_chr, levels = lev, ordered = is.ordered(tr))
-      } else if (is.logical(tr)) {
-        if (!is.logical(te)) {
-          stop(sprintf("Test predictor [%s] must also be logical.", nm),
-               call. = FALSE)
-        }
-      } else if (is.numeric(tr) || is.integer(tr)) {
-        if (!(is.numeric(te) || is.integer(te))) {
-          stop(sprintf("Test predictor [%s] must be numeric.", nm),
-               call. = FALSE)
-        }
-        train[[j]] <- as.numeric(tr)
-        test[[j]] <- as.numeric(te)
-      } else {
-        stop(sprintf("Unsupported predictor type for [%s].", nm),
-             call. = FALSE)
-      }
-    }
-    list(train = train, test = test)
-  }
-  
-  .check_predictors <- function(x, name) {
-    if (anyNA(x)) stop(sprintf("[%s] contains missing values.", name), call. = FALSE)
-    for (j in seq_along(x)) {
-      if (is.numeric(x[[j]]) && any(!is.finite(x[[j]]))) {
-        stop(sprintf("[%s] predictor [%s] contains non-finite values.",
-                     name, names(x)[j]), call. = FALSE)
-      }
-    }
-  }
   
   .restore_rng <- local({
     existed <- exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)
@@ -359,17 +293,7 @@ NNS.stack <- function(IVs.train,
   
   x <- .as_train_frame(IVs.train)
   
-  if (any(class(DV.train) %in% c("tbl", "data.table"))) {
-    DV.train <- as.vector(unlist(DV.train))
-  }
-  if (is.data.frame(DV.train) || is.matrix(DV.train)) {
-    if (NCOL(DV.train) != 1L) {
-      stop("[DV.train] must contain exactly one response column.",
-           call. = FALSE)
-    }
-    DV.train <- as.vector(unlist(DV.train))
-  }
-  
+  DV.train <- .nns_ensemble_response_vector(DV.train)
   if (length(DV.train) != nrow(x)) {
     stop("nrow(IVs.train) must equal length(DV.train).", call. = FALSE)
   }
@@ -385,16 +309,8 @@ NNS.stack <- function(IVs.train,
     stop("[DV.train] contains non-finite values.", call. = FALSE)
   }
   
-  response_was_factor <- is.factor(DV.train)
-  response_was_ordered <- is.ordered(DV.train)
-  response_was_character <- is.character(DV.train)
-  response_was_logical <- is.logical(DV.train)
-  response_was_numeric <- is.numeric(DV.train) || is.integer(DV.train)
-  
-  auto_class <- response_was_factor || response_was_character ||
-    response_was_logical ||
-    (response_was_numeric && length(unique(DV.train)) == 2L)
-  
+  auto_class <- is.factor(DV.train) || is.character(DV.train) || is.logical(DV.train) ||
+    (is.numeric(DV.train) && length(unique(DV.train)) == 2L)
   # A supplied forecast fold defines a regression task even if the observed
   # numeric response happens to contain only two distinct values. Later values
   # must not switch the task selected at the forecast origin.
@@ -405,29 +321,14 @@ NNS.stack <- function(IVs.train,
   }
   is_class <- identical(type, "class")
   
-  original_response <- DV.train
-  class_values <- NULL
-  
+  if (!is_class && !is.numeric(DV.train))
+    stop("A nonnumeric response requires type = 'CLASS'.", call. = FALSE)
+  if (is_class && !is.numeric(DV.train) && !is.factor(DV.train) &&
+      !is.character(DV.train) && !is.logical(DV.train))
+    stop("Unsupported classification response type.", call. = FALSE)
+  response <- .nns_encode_response(DV.train, type)
+  y <- if (is_class) response$codes else response$y
   if (is_class) {
-    if (response_was_factor) {
-      response_factor <- droplevels(DV.train)
-      class_values <- levels(response_factor)
-      y <- as.integer(response_factor)
-    } else if (response_was_character) {
-      # Sorted (factor) level order, as for a factor response and in NNS.boost.
-      class_values <- levels(factor(DV.train))
-      y <- match(DV.train, class_values)
-    } else if (response_was_logical) {
-      class_values <- sort(unique(DV.train))
-      y <- match(DV.train, class_values)
-    } else if (response_was_numeric) {
-      class_values <- sort(unique(as.numeric(DV.train)))
-      y <- match(as.numeric(DV.train), class_values)
-    } else {
-      stop("Unsupported classification response type.", call. = FALSE)
-    }
-    
-    y <- as.numeric(y)
     if (length(unique(y)) < 2L) {
       stop("Classification requires at least two response classes.",
            call. = FALSE)
@@ -441,11 +342,6 @@ NNS.stack <- function(IVs.train,
       obj.fn <- expression(mean(predicted == actual))
       objective <- "max"
     }
-  } else {
-    if (!response_was_numeric) {
-      stop("A nonnumeric response requires type = 'CLASS'.", call. = FALSE)
-    }
-    y <- .nns_sample(DV.train, "DV.train")
   }
   
   if (balance && !is_class) {
@@ -459,11 +355,11 @@ NNS.stack <- function(IVs.train,
   }
   
   character_x <- x[vapply(x, is.character, logical(1))]
-  aligned <- .align_predictors(x, z)
-  x <- aligned$train
+  aligned <- .nns_predictor_frames(x, z)
+  x <- .nns_declare_characters(aligned$train)
   z <- aligned$test
-  .check_predictors(x, "IVs.train")
-  .check_predictors(z, "IVs.test")
+  .nns_check_predictors(x, "IVs.train")
+  .nns_check_predictors(z, "IVs.test")
   
   n_obs <- nrow(x)
   original_p <- ncol(x)
@@ -538,52 +434,10 @@ NNS.stack <- function(IVs.train,
     predicted
   }
   
-  .round_codes <- function(raw, threshold) {
-    raw <- pmin(pmax(as.numeric(raw), 1), length(class_values))
-    lo <- floor(raw)
-    hi <- ceiling(raw)
-    frac <- raw - lo
-    out <- ifelse(frac < threshold, lo, hi)
-    as.integer(pmin(pmax(out, 1L), length(class_values)))
-  }
-  
-  .best_threshold <- function(raw, actual) {
-    if (!is_class || !optimize.threshold) return(0.5)
-    grid <- seq(0.01, 0.99, by = 0.01)
-    scores <- vapply(grid, function(th) {
-      .score(.round_codes(raw, th), actual)
-    }, numeric(1L))
-    valid <- which(is.finite(scores))
-    if (!length(valid)) return(0.5)
-    best_value <- if (objective == "min") {
-      min(scores[valid])
-    } else {
-      max(scores[valid])
-    }
-    tied <- valid[scores[valid] == best_value]
-    grid[tied[ceiling(length(tied) / 2)]]
-  }
-  
   .evaluate_raw <- function(raw, actual) {
-    threshold <- if (is_class) .best_threshold(raw, actual) else 0.5
-    predicted <- if (is_class) .round_codes(raw, threshold) else raw
-    list(score = .score(predicted, actual), threshold = threshold)
+    list(score = .score(raw, actual), threshold = 0.5)
   }
-  
-  .decode_codes <- function(code) {
-    code <- as.integer(pmin(pmax(code, 1L), length(class_values)))
-    if (response_was_numeric || response_was_logical) class_values[code] else as.numeric(code)
-  }
-  
-  .decode_interval <- function(interval, threshold) {
-    if (is.null(interval)) return(NULL)
-    interval <- as.data.frame(interval, check.names = FALSE)
-    interval[] <- lapply(interval, function(v) {
-      .decode_codes(.round_codes(v, threshold))
-    })
-    interval
-  }
-  
+
   .numeric_interval <- function(interval) {
     if (is.null(interval)) return(NULL)
     interval <- as.data.frame(interval, check.names = FALSE)
@@ -614,59 +468,10 @@ NNS.stack <- function(IVs.train,
     sample(c(down_idx, up_idx), replace = FALSE)
   }
   
-  .numeric_design <- function(train, test, scale = TRUE) {
-    train_blocks <- vector("list", ncol(train))
-    test_blocks <- vector("list", ncol(train))
-    # Original predictor behind each encoded column (factors expand to one
-    # column per level), so encoded selections map back to predictor names.
-    source_blocks <- vector("list", ncol(train))
-
-    for (j in seq_along(train)) {
-      nm <- names(train)[j]
-      tr <- train[[j]]
-      te <- test[[j]]
-      
-      if (is.factor(tr)) {
-        lev <- if (is.ordered(tr)) levels(tr) else sort(levels(tr))
-        tr_chr <- as.character(tr)
-        te_chr <- as.character(te)
-        tr_block <- vapply(lev, function(level) {
-          as.numeric(tr_chr == level)
-        }, numeric(length(tr_chr)))
-        te_block <- vapply(lev, function(level) {
-          as.numeric(te_chr == level)
-        }, numeric(length(te_chr)))
-        # vapply() drops to a vector for one row or one level; keep rows as
-        # observations either way (a single test row has one row per level).
-        if (is.null(dim(tr_block))) tr_block <- matrix(tr_block, nrow = length(tr_chr))
-        if (is.null(dim(te_block))) te_block <- matrix(te_block, nrow = length(te_chr))
-        block_names <- paste0(nm, "__", make.names(lev, unique = TRUE))
-        colnames(tr_block) <- block_names
-        colnames(te_block) <- block_names
-      } else {
-        tr_block <- matrix(as.numeric(tr), ncol = 1L,
-                           dimnames = list(NULL, nm))
-        te_block <- matrix(as.numeric(te), ncol = 1L,
-                           dimnames = list(NULL, nm))
-      }
-      
-      train_blocks[[j]] <- tr_block
-      test_blocks[[j]] <- te_block
-      source_blocks[[j]] <- rep(nm, ncol(tr_block))
-    }
-    
-    train_matrix <- do.call(cbind, train_blocks)
-    test_matrix <- do.call(cbind, test_blocks)
-    storage.mode(train_matrix) <- "double"
-    storage.mode(test_matrix) <- "double"
-    colnames(train_matrix) <- make.unique(colnames(train_matrix), sep = "_")
-    colnames(test_matrix) <- colnames(train_matrix)
-
-    if (!scale) {
-      return(list(train = as.data.frame(train_matrix, check.names = FALSE),
-                  test = as.data.frame(test_matrix, check.names = FALSE)))
-    }
-    
+  .numeric_design <- function(train, test) {
+    design <- .nns_stack_predictors(train, test)
+    train_matrix <- design$x
+    test_matrix <- design$point.est
     train_min <- apply(train_matrix, 2L, min)
     train_max <- apply(train_matrix, 2L, max)
     train_range <- train_max - train_min
@@ -682,7 +487,7 @@ NNS.stack <- function(IVs.train,
     
     list(train = train_scaled, test = test_scaled,
          minimum = train_min, range = train_range,
-         source = unlist(source_blocks, use.names = FALSE))
+         source = design$source)
   }
   
   # A forecast caller may supply a training prefix completed using only its
@@ -698,10 +503,10 @@ NNS.stack <- function(IVs.train,
       stop("[.validation] must provide IVs.train, DV.train, IVs.test and DV.test.")
     vt <- .as_test_frame(.validation$IVs.train, names(x))
     vv <- .as_test_frame(.validation$IVs.test, names(x))
-    va <- .align_predictors(vt, vv)
-    vt <- va$train; vv <- va$test
-    .check_predictors(vt, ".validation$IVs.train")
-    .check_predictors(vv, ".validation$IVs.test")
+    va <- .nns_predictor_frames(vt, vv)
+    vt <- .nns_declare_characters(va$train); vv <- va$test
+    .nns_check_predictors(vt, ".validation$IVs.train")
+    .nns_check_predictors(vv, ".validation$IVs.test")
     yt <- as.numeric(.validation$DV.train); yv <- as.numeric(.validation$DV.test)
     prefix <- n_obs - ts.test
     if (nrow(vt) != prefix || nrow(vv) < 1L || nrow(vv) > ts.test ||
@@ -839,16 +644,16 @@ NNS.stack <- function(IVs.train,
   splits <- .make_splits()
   if (is.null(.validation) && ncol(character_x)) {
     for (s in splits) {
-      .align_predictors(character_x[s$train, , drop = FALSE],
+      .nns_predictor_frames(character_x[s$train, , drop = FALSE],
                         character_x[s$validation, , drop = FALSE])
     }
   }
 
   if (is_class) {
-    return(.nns_stack_classify(x, y, z, class_values, splits, method, stack,
+    return(.nns_stack_classify(x, y, z, response, splits, method, stack,
       dim.red.method, order, dist, ncores, optimize.threshold, pred.int,
       .score, objective, .balance_indices,
-      response_was_numeric || response_was_logical, status, .numeric_design,
+      status,
       tau = if (is.null(ts.test)) NULL else "ts"))
   }
   
@@ -1085,15 +890,7 @@ NNS.stack <- function(IVs.train,
   fold_method <- dim.red.method
   candidate_p <- encoded_p
   if (2L %in% method && !is.null(.validation)) {
-    # Dummy names can change when two labels have the same syntactic name.
-    by_predictor <- split(seq_len(encoded_p), full_design$source)
-    columns <- lapply(names(x), function(nm) {
-      idx <- by_predictor[[nm]]
-      if (is.factor(vt[[nm]])) return(idx[match(levels(vt[[nm]]), levels(x[[nm]]))])
-      if (is.factor(x[[nm]])) return(NA_integer_)
-      idx
-    })
-    columns <- unlist(columns, use.names = FALSE)
+    columns <- .nns_fold_columns(vt, x, full_design$source)
     candidate_p <- min(encoded_p, length(columns))
     if (is.numeric(dim.red.method)) {
       weights <- .coefficient_vector(full_design$train, y)
@@ -1790,24 +1587,9 @@ NNS.stack <- function(IVs.train,
     }
   }
   
-  # Component predictions retain their own OOF-optimized thresholds. The stack
-  # uses the threshold optimized directly on the OOF weighted ensemble.
-  if (is_class) {
-    reg_output <- if (!is.null(reg_raw_final)) {
-      .decode_codes(.round_codes(reg_raw_final, reg_component_threshold))
-    } else {
-      NA
-    }
-    dim_output <- if (!is.null(dim_raw_final)) {
-      .decode_codes(.round_codes(dim_raw_final, dim_component_threshold))
-    } else {
-      NA
-    }
-  } else {
-    reg_output <- if (!is.null(reg_raw_final)) reg_raw_final else NA_real_
-    dim_output <- if (!is.null(dim_raw_final)) dim_raw_final else NA_real_
-  }
-  
+  reg_output <- if (!is.null(reg_raw_final)) reg_raw_final else NA_real_
+  dim_output <- if (!is.null(dim_raw_final)) dim_raw_final else NA_real_
+
   if (identical(method, 1L)) {
     stacked_raw <- reg_raw_final
   } else if (identical(method, 2L)) {
@@ -1827,23 +1609,10 @@ NNS.stack <- function(IVs.train,
       component_weights["dim.red"] * dim_use
   }
   
-  stacked_output <- if (is_class) {
-    .decode_codes(.round_codes(stacked_raw, probability.threshold))
-  } else {
-    stacked_raw
-  }
-  
-  reg_pred_int <- if (is_class) {
-    .decode_interval(reg_pred_int_raw, reg_component_threshold)
-  } else {
-    reg_pred_int_raw
-  }
-  dim_pred_int <- if (is_class) {
-    .decode_interval(dim_pred_int_raw, dim_component_threshold)
-  } else {
-    dim_pred_int_raw
-  }
-  
+  stacked_output <- stacked_raw
+  reg_pred_int <- .numeric_interval(reg_pred_int_raw)
+  dim_pred_int <- .numeric_interval(dim_pred_int_raw)
+
   if (is.null(pred.int)) {
     stacked_pred_int_raw <- NULL
   } else if (identical(method, 1L)) {
@@ -1869,12 +1638,8 @@ NNS.stack <- function(IVs.train,
     names(stacked_pred_int_raw) <- names(reg_pi)
   }
   
-  stacked_pred_int <- if (is_class) {
-    .decode_interval(stacked_pred_int_raw, probability.threshold)
-  } else {
-    stacked_pred_int_raw
-  }
-  
+  stacked_pred_int <- .numeric_interval(stacked_pred_int_raw)
+
   result <- list(
     OBJfn.reg = unname(as.numeric(reg_best_score)),
     NNS.reg.n.best = unname(as.integer(reg_best_k)),
@@ -1890,7 +1655,7 @@ NNS.stack <- function(IVs.train,
     stack = stacked_output,
     pred.int = .NNS.df(stacked_pred_int),
     weights = component_weights,
-    class.levels = if (is_class) class_values else NULL
+    class.levels = NULL
   )
   
   .NNS.out(result)

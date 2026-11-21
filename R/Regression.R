@@ -8,69 +8,6 @@
 }
 
 
-.nns_reg_response_vector <- function(y) {
-  if (inherits(y, c("tbl", "data.table")) || is.data.frame(y)) {
-    if (ncol(y) != 1L) stop("[y] must be a vector or one-column object.", call. = FALSE)
-    return(y[[1L]])
-  }
-  if (is.matrix(y)) {
-    if (ncol(y) != 1L) stop("[y] must be a vector or one-column object.", call. = FALSE)
-    return(y[, 1L])
-  }
-  y
-}
-
-.nns_reg_type <- function(type, y) {
-  if (!is.null(type)) {
-    if (!is.character(type) || length(type) != 1L || is.na(type)) {
-      stop("[type] must be NULL, 'REG', 'CLASS', or 'XONLY'.", call. = FALSE)
-    }
-    type <- tolower(type)
-    if (!type %in% c("reg", "class", "xonly")) {
-      stop("[type] must be NULL, 'REG', 'CLASS', or 'XONLY'.", call. = FALSE)
-    }
-  }
-  if (identical(type, "reg") && !is.numeric(y)) {
-    stop("[type = 'REG'] requires a numeric response.", call. = FALSE)
-  }
-  
-  # The automatic test hashes y, so it only runs when no type was given.
-  is.class <- identical(type, "class") ||
-    (is.null(type) &&
-       (is.factor(y) || is.character(y) || is.logical(y) ||
-          (is.numeric(y) && length(unique(y)) == 2L &&
-             setequal(sort(unique(as.numeric(y))), c(0, 1)))))
-  is.xonly <- identical(type, "xonly")
-  
-  if (is.factor(y)) {
-    class.levels <- levels(y)
-    y.numeric <- as.numeric(y)
-    class.values <- sort(unique(y.numeric))
-  } else if (is.character(y)) {
-    fy <- factor(y)
-    class.levels <- levels(fy)
-    y.numeric <- as.numeric(fy)
-    class.values <- sort(unique(y.numeric))
-  } else if (is.logical(y)) {
-    y.numeric <- as.numeric(y)
-    class.values <- sort(unique(y.numeric))
-    class.levels <- as.character(class.values)
-  } else {
-    y.numeric <- .nns_sample(y, "y")
-    class.values <- if (is.class) sort(unique(y.numeric)) else NULL
-    class.levels <- if (is.class) as.character(class.values) else NULL
-  }
-  
-  list(
-    type = if (is.class) "class" else if (is.xonly) "xonly" else type,
-    is.class = is.class,
-    is.xonly = is.xonly,
-    y = y.numeric,
-    class.values = class.values,
-    class.levels = class.levels
-  )
-}
-
 .nns_reg_validate_order <- function(order) {
   if (is.null(order)) return(NULL)
   if (is.character(order) && length(order) == 1L &&
@@ -264,161 +201,8 @@
   out
 }
 
-.nns_reg_levels <- function(x) {
-  if (is.ordered(x)) return(levels(x))
-  if (is.factor(x)) return(sort(levels(x)))
-  sort(unique(as.character(x)))
-}
-
 .nns_reg_predictor_names <- function(predictors, fields) {
   make.unique(c(fields, predictors))[-seq_along(fields)]
-}
-
-.nns_reg_encode_predictors <- function(x, point.est = NULL,
-                                       factor.2.dummy = TRUE, coefficient.names = NULL) {
-  factor.2.dummy <- .nns_reg_scalar_logical(factor.2.dummy, "factor.2.dummy")
-  # A plain numeric vector is the single numeric predictor "x", as
-  # data.frame(x = x) below names it; building that data frame was most of the
-  # encoding time for short series. Plain numeric points are its values.
-  if (is.numeric(x) && is.null(dim(x)) && is.null(oldClass(x)) &&
-      length(x) && all(is.finite(x)) &&
-      (is.null(point.est) ||
-         (is.numeric(point.est) && is.null(dim(point.est)) &&
-            is.null(oldClass(point.est))))) {
-    point.matrix <- NULL
-    if (!is.null(point.est)) {
-      if (any(!is.finite(point.est))) {
-        stop("[point.est] predictor 'x' must contain only finite numeric values.",
-             call. = FALSE)
-      }
-      point.matrix <- matrix(.nns_sample(point.est, "point.est"), ncol = 1L,
-                             dimnames = list(NULL, "x"))
-    }
-    return(list(
-      x = matrix(.nns_sample(x, "x"), ncol = 1L, dimnames = list(NULL, "x")),
-      point.est = point.matrix,
-      stack.index = FALSE,
-      raw.names = "x",
-      encoded.names = "x",
-      metadata = list(list(name = "x", categorical = FALSE, levels = NULL))
-    ))
-  }
-  train <- .nns_reg_as_frame(x)
-  points <- .nns_reg_prepare_points(point.est, names(train))
-  
-  stack.index <- FALSE
-  categorical <- vapply(train, function(z) is.factor(z) || is.character(z) || is.logical(z),
-                        logical(1L))
-  if (!is.null(coefficient.names) && factor.2.dummy && ncol(train) > 1L && any(categorical)) {
-    blocks <- Map(function(nm, z) {
-      if (is.factor(z) || is.character(z))
-        paste0(nm, "__", make.names(.nns_reg_levels(z), unique = TRUE))
-      else nm
-    }, names(train), train)
-    stack.names <- make.unique(unlist(blocks, use.names = FALSE), sep = "_")
-    stack.index <- length(coefficient.names) == length(stack.names) &&
-      setequal(coefficient.names, stack.names)
-  }
-
-  train.parts <- list()
-  point.parts <- if (is.null(points)) NULL else list()
-  meta <- vector("list", ncol(train))
-  
-  for (j in seq_along(train)) {
-    nm <- names(train)[j]
-    z <- train[[j]]
-    zp <- if (is.null(points)) NULL else points[[j]]
-    
-    if (categorical[j]) {
-      # A factor's declared levels are part of its training support even when
-      # a resampled fold or subset has no row at one of them; sorting the
-      # unordered levels keeps the encoding independent of level order.
-      single.logical <- stack.index && is.logical(z)
-      levels.train <- if (single.logical) c("FALSE", "TRUE") else .nns_reg_levels(z)
-      values.train <- as.character(z)
-      if (anyNA(values.train)) {
-        stop(sprintf("Predictor '%s' contains missing values.", nm), call. = FALSE)
-      }
-      if (!is.null(zp)) {
-        values.point <- as.character(zp)
-        if (anyNA(values.point)) {
-          stop(sprintf("[point.est] predictor '%s' contains missing values.", nm),
-               call. = FALSE)
-        }
-        unseen <- setdiff(unique(values.point), levels.train)
-        if (length(unseen)) {
-          stop(sprintf("[point.est] predictor '%s' contains unseen level(s): %s",
-                       nm, paste(unseen, collapse = ", ")), call. = FALSE)
-        }
-      } else {
-        values.point <- NULL
-      }
-      
-      if (factor.2.dummy && !single.logical) {
-        tr <- outer(values.train, levels.train, FUN = function(a, b) as.numeric(a == b))
-        if (is.null(dim(tr))) tr <- matrix(tr, nrow = length(values.train),
-                                           ncol = length(levels.train))
-        colnames(tr) <- paste0(nm, "_", make.names(levels.train, unique = TRUE))
-        train.parts[[length(train.parts) + 1L]] <- tr
-        
-        if (!is.null(points)) {
-          pt <- outer(values.point, levels.train, FUN = function(a, b) as.numeric(a == b))
-          if (is.null(dim(pt))) pt <- matrix(pt, nrow = length(values.point),
-                                             ncol = length(levels.train))
-          colnames(pt) <- colnames(tr)
-          point.parts[[length(point.parts) + 1L]] <- pt
-        }
-      } else {
-        tr <- matrix(match(values.train, levels.train) - as.integer(single.logical), ncol = 1L,
-                     dimnames = list(NULL, nm))
-        train.parts[[length(train.parts) + 1L]] <- tr
-        if (!is.null(points)) {
-          pt <- matrix(match(values.point, levels.train) - as.integer(single.logical), ncol = 1L,
-                       dimnames = list(NULL, nm))
-          point.parts[[length(point.parts) + 1L]] <- pt
-        }
-      }
-      
-      meta[[j]] <- list(name = nm, categorical = TRUE, levels = levels.train)
-    } else {
-      tr <- suppressWarnings(.nns_sample(z, nm))
-      if (length(tr) != length(z) || any(!is.finite(tr))) {
-        stop(sprintf("Predictor '%s' must contain only finite numeric values.", nm),
-             call. = FALSE)
-      }
-      tr <- matrix(tr, ncol = 1L, dimnames = list(NULL, nm))
-      train.parts[[length(train.parts) + 1L]] <- tr
-      
-      if (!is.null(points)) {
-        pt <- suppressWarnings(.nns_numeric_labels(zp, "point.est"))
-        if (length(pt) != length(zp) || any(!is.finite(pt))) {
-          stop(sprintf("[point.est] predictor '%s' must contain only finite numeric values.",
-                       nm), call. = FALSE)
-        }
-        pt <- matrix(pt, ncol = 1L, dimnames = list(NULL, nm))
-        point.parts[[length(point.parts) + 1L]] <- pt
-      }
-      meta[[j]] <- list(name = nm, categorical = FALSE, levels = NULL)
-    }
-  }
-  
-  x.matrix <- do.call(cbind, train.parts)
-  storage.mode(x.matrix) <- "double"
-  point.matrix <- if (is.null(points)) NULL else do.call(cbind, point.parts)
-  if (!is.null(point.matrix)) storage.mode(point.matrix) <- "double"
-  if (stack.index) {
-    colnames(x.matrix) <- stack.names
-    if (!is.null(point.matrix)) colnames(point.matrix) <- stack.names
-  }
-  
-  list(
-    x = x.matrix,
-    point.est = point.matrix,
-    stack.index = stack.index,
-    raw.names = names(train),
-    encoded.names = colnames(x.matrix),
-    metadata = meta
-  )
 }
 
 .nns_reg_reduce_value <- function(z, noise.reduction, is.class = FALSE) {
@@ -860,7 +644,7 @@
 #' 
 #' Univariate regression linearly interpolates the selected regression points and extends the first or last segment beyond their range (unless a smoothing spline is requested). Endpoint slopes can be unstable with sparse or noisy boundary points. Multivariate distance weighting is a weighted average of regression-point responses, so it does not automatically continue a trend outside the training support. Neither construction supplies a general extrapolation guarantee. With the default \code{n.best = NULL}, purely categorical predictors use exact observed joint cells, and an unobserved joint combination uses its nearest cells. An explicit \code{n.best} weights that many nearest cells, as for numeric predictors. A declared factor level with no training rows is accepted in \code{point.est} and is placed by the same distance rule. A coordinate with exactly two observed values retains both terminal cells, including a dummy column in a mixed design. Other finite-order numeric coordinates retain interval cells; \code{order = "max"} uses exact joint support.
 #' 
-#' Classification forms an indicator for each observed class, retains the empirical class frequencies in each predictor cell, and interpolates or distance-weights those probability vectors. Class labels never enter numeric interpolation. \code{Point.probabilities}, \code{Fitted.probabilities}, and \code{RPM.probabilities} expose the corresponding vectors. Tied class decisions follow first appearance in the training response. Factor and character responses retain numeric output codes with \code{class.levels}; numeric responses retain their supplied values. For dimension reduction, one signed NNS index is fitted per class indicator, and the resulting probabilities are normalized across classes; \code{equation} is then a list indexed by class. \code{confidence.interval} returns \code{Prediction.set}, the smallest leading set of classes attaining the requested estimated probability mass. These are descriptive probability sets, not calibrated coverage guarantees; nominal classes have no numeric prediction interval.
+#' Classification forms an indicator for each observed class, retains the empirical class frequencies in each predictor cell, and interpolates or distance-weights those probability vectors. Class labels never enter numeric interpolation. \code{Point.probabilities}, \code{Fitted.probabilities}, and \code{RPM.probabilities} expose the corresponding vectors. Tied class decisions follow first appearance in the training response. Factor and character responses return one-based numeric codes for the labels in \code{class.levels}. Factor labels follow their declared order. Character labels are sorted. Numeric and logical responses retain their supplied values. For dimension reduction, one signed NNS index is fitted per class indicator, and the resulting probabilities are normalized across classes; \code{equation} is then a list indexed by class. \code{confidence.interval} returns \code{Prediction.set}, the smallest leading set of classes attaining the requested estimated probability mass. These are descriptive probability sets, not calibrated coverage guarantees; nominal classes have no numeric prediction interval.
 #'
 #' @note
 #' \itemize{
@@ -967,11 +751,11 @@ NNS.reg <- function(x, y,
   confidence.interval <- .nns_reg_validate_ci(confidence.interval)
   if (!plot) residual.plot <- FALSE
   
-  y <- .nns_reg_response_vector(y)
+  y <- .nns_response_vector(y)
   if (length(y) < 2L) stop("[y] must contain at least two observations.", call. = FALSE)
   if (anyNA(y)) stop("[y] contains missing values.", call. = FALSE)
   
-  task <- .nns_reg_type(type, y)
+  task <- .nns_reg_response(y, type)
   y.numeric <- task$y
   if (any(!is.finite(y.numeric))) stop("[y] must contain finite values.", call. = FALSE)
   

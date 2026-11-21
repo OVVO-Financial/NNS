@@ -35,7 +35,7 @@ NNS.boost(
 
 \item{IVs.test}{a matrix or data frame of variables of numeric or factor data types with compatible dimensions to \code{(IVs.train)}.  If NULL, will use \code{(IVs.train)} as default.  Columns are matched to \code{(IVs.train)} by name when the two share the same predictor names, and positionally when they share no names at all (as in \code{cbind(test.x_1, test.x_2)} against \code{cbind(x_1, x_2)}).  A CSV UTF-8 byte-order mark in the first header (for example, \code{Male} becoming \code{X...Male}) is repaired before matching names. Other partial overlaps, including misspelled predictors, are ambiguous and return an error.}
 
-\item{type}{\code{NULL} (default).  To perform a classification of discrete integer classes from factor target variable \code{(DV.train)} with a base category of 1, set to \code{(type = "CLASS")}, else for continuous \code{(DV.train)} set to \code{(type = NULL)}.}
+\item{type}{Set to \code{"CLASS"} for classification. Factor responses yield one-based numeric codes. Use \code{NULL} (default) for a continuous response.}
 
 \item{depth}{options: (integer, NULL, "max"); \code{(depth = NULL)}(default) Specifies the \code{order} parameter in the \link{NNS.reg} routine, assigning a number of splits in the regressors, analogous to tree depth.}
 
@@ -73,7 +73,7 @@ NNS.boost(
 \item{folds}{integer; 5 (default) Number of cross-validation \code{folds} passed to the final \link{NNS.stack} call.}
 }
 \value{
-Returns a vector of fitted values for the dependent variable test set \code{$results}, prediction intervals \code{$pred.int}, the final feature loadings \code{$feature.weights}, final feature frequencies \code{$feature.frequency}, and (for classification) the class labels \code{$class.levels}.  Classification results are numeric: a factor or character \code{DV.train} yields integer class codes with a base category of 1 (label recoverable as \code{class.levels[results]}), and a numeric \code{DV.train} yields its original numeric class values.
+Returns a vector of fitted values for the dependent variable test set \code{$results}, prediction intervals \code{$pred.int}, the final feature loadings \code{$feature.weights}, final feature frequencies \code{$feature.frequency}, and (for classification) the class labels \code{$class.levels}.  Factor and character responses return one-based numeric codes. Use \code{class.levels[results]} to recover the labels. Observed factor labels follow their declared order. Character labels are sorted. Numeric and logical classes retain their values. The objective function receives the same values as the predictions.
 }
 \description{
 Ensemble method for classification using the NNS multivariate regression \link{NNS.reg} as the base learner instead of trees.

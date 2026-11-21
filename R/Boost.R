@@ -5,7 +5,7 @@
 #' @param IVs.train a matrix or data frame of variables of numeric or factor data types.
 #' @param DV.train a numeric or factor vector with compatible dimensions to \code{(IVs.train)}.
 #' @param IVs.test a matrix or data frame of variables of numeric or factor data types with compatible dimensions to \code{(IVs.train)}.  If NULL, will use \code{(IVs.train)} as default.  Columns are matched to \code{(IVs.train)} by name when the two share the same predictor names, and positionally when they share no names at all (as in \code{cbind(test.x_1, test.x_2)} against \code{cbind(x_1, x_2)}).  A CSV UTF-8 byte-order mark in the first header (for example, \code{Male} becoming \code{X...Male}) is repaired before matching names. Other partial overlaps, including misspelled predictors, are ambiguous and return an error.
-#' @param type \code{NULL} (default).  To perform a classification of discrete integer classes from factor target variable \code{(DV.train)} with a base category of 1, set to \code{(type = "CLASS")}, else for continuous \code{(DV.train)} set to \code{(type = NULL)}.
+#' @param type Set to \code{"CLASS"} for classification. Factor responses yield one-based numeric codes. Use \code{NULL} (default) for a continuous response.
 #' @param depth options: (integer, NULL, "max"); \code{(depth = NULL)}(default) Specifies the \code{order} parameter in the \link{NNS.reg} routine, assigning a number of splits in the regressors, analogous to tree depth.
 #' @param learner.trials integer; 100 (default) Sets the number of trials to obtain an accuracy \code{threshold} level.  If the number of all possible feature combinations is less than selected value, the minimum of the two values will be used.
 #' @param epochs integer; \code{2*length(DV.train)} (default) Number of repeated holdout re-evaluations of the learner-trial feature subsets that pass the accuracy threshold.
@@ -25,7 +25,7 @@
 #' @param dist options:(NULL, "NNS", "L1", "L2", "FACTOR") the method of distance calculation passed to delegated \link{NNS.reg} and \link{NNS.stack} calls. \code{dist = NULL} is the default and selects the native blended NNS distance; \code{dist = "NNS"} is an explicit alias for the default.
 #' @param folds integer; 5 (default) Number of cross-validation \code{folds} passed to the final \link{NNS.stack} call.
 #'
-#' @return Returns a vector of fitted values for the dependent variable test set \code{$results}, prediction intervals \code{$pred.int}, the final feature loadings \code{$feature.weights}, final feature frequencies \code{$feature.frequency}, and (for classification) the class labels \code{$class.levels}.  Classification results are numeric: a factor or character \code{DV.train} yields integer class codes with a base category of 1 (label recoverable as \code{class.levels[results]}), and a numeric \code{DV.train} yields its original numeric class values.
+#' @return Returns a vector of fitted values for the dependent variable test set \code{$results}, prediction intervals \code{$pred.int}, the final feature loadings \code{$feature.weights}, final feature frequencies \code{$feature.frequency}, and (for classification) the class labels \code{$class.levels}.  Factor and character responses return one-based numeric codes. Use \code{class.levels[results]} to recover the labels. Observed factor labels follow their declared order. Character labels are sorted. Numeric and logical classes retain their values. The objective function receives the same values as the predictions.
 #'
 #' @note
 #' \itemize{
@@ -183,82 +183,6 @@ NNS.boost <- function(IVs.train,
     x
   }
   
-  .align_predictors <- function(train, test) {
-    for (j in seq_along(train)) {
-      nm <- names(train)[j]
-      tr <- train[[j]]
-      te <- test[[j]]
-      
-      if (inherits(tr, "Date")) {
-        if (!inherits(te, "Date")) {
-          stop(sprintf("Test predictor [%s] must also be a Date.", nm),
-               call. = FALSE)
-        }
-        train[[j]] <- as.numeric(tr)
-        test[[j]] <- as.numeric(te)
-      } else if (inherits(tr, c("POSIXct", "POSIXlt"))) {
-        if (!inherits(te, c("POSIXct", "POSIXlt"))) {
-          stop(sprintf("Test predictor [%s] must also be a date-time value.", nm),
-               call. = FALSE)
-        }
-        train[[j]] <- as.numeric(tr)
-        test[[j]] <- as.numeric(te)
-      } else if (is.factor(tr) || is.character(tr)) {
-        tr_chr <- as.character(tr)
-        te_chr <- as.character(te)
-        lev <- if (is.factor(tr))
-          levels(tr)
-        else
-          sort(unique(tr_chr))
-        unseen <- setdiff(unique(te_chr), lev)
-        if (length(unseen)) {
-          stop(
-            sprintf(
-              "Test predictor [%s] contains unseen level(s): %s.",
-              nm,
-              paste(unseen, collapse = ", ")
-            ),
-            call. = FALSE
-          )
-        }
-        test[[j]] <- factor(te_chr, levels = lev, ordered = is.ordered(tr))
-      } else if (is.logical(tr)) {
-        if (!is.logical(te)) {
-          stop(sprintf("Test predictor [%s] must also be logical.", nm),
-               call. = FALSE)
-        }
-      } else if (is.numeric(tr) || is.integer(tr)) {
-        if (!(is.numeric(te) || is.integer(te))) {
-          stop(sprintf("Test predictor [%s] must be numeric.", nm),
-               call. = FALSE)
-        }
-        train[[j]] <- as.numeric(tr)
-        test[[j]] <- as.numeric(te)
-      } else {
-        stop(sprintf("Unsupported predictor type for [%s].", nm),
-             call. = FALSE)
-      }
-    }
-    
-    list(train = train, test = test)
-  }
-  
-  .check_predictors <- function(x, name) {
-    if (anyNA(x))
-      stop(sprintf("[%s] contains missing values.", name), call. = FALSE)
-    for (j in seq_along(x)) {
-      if (is.numeric(x[[j]]) && any(!is.finite(x[[j]]))) {
-        stop(
-          sprintf(
-            "[%s] predictor [%s] contains non-finite values.",
-            name,
-            names(x)[j]
-          ),
-          call. = FALSE
-        )
-      }
-    }
-  }
   
   .restore_rng <- local({
     existed <- exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)
@@ -364,16 +288,7 @@ NNS.boost <- function(IVs.train,
   
   x <- .as_train_frame(IVs.train)
   
-  if (any(class(DV.train) %in% c("tbl", "data.table"))) {
-    DV.train <- as.vector(unlist(DV.train))
-  }
-  if (is.data.frame(DV.train) || is.matrix(DV.train)) {
-    if (NCOL(DV.train) != 1L) {
-      stop("[DV.train] must contain exactly one response column.",
-           call. = FALSE)
-    }
-    DV.train <- as.vector(unlist(DV.train))
-  }
+  DV.train <- .nns_ensemble_response_vector(DV.train)
   if (length(DV.train) != nrow(x)) {
     stop("nrow(IVs.train) must equal length(DV.train).", call. = FALSE)
   }
@@ -387,30 +302,16 @@ NNS.boost <- function(IVs.train,
     stop("[DV.train] contains non-finite values.", call. = FALSE)
   }
   
-  response_was_numeric <- is.numeric(DV.train) ||
-    is.integer(DV.train)
-  auto_class <- is.factor(DV.train) ||
-    is.character(DV.train) || is.logical(DV.train)
+  auto_class <- is.factor(DV.train) || is.character(DV.train) || is.logical(DV.train)
   if (auto_class && is.null(type))
     type <- "class"
   is_class <- identical(type, "class")
   
-  original_response <- DV.train
-  class_values <- NULL
-  
+  if (!is_class && !is.numeric(DV.train))
+    stop("A nonnumeric response requires type = 'CLASS'.", call. = FALSE)
+  response <- .nns_boost_response(DV.train, type)
+  y <- if (is_class) response$codes else response$y
   if (is_class) {
-    if (response_was_numeric) {
-      class_values <- sort(unique(as.numeric(DV.train)))
-      y <- match(as.numeric(DV.train), class_values)
-    } else {
-      class_factor <- if (is.factor(DV.train))
-        droplevels(DV.train)
-      else
-        factor(DV.train)
-      class_values <- levels(class_factor)
-      y <- as.integer(class_factor)
-    }
-    y <- as.numeric(y)
     if (length(unique(y)) < 2L) {
       stop("Classification requires at least two response classes.",
            call. = FALSE)
@@ -422,11 +323,6 @@ NNS.boost <- function(IVs.train,
       obj.fn <- expression(mean(predicted == actual))
       objective <- "max"
     }
-  } else {
-    if (!(is.numeric(DV.train) || is.integer(DV.train))) {
-      stop("A nonnumeric response requires type = 'CLASS'.", call. = FALSE)
-    }
-    y <- .nns_sample(DV.train, "DV.train")
   }
   
   if (is.null(IVs.test)) {
@@ -435,11 +331,11 @@ NNS.boost <- function(IVs.train,
     z <- .as_test_frame(IVs.test, names(x))
   }
   
-  aligned <- .align_predictors(x, z)
+  aligned <- .nns_predictor_frames(x, z)
   x <- aligned$train
   z <- aligned$test
-  .check_predictors(x, "IVs.train")
-  .check_predictors(z, "IVs.test")
+  .nns_check_predictors(x, "IVs.train")
+  .nns_check_predictors(z, "IVs.test")
   
   n_obs <- nrow(x)
   n_features <- ncol(x)
@@ -472,7 +368,8 @@ NNS.boost <- function(IVs.train,
     }
     value <- eval(
       obj.fn,
-      envir = list(predicted = predicted, actual = actual),
+      envir = list(predicted = if (is_class) response$decode(predicted) else predicted,
+                   actual = if (is_class) response$decode(actual) else actual),
       enclos = parent.frame()
     )
     if (!is.numeric(value) || length(value) != 1L) {
@@ -569,8 +466,7 @@ NNS.boost <- function(IVs.train,
       g[sample.int(length(g), largest, replace = TRUE)]), use.names = FALSE)
     
     idx <- sort(c(down_idx, up_idx))
-    chars <- vapply(train_x, is.character, logical(1))
-    train_x[chars] <- lapply(train_x[chars], factor)
+    train_x <- .nns_declare_characters(train_x)
     list(x = train_x[idx, , drop = FALSE], y = train_y[idx])
   }
   
@@ -901,9 +797,8 @@ NNS.boost <- function(IVs.train,
   names(replicated.train) <- make.unique(names(replicated.train), sep = ".")
   names(replicated.test) <- names(replicated.train)
   
-  # Stack now scores and returns numeric class responses on their original
-  # scale. Internal nominal codes in this function remain 1..K and are decoded
-  # once below; a two-valued regression response needs no extra translation.
+  # Stack fits the same codes as the learners; its objective must see the same response values.
+  stack.objective <- if (is_class) as.expression(bquote(.(.score)(predicted, actual))) else obj.fn
 
   final.stack <- suppressWarnings(
     NNS.stack(
@@ -911,7 +806,7 @@ NNS.boost <- function(IVs.train,
       DV.train = y,
       IVs.test = replicated.test,
       type = type,
-      obj.fn = obj.fn,
+      obj.fn = stack.objective,
       objective = objective,
       optimize.threshold = FALSE,
       dist = dist,
@@ -929,47 +824,23 @@ NNS.boost <- function(IVs.train,
     )
   )
   
-  results <- final.stack$reg
-  pred.int.output <- final.stack$reg.pred.int
-  
-  estimates_code <- .sanitize_predictions(results, y)
-  pred_int_out <- pred.int.output
-  
+  estimates <- .sanitize_predictions(final.stack$reg, y)
+  pred_int_out <- final.stack$reg.pred.int
   if (is_class) {
-    estimates_code <- pmin(pmax(estimates_code, 1L), length(class_values))
-    estimates_code <- as.integer(round(estimates_code))
-    
-    # Classification results keep the historical numeric coding: integer
-    # class codes with a base category of 1 (numeric responses recover their
-    # original numeric class values). $class.levels supplies the label for
-    # each code, so labels are always recoverable via class.levels[results].
-    if (response_was_numeric) {
-      estimates <- class_values[estimates_code]
-    } else {
-      estimates <- estimates_code
-    }
-    
+    estimates <- response$decode(estimates)
     if (!is.null(pred_int_out)) {
       pred_int_out <- as.data.frame(pred_int_out)
-      pred_int_out[] <- lapply(pred_int_out, function(v) {
-        code <- pmin(pmax(as.integer(round(v)), 1L), length(class_values))
-        if (response_was_numeric)
-          class_values[code]
-        else
-          code
-      })
+      pred_int_out[] <- lapply(pred_int_out, function(code) as.numeric(response$decode(code)))
     }
-  } else {
-    estimates <- estimates_code
   }
-  
+
   .NNS.out(
     list(
       results = estimates,
       pred.int = pred_int_out,
       feature.weights = plot.table / sum(plot.table),
       feature.frequency = plot.table,
-      class.levels = if (is_class) class_values else NULL
+      class.levels = if (is_class) response$class.levels else NULL
     )
   )
 }

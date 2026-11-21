@@ -1,3 +1,17 @@
+test_that("regression uses observed class labels for codes and probabilities", {
+  x <- rep(1:2, each = 8)
+  y <- rep(c("b", "a"), each = 8)
+  fit <- function(y) NNS.reg(x, y, point.est = 1:2, plot = FALSE)
+  expected <- fit(factor(y, levels = c("b", "a")))
+  observed <- fit(factor(y, levels = c("b", "missing", "a")))
+  expect_identical(observed$class.levels, expected$class.levels)
+  expect_equal(observed$Point.probabilities, expected$Point.probabilities)
+  expect_identical(observed$Point.est, expected$Point.est)
+  ordered <- fit(ordered(y, levels = c("b", "missing", "a")))
+  expect_identical(ordered$class.levels, c("b", "a"))
+  expect_identical(ordered$class.levels[ordered$Point.est], y[c(1, 16)])
+})
+
 test_that("classification interpolates class frequencies, not arbitrary class codes", {
   x <- rep(0:2, each = 4)
   labels <- rep(c("A", "C", "B"), each = 4)
@@ -205,4 +219,58 @@ test_that("Stack reports the multivariate coordinates separately from the class 
   expect_equal(unname(fit$NNS.dim.red.variables), "nuisance")
   expect_equal(fit$NNS.reg.variables, "signal")
   expect_equal(fit$stack, c(0, 1))
+})
+
+test_that("class codes give the same accuracy as labels for an unsorted factor", {
+  x <- iris[1:100, 1:2]
+  y <- factor(iris$Species[1:100], levels = c("versicolor", "setosa"))
+  rows <- c(1, 100)
+  query <- x[rows, ]
+  actual <- y[rows]
+
+  reg <- NNS.reg(x, y, point.est = query, plot = FALSE)
+  expect_identical(reg$Point.est == as.numeric(actual),
+                   reg$class.levels[reg$Point.est] == as.character(actual))
+
+  stack <- NNS.stack(x, y, query, method = 1, folds = 2, seed = 17,
+                     ncores = 1, status = FALSE)
+  expect_identical(stack$stack == as.numeric(actual),
+                   stack$class.levels[stack$stack] == as.character(actual))
+
+  boost <- NNS.boost(x, y, query, epochs = 0, folds = 2, learner.trials = 3,
+                     seed = 9, feature.importance = FALSE, status = FALSE)
+  expect_identical(boost$results == as.numeric(actual),
+                   boost$class.levels[boost$results] == as.character(actual))
+})
+
+test_that("logical class predictions keep their truth values", {
+  x <- rep(1:2, each = 8)
+  y <- x == 2
+  fit <- NNS.reg(x, y, point.est = 1:2, plot = FALSE, confidence.interval = .8)
+  expect_identical(fit$Point.est, c(FALSE, TRUE))
+  expect_identical(fit$Fitted.xy$y.hat, y)
+  expect_identical(unlist(fit$Prediction.set), c(FALSE, TRUE))
+})
+
+test_that("a declared NA class keeps its own probability column", {
+  x <- rep(1:3, each = 5)
+  y <- factor(rep(c("b", NA, "a"), each = 5), exclude = NULL)
+  run <- function(y) NNS.reg(x, y, order = "max", point.est = 1:3, plot = FALSE)
+  fit <- run(y)
+  expect_identical(fit$class.levels[fit$Point.est], as.character(y[c(1, 6, 11)]))
+  expect_equal(unname(unclass(fit$Point.probabilities)),
+               unname(unclass(run(factor(as.integer(y)))$Point.probabilities)))
+  is.na(y)[1] <- TRUE
+  expect_error(run(y), "missing values")
+})
+
+test_that("per-class thresholds match a declared NA class by name", {
+  y <- factor(rep(c("b", NA, "a"), each = 10), levels = c("b", NA, "a"), exclude = NULL)
+  set.seed(201)
+  x <- data.frame(signal = as.integer(y) + rnorm(30), noise = rnorm(30))
+  fit <- function(th) NNS.reg(x, y, point.est = x[c(1, 11, 21), ], threshold = th,
+                              dim.red.method = "cor", plot = FALSE)
+  th <- setNames(c(0, .2, .7), levels(y))
+  expect_equal(fit(rev(th))$Point.probabilities, fit(unname(th))$Point.probabilities,
+               tolerance = 1e-12)
 })
