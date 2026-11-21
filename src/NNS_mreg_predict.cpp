@@ -460,8 +460,8 @@ struct PredictPathWorker : public Worker {
       if (walk >= 0 && limit < R_PosInf) {
         // The largest normalised gap whose own term stays within the limit,
         // widened well past rounding; the floor keeps gaps whose term would
-        // underflow.
-        const double zmax = dist_code == 0 ? (std::sqrt(1.0 + 4.0 * limit) - 1.0) / 2.0
+        // underflow. Rationalizing the NNS root avoids cancellation at small limits.
+        const double zmax = dist_code == 0 ? limit / (std::sqrt(0.25 + limit) + 0.5)
                           : dist_code == 2 ? limit : std::sqrt(limit);
         reach = std::max(zmax * rg * (1.0 + 1e-9), rg * 1e-150);
       }
