@@ -2,6 +2,7 @@
 // [[Rcpp::depends(RcppParallel)]]
 #include <Rcpp.h>
 #include <RcppParallel.h>
+#include <algorithm>
 #include <cmath>
 #include "partial_moments.h"
 #include "partial_moments_rcpp.h"
@@ -526,9 +527,17 @@ NumericVector CoUPM_RCPP(
    if((is_supplied_target(target) || (is<DataFrame>(target) && !target.isNULL()))){
      tgt=as<NumericVector>(target);
    }else{
+     variable_matrix = clone(variable_matrix);
      tgt = NumericVector(variable_cols);
      for (size_t j = 0; j < variable_cols; ++j) {
-       tgt[j] = mean(variable_matrix(_, j));
+       NumericMatrix::Column col = variable_matrix(_, j);
+       if (col.size()) {
+         // The nearest end to zero keeps a one-sign column's differences in range.
+         auto bounds = std::minmax_element(col.begin(), col.end());
+         double origin = std::max(0.0, *bounds.first) + std::min(0.0, *bounds.second);
+         for (double &value : col) value -= origin;
+       }
+       tgt[j] = mean(col);
      }
    }
    

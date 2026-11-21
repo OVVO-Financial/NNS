@@ -291,3 +291,12 @@ test_that("PM.matrix counts a constant decimal column on the lower side", {
   expect_equal(p0$cov.matrix[1, 2], 2 / 3)
   expect_equal(p1$cov.matrix[1, 2], 2 / 3)
 })
+
+test_that("PM.matrix distinguishes the implicit midpoint from a rounded target", {
+  x <- 1700000000 + c(0, 2^-22)
+  X <- cbind(x, rev(x))
+  implicit <- PM.matrix(1, 1, NULL, X, pop_adj = FALSE)
+  explicit <- PM.matrix(1, 1, colMeans(X), X, pop_adj = FALSE)
+  expect_equal(unname(implicit$cov.matrix) / 2^-46, matrix(c(1, -1, -1, 1), 2))
+  expect_equal(unname(explicit$cov.matrix) / 2^-46, diag(2, 2))
+})

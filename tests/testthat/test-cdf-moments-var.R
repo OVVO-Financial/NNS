@@ -189,3 +189,30 @@ test_that("VaR accepts a one-dimensional array and a row of percentiles", {
   expect_identical(LPM.VaR(matrix(c(.25, .75), nrow = 1), 0, x),
                    stats::quantile(1:4, c(.25, .75)))
 })
+
+test_that("NNS.moments resolves the midpoint between adjacent timestamps", {
+  x <- 1700000000 + c(0, 2^-22)
+  m <- NNS.moments(x)
+  expect_equal(m$mean, mean(x), tolerance = 0)
+  expect_equal(m$variance / 2^-46, 1)
+  expect_equal(m$skewness, 0, tolerance = 1e-12)
+  expect_equal(m$kurtosis, -2)
+})
+
+test_that("sample moments are invariant to a common timestamp offset", {
+  x <- c(0, 1, 2, 2, 4) * 2^-22
+  m <- NNS.moments(x, population = FALSE)
+  shifted <- NNS.moments(1700000000 + x, population = FALSE)
+  expect_equal(shifted$variance / m$variance, 1)
+  expect_equal(shifted$skewness, m$skewness)
+  expect_equal(shifted$kurtosis, m$kurtosis)
+})
+
+test_that("NNS.moments recovers the total sum of squares of NIST SmLs09", {
+  treatment <- rep(c(4, 3, 5, 3, 5, 3, 5, 3, 5), each = 2001)
+  x <- 1e12 + (treatment + c(0, rep(c(-1, 1), 1000))) / 10
+  ss <- NNS.moments(x, population = FALSE)$variance * (length(x) - 1)
+  # The decimal observations round to binary doubles at this offset.
+  expect_equal(ss, 160.08 + 180, tolerance = 2e-4)
+  expect_equal(ss, var(x - x[1]) * (length(x) - 1), tolerance = 1e-12)
+})
