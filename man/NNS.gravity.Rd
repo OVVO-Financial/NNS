@@ -9,7 +9,7 @@ NNS.gravity(x, discrete = FALSE)
 \arguments{
 \item{x}{vector of data.}
 
-\item{discrete}{logical; \code{FALSE} (default) for continuous distributions, \code{TRUE} for discrete distributions.}
+\item{discrete}{logical; \code{FALSE} (default) for continuous distributions, \code{TRUE} rounds the result to the nearest integer, with half-integers rounded up. A constant sample of four or more finite observations returns its common value.}
 }
 \value{
 Returns a numeric value representing the central tendency of the distribution.

@@ -4,7 +4,7 @@
 #'
 #' @param x a numeric vector.
 #' @param y a numeric vector.
-#' @param type \code{"discrete"} (default) compares empirical CDFs for ordinary first-order stochastic dominance. The legacy option \code{"continuous"} compares degree-one ratios \eqn{L_1/(L_1+U_1)}, equivalently Omega/expectile order; it does not carry the ordinary FSD guarantee for every increasing utility.
+#' @param type \code{"discrete"} (default) compares empirical CDFs for ordinary first-order stochastic dominance. The legacy option \code{"continuous"} compares degree-one ratios \eqn{L_1/(L_1+U_1)}, equivalently Omega/expectile order; it does not carry the ordinary FSD guarantee for every increasing utility. For other strings the function warns and uses the continuous comparison.
 #' @param plot logical; \code{TRUE} (default) plots the FSD test.
 #' @return With \code{type = "discrete"}, returns \code{"X FSD Y"}, \code{"Y FSD X"}, or \code{"NO FSD EXISTS"}. With \code{type = "continuous"}, returns \code{"X OMEGA Y"}, \code{"Y OMEGA X"}, or \code{"NO OMEGA DOMINANCE EXISTS"}; the numerical area-order criterion is unchanged.
 #' @note The curves are compared on the merged sample points and, for TSD and continuous area order, also at their closed-form extrema between those points. Differences smaller than \code{64 * .Machine$double.eps * S^d} (\code{S} = largest absolute value in \code{x} and \code{y}, \code{d} = 1 for SSD and the mean condition, 2 for TSD; a ratio analogue for continuous area order) are treated as ties, so that rounding noise does not decide dominance. Discrete FSD compares exact empirical CDF values.

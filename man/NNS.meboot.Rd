@@ -34,9 +34,9 @@ NNS.meboot(
 
 \item{reps}{numeric; number of replicates to generate.}
 
-\item{rho}{numeric [-1,1] (vectorized); A \code{rho} must be provided, otherwise a blank list will be returned.  The dependence target is applied to each individual \code{replicate} (every replicate is mixed to the requested dependence with the original series); it is \strong{not} applied to the \code{ensemble}.  See \code{Note}.}
+\item{rho}{numeric [-1,1] (vectorized); Supply \code{rho}, \code{target_drift} or \code{target_drift_scale} to generate scenarios. With none supplied, or with an explicitly supplied \code{NULL} scenario argument, the result is an empty list.  The dependence target is applied to each individual \code{replicate} (every replicate is mixed to the requested dependence with the original series); it is \strong{not} applied to the \code{ensemble}.  See \code{Note}.}
 
-\item{type}{options("spearman", "pearson", "NNScor", "NNSdep"); \code{type = "spearman"}(default) dependence metric desired.}
+\item{type}{options("spearman", "pearson", "NNScor", "NNSdep"); \code{type = "spearman"}(default) dependence metric desired. \code{"NNScor"} targets the signed correlation from \link{NNS.dep} and \code{"NNSdep"} its unsigned dependence. Unrecognised strings also use signed correlation.}
 
 \item{drift}{logical; \code{drift = TRUE} (default) preserves the drift of the original series.  \code{drift = FALSE} removes it: replicates are a flat baseline at \code{mean(x)} plus the resampled residuals.}
 
@@ -60,23 +60,22 @@ NNS.meboot(
 
 \item{sym}{logical; If \code{TRUE} an adjustment is performed to ensure that the ME density is symmetric.}
 
-\item{elaps}{logical; If \code{TRUE} elapsed time during computations is displayed.}
+\item{elaps}{Unused.}
 
 \item{digits}{integer; 6 (default) number of digits to round output to.}
 
-\item{colsubj}{numeric; the column in \code{x} that contains the individual index. It is ignored if the input data \code{x} is not a \code{pdata.frame} object.}
+\item{colsubj}{Unused. May be omitted.}
 
-\item{coldata}{numeric; the column in \code{x} that contains the data of the variable to create the ensemble. It is ignored if the input data \code{x} is not a \code{pdata.frame} object.}
+\item{coldata}{Unused. May be omitted.}
 
-\item{coltimes}{numeric; an optional argument indicating the column that contains the times at which the observations for each individual are observed. It is ignored if the input data \code{x}
-is not a \code{pdata.frame} object.}
+\item{coltimes}{Unused. May be omitted.}
 
 \item{...}{possible argument \code{fiv} to be passed to \code{expand.sd}.}
 
 \item{expand.residual.sd}{logical; \code{TRUE} (default) retains the residual-space SD expansion before trend reconstruction. Set to \code{FALSE} to leave the generated residual scales unexpanded; this is separate from the later level-space \code{expand.sd} switch.}
 }
 \value{
-Returns the following row names in a matrix:
+Returns a list matrix with one column per scenario and the following named rows. For example, \code{boots["replicates", 1][[1]]} extracts the replicate matrix for the first scenario.
 \itemize{
   \item{x} input vector, or the extracted column for a one-column data frame.
 \item{replicates} maximum entropy bootstrap replicates.
@@ -90,7 +89,6 @@ Returns the following row names in a matrix:
 \item{desintxb} desired interval means.
 \item{ordxx} ordered x values.
 \item{kappa} scale adjustment to the variance of ME density.
-\item{elaps} elapsed time.
 }
 }
 \description{

@@ -591,20 +591,22 @@
 #' @param confidence.interval numeric [0, 1]; \code{NULL} (default) Plots the associated confidence interval with the estimate and adds \code{conf.int.pos} / \code{conf.int.neg} to \code{Fitted.xy}.  The intervals are global: they are built from the type-8 quantiles of the in-sample residuals (no per-segment standard errors are returned).  Also applies the same level for the prediction intervals.
 #' @param threshold  numeric [0, 1]; \code{(threshold = 0)} (default) Sets the threshold for dimension reduction of independent variables when \code{(dim.red.method)} is not \code{NULL}. Predictors whose coefficient magnitude is below \code{threshold} are dropped; \code{NULL} or \code{NA} means 0. For classification, a vector with one cutoff per class (named by class, or in class order) applies each cutoff to that class's index, as \link{NNS.stack} can report in \code{NNS.dim.red.threshold}.
 #' @param n.best integer; \code{NULL} (default) Sets the number of nearest regression points to use in weighting for multivariate regression at \code{floor((1 - D) * sqrt(R))}, where R is the number of regression points (at least 1), and D averages the copula summaries with response y and -y so the smoothing choice is unchanged by response reflection. For classification, D is the mean over predictors of each predictor's strongest dependence with a class indicator.  \code{(n.best = "all")} will select and weight all generated regression points.  Analogous to \code{k} in a
-#' \code{k Nearest Neighbors} algorithm.  Different values of \code{n.best} are tested using cross-validation in \link{NNS.stack}. \code{NA} selects the default, as \code{NULL} does.
+#' \code{k Nearest Neighbors} algorithm. In multivariate regression with \code{n.best = 1}, ties at the nearest distance return the \link{NNS.gravity} of the tied regression-point responses. Different values of \code{n.best} are tested using cross-validation in \link{NNS.stack}. \code{NA} selects the default, as \code{NULL} does.
 #' @param smooth logical; \code{FALSE} (default) Applies a smoothing spline instead of local linear fit to regression points.
-#' @param noise.reduction the method of determining regression points options: ("mean", "median", "mode", "off"); In low signal:noise situations,\code{(noise.reduction = "mean")}  uses means for \link{NNS.dep} restricted partitions, \code{(noise.reduction = "median")} uses medians instead of means for \link{NNS.dep} restricted partitions, while \code{(noise.reduction = "mode")}  uses modes instead of means for \link{NNS.dep} restricted partitions.  \code{(noise.reduction = "off")} uses an overall central tendency measure for partitions.
-#' @param dist options:(NULL, "NNS", "L1", "L2", "FACTOR") the method of distance calculation. \code{dist = NULL} is the default and selects the native blended NNS distance, \eqn{sum(abs(z) + z^2)}, over range-normalized coordinates. \code{dist = "NNS"} is an explicit alias for the default. \code{dist = "L2"} selects Euclidean distance; \code{dist = "L1"} selects Manhattan distance; \code{dist = "FACTOR"} uses a frequency.
+#' @param noise.reduction the method of determining regression points options: ("mean", "median", "mode", "off"); In low signal:noise situations,\code{(noise.reduction = "mean")}  uses means for \link{NNS.dep} restricted partitions, \code{(noise.reduction = "median")} uses medians instead of means for \link{NNS.dep} restricted partitions, while \code{(noise.reduction = "mode")}  uses modes instead of means for \link{NNS.dep} restricted partitions.  In regression, \code{(noise.reduction = "off")} uses \link{NNS.gravity} for partition centres.
+#' @param dist options:(NULL, "NNS", "L1", "L2", "FACTOR") the method of distance calculation. \code{dist = NULL} is the default and selects the native blended NNS distance, \eqn{sum(abs(z) + z^2)}, over range-normalized coordinates. \code{dist = "NNS"} is an explicit alias for the default. \code{dist = "L2"} selects Euclidean distance; \code{dist = "L1"} selects Manhattan distance; \code{dist = "FACTOR"} uses the proportion of encoded predictor columns that differ.
 #' @param ncores Integer thread count for multivariate predictions. With \code{NULL} (default), small predictions use one thread. Large predictions use one fewer than the available cores (at least one), capped by any thread limit set with \code{RcppParallel::setThreadOptions()}. With the optional TinyThread backend, parallel predictions use its session thread count or, if unset, its hardware default. The estimates do not depend on the number of threads.
 #' @param multivariate.call Internal argument for multivariate regressions.
 #' @param point.only Internal argument for abbreviated output.
-#' @return UNIVARIATE REGRESSION RETURNS THE FOLLOWING VALUES:
+#' @return Univariate and dimension reduction regression return the following values:
 #' \itemize{
 #'  \item{\code{"R2"}} is squared Pearson correlation between fitted and observed responses (Racine--Hastie goodness of fit), or fitted classification accuracy;
 #'
 #'  \item{\code{"SE"}} returns the overall standard error of the estimate between \code{y} and \code{y.hat};
 #'
-#'  \item{\code{"Prediction.Accuracy"}} returns the proportion of fitted class decisions equal to the observed class;
+#'  \item{\code{"Prediction.Accuracy"}} and \code{class.levels} are \code{NULL} for regression;
+#'
+#'  \item{\code{"equation"}} gives the synthetic predictor coefficients in dimension reduction. Its last row gives the denominator, the number of nonzero coefficients. \code{x.star} gives the synthetic predictor for the training rows. Both fields are \code{NULL} for a single encoded predictor column;
 #'
 #'  \item{\code{"derivative"}} for the coefficient of the \code{x} and its applicable range;
 #'
@@ -614,17 +616,17 @@
 #'  
 #'  \item{\code{"regression.points"}} provides the points used in the regression equation for the given order of partitions;
 #'
-#'  \item{\code{"Fitted.xy"}} returns a \code{data.frame} of \code{x}, \code{y}, \code{y.hat}, \code{resid}, \code{NNS.ID}, \code{gradient};
+#'  \item{\code{"Fitted.xy"}} returns a \code{data.frame} of \code{x}, \code{y}, \code{y.hat}, \code{NNS.ID}, \code{gradient} and \code{residuals}. With \code{confidence.interval} it also contains \code{conf.int.neg} and \code{conf.int.pos};
 #' }
 #'
 #'
-#' MULTIVARIATE REGRESSION RETURNS THE FOLLOWING VALUES:
+#' Full multivariate regression returns the following values:
 #' \itemize{
 #'  \item{\code{"R2"}} is squared Pearson correlation between fitted and observed responses (Racine--Hastie goodness of fit), or fitted classification accuracy;
 #'
-#'  \item{\code{"equation"}} returns the numerator of the synthetic X* dimension reduction equation as a \code{data.frame} consisting of regressor and its coefficient.  Denominator is the number of non-zero coefficients (\code{abs(coefficient) > 0}), returned in last row of \code{equation} \code{data.frame}.
+#'  \item{\code{"n.best"}} gives the nominal number of nearest regression points. With \code{n.best = 1}, all points tied at the nearest distance contribute;
 #'
-#'  \item{\code{"x.star"}} returns the synthetic X* as a vector;
+#'  \item{\code{"dist"}} gives the distance method;
 #'
 #'  \item{\code{"rhs.partitions"}} returns the partition points for each regressor \code{x};
 #'
@@ -634,8 +636,21 @@
 #'  
 #'  \item{\code{"pred.int"}} lower and upper prediction intervals for the \code{"Point.est"} returned using the \code{"confidence.interval"} provided;
 #'
-#'  \item{\code{"Fitted.xy"}} returns a \code{data.frame} of the regressors, \code{y}, \code{y.hat}, \code{NNS.ID} and \code{residuals} for full multivariate regression, or of the synthetic \code{x}, \code{y}, \code{y.hat}, \code{NNS.ID}, \code{gradient} and \code{residuals} for dimension reduction regression.  \code{confidence.interval} adds \code{conf.int.neg} and \code{conf.int.pos}.
+#'  \item{\code{"Fitted.xy"}} returns a \code{data.frame} of the regressors, \code{y}, \code{y.hat}, \code{NNS.ID} and \code{residuals}.  \code{confidence.interval} adds \code{conf.int.neg} and \code{conf.int.pos}.
 #' }
+#'
+#' For classification, \code{R2} and \code{Prediction.Accuracy} give fitted accuracy.
+#' \code{Fitted} and \code{Fitted.xy} contain the same table of predictors, observed and fitted classes, \code{NNS.ID} and errors. \code{NNS.ID} is the cell ID in full classification and the training row index in reduced classification.
+#' \code{Fitted.probabilities} and \code{Point.probabilities} give class probabilities for training and prediction rows.
+#' \code{class.levels} and \code{class.values} map labels to output values. \code{Point.est} gives predicted classes.
+#' \code{Prediction.set} gives a set for each prediction row when \code{confidence.interval} is supplied.
+#' Without prediction rows, \code{Point.est}, \code{Point.probabilities} and \code{Prediction.set} are \code{NULL}.
+#' \code{SE}, \code{x.star}, \code{derivative} and \code{pred.int} are \code{NULL}.
+#' In the full classifier, \code{RPM} and \code{regression.points} give the cell centres, \code{RPM.probabilities} their class frequencies,
+#' \code{rhs.partitions} the partition boundaries and \code{n.best} the nominal neighbour count. Neighbour weighting includes all cells tied at the cutoff. With a single continuous predictor, the classifier interpolates cell probabilities regardless of \code{n.best}. Here \code{equation} is \code{NULL}.
+#' With dimension reduction, \code{equation} contains one equation per class, the cell and partition fields are \code{NULL} and \code{n.best} is \code{NA}.
+#'
+#' With \code{point.only = TRUE}, fitted tables, fitted probabilities and fit statistics are \code{NULL}.
 #'
 #' @details
 #' For regression, \code{R2} measures association between fitted and observed responses: it is \eqn{cor(y, \hat y)^2}, with the package's finite constant-vector convention. It is not \eqn{1-SSE/SST}; a biased or incorrectly scaled prediction can have \code{R2 = 1}. Evaluate held-out prediction errors for predictive accuracy.
@@ -702,7 +717,7 @@
 #'
 #' ## To call fitted values:
 #' x <- rnorm(100) ; y <- rnorm(100)
-#' NNS.reg(x, y)$Fitted
+#' NNS.reg(x, y)$Fitted.xy
 #'
 #' ## To call partial derivative (univariate regression only):
 #' NNS.reg(x, y)$derivative

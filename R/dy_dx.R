@@ -4,7 +4,7 @@
 #'
 #' @param x a numeric vector.
 #' @param y a numeric vector.
-#' @param eval.point Finite numeric points, or \code{"overall"} for the average first derivative.
+#' @param eval.point Required. Supply finite numeric points, or \code{"overall"} for the average first derivative.
 #' @return For numeric points, a \code{data.frame} with the first and second derivatives in the supplied order, including repeated points. For \code{"overall"}, a single first derivative.
 #'
 #' @details

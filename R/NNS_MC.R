@@ -8,7 +8,7 @@
 #' @param upper_rho numeric \code{[-1,1]}; \code{1} default will set the \code{to} argument in \code{seq(from, to, by)}.
 #' @param by numeric; \code{.01} default will set the \code{by} argument in \code{seq(-1, 1, step)}.
 #' @param exp positive finite numeric; \code{1} default will exponentially weight maximum rho value if \code{exp > 1}.  Shrinks values towards \code{upper_rho}, keeping them within \code{[lower_rho, upper_rho]}.
-#' @param type options("spearman", "pearson", "NNScor", "NNSdep"); \code{type = "spearman"}(default) dependence metric desired.
+#' @param type options("spearman", "pearson", "NNScor", "NNSdep"); \code{type = "spearman"}(default) dependence metric desired. \code{"NNScor"} targets the signed correlation from \link{NNS.dep} and \code{"NNSdep"} its unsigned dependence. Unrecognised strings also use signed correlation.
 #' @param drift logical; \code{drift = TRUE} (default) preserves the drift of the original series.
 #' @param target_drift numerical; \code{target_drift = NULL} (default) Specifies the desired drift when \code{drift = TRUE}, i.e. a risk-free rate of return.
 #' @param target_drift_scale numerical; instead of calculating a \code{target_drift}, provide a scalar to the existing drift when \code{drift = TRUE}.

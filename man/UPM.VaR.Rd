@@ -17,7 +17,7 @@ UPM.VaR(percentile, degree, x)
 Returns the type-7 empirical quantile (\code{degree = 0}), whose strict or inclusive sample tail fraction may differ from \code{percentile} because of interpolation or ties, or the threshold with \code{percentile} of the directional deviation area above it (\code{degree > 0}).
 }
 \description{
-Generates an upside value at risk (VaR) quantile based on the Upper Partial Moment ratio.
+Degree zero returns the upper-tail empirical quantile and degree one returns the upper-tail expectile.
 }
 \examples{
 set.seed(123)

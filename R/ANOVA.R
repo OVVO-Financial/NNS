@@ -44,17 +44,17 @@
 #' need not have exactly the requested nominal coverage. The independent-group
 #' bootstrap assumes independent observations within and between groups.
 #'
-#' @param control Numeric vector of control group observations
-#' @param treatment Numeric vector of treatment group observations
+#' @param control Numeric vector of control observations, or a matrix, data frame or list with one group per column or list element.
+#' @param treatment Numeric vector of treatment observations. Omit when \code{control} contains all groups.
 #' @param means.only Logical; \code{FALSE} (default) uses full distribution analysis. Set \code{TRUE} for the central comparison only (means, or medians when \code{medians = TRUE})
 #' @param medians Logical; \code{FALSE} (default) uses means. Set \code{TRUE} for median-based analysis
 #' @param confidence.interval Numeric [0,1]; confidence level for effect size bounds (e.g., 0.95)
-#' @param tails Character; specifies CI tail(s): "both", "left", or "right"
+#' @param tails Choose \code{"both"} (default), \code{"left"} or \code{"right"} (case-insensitive). For effect size, \code{"left"} sets the upper bound to \code{Inf}, and \code{"right"} sets the lower bound to \code{-Inf}.
 #' @param pairwise logical; \code{FALSE} (default) Returns pairwise certainty tests when set to \code{pairwise = TRUE}.
 #' @param robust logical; \code{FALSE} (default) Two-sample (\code{control}, \code{treatment}) path only: draws 100 independent bootstrap resamples of each group (with replacement, from its own full sample), and returns / plots the robust central tendency (\link{NNS.gravity}) and the \code{confidence.interval} bounds of the resampled \code{Certainty} values.  It is ignored when \code{control} is a matrix or list (multi-group, including \code{pairwise = TRUE}).
 #' @param plot Logical; \code{TRUE} (default) generates distribution plot
 #' 
-#' @return Returns a list containing:
+#' @return With separate \code{control} and \code{treatment} vectors, returns a list containing:
 #' \itemize{
 #'   \item \code{Control}: Mean/median of control group
 #'   \item \code{Treatment}: Mean/median of treatment group
@@ -68,6 +68,9 @@
 #'   \item \code{Effect_Size_UB}: Upper bound of treatment effect (if confidence.interval requested)
 #'   \item \code{Confidence_Level}: Confidence level used (if confidence.interval requested)
 #' }
+#' With \code{robust = TRUE}, finite effect-size bounds include their percentile in the name, e.g. \code{Effect_Size_LB.2.5\%} and \code{Effect_Size_UB.97.5\%}.
+#' The list also includes \code{Robust Certainty Estimate} and the requested certainty bounds, e.g. \code{Lower 95\% CI} and \code{Upper 95\% CI}, or \code{Lower 95\% bound} or \code{Upper 95\% bound} for one tail.
+#' With all groups in \code{control}, returns a single numeric value named \code{Certainty}, or a symmetric matrix of pairwise certainties with ones on the diagonal if \code{pairwise = TRUE}.
 #' 
 #' 
 #'

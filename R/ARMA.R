@@ -4,9 +4,7 @@
 #'
 #' @param variable a numeric vector.
 #' @param h integer; 1 (default) Number of periods to forecast.
-#' @param training.set numeric; \code{NULL} (default) Sets the number of variable observations
-#'
-#'  \code{(variable[1 : training.set])} to monitor performance of forecast over in-sample range.
+#' @param training.set Index of the last observation used to fit the forecast. With \code{NULL} (default), forecasts start after the full series.
 #' @param seasonal.factor logical or integer(s); \code{TRUE} (default) Automatically selects the best seasonal lag from the seasonality test, \link{NNS.seas}'s \code{best.period} without its permutation test.  For a significance-filtered lag, run \code{NNS.seas(variable, p.value = TRUE)} first and pass its \code{best.period} (or \code{periods}) here; \code{best.period} is 1 when no period is significant.  To use weighted average of all seasonal lags set to \code{(seasonal.factor = FALSE)}.  Otherwise, directly input known frequency integer lag to use, i.e. \code{(seasonal.factor = 12)} for monthly data.  Multiple frequency integers can also be used, i.e. \code{(seasonal.factor = c(12, 24, 36))}
 #' @param modulo integer(s); NULL (default) Adds the multiples of \code{modulo} on either side of each detected period (period 7 with \code{modulo = 5} gives 5 and 10).
 #' @param mod.only logical; \code{TRUE} (default) Limits the number of seasonal periods returned to the specified \code{modulo}.
